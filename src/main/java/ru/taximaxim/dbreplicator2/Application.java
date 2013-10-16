@@ -39,12 +39,11 @@ public class Application {
 	public static void main(String[] args) {
 		
 		LOG.info("Application run");
-		
 		try {
 			CommonsCli.initialization(args);
 		} catch (ParseException e) {
 			e.printStackTrace();
-			LOG.error("incorrect command");
+			LOG.error("Неправильный синтаксис команд");
 		}
 		
 	}
