@@ -23,6 +23,7 @@
 
 package ru.taximaxim.dbreplicator2;
 
+import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 
 public class Application {
@@ -32,6 +33,13 @@ public class Application {
 	public static void main(String[] args) {
 		
 		LOG.info("Application run");
-		//mardanov_rm test
+		
+		try {
+			CommonsCli.initialization(args);
+		} catch (ParseException e) {
+			e.printStackTrace();
+			LOG.error("incorrect command");
+		}
+		
 	}
 }
