@@ -32,6 +32,6 @@ public class Application {
 	public static void main(String[] args) {
 		
 		LOG.info("Application run");
-		
+		//mardanov_rm test
 	}
 }
