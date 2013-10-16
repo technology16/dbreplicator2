@@ -25,6 +25,12 @@ package ru.taximaxim.dbreplicator2;
 
 import org.apache.log4j.Logger;
 
+/**
+ * @author TaxiMaxim
+ * 
+ * Изменения в рамках задачи #1866
+ *
+ */
 public class Application {
 	
 	public static final Logger LOG = Logger.getLogger(Application.class);
