@@ -18,12 +18,13 @@ public class CommonsCli {
 
 	/**
 	 * получение опций
+	 * 
 	 * @return
 	 */
-	protected static Options getOptions(){
+	protected static Options getOptions() {
 		return posixOptions;
 	}
-	
+
 	/**
 	 * Установка опций
 	 * 
@@ -31,7 +32,7 @@ public class CommonsCli {
 	 *            - сокращенное имя вызова опций
 	 * 
 	 * @param longOpt
-	 *            - полное имя пользователя
+	 *            - полное имя вызова опций
 	 * 
 	 * @param hasArg
 	 *            - наличие аргумента
@@ -49,7 +50,7 @@ public class CommonsCli {
 	 *            - Имя аргумента
 	 * 
 	 */
-	protected static void setOption (String opt, String longOpt, boolean hasArg,
+	protected static void setOption(String opt, String longOpt, boolean hasArg,
 			String description, Integer num, boolean optionalArg, String argName) {
 		Option option = new Option(opt, longOpt, hasArg, description);
 
@@ -62,45 +63,46 @@ public class CommonsCli {
 	}
 
 	/**
-	 * Создание новых групп опций 
-	 * Используеться при создание новых опций
+	 * Создание новых групп опций Используеться при создание новых опций
 	 * 
 	 * @param option
+	 *            - опции
 	 */
 	protected static void createOptionGroup(Option option) {
 		processingOptionGroup(option, false, true);
 	}
 
 	/**
-	 * Установка групп опций
-	 * Использование при записи опций групп
-	 * Не добавляет опций после того как установите
-	 * послению опцию <code>addOptionGroup(Option option)</code>
+	 * Установка групп опций Использование при записи опций групп Не добавляет
+	 * опций после того как установите послению опцию
+	 * <code>addOptionGroup(Option option)</code>
 	 * 
 	 * @param option
 	 */
 	protected static void setOptionGroup(Option option) {
 		processingOptionGroup(option, false, false);
 	}
-	
+
 	/**
-	 *  Добавление групп опций в опции
-	 *  Для создания первой опций используйте
-	 *  <code>createOptionGroup(Option option)</code>
-	 *  
+	 * Добавление групп опций в опции Для создания первой опций используйте
+	 * <code>createOptionGroup(Option option)</code>
+	 * 
 	 * @param option
+	 *            - опции
 	 */
 	protected static void addOptionGroup(Option option) {
 		processingOptionGroup(option, true, false);
 	}
-	
+
 	/**
 	 * Обработка груп опций
 	 * 
 	 * @param option
+	 *            - опции
+	 * 
 	 * @param add
 	 *            - добавить в группу опцию
-	 *            
+	 * 
 	 * @param clear
 	 *            - очистить группу опцию
 	 */
@@ -119,6 +121,7 @@ public class CommonsCli {
 
 	/**
 	 * parser command line
+	 * 
 	 * @param args
 	 */
 	protected static void parserCommandLine(String[] args) {
@@ -126,13 +129,14 @@ public class CommonsCli {
 		CommandLineParser cmdLinePosixParser = new PosixParser();
 		CommandLine commandLine = null;
 		try {
-			commandLine = cmdLinePosixParser.parse(CommonsCli.getOptions(), args);
+			commandLine = cmdLinePosixParser.parse(CommonsCli.getOptions(),
+					args);
 			ProcessingCli.processingCmd(commandLine);
 		} catch (AlreadySelectedException ex) {
 			LOG.error(String.format("Ошибка опций групп: %s", ex.getMessage()));
 		} catch (ParseException ex) {
 			LOG.error("Неправильный синтаксис команд");
-			//ex.printStackTrace();
+			// ex.printStackTrace();
 		}
-	} 
+	}
 }
