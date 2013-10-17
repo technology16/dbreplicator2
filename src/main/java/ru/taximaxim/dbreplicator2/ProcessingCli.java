@@ -7,7 +7,6 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 
 public class ProcessingCli extends CommonsCli{
@@ -16,15 +15,6 @@ public class ProcessingCli extends CommonsCli{
 
 	/**
 	 * Вывод помошника
-	 * 
-	 * @param options
-	 * @param printedRowWidth
-	 * @param header
-	 * @param footer
-	 * @param spacesBeforeOption
-	 * @param spacesBeforeOptionDescription
-	 * @param displayUsage
-	 * @param out
 	 */
 	private static void printHelp(final Options options,
 			final int printedRowWidth, final String header,
@@ -44,21 +34,20 @@ public class ProcessingCli extends CommonsCli{
 	/**
 	 * Обработка
 	 * 
-	 * @param args
-	 *            - аргументы
-	 * @throws ParseException
+	 * @param args <code>String[]</code>
+	 *            - аргументы командной строки
 	 */
 	public static void initialization(String[] args) {
 		if (args.length != 0) {
-			CommonsCli.setOption("h", "help", true, "Print help for this application", 0,
+			ProcessingCli.setOption("h", "help", true, "Print help for this application", 0,
 					false, null);
-			CommonsCli.setOption("t", "test", true, "The test test test", 1, false, "file");
+			ProcessingCli.setOption("t", "test", true, "The test test test", 1, false, "file");
 
-			CommonsCli.createOptionGroup(new Option("a", true, "A option"));
-			CommonsCli.addOptionGroup(new Option("b", true, "B option"));
+			ProcessingCli.createOptionGroup(new Option("a", true, "A option"));
+			ProcessingCli.addOptionGroup(new Option("b", true, "B option"));
 
 			//выполение
-			CommonsCli.parserCommandLine(args);
+			ProcessingCli.parserCommandLine(args);
 		}
 	}
 
@@ -77,7 +66,7 @@ public class ProcessingCli extends CommonsCli{
 		}
 
 		if (commandLine.hasOption("h")) {
-			printHelp(CommonsCli.getOptions(), // опции по которым составляем help
+			printHelp(ProcessingCli.getOptions(), // опции по которым составляем help
 					80, // ширина строки вывода
 					"Options:", // строка предшествующая выводу
 					"-- HELP --", // строка следующая за выводом
