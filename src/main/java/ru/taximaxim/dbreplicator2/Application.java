@@ -23,7 +23,6 @@
 
 package ru.taximaxim.dbreplicator2;
 
-import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 
 /**
@@ -38,13 +37,8 @@ public class Application {
 
 	public static void main(String[] args) {
 		
+		//args = new String[] {"-h","-t", "gggg", "-a", "56789", "-b", "56789" };
 		LOG.info("Application run");
-		try {
-			CommonsCli.initialization(args);
-		} catch (ParseException e) {
-			e.printStackTrace();
-			LOG.error("Неправильный синтаксис команд");
-		}
-		
+		ProcessingCli.initialization(args);
 	}
 }
