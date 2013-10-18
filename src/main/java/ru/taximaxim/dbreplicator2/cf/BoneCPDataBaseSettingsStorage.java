@@ -1,4 +1,4 @@
-/**
+/*
  * The MIT License (MIT)
  *
  * Copyright (c) 2013 Technologiya
@@ -20,47 +20,46 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package ru.taximaxim.dbreplicator2.cf;
 
-/* 
- * Интерфейс для фабрики соединений к именованным пулам соединеий
- */
-package ru.taximaxim.dbreplicator2.ConnectionsFactory;
+import java.util.Map;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 
 /**
- * Фабрика соединений. Возвращает соединения из именованных пулов.
+ * Интерфейс хранилища настроек именнованных соединений
  * 
  * @author volodin_aa
  *
  */
-public interface ConnectionsFactory {
+public interface BoneCPDataBaseSettingsStorage {
 
     /**
-     * Получение соединения из именованного пула соединений
+     * Получение объекта настроек по имени
      * 
-     * @param poolName - имя пула соединений
-     * @return
-     * @throws SQLException 
-     * @throws ClassNotFoundException 
+     * @param poolName - имя пула
+     * @return - объект настроек
      */
-    public Connection getConnection(String poolName) throws SQLException, ClassNotFoundException;
-    
+    public BoneCPSettings getDataBaseSettingsByName(String poolName);
+
     /**
-     * Закрытие именованного пула соединений
+     * Получение всех настроек из хранилища
      * 
-     * @param poolName - имя пула соединений
-     * @return
+     * @return мап именованных настроек
      */
-    public void close(String PoolName);
-    
+    public Map<String, BoneCPSettings> getDataBaseSettings();
+
     /**
-     * Закрытие всех пулов соединений
+     * Сохранение настроек в хранилище
      * 
-     * @param poolName - имя пула соединений
-     * @return
+     * @param dataBaseSettings - объект настроек
      */
-    public void close();
-    
+    public void setDataBaseSettings(BoneCPSettings dataBaseSettings);
+
+    /**
+     * Удаление настроек из хранилища
+     * 
+     * @param dateBaseSettings - объект настроек
+     */
+    public void delDataBaseSettings(BoneCPSettings dateBaseSettings);
+  
 }

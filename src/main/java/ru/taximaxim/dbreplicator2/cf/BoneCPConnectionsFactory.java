@@ -21,7 +21,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ru.taximaxim.dbreplicator2.ConnectionsFactory;
+package ru.taximaxim.dbreplicator2.cf;
 
 import java.sql.Connection;
 import java.sql.SQLException;

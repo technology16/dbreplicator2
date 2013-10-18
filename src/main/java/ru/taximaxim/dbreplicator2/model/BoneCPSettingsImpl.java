@@ -20,14 +20,14 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ru.taximaxim.dbreplicator2.hibernate;
+package ru.taximaxim.dbreplicator2.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import ru.taximaxim.dbreplicator2.ConnectionsFactory.BoneCPSettings;
+import ru.taximaxim.dbreplicator2.cf.BoneCPSettings;
 
 /**
  * Персистентный класс настроек BoneCP
@@ -37,7 +37,7 @@ import ru.taximaxim.dbreplicator2.ConnectionsFactory.BoneCPSettings;
  */
 @Entity
 @Table( name = "bone_cp_settings" )
-public class PersistenceBoneCPSettings implements BoneCPSettings {
+public class BoneCPSettingsImpl implements BoneCPSettings {
     /**
      * Минимальное количество соединений в пуле
      */
@@ -62,7 +62,7 @@ public class PersistenceBoneCPSettings implements BoneCPSettings {
     /**
      * Конструктор по умолчанию
      */
-    public PersistenceBoneCPSettings() {
+    public BoneCPSettingsImpl() {
     }
 
     /**
@@ -121,7 +121,7 @@ public class PersistenceBoneCPSettings implements BoneCPSettings {
      * @param connectionTimeoutInMs - таймаут получения соединения
      * @param closeConnectionWatchTimeoutInMs - таймаут закрытия соединения
      */
-    public PersistenceBoneCPSettings(String poolId, String driver, String url, String user, String pass,
+    public BoneCPSettingsImpl(String poolId, String driver, String url, String user, String pass,
             int minConnectionsPerPartition, int maxConnectionsPerPartition, int partitionCount,
             long connectionTimeoutInMs, long closeConnectionWatchTimeoutInMs) {
         this.poolId = poolId;
@@ -145,7 +145,7 @@ public class PersistenceBoneCPSettings implements BoneCPSettings {
      * @param user - имя пользователя
      * @param pass - пароль
      */
-    public PersistenceBoneCPSettings(String poolId, String driver, String url, String user, String pass) {
+    public BoneCPSettingsImpl(String poolId, String driver, String url, String user, String pass) {
         this(poolId, driver, url, user, pass, MIN_CONNECTIONS_PER_PARTITION, MAX_CONNECTIONS_PER_PARTITION, 
                 PARTITION_COUNT, CONNECTION_TIMEOUT_IN_MS, CLOSE_CONNECTION_WATCH_TIMEOUT_IN_MS);
     }

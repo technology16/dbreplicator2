@@ -21,7 +21,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ru.taximaxim.dbreplicator2.hibernate;
+package ru.taximaxim.dbreplicator2.model;
 
 import java.util.Map;
 
@@ -29,8 +29,8 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
-import ru.taximaxim.dbreplicator2.ConnectionsFactory.BoneCPDataBaseSettingsStorage;
-import ru.taximaxim.dbreplicator2.ConnectionsFactory.BoneCPSettings;
+import ru.taximaxim.dbreplicator2.cf.BoneCPDataBaseSettingsStorage;
+import ru.taximaxim.dbreplicator2.cf.BoneCPSettings;
 
 /**
  * Хранилище настроек именнованных соединений к BoneCP на основе Hibernate
@@ -38,7 +38,7 @@ import ru.taximaxim.dbreplicator2.ConnectionsFactory.BoneCPSettings;
  * @author volodin_aa
  *
  */
-public class HibernateBoneCPSettingsStorage implements BoneCPDataBaseSettingsStorage {
+public class BoneCPSettingsService implements BoneCPDataBaseSettingsStorage {
     
     /**
      * Хранилище настроек
@@ -50,7 +50,7 @@ public class HibernateBoneCPSettingsStorage implements BoneCPDataBaseSettingsSto
      * 
      * @param sessionFactory - фабрика сессий Hibernate
      */
-    public HibernateBoneCPSettingsStorage(SessionFactory sessionFactory) {
+    public BoneCPSettingsService(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
 
@@ -58,7 +58,7 @@ public class HibernateBoneCPSettingsStorage implements BoneCPDataBaseSettingsSto
     public BoneCPSettings getDataBaseSettingsByName(String poolName) {
         Session session = sessionFactory.openSession();
         try {
-            return (BoneCPSettings) session.get(PersistenceBoneCPSettings.class, poolName);
+            return (BoneCPSettings) session.get(BoneCPSettingsImpl.class, poolName);
         } finally {
             session.close();
         }

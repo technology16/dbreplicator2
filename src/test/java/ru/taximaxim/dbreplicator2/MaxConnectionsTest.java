@@ -29,15 +29,14 @@ import java.sql.SQLException;
 import junit.framework.TestCase;
 
 import org.h2.tools.Server;
-
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
-import ru.taximaxim.dbreplicator2.ConnectionsFactory.BoneCPConnectionsFactory;
-import ru.taximaxim.dbreplicator2.ConnectionsFactory.BoneCPDataBaseSettingsStorage;
-import ru.taximaxim.dbreplicator2.ConnectionsFactory.ConnectionsFactory;
-import ru.taximaxim.dbreplicator2.hibernate.HibernateBoneCPSettingsStorage;
-import ru.taximaxim.dbreplicator2.hibernate.PersistenceBoneCPSettings;
+import ru.taximaxim.dbreplicator2.cf.BoneCPConnectionsFactory;
+import ru.taximaxim.dbreplicator2.cf.BoneCPDataBaseSettingsStorage;
+import ru.taximaxim.dbreplicator2.cf.ConnectionsFactory;
+import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
+import ru.taximaxim.dbreplicator2.model.BoneCPSettingsImpl;
 /**
  * Класс для тестирования пулов соединений
  * 
@@ -64,27 +63,27 @@ public class MaxConnectionsTest extends TestCase {
             .buildSessionFactory();
 
         // Инициализируем хранилище настроек пулов соединений
-        settingStorage = new HibernateBoneCPSettingsStorage(sessionFactory);
+        settingStorage = new BoneCPSettingsService(sessionFactory);
         
-        settingStorage.setDataBaseSettings( new PersistenceBoneCPSettings("1", 
+        settingStorage.setDataBaseSettings( new BoneCPSettingsImpl("1", 
                 "org.postgresql.Driver", 
                 "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", 
                 "ags", 
                 ""));
         
-        settingStorage.setDataBaseSettings( new PersistenceBoneCPSettings("2", 
+        settingStorage.setDataBaseSettings( new BoneCPSettingsImpl("2", 
                 "org.postgresql.Driver", 
                 "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", 
                 "ags", 
                 ""));
         
-        settingStorage.setDataBaseSettings( new PersistenceBoneCPSettings("3", 
+        settingStorage.setDataBaseSettings( new BoneCPSettingsImpl("3", 
                 "org.postgresql.Driver", 
                 "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", 
                 "ags", 
                 ""));
         
-        settingStorage.setDataBaseSettings( new PersistenceBoneCPSettings("4", 
+        settingStorage.setDataBaseSettings( new BoneCPSettingsImpl("4", 
                 "org.postgresql.Driver", 
                 "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", 
                 "ags", 
