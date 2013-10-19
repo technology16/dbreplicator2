@@ -18,6 +18,6 @@
 		<property name="show_sql">true</property>
 		<!-- Update the database schema on startup -->
 		<property name="hbm2ddl.auto">create</property>
-		<mapping class="ru.taximaxim.dbreplicator2.hibernate.PersistenceBoneCPSettings"/>
+		<mapping class="ru.taximaxim.dbreplicator2.model.BoneCPSettingsImpl"/>
 	</session-factory>
 </hibernate-configuration>

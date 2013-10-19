@@ -23,6 +23,8 @@
 
 package ru.taximaxim.dbreplicator2.model;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.hibernate.HibernateException;
@@ -66,8 +68,19 @@ public class BoneCPSettingsService implements BoneCPDataBaseSettingsStorage {
 
     @Override
     public Map<String, BoneCPSettings> getDataBaseSettings() {
-        // TODO Auto-generated method stub
-        return null;
+        Map<String, BoneCPSettings> result = new HashMap<String, BoneCPSettings>();
+        
+        Session session = sessionFactory.openSession();
+        try {
+            List<BoneCPSettings> settingsList = session.createCriteria(BoneCPSettingsImpl.class).list();
+            for (BoneCPSettings settings: settingsList){
+                result.put(settings.getPoolId(), settings);
+            }
+        } finally {
+            session.close();
+        }
+        
+        return result;
     }
 
     @Override
@@ -75,7 +88,7 @@ public class BoneCPSettingsService implements BoneCPDataBaseSettingsStorage {
         Session session = sessionFactory.openSession();
         session.beginTransaction();
         try {
-            session.save(dataBaseSettings);
+            session.saveOrUpdate(dataBaseSettings);
             session.getTransaction().commit();
         } catch (HibernateException e) {
             session.getTransaction().rollback();
@@ -86,8 +99,18 @@ public class BoneCPSettingsService implements BoneCPDataBaseSettingsStorage {
     }
 
     @Override
-    public void delDataBaseSettings(BoneCPSettings dateBaseSettings) {
-        // TODO Auto-generated method stub        
+    public void delDataBaseSettings(BoneCPSettings dataBaseSettings) {
+        Session session = sessionFactory.openSession();
+        session.beginTransaction();
+        try {
+            session.delete(dataBaseSettings);
+            session.getTransaction().commit();
+        } catch (HibernateException e) {
+            session.getTransaction().rollback();
+            throw e;
+        } finally {
+            session.close();
+        }
     }
 
 }

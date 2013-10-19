@@ -301,5 +301,25 @@ public class BoneCPSettingsImpl implements BoneCPSettings {
         this.closeConnectionWatchTimeoutInMs = closeConnectionWatchTimeoutInMs;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof BoneCPSettings) {
+            return poolId.equals(((BoneCPSettings) obj).getPoolId()) &&
+                    driver.equals(((BoneCPSettings) obj).getDriver()) &&
+                    url.equals(((BoneCPSettings) obj).getUrl()) &&
+                    user.equals(((BoneCPSettings) obj).getUser()) &&
+                    pass.equals(((BoneCPSettings) obj).getPass()) &&
+                    this.minConnectionsPerPartition == ((BoneCPSettings) obj).getMinConnectionsPerPartition() &&
+                    this.maxConnectionsPerPartition == ((BoneCPSettings) obj).getMaxConnectionsPerPartition() &&
+                    this.partitionCount == ((BoneCPSettings) obj).getPartitionCount() &&
+                    this.connectionTimeoutInMs == ((BoneCPSettings) obj).getConnectionTimeoutInMs() &&
+                    this.closeConnectionWatchTimeoutInMs == ((BoneCPSettings) obj).getCloseConnectionWatchTimeoutInMs();
+        }
+        return false;
+    }
+
 
 }
