@@ -25,8 +25,8 @@ package ru.taximaxim.dbreplicator2;
 
 import org.apache.log4j.Logger;
 
-import ru.taximaxim.dbreplicator2.model.Task;
-import ru.taximaxim.dbreplicator2.model.TaskService;
+import ru.taximaxim.dbreplicator2.model.TaskSettingsImpl;
+import ru.taximaxim.dbreplicator2.model.TaskSettingsService;
 
 /**
  * @author TaxiMaxim
@@ -44,11 +44,11 @@ public class Application {
 		
 		// TODO: Чтение настроек о зарегистрированных пулах соединений и их 
 		// инициализация.
-		TaskService service = new TaskService(); // Заменить на синглетон
+		//TaskService service = new TaskService(); // Заменить на синглетон
 		
-		for (Task task : service.getTasks()) {
-			service.run(task);
-		}
+		//for (Task task : service.getTasks()) {
+		//	service.run(task);
+		//}
 
 		// TODO: Определение рабочих потоков, подготовка пула потоков.
 		// 1. Расширить таблицы H2 насторйками пулов рабочих потоков.

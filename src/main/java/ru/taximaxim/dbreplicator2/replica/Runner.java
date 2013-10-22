@@ -24,8 +24,10 @@ package ru.taximaxim.dbreplicator2.replica;
 
 import java.util.List;
 
+import ru.taximaxim.dbreplicator2.model.StrategyModel;
 
-public interface ReplicaSettings {
+
+public interface Runner {
 
 	/**
 	 * Идентификатор пула соединений базы-истончка
@@ -55,6 +57,6 @@ public interface ReplicaSettings {
 	 * Список упорядоченных по приоритету разрешенных стратегий для потока реплики.
 	 * @return Список упорядоченных по приоритету разрешенных стратегий для потока реплики.
 	 */
-	public List<Strategy> getStrategies();
+	public List<StrategyModel> getStrategyModels();
 	
 }
