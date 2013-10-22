@@ -27,7 +27,6 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import ru.taximaxim.dbreplicator2.replica.ReplicaRunner;
 import ru.taximaxim.dbreplicator2.tasks.TaskSettings;
 
 /**
