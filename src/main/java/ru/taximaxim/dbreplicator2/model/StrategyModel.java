@@ -23,6 +23,8 @@
 package ru.taximaxim.dbreplicator2.model;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -36,7 +38,8 @@ public class StrategyModel {
 	 * Идентификатор стратегии
 	 */
     @Id
-	private int id;
+	@GeneratedValue(strategy=GenerationType.SEQUENCE)
+	private Integer id;
 	
 	/**
 	 * Имя класса
@@ -82,14 +85,14 @@ public class StrategyModel {
 	/**
 	 * @see StrategyModel#id
 	 */
-	public int getId() {
+	public Integer getId() {
 		return id;
 	}
 
 	/**
 	 * @see StrategyModel#id
 	 */
-	public void setId(int id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 
