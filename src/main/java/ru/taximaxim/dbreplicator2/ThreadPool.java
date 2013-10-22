@@ -53,7 +53,7 @@ public class ThreadPool {
 	 */
 	public void restart() {
 		shutdown();
-		LOG.info("Запуск");
+		LOG.info("Инциализация");
 		executor = Executors.newFixedThreadPool(count);
 	}
 	
