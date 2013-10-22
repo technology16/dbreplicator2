@@ -1,32 +1,26 @@
 package ru.taximaxim.dbreplicator2;
 
-import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class ThreadPoolTest {
-
+	
+	private static ThreadPool threadPool = null;
+	private static int count = 3;
+	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
+		threadPool = new ThreadPool(count);
 	}
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
-	}
-
-	@Before
-	public void setUp() throws Exception {
-	}
-
-	@After
-	public void tearDown() throws Exception {
+		threadPool.shutdown();
 	}
 
 	@Test
 	public void testPool() {
-		ThreadPool threadPool = new ThreadPool(3);
 		threadPool.start("1");
 		threadPool.start("2");
 		threadPool.start("3");
@@ -40,7 +34,6 @@ public class ThreadPoolTest {
 		threadPool.start("b");
 		threadPool.start("c");
 		threadPool.start("d");
-		threadPool.shutdown();
 	}
 
 }
