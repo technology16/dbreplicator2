@@ -28,28 +28,34 @@ import java.util.concurrent.Executors;
 
 import org.apache.log4j.Logger;
 
+import ru.taximaxim.dbreplicator2.model.RunnerModel;
+
 public class ThreadPool {
 
 	public static final Logger LOG = Logger.getLogger(ThreadPool.class);
+	
 	public ExecutorService executor = null;
 	private int count;
+	
 	public ThreadPool(int count) {
-		// Инциализация
 		executor = Executors.newFixedThreadPool(count);
 		this.count = count;
 	}
 	
 	/**
-	 * Выключение
+	 * Ожидание остановки выполнения всех потоков и завершение работы.
 	 */
 	public void shutdown() {
 		executor.shutdown();
-        while (!executor.isTerminated()){};
-		LOG.info("Завершенно");
+        
+		while (!executor.isTerminated()) {};
+
+        LOG.info("ThreadPool.shutdown()");
 	}
 	
 	/**
-	 * Перезапуск
+	 * Ожидание завершения всех потоков и инициализация нового пула
+	 * с новым значением.
 	 */
 	public void restart() {
 		shutdown();
@@ -59,10 +65,10 @@ public class ThreadPool {
 	
 	
 	/**
-	 * Запуск потоков
+	 * Запуск потока RunnerModel. Поток будет поставлен в очередь на выполнение.
 	 */
-	public void start(Object object) {
-		Runnable worker = new WorkerThread(object);
+	public void start(RunnerModel runner) {
+		Runnable worker = new WorkerThread(runner);
 		executor.execute(worker);	
     }
 }
