@@ -25,15 +25,20 @@ package ru.taximaxim.dbreplicator2;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.cf.ConnectionsFactory;
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
+import ru.taximaxim.dbreplicator2.model.StrategyModel;
+import ru.taximaxim.dbreplicator2.replica.StopChainProcesing;
+import ru.taximaxim.dbreplicator2.replica.Strategy;
+import ru.taximaxim.dbreplicator2.replica.StrategyException;
 
 public class WorkerThread implements Runnable {
 
-	public static final Logger LOG = Logger.getLogger(WorkerThread.class);
+	private static final Logger LOG = Logger.getLogger(WorkerThread.class);
 	
 	private RunnerModel runner;
 
@@ -42,13 +47,14 @@ public class WorkerThread implements Runnable {
 	}
 
 	public void run() {
-		LOG.info(String.format("Запуск потока: %s [%s] [%s]", 
+
+		LOG.debug(String.format("Запуск потока: %s [%s] [%s]", 
 				runner.getDescription(), runner.getId(), 
 				Thread.currentThread().getName()));
 
 		processCommand(runner);
 
-		LOG.info(String.format("Завершение потока: %s [%s] [%s]", 
+		LOG.debug(String.format("Завершение потока: %s [%s] [%s]", 
 				runner.getDescription(), runner.getId(), 
 				Thread.currentThread().getName()));
 	}
@@ -59,22 +65,56 @@ public class WorkerThread implements Runnable {
 	 * 
 	 * @param runner Настроенный runner.
 	 */
-	public void processCommand(RunnerModel runner) {
+	protected void processCommand(RunnerModel runner) {
 		
 		ConnectionsFactory connectionsFactory = Application.getConnectionFactory();
-		Connection targetConnection;
 		
+		// Инициализируем два соединения. Используем try-with-resources для 
+		// каждого.
 		try (Connection sourceConnection = connectionsFactory.getConnection(runner.getSource())) {
-			// Инициализируем два соединения.
-			//sourceConnection = connectionsFactory.getConnection(runner.getSource());
-			targetConnection = connectionsFactory.getConnection(runner.getTarget());
-
+			try (Connection targetConnection = connectionsFactory.getConnection(runner.getTarget())) {
+	
+				List<StrategyModel> strategies = runner.getStrategyModels();
+				
+				try {
+					for (StrategyModel strategyModel : strategies) {
+						runStrategy(sourceConnection, targetConnection, strategyModel);
+					}
+				} catch (StopChainProcesing e) {
+					LOG.warn("Запрошена принудительная остановка обработка цепочки.", e);
+				}
+	
+			} catch (InstantiationException | IllegalAccessException e) {
+				LOG.error("Ошибка при создании объекта-стратегии", e);
+			}
 		} catch (ClassNotFoundException | SQLException e) {
 			LOG.error("Ошибка при инициализации соединений с базами данных потока-воркера", e);
-			
-			return;
+		} 
+		catch (StrategyException e) {
+			LOG.error("Ошибка при выполнении стратегии", e);
 		} 
 	}
+	
+	/**
+	 * Выполняет запрошенную стратегию.
+	 * 
+	 * @param sourceConnection Источник
+	 * @param targetConnection Целевая БД
+	 * @param strategyModel Данные для стратегии
+	 * 
+	 * @throws ClassNotFoundException
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 * @throws StrategyException
+	 */
+	protected void runStrategy(Connection sourceConnection, Connection targetConnection, 
+			StrategyModel strategyModel) 
+					throws ClassNotFoundException, InstantiationException, 
+						IllegalAccessException, StrategyException {
+
+		Class<?> clazz = Class.forName(strategyModel.getClassName());
+		Strategy strategy = (Strategy) clazz.newInstance();
+		
+		strategy.execute(sourceConnection, targetConnection, strategyModel);
+	}
 }
-
-
