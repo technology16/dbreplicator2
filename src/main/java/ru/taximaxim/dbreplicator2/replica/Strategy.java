@@ -20,26 +20,18 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package ru.taximaxim.dbreplicator2.replica;
 
-package ru.taximaxim.dbreplicator2.conf;
 
-public class ConfigurableError extends Exception {
-
-	private static final long serialVersionUID = -8931977895199484271L;
+public interface Strategy {
 	
-	public ConfigurableError() {
-		super();
-	}
-
-	public ConfigurableError(String message) {
-		super(message);
-	}
-
-    public ConfigurableError(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public ConfigurableError(Throwable cause) {
-        super(cause);
-    }
+	/**
+	 * Выполняет код по наступлению события модификации записи в таблице.
+	 * 
+	 * @param runner runner в контексте которого выполняется стратегия
+	 * @param param 
+	 * @return
+	 */
+	public Object exec(ReplicaRunner runner, String param);
+	
 }

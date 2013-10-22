@@ -21,41 +21,19 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ru.taximaxim.dbreplicator2.conf;
+package ru.taximaxim.dbreplicator2.replica;
 
-/**
- * Интрефейс определяет, что свойство может быть сохранено или восстановлены 
- * значения свойства по умолчанию.
- * 
- * @author ags
- *
- */
-public interface Configurable {
+import java.util.List;
+
+public interface ReplicaRunner extends Runnable {
 
 	/**
-	 * Объект поддерживающий сохранение, должен выполнить сохранение объекта,
-	 * в противном случае выбрасывает ConfigurableError
+	 * Выполняет задачу репликации данных для нескольких стратегий
 	 * 
-	 * @see ConfigurableError
+	 * @param settings
+	 * @param strategies
 	 */
-	public void save() throws ConfigurableError;
+	public void execute(ReplicaSettings settings, List<Strategy> strategies);
 
-
-	/**
-	 * Загружает данные из персистентного хранилища. 
-	 * 
-	 * @throws ConfigurableError
-	 */
-	public void load() throws ConfigurableError;
-
-	/**
-	 * Маркер того, что объект был сохранен и требует вызова save() для постоянного
-	 * сохранения настроек.
-	 * 
-	 * @return true в случае, если объект был изменён
-	 * @throws ConfigurableError
-	 */
-	public boolean isDirty() throws ConfigurableError;
+	public List<Strategy> getStrategies();
 }
-
-
