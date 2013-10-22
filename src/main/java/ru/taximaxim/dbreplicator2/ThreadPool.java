@@ -32,10 +32,11 @@ public class ThreadPool {
 
 	public static final Logger LOG = Logger.getLogger(ThreadPool.class);
 	public ExecutorService executor = null;
-	
+	private int count;
 	public ThreadPool(int count) {
 		// Инциализация
 		executor = Executors.newFixedThreadPool(count);
+		this.count = count;
 	}
 	
 	/**
@@ -46,6 +47,16 @@ public class ThreadPool {
         while (!executor.isTerminated()){};
 		LOG.info("Завершенно");
 	}
+	
+	/**
+	 * Перезапуск
+	 */
+	public void restart() {
+		shutdown();
+		LOG.info("Запуск");
+		executor = Executors.newFixedThreadPool(count);
+	}
+	
 	
 	/**
 	 * Запуск потоков

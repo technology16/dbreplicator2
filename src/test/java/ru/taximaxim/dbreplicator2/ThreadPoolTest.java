@@ -21,19 +21,33 @@ public class ThreadPoolTest {
 
 	@Test
 	public void testPool() {
+		
 		threadPool.start("1");
 		threadPool.start("2");
 		threadPool.start("3");
 		threadPool.start("4");
 		threadPool.start("5");
-		threadPool.start("6");
-		threadPool.start("7");
-		threadPool.start("8");
-		threadPool.start("9");
-		threadPool.start("a");
-		threadPool.start("b");
-		threadPool.start("c");
-		threadPool.start("d");
+		
+		threadPool.restart();
+		threadPool.start("11");
+		threadPool.start("22");
+		threadPool.start("33");
+		threadPool.start("44");
+		threadPool.start("55");
+		
+		threadPool.restart();
+		threadPool.start("111");
+		threadPool.start("222");
+		threadPool.start("333");
+		threadPool.start("444");
+		threadPool.start("555");
+		
+		threadPool.restart();
+		threadPool.start("1111");
+		threadPool.start("2222");
+		threadPool.start("3333");
+		threadPool.start("4444");
+		threadPool.start("5555");
 	}
 
 }
