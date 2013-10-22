@@ -63,8 +63,10 @@ public class BoneCPConnectionsFactory implements ConnectionsFactory {
      * @see ru.taximaxim.dbreplicator2.ConnectionsFactory.IConnectionsFactory#getConnection(java.lang.String)
      */
     public Connection getConnection(String poolName) throws SQLException, ClassNotFoundException {
-        synchronized (connectionPools) {
-            BoneCP connectionPool = connectionPools.get(poolName);
+    	BoneCP connectionPool;
+        
+    	synchronized (connectionPools) {
+            connectionPool = connectionPools.get(poolName);
             if (connectionPool == null) {
                 BoneCPSettings boneCPSettings = settingStorage.getDataBaseSettingsByName(poolName);
 
@@ -85,9 +87,8 @@ public class BoneCPConnectionsFactory implements ConnectionsFactory {
 
                 connectionPools.put(poolName, connectionPool);
             }
-
-            return connectionPool.getConnection();
         }
+        return connectionPool.getConnection();
     }
 
     /* (non-Javadoc)

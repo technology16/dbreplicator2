@@ -23,8 +23,12 @@
 
 package ru.taximaxim.dbreplicator2;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
 import org.apache.log4j.Logger;
 
+import ru.taximaxim.dbreplicator2.cf.ConnectionsFactory;
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
 
 public class WorkerThread implements Runnable {
@@ -56,13 +60,21 @@ public class WorkerThread implements Runnable {
 	 * @param runner Настроенный runner.
 	 */
 	public void processCommand(RunnerModel runner) {
-		// ...
-		// Запуск
-		// код
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		
+		ConnectionsFactory connectionsFactory = Application.getConnectionFactory();
+		Connection targetConnection;
+		
+		try (Connection sourceConnection = connectionsFactory.getConnection(runner.getSource())) {
+			// Инициализируем два соединения.
+			//sourceConnection = connectionsFactory.getConnection(runner.getSource());
+			targetConnection = connectionsFactory.getConnection(runner.getTarget());
+
+		} catch (ClassNotFoundException | SQLException e) {
+			LOG.error("Ошибка при инициализации соединений с базами данных потока-воркера", e);
+			
+			return;
+		} 
 	}
 }
+
+
