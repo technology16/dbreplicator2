@@ -19,5 +19,6 @@
 		<!-- Update the database schema on startup -->
 		<property name="hbm2ddl.auto">create</property>
 		<mapping class="ru.taximaxim.dbreplicator2.model.BoneCPSettingsImpl"/>
+        <mapping class="ru.taximaxim.dbreplicator2.model.StrategyModel"/>
 	</session-factory>
 </hibernate-configuration>

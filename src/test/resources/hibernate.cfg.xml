@@ -5,7 +5,8 @@
 	<session-factory>
 		<!-- Database connection settings -->
 		<property name="connection.driver_class">org.h2.Driver</property>
-		<property name="connection.url">jdbc:h2:tcp://localhost:8084/~/H2Settings</property>
+		<!-- Тесты проводим в памяти -->
+		<property name="connection.url">jdbc:h2:mem://localhost/~/test</property>
 		<property name="connection.username">sa</property>
 		<property name="connection.password"/>
 		<!-- JDBC connection pool (use the built-in) -->
@@ -19,5 +20,6 @@
 		<!-- Update the database schema on startup -->
 		<property name="hbm2ddl.auto">create</property>
 		<mapping class="ru.taximaxim.dbreplicator2.model.BoneCPSettingsImpl"/>
+        <mapping class="ru.taximaxim.dbreplicator2.model.StrategyModel"/>
 	</session-factory>
 </hibernate-configuration>
