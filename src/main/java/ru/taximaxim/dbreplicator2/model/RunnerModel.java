@@ -72,6 +72,21 @@ public class RunnerModel implements Runner {
 	private List<StrategyModel> strategyModels;
 
 	/**
+	 * Добавляет стратегию к runner'y
+	 * 
+	 * @param strategy
+	 * @return
+	 */
+	public List<StrategyModel> addStrategy(StrategyModel strategy) {
+		
+		List<StrategyModel> strategies = getStrategyModels();
+		strategies.add(strategy);
+		strategy.setRunner(this);
+		
+		return strategies;
+	}
+	
+	/**
 	 * @see RunnerModel#source
 	 */
 	@Override

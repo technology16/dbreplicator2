@@ -25,31 +25,37 @@ package ru.taximaxim.dbreplicator2;
 
 import org.apache.log4j.Logger;
 
+import ru.taximaxim.dbreplicator2.model.RunnerModel;
+
 public class WorkerThread implements Runnable {
 
 	public static final Logger LOG = Logger.getLogger(WorkerThread.class);
-	private Object object = null;
+	
+	private RunnerModel runner;
 
-	public WorkerThread(Object object) {
-		this.object = object;
+	public WorkerThread(RunnerModel runner) {
+		this.runner = runner;
 	}
 
 	public void run() {
-		LOG.info(String.format("Запуск потока: %s [%s]", Thread.currentThread()
-				.getName(), object));
+		LOG.info(String.format("Запуск потока: %s [%s] [%s]", 
+				runner.getDescription(), runner.getId(), 
+				Thread.currentThread().getName()));
 
-		processCommand(object);
+		processCommand(runner);
 
-		LOG.info(String.format("Завершение потока: %s [%s]", Thread
-				.currentThread().getName(), object));
+		LOG.info(String.format("Завершение потока: %s [%s] [%s]", 
+				runner.getDescription(), runner.getId(), 
+				Thread.currentThread().getName()));
 	}
 
 	/**
-	 * Запуск рабочего потока
+	 * Запуск рабочего потока. Вся работа по выполнению репликации должна 
+	 * выполняться здесь.
 	 * 
-	 * @param table
+	 * @param runner Настроенный runner.
 	 */
-	public void processCommand(Object object) {
+	public void processCommand(RunnerModel runner) {
 		// ...
 		// Запуск
 		// код

@@ -53,6 +53,9 @@ public class StrategiesTest {
 	    sessionFactory = configuration.buildSessionFactory(serviceRegistry);		
 	}
 
+	/**
+	 * Проверка создания модели исполняемого потока и стратегии.
+	 */
 	@Test
 	public void test() {
 		
@@ -67,14 +70,24 @@ public class StrategiesTest {
 
         addStrategy(runner, strategy);
         session.saveOrUpdate(runner);
+        session.saveOrUpdate(strategy);
         
         LOG.debug("Идентификатор потока после его сохранения: " + runner.getId());
         Assert.assertNotNull(runner.getId());
         
-        RunnerModel runner2 = (RunnerModel) session.get(RunnerModel.class, runner.getId());
+        RunnerModel runner_compare = (RunnerModel) session.get(RunnerModel.class, runner.getId());
         
-        LOG.debug("Идентификатор потока после его восстановления: " + runner2.getId());
-        Assert.assertEquals(runner.getId(), runner2.getId());
+        LOG.debug("Идентификатор потока после его восстановления: " + runner_compare.getId());
+        Assert.assertEquals(runner.getId(), runner_compare.getId());
+
+        RunnerModel runner2 = createRunner("source", "target", "Описание исполняемого потока (2)");
+        StrategyModel strategy2 = createStrategy("ru.taximaxim.Class", null, true, 100);
+        addStrategy(runner2, strategy2);
+        
+        session.saveOrUpdate(runner2);
+        session.saveOrUpdate(strategy2);
+        
+        Assert.assertNotNull(((StrategyModel)runner2.getStrategyModels().get(0)).getId());
 	}
 	
 	public RunnerModel createRunner(String source, String target, String description) {
