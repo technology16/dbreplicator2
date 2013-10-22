@@ -20,20 +20,43 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 package ru.taximaxim.dbreplicator2.replica;
 
 import java.util.List;
 
-public interface ReplicaRunner extends Runnable {
+import ru.taximaxim.dbreplicator2.model.StrategyModel;
+
+
+public interface Runner {
 
 	/**
-	 * Выполняет задачу репликации данных для нескольких стратегий
-	 * 
-	 * @param settings
-	 * @param strategies
+	 * Идентификатор пула соединений базы-истончка
+	 * @return Строковый идентификатор пула соединений базы-истончка
 	 */
-	public void execute(ReplicaSettings settings, List<Strategy> strategies);
+	public String getSource();
+	
+	/**
+	 * Идентификатор пула соединений целевой БД
+	 * @return Строковый идентификатор пула соединений целевой БД
+	 */
+	public String getTarget();
 
-	public List<Strategy> getStrategies();
+	/**
+	 * Идентификатор потока-реплики
+	 * @return Идентификатор потока-реплики
+	 */
+	public Integer getId();
+	
+	/**
+	 * Описание потока реплики
+	 * @return Описание потока реплики
+	 */
+	public String getDescription();
+	
+	/**
+	 * Список упорядоченных по приоритету разрешенных стратегий для потока реплики.
+	 * @return Список упорядоченных по приоритету разрешенных стратегий для потока реплики.
+	 */
+	public List<StrategyModel> getStrategies();
+	
 }

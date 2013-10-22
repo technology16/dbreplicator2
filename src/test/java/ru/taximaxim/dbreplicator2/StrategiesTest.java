@@ -38,12 +38,12 @@ public class StrategiesTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		
-		Configuration configuration = new Configuration();
-		configuration.configure();
+	    Configuration configuration = new Configuration();
+	    configuration.configure();
 	    
-		// http://stackoverflow.com/a/15702946/2743959
+	    // http://stackoverflow.com/a/15702946/2743959
 	    ServiceRegistry serviceRegistry = 
-	    		new ServiceRegistryBuilder().applySettings(configuration.getProperties()).buildServiceRegistry();        
+	    	    new ServiceRegistryBuilder().applySettings(configuration.getProperties()).buildServiceRegistry();        
 	    sessionFactory = configuration.buildSessionFactory(serviceRegistry);		
 		
 	}

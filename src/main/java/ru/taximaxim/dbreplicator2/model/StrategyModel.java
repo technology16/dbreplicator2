@@ -27,7 +27,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table( name = "strategy" )
+@Table( name = "strategies" )
 public class StrategyModel {
 	
 	/**
