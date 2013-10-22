@@ -68,6 +68,11 @@ public class TaskSettingsImpl implements TaskSettings{
      * Интервал после ошибочного выполнения задачи
      */
     private int failInterval;
+    
+    /**
+     * Интервал после ошибочного выполнения задачи
+     */
+    private String description;
 
 	/**
 	 * Для использования выполнения задачи будем использовать поток реплику, как
@@ -194,6 +199,23 @@ public class TaskSettingsImpl implements TaskSettings{
     public void setFailInterval(int failInterval) {
         // TODO Auto-generated method stub
         this.failInterval = failInterval;
+    }
+
+    /* (non-Javadoc)
+     * @see ru.taximaxim.dbreplicator2.tasks.TaskSettings#getDescription()
+     */
+    @Column(name = "description")
+    @Override
+    public String getDescription() {
+        return description;
+    }
+
+    /* (non-Javadoc)
+     * @see ru.taximaxim.dbreplicator2.tasks.TaskSettings#setDescription(java.lang.String)
+     */
+    @Override
+    public void setDescription(String description) {
+        this.description = description;
     }
 	
 }
