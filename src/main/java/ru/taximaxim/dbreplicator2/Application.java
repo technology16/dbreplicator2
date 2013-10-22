@@ -25,6 +25,9 @@ package ru.taximaxim.dbreplicator2;
 
 import org.apache.log4j.Logger;
 
+import ru.taximaxim.dbreplicator2.model.Task;
+import ru.taximaxim.dbreplicator2.model.TaskService;
+
 /**
  * @author TaxiMaxim
  * 
@@ -36,9 +39,26 @@ public class Application {
 	public static final Logger LOG = Logger.getLogger(Application.class);
 
 	public static void main(String[] args) {
-		
-		//args = new String[] {"-h","-t", "gggg", "-a", "56789", "-b", "56789" };
 		LOG.info("Application run");
-		ProcessingCli.initialization(args);
+		ProcessingCli.initialize(args);
+		
+		// TODO: Чтение настроек о зарегистрированных пулах соединений и их 
+		// инициализация.
+		TaskService service = new TaskService(); // Заменить на синглетон
+		
+		for (Task task : service.getTasks()) {
+			service.run(task);
+		}
+
+		// TODO: Определение рабочих потоков, подготовка пула потоков.
+		// 1. Расширить таблицы H2 насторйками пулов рабочих потоков.
+		// 2. Инициализация пулов потоков.
+		
+		// TODO: Определение ведущих БД и запуск процессов диспетчеров записей 
+		// для каждой ведущей БД.
+		// 1. Определяем ведущие БД по существующим настройкам.
+		// 2. Запуск диспечеров записей для каждой ведущей БД.
+		
 	}
 }
+

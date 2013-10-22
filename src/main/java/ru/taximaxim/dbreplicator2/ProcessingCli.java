@@ -60,7 +60,7 @@ public class ProcessingCli extends CommonsCli{
 	 * @param args <code>String[]</code>
 	 *            - аргументы командной строки
 	 */
-	public static void initialization(String[] args) {
+	public static void initialize(String[] args) {
 		if (args.length != 0) {
 			ProcessingCli.setOption("h", "help", true, "Print help for this application", 0,
 					false, null);
