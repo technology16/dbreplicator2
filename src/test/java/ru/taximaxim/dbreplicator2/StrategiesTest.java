@@ -22,14 +22,16 @@
  */
 package ru.taximaxim.dbreplicator2;
 
-import static org.junit.Assert.fail;
-
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 import org.hibernate.service.ServiceRegistryBuilder;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import ru.taximaxim.dbreplicator2.model.RunnerModel;
+import ru.taximaxim.dbreplicator2.model.StrategyModel;
 
 public class StrategiesTest {
 
@@ -45,11 +47,51 @@ public class StrategiesTest {
 	    ServiceRegistry serviceRegistry = 
 	    	    new ServiceRegistryBuilder().applySettings(configuration.getProperties()).buildServiceRegistry();        
 	    sessionFactory = configuration.buildSessionFactory(serviceRegistry);		
-		
 	}
 
 	@Test
 	public void test() {
-		fail("Not yet implemented");
+		
+        Session session = sessionFactory.openSession();
+        session.beginTransaction();
+
+        RunnerModel runner = createRunner("source", "target", "description");
+        StrategyModel strategy = createStrategy("ru.taximaxim.Class", null, true, 100);
+        
+        addStrategy(runner, strategy);
+        
+        session.saveOrUpdate(runner);
+	}
+	
+	public RunnerModel createRunner(String source, String target, String description) {
+
+		RunnerModel runner = new RunnerModel();
+		
+		runner.setSource(source);
+		runner.setTarget(target);
+		runner.setDescription(description);
+		
+		return runner;
+	}
+	
+	public StrategyModel createStrategy(String className, String param, 
+			boolean isEnabled, int priority) {
+		
+		StrategyModel strategy = new StrategyModel();
+		
+		strategy.setClassName(className);
+		strategy.setParam(param);
+		strategy.setEnabled(isEnabled);
+		strategy.setPriority(priority);
+		
+		return strategy;
+	}
+	
+	public void addStrategy(RunnerModel runner, StrategyModel strategy) {
+		
+		runner.getStrategyModels().add(strategy);
+		strategy.setRunner(runner);
+		
 	}
 }
+

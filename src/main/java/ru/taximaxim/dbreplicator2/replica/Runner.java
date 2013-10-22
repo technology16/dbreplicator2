@@ -57,6 +57,6 @@ public interface Runner {
 	 * Список упорядоченных по приоритету разрешенных стратегий для потока реплики.
 	 * @return Список упорядоченных по приоритету разрешенных стратегий для потока реплики.
 	 */
-	public List<StrategyModel> getStrategies();
+	public List<StrategyModel> getStrategyModels();
 	
 }

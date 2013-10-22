@@ -24,6 +24,8 @@ package ru.taximaxim.dbreplicator2.model;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -36,11 +38,6 @@ public class StrategyModel {
     @Id
 	private int id;
 	
-	/**
-	 * Идентификатор потока-реплики которой принадлежит стратегия
-	 */
-	private int id_replica;
-
 	/**
 	 * Имя класса
 	 */
@@ -60,7 +57,28 @@ public class StrategyModel {
 	 * Приоритет стратегии, чем меньше, тем выше.
 	 */
 	private int priority;
+
+	/**
+	 * Поток исполнитель, которому принадлежит стратегия
+	 */
+	@ManyToOne
+    @JoinColumn(name="runner_id")	
+	private RunnerModel runner;
 	
+	/**
+	 * @see StrategyModel#runner
+	 */
+	public RunnerModel getRunner() {
+		return runner;
+	}
+
+	/**
+	 * @see StrategyModel#runner
+	 */
+	public void setRunner(RunnerModel runner) {
+		this.runner = runner;
+	}
+
 	/**
 	 * @see StrategyModel#id
 	 */
@@ -73,20 +91,6 @@ public class StrategyModel {
 	 */
 	public void setId(int id) {
 		this.id = id;
-	}
-
-	/**
-	 * @see StrategyModel#id_replica
-	 */
-	public int getId_replica() {
-		return id_replica;
-	}
-
-	/**
-	 * @see StrategyModel#id_replica
-	 */
-	public void setId_replica(int id_replica) {
-		this.id_replica = id_replica;
 	}
 
 	/**
@@ -144,5 +148,4 @@ public class StrategyModel {
 	public void setPriority(int priority) {
 		this.priority = priority;
 	}
-
 }

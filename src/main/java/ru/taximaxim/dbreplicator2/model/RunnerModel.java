@@ -22,10 +22,16 @@
  */
 package ru.taximaxim.dbreplicator2.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.Where;
 
 import ru.taximaxim.dbreplicator2.replica.Runner;
 
@@ -36,6 +42,7 @@ public class RunnerModel implements Runner {
 	/**
 	 * Идентификатор выполняемого потока
 	 */
+	@Id
 	private int id;
 
 	/**
@@ -53,6 +60,12 @@ public class RunnerModel implements Runner {
 	 */
 	private String description;
 	
+	/**
+	 * Список стратегий, которые необхоимо выполнить потоку
+	 */
+	@OneToMany(mappedBy="runner")
+	@Where(clause="isEnabled=true")
+	@OrderBy("priority ASC")
 	private List<StrategyModel> strategyModels;
 
 	/**
@@ -87,11 +100,31 @@ public class RunnerModel implements Runner {
 		return description;
 	}
 
-	/**
-	 * @see RunnerModel#strategyModels
-	 */
-	@Override
-	public List<StrategyModel> getStrategies() {
+	public List<StrategyModel> getStrategyModels() {
+		
+		if (strategyModels == null)
+			strategyModels = new ArrayList<StrategyModel>();
+		
 		return strategyModels;
+	}
+
+	public void setStrategyModels(List<StrategyModel> strategyModels) {
+		this.strategyModels = strategyModels;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public void setSource(String source) {
+		this.source = source;
+	}
+
+	public void setTarget(String target) {
+		this.target = target;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 }
