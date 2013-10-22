@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
@@ -43,7 +45,8 @@ public class RunnerModel implements Runner {
 	 * Идентификатор выполняемого потока
 	 */
 	@Id
-	private int id;
+	@GeneratedValue(strategy=GenerationType.SEQUENCE)
+	private Integer id;
 
 	/**
 	 * Именованный пул-источник

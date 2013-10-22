@@ -22,11 +22,13 @@
  */
 package ru.taximaxim.dbreplicator2;
 
+import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 import org.hibernate.service.ServiceRegistryBuilder;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -36,6 +38,8 @@ import ru.taximaxim.dbreplicator2.model.StrategyModel;
 public class StrategiesTest {
 
 	protected static SessionFactory sessionFactory;
+	
+	protected static final Logger LOG = Logger.getLogger(StrategiesTest.class);
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -55,12 +59,22 @@ public class StrategiesTest {
         Session session = sessionFactory.openSession();
         session.beginTransaction();
 
-        RunnerModel runner = createRunner("source", "target", "description");
+        RunnerModel runner = createRunner("source", "target", "Описание исполняемого потока");
         StrategyModel strategy = createStrategy("ru.taximaxim.Class", null, true, 100);
         
+        Assert.assertNull(runner.getId());
+        LOG.debug("Идентификатор потока перед сохранением: " + runner.getId());
+
         addStrategy(runner, strategy);
-        
         session.saveOrUpdate(runner);
+        
+        LOG.debug("Идентификатор потока после его сохранения: " + runner.getId());
+        Assert.assertNotNull(runner.getId());
+        
+        RunnerModel runner2 = (RunnerModel) session.get(RunnerModel.class, runner.getId());
+        
+        LOG.debug("Идентификатор потока после его восстановления: " + runner2.getId());
+        Assert.assertEquals(runner.getId(), runner2.getId());
 	}
 	
 	public RunnerModel createRunner(String source, String target, String description) {
