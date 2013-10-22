@@ -25,8 +25,8 @@ package ru.taximaxim.dbreplicator2;
 
 import org.apache.log4j.Logger;
 
-import ru.taximaxim.dbreplicator2.model.Task;
-import ru.taximaxim.dbreplicator2.model.TaskService;
+import ru.taximaxim.dbreplicator2.model.TaskSettingsImpl;
+import ru.taximaxim.dbreplicator2.model.TaskSettingsService;
 
 /**
  * @author TaxiMaxim

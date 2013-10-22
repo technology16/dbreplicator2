@@ -22,30 +22,28 @@
  */
 package ru.taximaxim.dbreplicator2.model;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import java.util.List;
 
-import ru.taximaxim.dbreplicator2.replica.ReplicaRunner;
+import ru.taximaxim.dbreplicator2.tasks.TaskSettings;
 
-/**
- * Класс инкапсулирующий задачу менеджера записей.
- * 
- * @author ags
- *
- */
-@Entity
-@Table( name = "tasks" )
-public class Task {
+public class TaskSettingsService {
 
 	/**
-	 * Для использования выполнения задачи будем использовать поток реплику, как
-	 * подготовленное рабочее решение.
+	 * Возвражает список менеджеров записей.
 	 * 
+	 * @return
 	 */
-	private ReplicaRunner runner;
+	public List<TaskSettingsImpl> getTasks() {
+		// TODO: Not implemented
+		return null;
+	}
+
+	public TaskSettings getTask(int taskId) {
+	    return null;
+	}
 	
-	public ReplicaRunner getRunner() {
-		return runner;
+	public void setTask(TaskSettings taskSettings) {
+	    
 	}
 	
 }
