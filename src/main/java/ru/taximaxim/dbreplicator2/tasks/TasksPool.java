@@ -22,15 +22,9 @@
  */
 package ru.taximaxim.dbreplicator2.tasks;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.hibernate.Session;
-
-import ru.taximaxim.dbreplicator2.Application;
-import ru.taximaxim.dbreplicator2.ThreadPool;
-import ru.taximaxim.dbreplicator2.Utils;
-import ru.taximaxim.dbreplicator2.model.TaskSettingsImpl;
 import ru.taximaxim.dbreplicator2.model.TaskSettingsService;
 
 /**
@@ -39,7 +33,7 @@ import ru.taximaxim.dbreplicator2.model.TaskSettingsService;
  */
 public class TasksPool {
     
-    private List<TaskThread> taskThreads;
+    private Map<TaskRunner, Thread> taskThreads = new HashMap<TaskRunner, Thread>();
     
     private TaskSettingsService taskSettingsService;
     
@@ -51,23 +45,31 @@ public class TasksPool {
      * Запускаем потоки задач
      */
     public void start() {
-    	Session session = Application.getSessionFactory().openSession();
+        Map<Integer, TaskSettings> taskSettings = taskSettingsService.getTasks();
     	
-    	List<TaskSettingsImpl> taskSettings = 
-    			Utils.castList(TaskSettingsImpl.class, 
-    					session.createQuery("from TaskSettingsImpl order by name").list());
-    	
-    	if (taskThreads == null)
-    		taskThreads = new ArrayList<TaskThread>();
-    	
-    	for (TaskSettings settings : taskSettings) {
-    		TaskThread thread = new TaskThread(settings, null);
+    	for (Integer taskId: taskSettings.keySet()) {
+    		TaskRunner taskRunner = new TaskRunner(taskSettings.get(taskId));
+    		Thread thread = new Thread(taskRunner);
+            thread.run();
+    		taskThreads.put(taskRunner, thread);
 		}
     }
 
     /**
      * Останливаем потоки задач
+     * @throws InterruptedException 
      */
-    public void stop() {
+    public void stop() throws InterruptedException {
+        // Сигнализируем обработчикам задач что надо остановиться
+        for (TaskRunner taskRunner: taskThreads.keySet()) {
+            taskRunner.stop();
+        }
+        
+        // Дожидаемся завершения потоков задач
+        for (TaskRunner taskRunner: taskThreads.keySet()) {
+            taskThreads.get(taskRunner).join();
+        }
+        
+        taskThreads.clear();
     }
 }

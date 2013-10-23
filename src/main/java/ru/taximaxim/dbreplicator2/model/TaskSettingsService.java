@@ -22,28 +22,89 @@
  */
 package ru.taximaxim.dbreplicator2.model;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+
+import ru.taximaxim.dbreplicator2.replica.Runner;
 import ru.taximaxim.dbreplicator2.tasks.TaskSettings;
 
 public class TaskSettingsService {
 
+    /**
+     * Хранилище настроек
+     */
+    protected SessionFactory sessionFactory;
+    
+    /**
+     * @param sessionFactory
+     */
+    public TaskSettingsService(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
+    }
+
 	/**
-	 * Возвражает список менеджеров записей.
+	 * Возвражает список задач.
 	 * 
 	 * @return
 	 */
-	public List<TaskSettingsImpl> getTasks() {
-		// TODO: Not implemented
-		return null;
+	public Map<Integer, TaskSettings> getTasks() {
+	    Map<Integer, TaskSettings> result = new HashMap<Integer, TaskSettings>();
+        
+        Session session = sessionFactory.openSession();
+        try {
+            List<TaskSettings> settingsList = session.createCriteria(TaskSettingsImpl.class).list();
+            for (TaskSettings task: settingsList){
+                task.setRunner((Runner) session.get(Runner.class, task.getRunnerId()));
+                result.put(task.getTaskId(), task);
+            }
+        } finally {
+            session.close();
+        }
+        
+        return result;
 	}
 
+	/**
+	 * Получение экземпляра настроек задачи по идентификатору
+	 * 
+	 * @param taskId
+	 * @return
+	 */
 	public TaskSettings getTask(int taskId) {
-	    return null;
+        Session session = sessionFactory.openSession();
+        try {
+            TaskSettings task = (TaskSettings) session.get(TaskSettingsImpl.class, taskId);
+            task.setRunner((Runner) session.get(Runner.class, task.getRunnerId())); 
+            
+            return task;
+        } finally {
+            session.close();
+        }
 	}
 	
+	/**
+	 * Сохранение экземпляра настроек задачи
+	 * 
+	 * @param taskSettings
+	 */
 	public void setTask(TaskSettings taskSettings) {
-	    
+        Session session = sessionFactory.openSession();
+        session.beginTransaction();
+        try {
+            session.saveOrUpdate(taskSettings);
+            session.saveOrUpdate(taskSettings.getRunner());
+            session.getTransaction().commit();
+        } catch (HibernateException e) {
+            session.getTransaction().rollback();
+            throw e;
+        } finally {
+            session.close();
+        }
 	}
 	
 }

@@ -26,27 +26,46 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 
-import ru.taximaxim.dbreplicator2.ThreadPool;
 import ru.taximaxim.dbreplicator2.WorkerThread;
-import ru.taximaxim.dbreplicator2.model.RunnerModel;
 
-public class TaskThread implements Runnable {
+/**
+ * Класс потока циклического запуска выполнения обработчика записей 
+ * 
+ * @author volodin_aa
+ *
+ */
+public class TaskRunner implements Runnable {
 
-    public static final Logger LOG = Logger.getLogger(TaskThread.class);
+    public static final Logger LOG = Logger.getLogger(TaskRunner.class);
     
+    /**
+     * Текущие настройки задачи
+     */
     private TaskSettings taskSettings;
     
-    private RunnerModel runner;
+    /**
+     * Инициализированный рабочий поток
+     */
+    private WorkerThread workerThread;
     
+    /**
+     * Флаг активности задачи
+     */
     private boolean enabled;
 
-    public TaskThread(TaskSettings taskSettings, RunnerModel runner) {
+    /**
+     * @param taskSettings
+     */
+    public TaskRunner(TaskSettings taskSettings) {
         this.taskSettings = taskSettings;
-        this.runner = runner;
+        this.workerThread = new WorkerThread(taskSettings.getRunner());
         
         enabled = true;
     }
     
+    /**
+     * Метод для корректной остановки потока задачи. Поток дождется окончания текущего цикла и завершит работу
+     */
     public void stop(){
         enabled = false;
     }
@@ -59,8 +78,7 @@ public class TaskThread implements Runnable {
             try {
                 long startTime = new Date().getTime();
 
-                new WorkerThread(runner).run();
-                //threadPool.start(runner);
+                workerThread.run();
 
                 // Ожидаем окончания периода синхронизации
                 long sleepTime = startTime + taskSettings.getSuccessInterval() - new Date().getTime();

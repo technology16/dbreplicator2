@@ -30,8 +30,8 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.cf.ConnectionsFactory;
-import ru.taximaxim.dbreplicator2.model.RunnerModel;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
+import ru.taximaxim.dbreplicator2.replica.Runner;
 import ru.taximaxim.dbreplicator2.replica.StopChainProcesing;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
@@ -40,9 +40,9 @@ public class WorkerThread implements Runnable {
 
 	private static final Logger LOG = Logger.getLogger(WorkerThread.class);
 	
-	private RunnerModel runner;
+	private Runner runner;
 
-	public WorkerThread(RunnerModel runner) {
+	public WorkerThread(Runner runner) {
 		this.runner = runner;
 	}
 
@@ -65,7 +65,7 @@ public class WorkerThread implements Runnable {
 	 * 
 	 * @param runner Настроенный runner.
 	 */
-	protected void processCommand(RunnerModel runner) {
+	protected void processCommand(Runner runner) {
 		
 		ConnectionsFactory connectionsFactory = Application.getConnectionFactory();
 		

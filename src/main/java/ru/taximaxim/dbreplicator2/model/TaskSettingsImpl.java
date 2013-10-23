@@ -37,7 +37,7 @@ import ru.taximaxim.dbreplicator2.tasks.TaskSettings;
  *
  */
 @Entity
-@Table( name = "task_settings" )
+@Table( name = "tasks" )
 public class TaskSettingsImpl implements TaskSettings{
     
     /**
@@ -48,15 +48,7 @@ public class TaskSettingsImpl implements TaskSettings{
     /**
      * Идентификатор реплики
      */
-    private int replicaId;
-    
-    /**
-     * Приоритет, задачи выполняются в порядке возрастания приоритета
-     * 
-     * TODO: Зачем приоритет? Ведь эти потоки обслуживают абсолютно разные 
-     * базы? Потоки должны быть не должны зависеть от другого потока. Предлагаю убрать.
-     */
-    private int priority;
+    private int runnerId;
     
     /**
      * Флаг доступности задачи
@@ -101,26 +93,15 @@ public class TaskSettingsImpl implements TaskSettings{
         this.taskId = taskId;
     }
 
-    @Column(name = "replica_id")
+    @Column(name = "runner_id")
     @Override
-    public int getReplicaId() {
-        return replicaId;
+    public int getRunnerId() {
+        return runnerId;
     }
 
     @Override
-    public void setReplicaId(int replicaId) {
-        this.replicaId = replicaId;
-    }
-
-    @Column(name = "priority")
-    @Override
-    public int getPriority() {
-        return priority;
-    }
-
-    @Override
-    public void setPriority(int priority) {
-        this.priority = priority;
+    public void setRunnerId(int runnerId) {
+        this.runnerId = runnerId;
     }
 
     @Column(name = "enabled")
@@ -173,8 +154,7 @@ public class TaskSettingsImpl implements TaskSettings{
     }
 
     @Override
-    public Runner setRunner() {
-        // TODO Auto-generated method stub
-        return null;
+    public void setRunner(Runner runner) {
+        this.runner = runner;
     }
 }

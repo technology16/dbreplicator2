@@ -45,28 +45,14 @@ public interface TaskSettings {
      * 
      * @return
      */
-    public int getReplicaId();
+    public int getRunnerId();
     
     /**
      * Установка идентификатора запускаемой реплики
      * 
-     * @param replicaId
+     * @param runnerId
      */
-    public void setReplicaId(int replicaId);
-    
-    /**
-     * Получение приоритета задачи, задачи выполняются в порядке возрастания приоритета
-     * 
-     * @return
-     */
-    public int getPriority();
-    
-    /**
-     * Установка приоритетазадачи
-     * 
-     * @param priority
-     */
-    public void setPriority(int priority);
+    public void setRunnerId(int runnerId);
     
     /**
      * Получение флага доступности задачи
@@ -134,7 +120,7 @@ public interface TaskSettings {
     /**
      * Установка инициализированного экземпляра обработчика реплики
      * 
-     * @return
+     * @param runner
      */
-    public Runner setRunner();
+    public void setRunner(Runner runner);
 }
