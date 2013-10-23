@@ -23,8 +23,6 @@
 
 package ru.taximaxim.dbreplicator2.cli;
 
-import java.io.PrintWriter;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
@@ -74,19 +72,8 @@ public class CommandLineParser extends AbstractCommandLineParser{
 
 		if (commandLine.hasOption("h")) {
 					
-			PrintWriter writer = new PrintWriter(System.out);
 			HelpFormatter formatter = new HelpFormatter();
-
-			formatter.printHelp(writer, 
-					80, 						// ширина строки вывода
-					"java dbreplicator2.jar",
-					"Options:", 				// строка предшествующая выводу
-					getOptions(), 
-					3, 							// число пробелов перед выводом опции
-					5, 							// число пробелов перед выводом опцисания опции 
-					"-- HELP --", 				// строка следующая за выводом 
-					true 						// выводить ли в строке usage список команд
-					);
+			formatter.printHelp("java dbreplicator2.jar", getOptions());
 
 			error = false;
 		}
