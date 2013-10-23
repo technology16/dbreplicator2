@@ -31,6 +31,7 @@ import junit.framework.TestCase;
 import org.h2.tools.Server;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
+import org.junit.Ignore;
 
 import ru.taximaxim.dbreplicator2.cf.BoneCPConnectionsFactory;
 import ru.taximaxim.dbreplicator2.cf.BoneCPDataBaseSettingsStorage;
@@ -43,6 +44,7 @@ import ru.taximaxim.dbreplicator2.model.BoneCPSettingsImpl;
  * @author volodin_aa
  *
  */
+@Ignore
 public class MaxConnectionsTest extends TestCase {
   
     private SessionFactory sessionFactory;
