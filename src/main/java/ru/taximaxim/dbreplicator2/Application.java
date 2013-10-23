@@ -24,20 +24,59 @@
 package ru.taximaxim.dbreplicator2;
 
 import org.apache.log4j.Logger;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.service.ServiceRegistry;
+import org.hibernate.service.ServiceRegistryBuilder;
 
-import ru.taximaxim.dbreplicator2.model.TaskSettingsImpl;
-import ru.taximaxim.dbreplicator2.model.TaskSettingsService;
+import ru.taximaxim.dbreplicator2.cf.BoneCPConnectionsFactory;
+import ru.taximaxim.dbreplicator2.cf.ConnectionsFactory;
+import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
 
 /**
  * @author TaxiMaxim
  * 
- * Изменения в рамках задачи #1866
- *
  */
 public class Application {
 	
 	public static final Logger LOG = Logger.getLogger(Application.class);
 
+	public static SessionFactory sessionFactory;
+	
+	/**
+	 * Возвращает фабрику сессий гибернейта.
+	 * 
+	 * @return фабрику сессий гибернейта.
+	 */
+	public static SessionFactory getSessionFactory() {
+
+		if (sessionFactory == null) {
+		    Configuration configuration = new Configuration();
+		    configuration.configure();
+		    
+		    ServiceRegistry serviceRegistry = 
+		    	    new ServiceRegistryBuilder().applySettings(configuration.getProperties()).buildServiceRegistry();        
+		    sessionFactory = configuration.buildSessionFactory(serviceRegistry);
+		}
+	    return sessionFactory;
+	}
+	
+	private static ConnectionsFactory connectionsFactory;
+	
+	/**
+	 * Возвращает фабрику соединений
+	 * 
+	 * @return фабрику соединений
+	 */
+	public static ConnectionsFactory getConnectionFactory() {
+		
+		if (connectionsFactory == null )
+			connectionsFactory = 
+				new BoneCPConnectionsFactory(new BoneCPSettingsService(getSessionFactory()));
+		
+		return connectionsFactory;
+	}
+	
 	public static void main(String[] args) {
 		LOG.info("Application run");
 		ProcessingCli.initialize(args);
