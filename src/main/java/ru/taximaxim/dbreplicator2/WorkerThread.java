@@ -29,7 +29,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import ru.taximaxim.dbreplicator2.cf.ConnectionsFactory;
+import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.StopChainProcesing;
@@ -67,7 +67,7 @@ public class WorkerThread implements Runnable {
 	 */
 	protected void processCommand(RunnerModel runner) {
 		
-		ConnectionsFactory connectionsFactory = Application.getConnectionFactory();
+		ConnectionFactory connectionsFactory = Application.getConnectionFactory();
 		
 		// Инициализируем два соединения. Используем try-with-resources для 
 		// каждого.

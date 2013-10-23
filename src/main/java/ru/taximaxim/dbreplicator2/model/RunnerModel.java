@@ -120,8 +120,9 @@ public class RunnerModel implements Runner {
 
 	public List<StrategyModel> getStrategyModels() {
 		
-		if (strategyModels == null)
+		if (strategyModels == null) {
 			strategyModels = new ArrayList<StrategyModel>();
+		}
 		
 		return strategyModels;
 	}

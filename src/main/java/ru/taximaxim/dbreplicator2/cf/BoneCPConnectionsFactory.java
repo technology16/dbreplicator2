@@ -39,7 +39,7 @@ import com.jolbox.bonecp.BoneCPConfig;
  * @author volodin_aa
  *
  */
-public class BoneCPConnectionsFactory implements ConnectionsFactory {
+public class BoneCPConnectionsFactory implements ConnectionFactory {
 	
 	private static final Logger LOG = Logger.getLogger(BoneCPConnectionsFactory.class);
 
