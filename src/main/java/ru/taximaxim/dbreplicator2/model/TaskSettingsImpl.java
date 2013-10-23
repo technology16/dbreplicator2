@@ -27,6 +27,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import ru.taximaxim.dbreplicator2.replica.Runner;
 import ru.taximaxim.dbreplicator2.tasks.TaskSettings;
 
 /**
@@ -76,6 +77,11 @@ public class TaskSettingsImpl implements TaskSettings{
      * Интервал после ошибочного выполнения задачи
      */
     private String description;
+    
+    /**
+     * Инициализированный обработчик реплики. Будет инициализироваться сервисом хранения настроек задач.
+     */
+    private Runner runner;
 
 	/**
 	 * Для использования выполнения задачи будем использовать поток реплику, как
@@ -159,5 +165,16 @@ public class TaskSettingsImpl implements TaskSettings{
     @Override
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @Override
+    public Runner getRunner() {
+        return runner;
+    }
+
+    @Override
+    public Runner setRunner() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

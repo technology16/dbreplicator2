@@ -22,6 +22,8 @@
  */
 package ru.taximaxim.dbreplicator2.tasks;
 
+import ru.taximaxim.dbreplicator2.replica.Runner;
+
 public interface TaskSettings {
 
     /**
@@ -122,4 +124,17 @@ public interface TaskSettings {
      */
     public void setDescription(String description);
     
+    /**
+     * Функция получения инициализированного экземпляра обработчика реплики
+     * 
+     * @return
+     */
+    public Runner getRunner();
+    
+    /**
+     * Установка инициализированного экземпляра обработчика реплики
+     * 
+     * @return
+     */
+    public Runner setRunner();
 }
