@@ -35,32 +35,36 @@ public class ThreadPool {
 	public static final Logger LOG = Logger.getLogger(ThreadPool.class);
 	
 	public ExecutorService executor = null;
-	private int count;
 	
 	public ThreadPool(int count) {
-		executor = Executors.newFixedThreadPool(count);
-		this.count = count;
+		restart(count);
 	}
 	
 	/**
 	 * Ожидание остановки выполнения всех потоков и завершение работы.
 	 */
 	public void shutdown() {
-		executor.shutdown();
+		
+		if (executor != null) {
+			executor.shutdown();
         
-		while (!executor.isTerminated()) {};
+			while (!executor.isTerminated()) {
+				// wait wile all tasks have completed following shut down 
+			};
 
-        LOG.info("ThreadPool.shutdown()");
+			LOG.info("ThreadPool.shutdown()");
+		}
 	}
 	
 	/**
 	 * Ожидание завершения всех потоков и инициализация нового пула
 	 * с новым значением.
 	 */
-	public void restart() {
+	public void restart(int count) {
 		shutdown();
-		LOG.info("Инциализация");
 		executor = Executors.newFixedThreadPool(count);
+		
+		LOG.info(String.format("ThreadPool.restart(%s)", count));
 	}
 	
 	
