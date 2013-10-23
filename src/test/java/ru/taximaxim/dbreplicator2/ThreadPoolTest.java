@@ -23,21 +23,41 @@
 
 package ru.taximaxim.dbreplicator2;
 
+import org.apache.log4j.Logger;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.service.ServiceRegistry;
+import org.hibernate.service.ServiceRegistryBuilder;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
+import ru.taximaxim.dbreplicator2.model.StrategyModel;
 
 public class ThreadPoolTest {
-	
+
 	private static ThreadPool threadPool = null;
 	private static int count = 3;
 	private static int id = 0;
-	
+	protected static SessionFactory sessionFactory;
+	protected static final Logger LOG = Logger.getLogger(ThreadPoolTest.class);
+
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
+
 		threadPool = new ThreadPool(count);
+
+		Configuration configuration = new Configuration();
+		configuration.configure();
+
+		// http://stackoverflow.com/a/15702946/2743959
+		ServiceRegistry serviceRegistry = new ServiceRegistryBuilder()
+				.applySettings(configuration.getProperties())
+				.buildServiceRegistry();
+		sessionFactory = configuration.buildSessionFactory(serviceRegistry);
 	}
 
 	@AfterClass
@@ -48,30 +68,64 @@ public class ThreadPoolTest {
 	@Test
 	public void testPool() {
 		
-		threadPool.start(createRunner("source", "target", "Description"));
-		threadPool.start(createRunner("source", "target", "Описание"));
-		threadPool.start(createRunner("source", "target", "Модуль"));
-		threadPool.start(createRunner("source", "target", "Поток"));
-		threadPool.start(createRunner("source", "target", "Тест"));
-		threadPool.start(createRunner("source", "target", "Привет"));;
-		threadPool.start(createRunner("source", "target", "Пул"));
-		threadPool.start(createRunner("source", "target", "Запуск"));
-		threadPool.start(createRunner("source", "target", "Пуск"));
-		threadPool.start(createRunner("source", "target", "Модель"));
-		threadPool.start(createRunner("source", "target", "java"));
-		threadPool.start(createRunner("source", "target", "info"));
-		threadPool.start(createRunner("source", "target", "Салют"));
+		Session session = sessionFactory.openSession();
+		session.beginTransaction();
+		
+		helpCode(session);
+		
+	}
+
+	public void helpCode(Session session) {
+
+		RunnerModel runner = createRunner("source", "target",
+				"Описание исполняемого потока");
+		StrategyModel strategy = createStrategy("ru.taximaxim.Class", null,
+				true, 100);
+
+		Assert.assertNull(runner.getId());
+		LOG.debug("Идентификатор потока перед сохранением: " + runner.getId());
+
+		addStrategy(runner, strategy);
+		session.saveOrUpdate(runner);
+		session.saveOrUpdate(strategy);
+
+		LOG.debug("Идентификатор потока после его сохранения: "
+				+ runner.getId());
+		Assert.assertNotNull(runner.getId());
+		
+		threadPool.start(runner);
 	}
 	
-	public RunnerModel createRunner(String source, String target, String description) {
+	public RunnerModel createRunner(String source, String target,
+			String description) {
 
 		RunnerModel runner = new RunnerModel();
-		
+
 		runner.setId(id++);
 		runner.setSource(source);
 		runner.setTarget(target);
 		runner.setDescription(description);
-		
+
 		return runner;
+	}
+
+	public StrategyModel createStrategy(String className, String param,
+			boolean isEnabled, int priority) {
+
+		StrategyModel strategy = new StrategyModel();
+
+		strategy.setClassName(className);
+		strategy.setParam(param);
+		strategy.setEnabled(isEnabled);
+		strategy.setPriority(priority);
+
+		return strategy;
+	}
+
+	public void addStrategy(RunnerModel runner, StrategyModel strategy) {
+
+		runner.getStrategyModels().add(strategy);
+		strategy.setRunner(runner);
+
 	}
 }
