@@ -27,6 +27,7 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.ThreadPool;
+import ru.taximaxim.dbreplicator2.WorkerThread;
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
 
 public class TaskThread implements Runnable {
@@ -35,15 +36,12 @@ public class TaskThread implements Runnable {
     
     private TaskSettings taskSettings;
     
-    private ThreadPool threadPool = null;
-    
     private RunnerModel runner;
     
     private boolean enabled;
 
-    public TaskThread(TaskSettings taskSettings, ThreadPool threadPool, RunnerModel runner) {
+    public TaskThread(TaskSettings taskSettings, RunnerModel runner) {
         this.taskSettings = taskSettings;
-        this.threadPool = threadPool;
         this.runner = runner;
         
         enabled = true;
@@ -61,7 +59,8 @@ public class TaskThread implements Runnable {
             try {
                 long startTime = new Date().getTime();
 
-                threadPool.start(runner);
+                new WorkerThread(runner).run();
+                //threadPool.start(runner);
 
                 // Ожидаем окончания периода синхронизации
                 long sleepTime = startTime + taskSettings.getSuccessInterval() - new Date().getTime();
@@ -85,5 +84,4 @@ public class TaskThread implements Runnable {
             }
         }
     }
-
 }

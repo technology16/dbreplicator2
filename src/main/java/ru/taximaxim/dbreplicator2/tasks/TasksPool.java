@@ -22,8 +22,15 @@
  */
 package ru.taximaxim.dbreplicator2.tasks;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.Session;
+
+import ru.taximaxim.dbreplicator2.Application;
+import ru.taximaxim.dbreplicator2.ThreadPool;
+import ru.taximaxim.dbreplicator2.Utils;
+import ru.taximaxim.dbreplicator2.model.TaskSettingsImpl;
 import ru.taximaxim.dbreplicator2.model.TaskSettingsService;
 
 /**
@@ -36,9 +43,6 @@ public class TasksPool {
     
     private TaskSettingsService taskSettingsService;
     
-    /**
-     * 
-     */
     public TasksPool(TaskSettingsService taskSettingsService) {
         this.taskSettingsService = taskSettingsService;
     }
@@ -47,13 +51,23 @@ public class TasksPool {
      * Запускаем потоки задач
      */
     public void start() {
-        
+    	Session session = Application.getSessionFactory().openSession();
+    	
+    	List<TaskSettingsImpl> taskSettings = 
+    			Utils.castList(TaskSettingsImpl.class, 
+    					session.createQuery("from TaskSettingsImpl order by name").list());
+    	
+    	if (taskThreads == null)
+    		taskThreads = new ArrayList<TaskThread>();
+    	
+    	for (TaskSettings settings : taskSettings) {
+    		TaskThread thread = new TaskThread(settings, null);
+		}
     }
-    
+
     /**
      * Останливаем потоки задач
      */
     public void stop() {
-        
     }
 }
