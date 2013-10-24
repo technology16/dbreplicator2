@@ -28,22 +28,22 @@ import ru.taximaxim.dbreplicator2.tasks.TaskSettings;
 
 public class TaskSettingsService {
 
-	/**
-	 * Возвражает список менеджеров записей.
-	 * 
-	 * @return
-	 */
-	public List<TaskSettingsImpl> getTasks() {
-		// TODO: Not implemented
-		return null;
-	}
+    /**
+     * Возвражает список менеджеров записей.
+     * 
+     * @return
+     */
+    public List<TaskSettingsImpl> getTasks() {
+        // TODO: Not implemented
+        return null;
+    }
 
-	public TaskSettings getTask(int taskId) {
-	    return null;
-	}
-	
-	public void setTask(TaskSettings taskSettings) {
-	    
-	}
-	
+    public TaskSettings getTask(int taskId) {
+        return null;
+    }
+
+    public void setTask(TaskSettings taskSettings) {
+
+    }
+
 }

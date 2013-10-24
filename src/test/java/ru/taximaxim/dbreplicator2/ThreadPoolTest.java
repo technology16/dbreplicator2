@@ -30,48 +30,50 @@ import org.junit.Test;
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
 
 public class ThreadPoolTest {
-	
-	private static ThreadPool threadPool = null;
-	private static int count = 3;
-	private static int id = 0;
-	
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		threadPool = new ThreadPool(count);
-	}
 
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-		threadPool.shutdown();
-	}
+    private static ThreadPool threadPool = null;
+    private static int count = 3;
+    private static int id = 0;
 
-	@Test
-	public void testPool() {
-		
-		threadPool.start(createRunner("source", "target", "Description"));
-		threadPool.start(createRunner("source", "target", "Описание"));
-		threadPool.start(createRunner("source", "target", "Модуль"));
-		threadPool.start(createRunner("source", "target", "Поток"));
-		threadPool.start(createRunner("source", "target", "Тест"));
-		threadPool.start(createRunner("source", "target", "Привет"));;
-		threadPool.start(createRunner("source", "target", "Пул"));
-		threadPool.start(createRunner("source", "target", "Запуск"));
-		threadPool.start(createRunner("source", "target", "Пуск"));
-		threadPool.start(createRunner("source", "target", "Модель"));
-		threadPool.start(createRunner("source", "target", "java"));
-		threadPool.start(createRunner("source", "target", "info"));
-		threadPool.start(createRunner("source", "target", "Салют"));
-	}
-	
-	public RunnerModel createRunner(String source, String target, String description) {
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
+        threadPool = new ThreadPool(count);
+    }
 
-		RunnerModel runner = new RunnerModel();
-		
-		runner.setId(id++);
-		runner.setSource(source);
-		runner.setTarget(target);
-		runner.setDescription(description);
-		
-		return runner;
-	}
+    @AfterClass
+    public static void tearDownAfterClass() throws Exception {
+        threadPool.shutdown();
+    }
+
+    @Test
+    public void testPool() {
+
+        threadPool.start(createRunner("source", "target", "Description"));
+        threadPool.start(createRunner("source", "target", "Описание"));
+        threadPool.start(createRunner("source", "target", "Модуль"));
+        threadPool.start(createRunner("source", "target", "Поток"));
+        threadPool.start(createRunner("source", "target", "Тест"));
+        threadPool.start(createRunner("source", "target", "Привет"));
+        ;
+        threadPool.start(createRunner("source", "target", "Пул"));
+        threadPool.start(createRunner("source", "target", "Запуск"));
+        threadPool.start(createRunner("source", "target", "Пуск"));
+        threadPool.start(createRunner("source", "target", "Модель"));
+        threadPool.start(createRunner("source", "target", "java"));
+        threadPool.start(createRunner("source", "target", "info"));
+        threadPool.start(createRunner("source", "target", "Салют"));
+    }
+
+    public RunnerModel createRunner(String source, String target,
+            String description) {
+
+        RunnerModel runner = new RunnerModel();
+
+        runner.setId(id++);
+        runner.setSource(source);
+        runner.setTarget(target);
+        runner.setDescription(description);
+
+        return runner;
+    }
 }

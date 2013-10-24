@@ -32,49 +32,56 @@ import ru.taximaxim.dbreplicator2.model.RunnerModel;
 public class TaskThread implements Runnable {
 
     public static final Logger LOG = Logger.getLogger(TaskThread.class);
-    
+
     private TaskSettings taskSettings;
-    
+
     private RunnerModel runner;
-    
+
     private boolean enabled;
 
     public TaskThread(TaskSettings taskSettings, RunnerModel runner) {
         this.taskSettings = taskSettings;
         this.runner = runner;
-        
+
         enabled = true;
     }
-    
-    public void stop(){
+
+    public void stop() {
         enabled = false;
     }
 
     @Override
     public void run() {
-        LOG.info(String.format("Запуск задачи [%d] %s", 
+        LOG.info(String.format("Запуск задачи [%d] %s",
                 taskSettings.getTaskId(), taskSettings.getDescription()));
         while (enabled) {
             try {
                 long startTime = new Date().getTime();
 
                 new WorkerThread(runner).run();
-                //threadPool.start(runner);
+                // threadPool.start(runner);
 
                 // Ожидаем окончания периода синхронизации
-                long sleepTime = startTime + taskSettings.getSuccessInterval() - new Date().getTime();
+                long sleepTime = startTime + taskSettings.getSuccessInterval()
+                        - new Date().getTime();
 
                 if (sleepTime > 0) {
-                    LOG.info(String.format("Ожидаем %d милисекунд после завершения задачи [%d] %s",
-                            sleepTime, taskSettings.getTaskId(), taskSettings.getDescription()));
+                    LOG.info(String
+                            .format("Ожидаем %d милисекунд после завершения задачи [%d] %s",
+                                    sleepTime, taskSettings.getTaskId(),
+                                    taskSettings.getDescription()));
                     Thread.sleep(sleepTime);
                 }
             } catch (Exception e) {
-                LOG.error(String.format("Ошибка при выполнении задачи [%d] %s", 
-                        taskSettings.getTaskId(), taskSettings.getDescription()), e);
+                LOG.error(
+                        String.format("Ошибка при выполнении задачи [%d] %s",
+                                taskSettings.getTaskId(),
+                                taskSettings.getDescription()), e);
 
-                LOG.info(String.format("Ожидаем %d милисекунд до рестарта задачи [%d] %s", 
-                        taskSettings.getFailInterval(), taskSettings.getTaskId(), taskSettings.getDescription()));
+                LOG.info(String.format(
+                        "Ожидаем %d милисекунд до рестарта задачи [%d] %s",
+                        taskSettings.getFailInterval(),
+                        taskSettings.getTaskId(), taskSettings.getDescription()));
                 try {
                     Thread.sleep(taskSettings.getFailInterval());
                 } catch (InterruptedException ex) {

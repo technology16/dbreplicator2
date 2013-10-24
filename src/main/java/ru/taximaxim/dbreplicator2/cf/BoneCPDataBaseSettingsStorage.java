@@ -32,36 +32,36 @@ import java.util.Map;
  */
 public interface BoneCPDataBaseSettingsStorage {
 
-	/**
-	 * Получение объекта настроек по имени
-	 * 
-	 * @param poolName
-	 *            - имя пула
-	 * @return - объект настроек
-	 */
-	BoneCPSettings getDataBaseSettingsByName(String poolName);
+    /**
+     * Получение объекта настроек по имени
+     * 
+     * @param poolName
+     *            - имя пула
+     * @return - объект настроек
+     */
+    BoneCPSettings getDataBaseSettingsByName(String poolName);
 
-	/**
-	 * Получение всех настроек из хранилища
-	 * 
-	 * @return мап именованных настроек
-	 */
-	Map<String, BoneCPSettings> getDataBaseSettings();
+    /**
+     * Получение всех настроек из хранилища
+     * 
+     * @return мап именованных настроек
+     */
+    Map<String, BoneCPSettings> getDataBaseSettings();
 
-	/**
-	 * Сохранение настроек в хранилище
-	 * 
-	 * @param dataBaseSettings
-	 *            - объект настроек
-	 */
-	void setDataBaseSettings(BoneCPSettings dataBaseSettings);
+    /**
+     * Сохранение настроек в хранилище
+     * 
+     * @param dataBaseSettings
+     *            - объект настроек
+     */
+    void setDataBaseSettings(BoneCPSettings dataBaseSettings);
 
-	/**
-	 * Удаление настроек из хранилища
-	 * 
-	 * @param dateBaseSettings
-	 *            - объект настроек
-	 */
-	void delDataBaseSettings(BoneCPSettings dateBaseSettings);
+    /**
+     * Удаление настроек из хранилища
+     * 
+     * @param dateBaseSettings
+     *            - объект настроек
+     */
+    void delDataBaseSettings(BoneCPSettings dateBaseSettings);
 
 }

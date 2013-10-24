@@ -33,79 +33,79 @@ package ru.taximaxim.dbreplicator2.cf;
  */
 public interface DataBaseSettings {
 
-	/**
-	 * Получение имени пула
-	 * 
-	 * @return - имя пула
-	 */
-	String getPoolId();
+    /**
+     * Получение имени пула
+     * 
+     * @return - имя пула
+     */
+    String getPoolId();
 
-	/**
-	 * Установка имени пула
-	 * 
-	 * @param poolId
-	 *            - имя пула
-	 */
-	void setPoolId(String poolId);
+    /**
+     * Установка имени пула
+     * 
+     * @param poolId
+     *            - имя пула
+     */
+    void setPoolId(String poolId);
 
-	/**
-	 * Получение имени драйвера БД
-	 * 
-	 * @return - имя драйвера БД
-	 */
-	String getDriver();
+    /**
+     * Получение имени драйвера БД
+     * 
+     * @return - имя драйвера БД
+     */
+    String getDriver();
 
-	/**
-	 * Установка имени драйвра БД
-	 * 
-	 * @param driver
-	 *            - имя драйвера БД
-	 */
-	void setDriver(String driver);
+    /**
+     * Установка имени драйвра БД
+     * 
+     * @param driver
+     *            - имя драйвера БД
+     */
+    void setDriver(String driver);
 
-	/**
-	 * Получение строки подключения к БД
-	 * 
-	 * @return - строка подключения к БД
-	 */
-	String getUrl();
+    /**
+     * Получение строки подключения к БД
+     * 
+     * @return - строка подключения к БД
+     */
+    String getUrl();
 
-	/**
-	 * Установка строки подключения к БД
-	 * 
-	 * @param url
-	 *            - строка подключения к БД
-	 */
-	void setUrl(String url);
+    /**
+     * Установка строки подключения к БД
+     * 
+     * @param url
+     *            - строка подключения к БД
+     */
+    void setUrl(String url);
 
-	/**
-	 * Получение имени пользователя
-	 * 
-	 * @return - имя пользователя
-	 */
-	String getUser();
+    /**
+     * Получение имени пользователя
+     * 
+     * @return - имя пользователя
+     */
+    String getUser();
 
-	/**
-	 * Установка имени пользователя
-	 * 
-	 * @param user
-	 *            - имя пользователя
-	 */
-	void setUser(String user);
+    /**
+     * Установка имени пользователя
+     * 
+     * @param user
+     *            - имя пользователя
+     */
+    void setUser(String user);
 
-	/**
-	 * Получение пароля
-	 * 
-	 * @return - пароль
-	 */
-	String getPass();
+    /**
+     * Получение пароля
+     * 
+     * @return - пароль
+     */
+    String getPass();
 
-	/**
-	 * Установка пароля
-	 * 
-	 * @param pass
-	 *            - пароль
-	 */
-	void setPass(String pass);
+    /**
+     * Установка пароля
+     * 
+     * @param pass
+     *            - пароль
+     */
+    void setPass(String pass);
 
 }

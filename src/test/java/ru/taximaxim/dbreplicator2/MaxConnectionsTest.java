@@ -38,18 +38,19 @@ import ru.taximaxim.dbreplicator2.cf.BoneCPDataBaseSettingsStorage;
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsImpl;
+
 /**
  * Класс для тестирования пулов соединений
  * 
  * @author volodin_aa
- *
+ * 
  */
 @Ignore
 public class MaxConnectionsTest extends TestCase {
-  
+
     private SessionFactory sessionFactory;
     private Server server;
-    
+
     // Хранилище настроек
     protected BoneCPDataBaseSettingsStorage settingStorage;
 
@@ -58,62 +59,50 @@ public class MaxConnectionsTest extends TestCase {
         // Инициализируем БД настроек
         server = Server.createTcpServer(
                 new String[] { "-tcpPort", "8084", "-tcpAllowOthers" }).start();
-        
+
         // Инициализируем Hibernate
-        sessionFactory = new Configuration()
-            .configure()
-            .buildSessionFactory();
+        sessionFactory = new Configuration().configure().buildSessionFactory();
 
         // Инициализируем хранилище настроек пулов соединений
         settingStorage = new BoneCPSettingsService(sessionFactory);
-        
-        settingStorage.setDataBaseSettings( new BoneCPSettingsImpl("1", 
-                "org.postgresql.Driver", 
-                "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", 
-                "ags", 
-                ""));
-        
-        settingStorage.setDataBaseSettings( new BoneCPSettingsImpl("2", 
-                "org.postgresql.Driver", 
-                "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", 
-                "ags", 
-                ""));
-        
-        settingStorage.setDataBaseSettings( new BoneCPSettingsImpl("3", 
-                "org.postgresql.Driver", 
-                "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", 
-                "ags", 
-                ""));
-        
-        settingStorage.setDataBaseSettings( new BoneCPSettingsImpl("4", 
-                "org.postgresql.Driver", 
-                "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", 
-                "ags", 
-                "",
-                1,
-                3,
-                1,
-                10000, 
-                0));
+
+        settingStorage.setDataBaseSettings(new BoneCPSettingsImpl("1",
+                "org.postgresql.Driver",
+                "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", "ags", ""));
+
+        settingStorage.setDataBaseSettings(new BoneCPSettingsImpl("2",
+                "org.postgresql.Driver",
+                "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", "ags", ""));
+
+        settingStorage.setDataBaseSettings(new BoneCPSettingsImpl("3",
+                "org.postgresql.Driver",
+                "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", "ags", ""));
+
+        settingStorage.setDataBaseSettings(new BoneCPSettingsImpl("4",
+                "org.postgresql.Driver",
+                "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", "ags", "",
+                1, 3, 1, 10000, 0));
     }
 
     @Override
     protected void tearDown() throws Exception {
-        if ( sessionFactory != null ) {
+        if (sessionFactory != null) {
             sessionFactory.close();
         }
-        
+
         server.shutdown();
     }
 
-    /** 
+    /**
      * Тест таймаута при привышении максимального количества открытых соединений
      * 
      * @throws ClassNotFoundException
      * @throws SQLException
      */
-    public void testMaxConnections() throws ClassNotFoundException, SQLException {
-        ConnectionFactory connectionsFactory = new BoneCPConnectionsFactory(settingStorage);
+    public void testMaxConnections() throws ClassNotFoundException,
+            SQLException {
+        ConnectionFactory connectionsFactory = new BoneCPConnectionsFactory(
+                settingStorage);
         try {
             Connection connection1 = connectionsFactory.getConnection("1");
             connection1.setAutoCommit(false);
@@ -142,7 +131,7 @@ public class MaxConnectionsTest extends TestCase {
             Connection connection44 = connectionsFactory.getConnection("4");
             connection44.setAutoCommit(false);
             connection44.commit();
-            
+
             connection1.close();
             connection2.close();
             connection3.close();
@@ -150,9 +139,9 @@ public class MaxConnectionsTest extends TestCase {
             connection42.close();
             connection43.close();
             connection44.close();
-        } catch(SQLException e){
+        } catch (SQLException e) {
             // Поглощаем только ошибку таймаута
-            if (!e.getSQLState().equals("08001")){
+            if (!e.getSQLState().equals("08001")) {
                 throw e;
             }
         } finally {
@@ -160,5 +149,5 @@ public class MaxConnectionsTest extends TestCase {
         }
 
     }
-    
+
 }

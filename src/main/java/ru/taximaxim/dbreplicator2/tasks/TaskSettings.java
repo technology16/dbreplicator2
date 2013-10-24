@@ -24,103 +24,103 @@ package ru.taximaxim.dbreplicator2.tasks;
 
 public interface TaskSettings {
 
-	/**
-	 * Получение идентификатора задачи
-	 * 
-	 * @return
-	 */
-	int getTaskId();
+    /**
+     * Получение идентификатора задачи
+     * 
+     * @return
+     */
+    int getTaskId();
 
-	/**
-	 * Установка идентификатора задачи
-	 * 
-	 * @param taskId
-	 */
-	void setTaskId(int taskId);
+    /**
+     * Установка идентификатора задачи
+     * 
+     * @param taskId
+     */
+    void setTaskId(int taskId);
 
-	/**
-	 * Получение идентификатора запускаемой реплики
-	 * 
-	 * @return
-	 */
-	int getReplicaId();
+    /**
+     * Получение идентификатора запускаемой реплики
+     * 
+     * @return
+     */
+    int getReplicaId();
 
-	/**
-	 * Установка идентификатора запускаемой реплики
-	 * 
-	 * @param replicaId
-	 */
-	void setReplicaId(int replicaId);
+    /**
+     * Установка идентификатора запускаемой реплики
+     * 
+     * @param replicaId
+     */
+    void setReplicaId(int replicaId);
 
-	/**
-	 * Получение приоритета задачи, задачи выполняются в порядке возрастания
-	 * приоритета
-	 * 
-	 * @return
-	 */
-	int getPriority();
+    /**
+     * Получение приоритета задачи, задачи выполняются в порядке возрастания
+     * приоритета
+     * 
+     * @return
+     */
+    int getPriority();
 
-	/**
-	 * Установка приоритетазадачи
-	 * 
-	 * @param priority
-	 */
-	void setPriority(int priority);
+    /**
+     * Установка приоритетазадачи
+     * 
+     * @param priority
+     */
+    void setPriority(int priority);
 
-	/**
-	 * Получение флага доступности задачи
-	 * 
-	 * @return
-	 */
-	boolean getEnabled();
+    /**
+     * Получение флага доступности задачи
+     * 
+     * @return
+     */
+    boolean getEnabled();
 
-	/**
-	 * Установка флага доступности
-	 * 
-	 * @param enabled
-	 */
-	void setEnabled(boolean enabled);
+    /**
+     * Установка флага доступности
+     * 
+     * @param enabled
+     */
+    void setEnabled(boolean enabled);
 
-	/**
-	 * Получение интервала ожидания после корректного завершения задачи, мс
-	 * 
-	 * @return
-	 */
-	int getSuccessInterval();
+    /**
+     * Получение интервала ожидания после корректного завершения задачи, мс
+     * 
+     * @return
+     */
+    int getSuccessInterval();
 
-	/**
-	 * Установка интервала ожидания после корректного завершения задачи, мс
-	 * 
-	 * @param successInterval
-	 */
-	void setSuccessInterval(int successInterval);
+    /**
+     * Установка интервала ожидания после корректного завершения задачи, мс
+     * 
+     * @param successInterval
+     */
+    void setSuccessInterval(int successInterval);
 
-	/**
-	 * Получение интервала ожидания после ошибочного завершения задачи, мс
-	 * 
-	 * @return
-	 */
-	int getFailInterval();
+    /**
+     * Получение интервала ожидания после ошибочного завершения задачи, мс
+     * 
+     * @return
+     */
+    int getFailInterval();
 
-	/**
-	 * Установка интервала ожидания после ошибочного завершения задачи, мс
-	 * 
-	 * @param failInterval
-	 */
-	void setFailInterval(int failInterval);
+    /**
+     * Установка интервала ожидания после ошибочного завершения задачи, мс
+     * 
+     * @param failInterval
+     */
+    void setFailInterval(int failInterval);
 
-	/**
-	 * Получение интервала ожидания после ошибочного завершения задачи, мс
-	 * 
-	 * @return
-	 */
-	String getDescription();
+    /**
+     * Получение интервала ожидания после ошибочного завершения задачи, мс
+     * 
+     * @return
+     */
+    String getDescription();
 
-	/**
-	 * Установка интервала ожидания после ошибочного завершения задачи, мс
-	 * 
-	 * @param failInterval
-	 */
-	void setDescription(String description);
+    /**
+     * Установка интервала ожидания после ошибочного завершения задачи, мс
+     * 
+     * @param failInterval
+     */
+    void setDescription(String description);
 
 }

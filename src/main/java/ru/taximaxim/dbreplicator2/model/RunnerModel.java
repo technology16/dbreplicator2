@@ -38,112 +38,112 @@ import org.hibernate.annotations.Where;
 import ru.taximaxim.dbreplicator2.replica.Runner;
 
 @Entity
-@Table( name = "runners" )
+@Table(name = "runners")
 public class RunnerModel implements Runner {
 
-	/**
-	 * Идентификатор выполняемого потока
-	 */
-	@Id
-	@GeneratedValue(strategy=GenerationType.SEQUENCE)
-	private Integer id;
+    /**
+     * Идентификатор выполняемого потока
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    private Integer id;
 
-	/**
-	 * Именованный пул-источник
-	 */
-	private String source;
-	
-	/**
-	 * Именованный целевой пул
-	 */
-	private String target;
-	
-	/**
-	 * Описание потока исполнителя
-	 */
-	private String description;
-	
-	/**
-	 * Список стратегий, которые необхоимо выполнить потоку
-	 */
-	@OneToMany(mappedBy="runner")
-	@Where(clause="isEnabled=true")
-	@OrderBy("priority ASC")
-	private List<StrategyModel> strategyModels;
+    /**
+     * Именованный пул-источник
+     */
+    private String source;
 
-	/**
-	 * Добавляет стратегию к runner'y
-	 * 
-	 * @param strategy
-	 * @return
-	 */
-	public List<StrategyModel> addStrategy(StrategyModel strategy) {
-		
-		List<StrategyModel> strategies = getStrategyModels();
-		strategies.add(strategy);
-		strategy.setRunner(this);
-		
-		return strategies;
-	}
-	
-	/**
-	 * @see RunnerModel#source
-	 */
-	@Override
-	public String getSource() {
-		return source;
-	}
+    /**
+     * Именованный целевой пул
+     */
+    private String target;
 
-	/**
-	 * @see RunnerModel#target
-	 */
-	@Override
-	public String getTarget() {
-		return target;
-	}
+    /**
+     * Описание потока исполнителя
+     */
+    private String description;
 
-	/**
-	 * @see RunnerModel#id
-	 */
-	@Override
-	public Integer getId() {
-		return id;
-	}
+    /**
+     * Список стратегий, которые необхоимо выполнить потоку
+     */
+    @OneToMany(mappedBy = "runner")
+    @Where(clause = "isEnabled=true")
+    @OrderBy("priority ASC")
+    private List<StrategyModel> strategyModels;
 
-	/**
-	 * @see RunnerModel#description
-	 */
-	@Override
-	public String getDescription() {
-		return description;
-	}
+    /**
+     * Добавляет стратегию к runner'y
+     * 
+     * @param strategy
+     * @return
+     */
+    public List<StrategyModel> addStrategy(StrategyModel strategy) {
 
-	public List<StrategyModel> getStrategyModels() {
-		
-		if (strategyModels == null) {
-			strategyModels = new ArrayList<StrategyModel>();
-		}
-		
-		return strategyModels;
-	}
+        List<StrategyModel> strategies = getStrategyModels();
+        strategies.add(strategy);
+        strategy.setRunner(this);
 
-	public void setStrategyModels(List<StrategyModel> strategyModels) {
-		this.strategyModels = strategyModels;
-	}
+        return strategies;
+    }
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    /**
+     * @see RunnerModel#source
+     */
+    @Override
+    public String getSource() {
+        return source;
+    }
 
-	public void setSource(String source) {
-		this.source = source;
-	}
+    /**
+     * @see RunnerModel#target
+     */
+    @Override
+    public String getTarget() {
+        return target;
+    }
 
-	public void setTarget(String target) {
-		this.target = target;
-	}
+    /**
+     * @see RunnerModel#id
+     */
+    @Override
+    public Integer getId() {
+        return id;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    /**
+     * @see RunnerModel#description
+     */
+    @Override
+    public String getDescription() {
+        return description;
+    }
+
+    public List<StrategyModel> getStrategyModels() {
+
+        if (strategyModels == null) {
+            strategyModels = new ArrayList<StrategyModel>();
+        }
+
+        return strategyModels;
+    }
+
+    public void setStrategyModels(List<StrategyModel> strategyModels) {
+        this.strategyModels = strategyModels;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
+
+    public void setTarget(String target) {
+        this.target = target;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 }

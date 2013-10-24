@@ -38,19 +38,20 @@ import ru.taximaxim.dbreplicator2.cf.BoneCPSettings;
  * Хранилище настроек именнованных соединений к BoneCP на основе Hibernate
  * 
  * @author volodin_aa
- *
+ * 
  */
 public class BoneCPSettingsService implements BoneCPDataBaseSettingsStorage {
-    
+
     /**
      * Хранилище настроек
      */
     protected SessionFactory sessionFactory;
-    
+
     /**
      * Конструктор хранилища настроек в Hibernate
      * 
-     * @param sessionFactory - фабрика сессий Hibernate
+     * @param sessionFactory
+     *            - фабрика сессий Hibernate
      */
     public BoneCPSettingsService(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
@@ -60,7 +61,8 @@ public class BoneCPSettingsService implements BoneCPDataBaseSettingsStorage {
     public BoneCPSettings getDataBaseSettingsByName(String poolName) {
         Session session = sessionFactory.openSession();
         try {
-            return (BoneCPSettings) session.get(BoneCPSettingsImpl.class, poolName);
+            return (BoneCPSettings) session.get(BoneCPSettingsImpl.class,
+                    poolName);
         } finally {
             session.close();
         }
@@ -69,17 +71,18 @@ public class BoneCPSettingsService implements BoneCPDataBaseSettingsStorage {
     @Override
     public Map<String, BoneCPSettings> getDataBaseSettings() {
         Map<String, BoneCPSettings> result = new HashMap<String, BoneCPSettings>();
-        
+
         Session session = sessionFactory.openSession();
         try {
-            List<BoneCPSettings> settingsList = session.createCriteria(BoneCPSettingsImpl.class).list();
-            for (BoneCPSettings settings: settingsList){
+            List<BoneCPSettings> settingsList = session.createCriteria(
+                    BoneCPSettingsImpl.class).list();
+            for (BoneCPSettings settings : settingsList) {
                 result.put(settings.getPoolId(), settings);
             }
         } finally {
             session.close();
         }
-        
+
         return result;
     }
 

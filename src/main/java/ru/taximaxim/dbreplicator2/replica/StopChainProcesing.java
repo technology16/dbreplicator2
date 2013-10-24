@@ -24,13 +24,13 @@
 package ru.taximaxim.dbreplicator2.replica;
 
 /**
- * Исключение сигнализирующее о том, что необходимо прекратить дальнейшую 
+ * Исключение сигнализирующее о том, что необходимо прекратить дальнейшую
  * обработку стратегий.
  * 
  * @author ags
  */
 public class StopChainProcesing extends StrategyException {
 
-	private static final long serialVersionUID = -2920987366558992293L;
+    private static final long serialVersionUID = -2920987366558992293L;
 
 }

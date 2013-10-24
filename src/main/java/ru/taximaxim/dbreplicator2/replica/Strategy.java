@@ -34,20 +34,20 @@ import ru.taximaxim.dbreplicator2.model.StrategyModel;
  */
 public interface Strategy {
 
-	/**
-	 * Отрабатывает стратегию кода.
-	 * 
-	 * @param sourceConnection
-	 *            Источник БД
-	 * @param targetConnection
-	 *            Целевая БД
-	 * @param data
-	 *            Модель данных описывающая стратегию.
-	 * 
-	 *            TODO: Может быть передавать не StrategyModel как избыточную, а
-	 *            лишь data?
-	 */
-	void execute(Connection sourceConnection, Connection targetConnection,
-			StrategyModel data) throws StrategyException;
+    /**
+     * Отрабатывает стратегию кода.
+     * 
+     * @param sourceConnection
+     *            Источник БД
+     * @param targetConnection
+     *            Целевая БД
+     * @param data
+     *            Модель данных описывающая стратегию.
+     * 
+     *            TODO: Может быть передавать не StrategyModel как избыточную, а
+     *            лишь data?
+     */
+    void execute(Connection sourceConnection, Connection targetConnection,
+            StrategyModel data) throws StrategyException;
 
 }

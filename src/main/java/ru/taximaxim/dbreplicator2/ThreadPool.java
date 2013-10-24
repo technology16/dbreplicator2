@@ -19,7 +19,7 @@
  * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */ 
+ */
 
 package ru.taximaxim.dbreplicator2;
 
@@ -32,47 +32,46 @@ import ru.taximaxim.dbreplicator2.model.RunnerModel;
 
 public class ThreadPool {
 
-	public static final Logger LOG = Logger.getLogger(ThreadPool.class);
-	
-	public ExecutorService executor = null;
-	
-	public ThreadPool(int count) {
-		restart(count);
-	}
-	
-	/**
-	 * Ожидание остановки выполнения всех потоков и завершение работы.
-	 */
-	public void shutdown() {
-		
-		if (executor != null) {
-			executor.shutdown();
-        
-			while (!executor.isTerminated()) {
-				// wait wile all tasks have completed following shut down 
-			};
+    public static final Logger LOG = Logger.getLogger(ThreadPool.class);
 
-			LOG.info("ThreadPool.shutdown()");
-		}
-	}
-	
-	/**
-	 * Ожидание завершения всех потоков и инициализация нового пула
-	 * с новым значением.
-	 */
-	public void restart(int count) {
-		shutdown();
-		executor = Executors.newFixedThreadPool(count);
-		
-		LOG.info(String.format("ThreadPool.restart(%s)", count));
-	}
-	
-	
-	/**
-	 * Запуск потока RunnerModel. Поток будет поставлен в очередь на выполнение.
-	 */
-	public void start(RunnerModel runner) {
-		Runnable worker = new WorkerThread(runner);
-		executor.execute(worker);	
+    public ExecutorService executor = null;
+
+    public ThreadPool(int count) {
+        restart(count);
+    }
+
+    /**
+     * Ожидание остановки выполнения всех потоков и завершение работы.
+     */
+    public void shutdown() {
+
+        if (executor != null) {
+            executor.shutdown();
+
+            while (!executor.isTerminated()) {
+                // wait wile all tasks have completed following shut down
+            }
+
+            LOG.info("ThreadPool.shutdown()");
+        }
+    }
+
+    /**
+     * Ожидание завершения всех потоков и инициализация нового пула с новым
+     * значением.
+     */
+    public void restart(int count) {
+        shutdown();
+        executor = Executors.newFixedThreadPool(count);
+
+        LOG.info(String.format("ThreadPool.restart(%s)", count));
+    }
+
+    /**
+     * Запуск потока RunnerModel. Поток будет поставлен в очередь на выполнение.
+     */
+    public void start(RunnerModel runner) {
+        Runnable worker = new WorkerThread(runner);
+        executor.execute(worker);
     }
 }

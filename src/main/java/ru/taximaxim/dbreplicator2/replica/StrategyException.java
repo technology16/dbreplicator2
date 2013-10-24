@@ -25,6 +25,6 @@ package ru.taximaxim.dbreplicator2.replica;
 
 public class StrategyException extends Exception {
 
-	private static final long serialVersionUID = -4533351861802219308L;
+    private static final long serialVersionUID = -4533351861802219308L;
 
 }

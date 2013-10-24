@@ -37,34 +37,34 @@ import java.sql.SQLException;
  */
 public interface ConnectionFactory {
 
-	/**
-	 * Получение соединения из именованного пула соединений
-	 * 
-	 * @param poolName
-	 *            - имя пула соединений
-	 * @return
-	 * @throws SQLException
-	 * @throws ClassNotFoundException
-	 */
-	Connection getConnection(String poolName) throws SQLException,
-			ClassNotFoundException;
+    /**
+     * Получение соединения из именованного пула соединений
+     * 
+     * @param poolName
+     *            - имя пула соединений
+     * @return
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     */
+    Connection getConnection(String poolName) throws SQLException,
+            ClassNotFoundException;
 
-	/**
-	 * Закрытие именованного пула соединений
-	 * 
-	 * @param poolName
-	 *            - имя пула соединений
-	 * @return
-	 */
-	void close(String PoolName);
+    /**
+     * Закрытие именованного пула соединений
+     * 
+     * @param poolName
+     *            - имя пула соединений
+     * @return
+     */
+    void close(String PoolName);
 
-	/**
-	 * Закрытие всех пулов соединений
-	 * 
-	 * @param poolName
-	 *            - имя пула соединений
-	 * @return
-	 */
-	void close();
+    /**
+     * Закрытие всех пулов соединений
+     * 
+     * @param poolName
+     *            - имя пула соединений
+     * @return
+     */
+    void close();
 
 }

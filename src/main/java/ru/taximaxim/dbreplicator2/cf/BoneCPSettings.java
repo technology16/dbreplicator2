@@ -33,79 +33,79 @@ package ru.taximaxim.dbreplicator2.cf;
  */
 public interface BoneCPSettings extends DataBaseSettings {
 
-	/**
-	 * Получение минимального количества соединений в пуле
-	 * 
-	 * @return - количество соединений
-	 */
-	int getMinConnectionsPerPartition();
+    /**
+     * Получение минимального количества соединений в пуле
+     * 
+     * @return - количество соединений
+     */
+    int getMinConnectionsPerPartition();
 
-	/**
-	 * Установка минимального количества соединений в пуле
-	 * 
-	 * @param minConnectionsPerPartition
-	 *            - количество соединений
-	 */
-	void setMinConnectionsPerPartition(int minConnectionsPerPartition);
+    /**
+     * Установка минимального количества соединений в пуле
+     * 
+     * @param minConnectionsPerPartition
+     *            - количество соединений
+     */
+    void setMinConnectionsPerPartition(int minConnectionsPerPartition);
 
-	/**
-	 * Получение максимального количества соединений в пуле
-	 * 
-	 * @return - количество соединений
-	 */
-	int getMaxConnectionsPerPartition();
+    /**
+     * Получение максимального количества соединений в пуле
+     * 
+     * @return - количество соединений
+     */
+    int getMaxConnectionsPerPartition();
 
-	/**
-	 * Установка максимального количества соединений в пуле
-	 * 
-	 * @param maxConnectionsPerPartition
-	 *            - количество соединений
-	 */
-	void setMaxConnectionsPerPartition(int maxConnectionsPerPartition);
+    /**
+     * Установка максимального количества соединений в пуле
+     * 
+     * @param maxConnectionsPerPartition
+     *            - количество соединений
+     */
+    void setMaxConnectionsPerPartition(int maxConnectionsPerPartition);
 
-	/**
-	 * Получение количесва порций соединений в пуле
-	 * 
-	 * @return - количество порций
-	 */
-	int getPartitionCount();
+    /**
+     * Получение количесва порций соединений в пуле
+     * 
+     * @return - количество порций
+     */
+    int getPartitionCount();
 
-	/**
-	 * Установка количесва порций соединений в пуле
-	 * 
-	 * @param partitionCount
-	 *            - количество порций
-	 */
-	void setPartitionCount(int partitionCount);
+    /**
+     * Установка количесва порций соединений в пуле
+     * 
+     * @param partitionCount
+     *            - количество порций
+     */
+    void setPartitionCount(int partitionCount);
 
-	/**
-	 * Установка таймаута на ожидание получения соединения из пула
-	 * 
-	 * @return - таймаут, мс
-	 */
-	long getConnectionTimeoutInMs();
+    /**
+     * Установка таймаута на ожидание получения соединения из пула
+     * 
+     * @return - таймаут, мс
+     */
+    long getConnectionTimeoutInMs();
 
-	/**
-	 * Получение таймаута на ожидание получения соединения из пула
-	 * 
-	 * @param connectionTimeoutInMs
-	 *            - таймаут, мс
-	 */
-	void setConnectionTimeoutInMs(long connectionTimeoutInMs);
+    /**
+     * Получение таймаута на ожидание получения соединения из пула
+     * 
+     * @param connectionTimeoutInMs
+     *            - таймаут, мс
+     */
+    void setConnectionTimeoutInMs(long connectionTimeoutInMs);
 
-	/**
-	 * Установка таймаута на ожидание закрытия соединения
-	 * 
-	 * @return - таймаут, мс
-	 */
-	long getCloseConnectionWatchTimeoutInMs();
+    /**
+     * Установка таймаута на ожидание закрытия соединения
+     * 
+     * @return - таймаут, мс
+     */
+    long getCloseConnectionWatchTimeoutInMs();
 
-	/**
-	 * Получение таймаута на ожидание закрытия соединения
-	 * 
-	 * @param closeConnectionWatchTimeoutInMs
-	 *            - таймаут, мс
-	 */
-	void setCloseConnectionWatchTimeoutInMs(long closeConnectionWatchTimeoutInMs);
+    /**
+     * Получение таймаута на ожидание закрытия соединения
+     * 
+     * @param closeConnectionWatchTimeoutInMs
+     *            - таймаут, мс
+     */
+    void setCloseConnectionWatchTimeoutInMs(long closeConnectionWatchTimeoutInMs);
 
 }
