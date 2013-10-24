@@ -31,8 +31,6 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
 import ru.taximaxim.dbreplicator2.Utils;
-import ru.taximaxim.dbreplicator2.replica.Runner;
-import ru.taximaxim.dbreplicator2.tasks.TaskSettings;
 
 public class TaskSettingsService {
 

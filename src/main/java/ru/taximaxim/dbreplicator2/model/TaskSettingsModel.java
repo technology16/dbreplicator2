@@ -29,7 +29,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import ru.taximaxim.dbreplicator2.tasks.TaskSettings;
 
 /**
  * Класс инкапсулирующий задачу менеджера записей.

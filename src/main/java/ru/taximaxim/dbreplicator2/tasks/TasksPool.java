@@ -25,6 +25,7 @@ package ru.taximaxim.dbreplicator2.tasks;
 import java.util.HashMap;
 import java.util.Map;
 
+import ru.taximaxim.dbreplicator2.model.TaskSettings;
 import ru.taximaxim.dbreplicator2.model.TaskSettingsService;
 
 /**

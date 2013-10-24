@@ -27,7 +27,6 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import ru.taximaxim.dbreplicator2.cf.BoneCPSettings;
 
 /**
  * Персистентный класс настроек BoneCP

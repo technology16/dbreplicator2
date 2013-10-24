@@ -36,7 +36,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ru.taximaxim.dbreplicator2.cf.BoneCPDataBaseSettingsStorage;
-import ru.taximaxim.dbreplicator2.cf.BoneCPSettings;
+import ru.taximaxim.dbreplicator2.model.BoneCPSettings;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsModel;
 
