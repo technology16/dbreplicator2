@@ -329,29 +329,91 @@ public class BoneCPSettingsModel implements BoneCPSettings {
         this.closeConnectionWatchTimeoutInMs = closeConnectionWatchTimeoutInMs;
     }
 
-    /*
-     * (non-Javadoc)
-     *
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (int) (closeConnectionWatchTimeoutInMs ^ (closeConnectionWatchTimeoutInMs >>> 32));
+        result = prime * result + (int) (connectionTimeoutInMs ^ (connectionTimeoutInMs >>> 32));
+        result = prime * result + ((driver == null) ? 0 : driver.hashCode());
+        result = prime * result + maxConnectionsPerPartition;
+        result = prime * result + minConnectionsPerPartition;
+        result = prime * result + partitionCount;
+        result = prime * result + ((pass == null) ? 0 : pass.hashCode());
+        result = prime * result + ((poolId == null) ? 0 : poolId.hashCode());
+        result = prime * result + ((url == null) ? 0 : url.hashCode());
+        result = prime * result + ((user == null) ? 0 : user.hashCode());
+        return result;
+    }
+
+    /* (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof BoneCPSettings) {
-            return poolId.equals(((BoneCPSettings) obj).getPoolId())
-                    && driver.equals(((BoneCPSettings) obj).getDriver())
-                    && url.equals(((BoneCPSettings) obj).getUrl())
-                    && user.equals(((BoneCPSettings) obj).getUser())
-                    && pass.equals(((BoneCPSettings) obj).getPass())
-                    && this.minConnectionsPerPartition == ((BoneCPSettings) obj)
-                            .getMinConnectionsPerPartition()
-                    && this.maxConnectionsPerPartition == ((BoneCPSettings) obj)
-                            .getMaxConnectionsPerPartition()
-                    && this.partitionCount == ((BoneCPSettings) obj).getPartitionCount()
-                    && this.connectionTimeoutInMs == ((BoneCPSettings) obj)
-                            .getConnectionTimeoutInMs()
-                    && this.closeConnectionWatchTimeoutInMs == ((BoneCPSettings) obj)
-                            .getCloseConnectionWatchTimeoutInMs();
+        if (this == obj) {
+            return true;
         }
-        return false;
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof BoneCPSettingsModel)) {
+            return false;
+        }
+        BoneCPSettingsModel other = (BoneCPSettingsModel) obj;
+        if (closeConnectionWatchTimeoutInMs != other.closeConnectionWatchTimeoutInMs) {
+            return false;
+        }
+        if (connectionTimeoutInMs != other.connectionTimeoutInMs) {
+            return false;
+        }
+        if (driver == null) {
+            if (other.driver != null) {
+                return false;
+            }
+        } else if (!driver.equals(other.driver)) {
+            return false;
+        }
+        if (maxConnectionsPerPartition != other.maxConnectionsPerPartition) {
+            return false;
+        }
+        if (minConnectionsPerPartition != other.minConnectionsPerPartition) {
+            return false;
+        }
+        if (partitionCount != other.partitionCount) {
+            return false;
+        }
+        if (pass == null) {
+            if (other.pass != null) {
+                return false;
+            }
+        } else if (!pass.equals(other.pass)) {
+            return false;
+        }
+        if (poolId == null) {
+            if (other.poolId != null) {
+                return false;
+            }
+        } else if (!poolId.equals(other.poolId)) {
+            return false;
+        }
+        if (url == null) {
+            if (other.url != null) {
+                return false;
+            }
+        } else if (!url.equals(other.url)) {
+            return false;
+        }
+        if (user == null) {
+            if (other.user != null) {
+                return false;
+            }
+        } else if (!user.equals(other.user)) {
+            return false;
+        }
+        return true;
     }
 }
