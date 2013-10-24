@@ -29,97 +29,97 @@ public interface TaskSettings {
      * 
      * @return
      */
-    public int getTaskId();
+    public abstract int getTaskId();
     
     /**
      * Установка идентификатора задачи
      * 
      * @param taskId
      */
-    public void setTaskId(int taskId);
+    public abstract void setTaskId(int taskId);
     
     /**
      * Получение идентификатора запускаемой реплики
      * 
      * @return
      */
-    public int getReplicaId();
+    public abstract int getReplicaId();
     
     /**
      * Установка идентификатора запускаемой реплики
      * 
      * @param replicaId
      */
-    public void setReplicaId(int replicaId);
+    public abstract void setReplicaId(int replicaId);
     
     /**
      * Получение приоритета задачи, задачи выполняются в порядке возрастания приоритета
      * 
      * @return
      */
-    public int getPriority();
+    public abstract int getPriority();
     
     /**
      * Установка приоритетазадачи
      * 
      * @param priority
      */
-    public void setPriority(int priority);
+    public abstract void setPriority(int priority);
     
     /**
      * Получение флага доступности задачи
      * 
      * @return
      */
-    public boolean getEnabled();
+    public abstract boolean getEnabled();
     
     /**
      * Установка флага доступности
      * 
      * @param enabled
      */
-    public void setEnabled(boolean enabled);
+    public abstract void setEnabled(boolean enabled);
     
     /**
      * Получение интервала ожидания после корректного завершения задачи, мс
      * 
      * @return
      */
-    public int getSuccessInterval();
+    public abstract int getSuccessInterval();
     
     /**
      * Установка интервала ожидания после корректного завершения задачи, мс
      * 
      * @param successInterval
      */
-    public void setSuccessInterval(int successInterval);
+    public abstract void setSuccessInterval(int successInterval);
     
     /**
      * Получение интервала ожидания после ошибочного завершения задачи, мс
      * 
      * @return
      */
-    public int getFailInterval();
+    public abstract int getFailInterval();
     
     /**
      * Установка интервала ожидания после ошибочного завершения задачи, мс
      * 
      * @param failInterval
      */
-    public void setFailInterval(int failInterval);
+    public abstract void setFailInterval(int failInterval);
     
     /**
      * Получение интервала ожидания после ошибочного завершения задачи, мс
      * 
      * @return
      */
-    public String getDescription();
+    public abstract String getDescription();
     
     /**
      * Установка интервала ожидания после ошибочного завершения задачи, мс
      * 
      * @param failInterval
      */
-    public void setDescription(String description);
+    public abstract void setDescription(String description);
     
 }
