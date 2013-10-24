@@ -26,37 +26,43 @@ import java.util.List;
 
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 
-
 public interface Runner {
 
 	/**
 	 * Идентификатор пула соединений базы-истончка
+	 * 
 	 * @return Строковый идентификатор пула соединений базы-истончка
 	 */
-	public String getSource();
-	
+	String getSource();
+
 	/**
 	 * Идентификатор пула соединений целевой БД
+	 * 
 	 * @return Строковый идентификатор пула соединений целевой БД
 	 */
-	public String getTarget();
+	String getTarget();
 
 	/**
 	 * Идентификатор потока-реплики
+	 * 
 	 * @return Идентификатор потока-реплики
 	 */
-	public Integer getId();
-	
+	Integer getId();
+
 	/**
 	 * Описание потока реплики
+	 * 
 	 * @return Описание потока реплики
 	 */
-	public String getDescription();
-	
+	String getDescription();
+
 	/**
-	 * Список упорядоченных по приоритету разрешенных стратегий для потока реплики.
-	 * @return Список упорядоченных по приоритету разрешенных стратегий для потока реплики.
+	 * Список упорядоченных по приоритету разрешенных стратегий для потока
+	 * реплики.
+	 * 
+	 * @return Список упорядоченных по приоритету разрешенных стратегий для
+	 *         потока реплики.
 	 */
-	public List<StrategyModel> getStrategyModels();
-	
+	List<StrategyModel> getStrategyModels();
+
 }

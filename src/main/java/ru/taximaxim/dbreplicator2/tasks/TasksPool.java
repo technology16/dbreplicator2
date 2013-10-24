@@ -28,7 +28,6 @@ import java.util.List;
 import org.hibernate.Session;
 
 import ru.taximaxim.dbreplicator2.Application;
-import ru.taximaxim.dbreplicator2.ThreadPool;
 import ru.taximaxim.dbreplicator2.Utils;
 import ru.taximaxim.dbreplicator2.model.TaskSettingsImpl;
 import ru.taximaxim.dbreplicator2.model.TaskSettingsService;

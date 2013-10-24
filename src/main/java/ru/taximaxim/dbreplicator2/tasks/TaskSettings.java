@@ -24,102 +24,103 @@ package ru.taximaxim.dbreplicator2.tasks;
 
 public interface TaskSettings {
 
-    /**
-     * Получение идентификатора задачи
-     * 
-     * @return
-     */
-    public abstract int getTaskId();
-    
-    /**
-     * Установка идентификатора задачи
-     * 
-     * @param taskId
-     */
-    public abstract void setTaskId(int taskId);
-    
-    /**
-     * Получение идентификатора запускаемой реплики
-     * 
-     * @return
-     */
-    public abstract int getReplicaId();
-    
-    /**
-     * Установка идентификатора запускаемой реплики
-     * 
-     * @param replicaId
-     */
-    public abstract void setReplicaId(int replicaId);
-    
-    /**
-     * Получение приоритета задачи, задачи выполняются в порядке возрастания приоритета
-     * 
-     * @return
-     */
-    public abstract int getPriority();
-    
-    /**
-     * Установка приоритетазадачи
-     * 
-     * @param priority
-     */
-    public abstract void setPriority(int priority);
-    
-    /**
-     * Получение флага доступности задачи
-     * 
-     * @return
-     */
-    public abstract boolean getEnabled();
-    
-    /**
-     * Установка флага доступности
-     * 
-     * @param enabled
-     */
-    public abstract void setEnabled(boolean enabled);
-    
-    /**
-     * Получение интервала ожидания после корректного завершения задачи, мс
-     * 
-     * @return
-     */
-    public abstract int getSuccessInterval();
-    
-    /**
-     * Установка интервала ожидания после корректного завершения задачи, мс
-     * 
-     * @param successInterval
-     */
-    public abstract void setSuccessInterval(int successInterval);
-    
-    /**
-     * Получение интервала ожидания после ошибочного завершения задачи, мс
-     * 
-     * @return
-     */
-    public abstract int getFailInterval();
-    
-    /**
-     * Установка интервала ожидания после ошибочного завершения задачи, мс
-     * 
-     * @param failInterval
-     */
-    public abstract void setFailInterval(int failInterval);
-    
-    /**
-     * Получение интервала ожидания после ошибочного завершения задачи, мс
-     * 
-     * @return
-     */
-    public abstract String getDescription();
-    
-    /**
-     * Установка интервала ожидания после ошибочного завершения задачи, мс
-     * 
-     * @param failInterval
-     */
-    public abstract void setDescription(String description);
-    
+	/**
+	 * Получение идентификатора задачи
+	 * 
+	 * @return
+	 */
+	int getTaskId();
+
+	/**
+	 * Установка идентификатора задачи
+	 * 
+	 * @param taskId
+	 */
+	void setTaskId(int taskId);
+
+	/**
+	 * Получение идентификатора запускаемой реплики
+	 * 
+	 * @return
+	 */
+	int getReplicaId();
+
+	/**
+	 * Установка идентификатора запускаемой реплики
+	 * 
+	 * @param replicaId
+	 */
+	void setReplicaId(int replicaId);
+
+	/**
+	 * Получение приоритета задачи, задачи выполняются в порядке возрастания
+	 * приоритета
+	 * 
+	 * @return
+	 */
+	int getPriority();
+
+	/**
+	 * Установка приоритетазадачи
+	 * 
+	 * @param priority
+	 */
+	void setPriority(int priority);
+
+	/**
+	 * Получение флага доступности задачи
+	 * 
+	 * @return
+	 */
+	boolean getEnabled();
+
+	/**
+	 * Установка флага доступности
+	 * 
+	 * @param enabled
+	 */
+	void setEnabled(boolean enabled);
+
+	/**
+	 * Получение интервала ожидания после корректного завершения задачи, мс
+	 * 
+	 * @return
+	 */
+	int getSuccessInterval();
+
+	/**
+	 * Установка интервала ожидания после корректного завершения задачи, мс
+	 * 
+	 * @param successInterval
+	 */
+	void setSuccessInterval(int successInterval);
+
+	/**
+	 * Получение интервала ожидания после ошибочного завершения задачи, мс
+	 * 
+	 * @return
+	 */
+	int getFailInterval();
+
+	/**
+	 * Установка интервала ожидания после ошибочного завершения задачи, мс
+	 * 
+	 * @param failInterval
+	 */
+	void setFailInterval(int failInterval);
+
+	/**
+	 * Получение интервала ожидания после ошибочного завершения задачи, мс
+	 * 
+	 * @return
+	 */
+	String getDescription();
+
+	/**
+	 * Установка интервала ожидания после ошибочного завершения задачи, мс
+	 * 
+	 * @param failInterval
+	 */
+	void setDescription(String description);
+
 }

@@ -26,7 +26,6 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 
-import ru.taximaxim.dbreplicator2.ThreadPool;
 import ru.taximaxim.dbreplicator2.WorkerThread;
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
 
