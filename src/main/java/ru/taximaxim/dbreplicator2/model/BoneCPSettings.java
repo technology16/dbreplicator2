@@ -25,7 +25,6 @@
  */
 package ru.taximaxim.dbreplicator2.model;
 
-import ru.taximaxim.dbreplicator2.cf.DataBaseSettings;
 
 /**
  * Интерфейс к настройкам подключения в BoneCP
