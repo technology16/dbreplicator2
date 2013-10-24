@@ -29,6 +29,9 @@ import java.sql.SQLException;
 import junit.framework.TestCase;
 
 import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.service.ServiceRegistryBuilder;
+
 import ru.taximaxim.dbreplicator2.cf.BoneCPConnectionsFactory;
 import ru.taximaxim.dbreplicator2.cf.BoneCPDataBaseSettingsStorage;
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
@@ -50,27 +53,32 @@ public class MaxConnectionsTest extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
+        Configuration configuration = new Configuration().configure();
+        
         // Инициализируем Hibernate
-        sessionFactory = Application.getSessionFactory();
+        sessionFactory = new Configuration()
+        .configure()
+        .buildSessionFactory(new ServiceRegistryBuilder()
+            .applySettings(configuration.getProperties()).buildServiceRegistry());
 
         // Инициализируем хранилище настроек пулов соединений
         settingStorage = new BoneCPSettingsService(sessionFactory);
 
         settingStorage.setDataBaseSettings(new BoneCPSettingsModel("1",
-                "org.postgresql.Driver",
-                "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", "ags", ""));
+                "org.h2.Driver",
+                "jdbc:h2:mem://localhost/~/test", "sa", ""));
 
         settingStorage.setDataBaseSettings(new BoneCPSettingsModel("2",
-                "org.postgresql.Driver",
-                "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", "ags", ""));
+                "org.h2.Driver",
+                "jdbc:h2:mem://localhost/~/test", "sa", ""));
 
         settingStorage.setDataBaseSettings(new BoneCPSettingsModel("3",
-                "org.postgresql.Driver",
-                "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", "ags", ""));
+                "org.h2.Driver",
+                "jdbc:h2:mem://localhost/~/test", "sa", ""));
 
         settingStorage.setDataBaseSettings(new BoneCPSettingsModel("4",
-                "org.postgresql.Driver",
-                "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", "ags", "",
+                "org.h2.Driver",
+                "jdbc:h2:mem://localhost/~/test", "sa", "",
                 1, 3, 1, 10000, 0));
     }
 
