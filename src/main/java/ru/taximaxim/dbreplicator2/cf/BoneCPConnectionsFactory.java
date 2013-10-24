@@ -48,12 +48,12 @@ public class BoneCPConnectionsFactory implements ConnectionFactory {
     /**
      * Инициализированные именнованные пулы соединений
      */
-    protected Map<String, BoneCP> connectionPools;
+    private Map<String, BoneCP> connectionPools;
 
     /**
      * Хранилище настроек
      */
-    protected BoneCPDataBaseSettingsStorage settingStorage;
+    private BoneCPDataBaseSettingsStorage settingStorage;
 
     /**
      * Конструктор фабрики

@@ -44,7 +44,7 @@ public class BoneCPSettingsService implements BoneCPDataBaseSettingsStorage {
     /**
      * Хранилище настроек
      */
-    protected SessionFactory sessionFactory;
+    private SessionFactory sessionFactory;
 
     /**
      * Конструктор хранилища настроек в Hibernate
