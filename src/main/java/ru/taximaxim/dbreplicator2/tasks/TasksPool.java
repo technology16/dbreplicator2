@@ -47,10 +47,10 @@ public class TasksPool {
     public void start() {
         Map<Integer, TaskSettings> taskSettings = taskSettingsService.getTasks();
 
-    	for (Integer taskId: taskSettings.keySet()) {
-    		TaskRunner taskRunner = new TaskRunner(taskSettings.get(taskId));
+    	for (TaskSettings task: taskSettings.values()) {
+    		TaskRunner taskRunner = new TaskRunner(task);
     		Thread thread = new Thread(taskRunner);
-            thread.run();
+            thread.start();
     		taskThreads.put(taskRunner, thread);
 		}
     }

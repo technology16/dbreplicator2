@@ -22,7 +22,7 @@
  */
 package ru.taximaxim.dbreplicator2.tasks;
 
-import ru.taximaxim.dbreplicator2.replica.Runner;
+import ru.taximaxim.dbreplicator2.model.RunnerModel;
 
 public interface TaskSettings {
 
@@ -39,20 +39,6 @@ public interface TaskSettings {
      * @param taskId
      */
     void setTaskId(int taskId);
-
-    /**
-     * Получение идентификатора запускаемой реплики
-     *
-     * @return
-     */
-    public int getRunnerId();
-
-    /**
-     * Установка идентификатора запускаемой реплики
-     *
-     * @param runnerId
-     */
-    public void setRunnerId(int runnerId);
 
     /**
      * Получение флага доступности задачи
@@ -115,12 +101,12 @@ public interface TaskSettings {
      *
      * @return
      */
-    public Runner getRunner();
+    public RunnerModel getRunner();
 
     /**
      * Установка инициализированного экземпляра обработчика реплики
      *
      * @param runner
      */
-    public void setRunner(Runner runner);
+    public void setRunner(RunnerModel runner);
 }

@@ -28,14 +28,11 @@ import java.sql.SQLException;
 
 import junit.framework.TestCase;
 
-import org.h2.tools.Server;
 import org.hibernate.SessionFactory;
-import org.junit.Ignore;
-
 import ru.taximaxim.dbreplicator2.cf.BoneCPConnectionsFactory;
 import ru.taximaxim.dbreplicator2.cf.BoneCPDataBaseSettingsStorage;
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
-import ru.taximaxim.dbreplicator2.model.BoneCPSettingsImpl;
+import ru.taximaxim.dbreplicator2.model.BoneCPSettingsModel;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
 
 /**
@@ -44,40 +41,34 @@ import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
  * @author volodin_aa
  *
  */
-@Ignore
 public class MaxConnectionsTest extends TestCase {
 
     private SessionFactory sessionFactory;
-    private Server server;
-
+    
     // Хранилище настроек
     protected BoneCPDataBaseSettingsStorage settingStorage;
 
     @Override
     protected void setUp() throws Exception {
-        // Инициализируем БД настроек
-        server = Server.createTcpServer(
-                new String[] { "-tcpPort", "8084", "-tcpAllowOthers" }).start();
-
         // Инициализируем Hibernate
         sessionFactory = Application.getSessionFactory();
 
         // Инициализируем хранилище настроек пулов соединений
         settingStorage = new BoneCPSettingsService(sessionFactory);
 
-        settingStorage.setDataBaseSettings(new BoneCPSettingsImpl("1",
+        settingStorage.setDataBaseSettings(new BoneCPSettingsModel("1",
                 "org.postgresql.Driver",
                 "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", "ags", ""));
 
-        settingStorage.setDataBaseSettings(new BoneCPSettingsImpl("2",
+        settingStorage.setDataBaseSettings(new BoneCPSettingsModel("2",
                 "org.postgresql.Driver",
                 "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", "ags", ""));
 
-        settingStorage.setDataBaseSettings(new BoneCPSettingsImpl("3",
+        settingStorage.setDataBaseSettings(new BoneCPSettingsModel("3",
                 "org.postgresql.Driver",
                 "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", "ags", ""));
 
-        settingStorage.setDataBaseSettings(new BoneCPSettingsImpl("4",
+        settingStorage.setDataBaseSettings(new BoneCPSettingsModel("4",
                 "org.postgresql.Driver",
                 "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", "ags", "",
                 1, 3, 1, 10000, 0));
@@ -88,8 +79,6 @@ public class MaxConnectionsTest extends TestCase {
         if (sessionFactory != null) {
             sessionFactory.close();
         }
-
-        server.shutdown();
     }
 
     /**

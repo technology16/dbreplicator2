@@ -38,7 +38,7 @@ import org.junit.Test;
 import ru.taximaxim.dbreplicator2.cf.BoneCPDataBaseSettingsStorage;
 import ru.taximaxim.dbreplicator2.cf.BoneCPSettings;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
-import ru.taximaxim.dbreplicator2.model.BoneCPSettingsImpl;
+import ru.taximaxim.dbreplicator2.model.BoneCPSettingsModel;
 
 /**
  * Класс для тестирования пулов соединений
@@ -93,7 +93,7 @@ public class BoneCPSettingsServiceTest {
                 boneCPSettings);
 
         // Получение существующих
-        BoneCPSettings newBoneCPSettings = new BoneCPSettingsImpl(
+        BoneCPSettings newBoneCPSettings = new BoneCPSettingsModel(
                 "testGetDataBaseSettingsByName", "org.postgresql.Driver",
                 "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", "ags", "");
 
@@ -105,7 +105,7 @@ public class BoneCPSettingsServiceTest {
                 newBoneCPSettings, boneCPSettings);
 
         // Получение существующих
-        newBoneCPSettings = new BoneCPSettingsImpl(
+        newBoneCPSettings = new BoneCPSettingsModel(
                 "testGetDataBaseSettingsByName2", "org.postgresql.Driver",
                 "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", "ags", "",
                 1, 2, 3, 4, 5);
@@ -132,12 +132,12 @@ public class BoneCPSettingsServiceTest {
     public void testGetDataBaseSettings() throws ClassNotFoundException,
             SQLException {
         // Создание настроек
-        BoneCPSettings newBoneCPSettings1 = new BoneCPSettingsImpl(
+        BoneCPSettings newBoneCPSettings1 = new BoneCPSettingsModel(
                 "testGetDataBaseSettings1", "org.postgresql.Driver",
                 "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", "ags", "");
         settingStorage.setDataBaseSettings(newBoneCPSettings1);
 
-        BoneCPSettings newBoneCPSettings2 = new BoneCPSettingsImpl(
+        BoneCPSettings newBoneCPSettings2 = new BoneCPSettingsModel(
                 "testGetDataBaseSettings2", "org.postgresql.Driver",
                 "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", "ags", "",
                 1, 2, 3, 4, 5);
@@ -164,7 +164,7 @@ public class BoneCPSettingsServiceTest {
     public void testSetDataBaseSettings() throws ClassNotFoundException,
             SQLException {
         // Создание настроек
-        BoneCPSettings newBoneCPSettings = new BoneCPSettingsImpl(
+        BoneCPSettings newBoneCPSettings = new BoneCPSettingsModel(
                 "testSetDataBaseSettings", "org.postgresql.Driver",
                 "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", "ags", "");
 
@@ -211,7 +211,7 @@ public class BoneCPSettingsServiceTest {
     public void testDelDataBaseSettings() throws ClassNotFoundException,
             SQLException {
         // Создание настроек
-        BoneCPSettings newBoneCPSettings = new BoneCPSettingsImpl(
+        BoneCPSettings newBoneCPSettings = new BoneCPSettingsModel(
                 "testDelDataBaseSettings", "org.postgresql.Driver",
                 "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", "ags", "");
 

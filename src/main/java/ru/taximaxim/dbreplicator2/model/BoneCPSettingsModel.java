@@ -37,7 +37,7 @@ import ru.taximaxim.dbreplicator2.cf.BoneCPSettings;
  */
 @Entity
 @Table(name = "bone_cp_settings")
-public class BoneCPSettingsImpl implements BoneCPSettings {
+public class BoneCPSettingsModel implements BoneCPSettings {
     /**
      * Минимальное количество соединений в пуле
      */
@@ -62,7 +62,7 @@ public class BoneCPSettingsImpl implements BoneCPSettings {
     /**
      * Конструктор по умолчанию
      */
-    public BoneCPSettingsImpl() {
+    public BoneCPSettingsModel() {
     }
 
     /**
@@ -131,7 +131,7 @@ public class BoneCPSettingsImpl implements BoneCPSettings {
      * @param closeConnectionWatchTimeoutInMs
      *            - таймаут закрытия соединения
      */
-    public BoneCPSettingsImpl(String poolId, String driver, String url, String user,
+    public BoneCPSettingsModel(String poolId, String driver, String url, String user,
             String pass, int minConnectionsPerPartition, int maxConnectionsPerPartition,
             int partitionCount, long connectionTimeoutInMs,
             long closeConnectionWatchTimeoutInMs) {
@@ -161,7 +161,7 @@ public class BoneCPSettingsImpl implements BoneCPSettings {
      * @param pass
      *            - пароль
      */
-    public BoneCPSettingsImpl(String poolId, String driver, String url, String user,
+    public BoneCPSettingsModel(String poolId, String driver, String url, String user,
             String pass) {
         this(poolId, driver, url, user, pass, MIN_CONNECTIONS_PER_PARTITION,
                 MAX_CONNECTIONS_PER_PARTITION, PARTITION_COUNT, CONNECTION_TIMEOUT_IN_MS,
