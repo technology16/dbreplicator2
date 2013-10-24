@@ -20,9 +20,8 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ru.taximaxim.dbreplicator2.tasks;
+package ru.taximaxim.dbreplicator2.model;
 
-import ru.taximaxim.dbreplicator2.replica.Runner;
 
 public interface TaskSettings {
 
@@ -39,20 +38,6 @@ public interface TaskSettings {
      * @param taskId
      */
     void setTaskId(int taskId);
-
-    /**
-     * Получение идентификатора запускаемой реплики
-     *
-     * @return
-     */
-    int getRunnerId();
-
-    /**
-     * Установка идентификатора запускаемой реплики
-     *
-     * @param runnerId
-     */
-    void setRunnerId(int runnerId);
 
     /**
      * Получение флага доступности задачи
@@ -115,12 +100,12 @@ public interface TaskSettings {
      *
      * @return
      */
-    Runner getRunner();
+    public RunnerModel getRunner();
 
     /**
      * Установка инициализированного экземпляра обработчика реплики
      *
      * @param runner
      */
-    void setRunner(Runner runner);
+    void setRunner(RunnerModel runner);
 }

@@ -25,6 +25,7 @@ package ru.taximaxim.dbreplicator2.tasks;
 import java.util.HashMap;
 import java.util.Map;
 
+import ru.taximaxim.dbreplicator2.model.TaskSettings;
 import ru.taximaxim.dbreplicator2.model.TaskSettingsService;
 
 /**
@@ -47,12 +48,12 @@ public class TasksPool {
     public void start() {
         Map<Integer, TaskSettings> taskSettings = taskSettingsService.getTasks();
 
-        for (Integer taskId : taskSettings.keySet()) {
-            TaskRunner taskRunner = new TaskRunner(taskSettings.get(taskId));
-            Thread thread = new Thread(taskRunner);
-            thread.run();
-            taskThreads.put(taskRunner, thread);
-        }
+    	for (TaskSettings task: taskSettings.values()) {
+    		TaskRunner taskRunner = new TaskRunner(task);
+    		Thread thread = new Thread(taskRunner);
+            thread.start();
+    		taskThreads.put(taskRunner, thread);
+		}
     }
 
     /**

@@ -23,7 +23,8 @@
 /**
  * 
  */
-package ru.taximaxim.dbreplicator2.cf;
+package ru.taximaxim.dbreplicator2.model;
+
 
 /**
  * Интерфейс к настройкам подключения в BoneCP
