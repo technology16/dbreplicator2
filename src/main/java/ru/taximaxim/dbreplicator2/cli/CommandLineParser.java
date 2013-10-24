@@ -19,7 +19,7 @@
  * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */ 
+ */
 
 package ru.taximaxim.dbreplicator2.cli;
 
@@ -28,58 +28,58 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.log4j.Logger;
 
-public class CommandLineParser extends AbstractCommandLineParser{
-	
-	private static final Logger LOG = Logger.getLogger(CommandLineParser.class);
+public class CommandLineParser extends AbstractCommandLineParser {
 
-	public static CommandLineParser parse(String[] args) {
-		return new CommandLineParser(args);
-	} 
-	
-	/**
-	 * Обработка
-	 * 
-	 * @param args <code>String[]</code>
-	 *            - аргументы командной строки
-	 */
-	protected CommandLineParser(String[] args) {
-		if (args.length != 0) {
-			setOption("h", "help", true, "Print help for this application", 0,
-					false, null);
-			setOption("t", "test", true, "The test test test", 1, false, "file");
+    private static final Logger LOG = Logger.getLogger(CommandLineParser.class);
 
-			createOptionGroup(new Option("a", true, "A option"));
-			addOptionGroup(new Option("b", true, "B option"));
+    public static CommandLineParser parse(String[] args) {
+        return new CommandLineParser(args);
+    }
 
-			//выполение
-			parserCommandLine(args);
-		}
-	}
+    /**
+     * Обработка
+     * 
+     * @param args
+     *            <code>String[]</code> - аргументы командной строки
+     */
+    protected CommandLineParser(String[] args) {
+        if (args.length != 0) {
+            setOption("h", "help", true, "Print help for this application", 0,
+                    false, null);
+            setOption("t", "test", true, "The test test test", 1, false, "file");
 
-	/**
-	 * Обработка команд
-	 * 
-	 * @param commandLine
-	 */
-	protected void processingCmd(CommandLine commandLine) {
+            createOptionGroup(new Option("a", true, "A option"));
+            addOptionGroup(new Option("b", true, "B option"));
 
-		boolean error = true;
-		if (commandLine.hasOption("t")) {
-			String[] arguments = commandLine.getOptionValues("t");
-			LOG.debug("Name of the test: " + arguments[0]);
-			error = false;
-		}
+            // выполение
+            parserCommandLine(args);
+        }
+    }
 
-		if (commandLine.hasOption("h")) {
-					
-			HelpFormatter formatter = new HelpFormatter();
-			formatter.printHelp("java dbreplicator2.jar", getOptions());
+    /**
+     * Обработка команд
+     * 
+     * @param commandLine
+     */
+    protected void processingCmd(CommandLine commandLine) {
 
-			error = false;
-		}
-		
-		if (error) {
-			LOG.error("Неизвестная команда, пожалуйста воспользуетесь командой [-h] или [--help]");
-		}
-	}
+        boolean error = true;
+        if (commandLine.hasOption("t")) {
+            String[] arguments = commandLine.getOptionValues("t");
+            LOG.debug("Name of the test: " + arguments[0]);
+            error = false;
+        }
+
+        if (commandLine.hasOption("h")) {
+
+            HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp("java dbreplicator2.jar", getOptions());
+
+            error = false;
+        }
+
+        if (error) {
+            LOG.error("Неизвестная команда, пожалуйста воспользуетесь командой [-h] или [--help]");
+        }
+    }
 }
