@@ -67,12 +67,12 @@ public class ThreadPoolTest {
 
 	@Test
 	public void testPool() {
-		
+
 		Session session = sessionFactory.openSession();
 		session.beginTransaction();
-		
+
 		helpCode(session);
-		
+
 	}
 
 	public void helpCode(Session session) {
@@ -82,20 +82,13 @@ public class ThreadPoolTest {
 		StrategyModel strategy = createStrategy("ru.taximaxim.Class", null,
 				true, 100);
 
-		Assert.assertNull(runner.getId());
-		LOG.debug("Идентификатор потока перед сохранением: " + runner.getId());
-
 		addStrategy(runner, strategy);
 		session.saveOrUpdate(runner);
 		session.saveOrUpdate(strategy);
 
-		LOG.debug("Идентификатор потока после его сохранения: "
-				+ runner.getId());
-		Assert.assertNotNull(runner.getId());
-		
 		threadPool.start(runner);
 	}
-	
+
 	public RunnerModel createRunner(String source, String target,
 			String description) {
 
