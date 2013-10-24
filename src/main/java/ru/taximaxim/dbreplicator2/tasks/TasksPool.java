@@ -47,26 +47,27 @@ public class TasksPool {
     public void start() {
         Map<Integer, TaskSettings> taskSettings = taskSettingsService.getTasks();
 
-    	for (Integer taskId: taskSettings.keySet()) {
-    		TaskRunner taskRunner = new TaskRunner(taskSettings.get(taskId));
-    		Thread thread = new Thread(taskRunner);
+        for (Integer taskId : taskSettings.keySet()) {
+            TaskRunner taskRunner = new TaskRunner(taskSettings.get(taskId));
+            Thread thread = new Thread(taskRunner);
             thread.run();
-    		taskThreads.put(taskRunner, thread);
-		}
+            taskThreads.put(taskRunner, thread);
+        }
     }
 
     /**
      * Останливаем потоки задач
+     *
      * @throws InterruptedException
      */
     public void stop() throws InterruptedException {
         // Сигнализируем обработчикам задач что надо остановиться
-        for (TaskRunner taskRunner: taskThreads.keySet()) {
+        for (TaskRunner taskRunner : taskThreads.keySet()) {
             taskRunner.stop();
         }
 
         // Дожидаемся завершения потоков задач
-        for (TaskRunner taskRunner: taskThreads.keySet()) {
+        for (TaskRunner taskRunner : taskThreads.keySet()) {
             taskThreads.get(taskRunner).join();
         }
 

@@ -48,13 +48,13 @@ public class TaskSettingsService {
         this.sessionFactory = sessionFactory;
     }
 
-	/**
-	 * Возвражает список задач.
-	 *
-	 * @return
-	 */
-	public Map<Integer, TaskSettings> getTasks() {
-	    Map<Integer, TaskSettings> result = new HashMap<Integer, TaskSettings>();
+    /**
+     * Возвражает список задач.
+     *
+     * @return
+     */
+    public Map<Integer, TaskSettings> getTasks() {
+        Map<Integer, TaskSettings> result = new HashMap<Integer, TaskSettings>();
 
         Session session = sessionFactory.openSession();
         try {
@@ -62,7 +62,7 @@ public class TaskSettingsService {
                     Utils.castList(TaskSettings.class,
                             session.createCriteria(TaskSettingsImpl.class).list());
 
-            for (TaskSettings task: settingsList){
+            for (TaskSettings task : settingsList) {
                 task.setRunner((Runner) session.get(Runner.class, task.getRunnerId()));
                 result.put(task.getTaskId(), task);
             }
@@ -71,32 +71,33 @@ public class TaskSettingsService {
         }
 
         return result;
-	}
+    }
 
-	/**
-	 * Получение экземпляра настроек задачи по идентификатору
-	 *
-	 * @param taskId
-	 * @return
-	 */
-	public TaskSettings getTask(int taskId) {
+    /**
+     * Получение экземпляра настроек задачи по идентификатору
+     *
+     * @param taskId
+     * @return
+     */
+    public TaskSettings getTask(int taskId) {
         Session session = sessionFactory.openSession();
         try {
-            TaskSettings task = (TaskSettings) session.get(TaskSettingsImpl.class, taskId);
+            TaskSettings task =
+                    (TaskSettings) session.get(TaskSettingsImpl.class, taskId);
             task.setRunner((Runner) session.get(Runner.class, task.getRunnerId()));
 
             return task;
         } finally {
             session.close();
         }
-	}
+    }
 
-	/**
-	 * Сохранение экземпляра настроек задачи
-	 *
-	 * @param taskSettings
-	 */
-	public void setTask(TaskSettings taskSettings) {
+    /**
+     * Сохранение экземпляра настроек задачи
+     *
+     * @param taskSettings
+     */
+    public void setTask(TaskSettings taskSettings) {
         Session session = sessionFactory.openSession();
         session.beginTransaction();
         try {
@@ -109,5 +110,5 @@ public class TaskSettingsService {
         } finally {
             session.close();
         }
-	}
+    }
 }

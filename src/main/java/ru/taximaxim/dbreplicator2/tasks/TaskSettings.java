@@ -45,14 +45,14 @@ public interface TaskSettings {
      *
      * @return
      */
-    public int getRunnerId();
+    int getRunnerId();
 
     /**
      * Установка идентификатора запускаемой реплики
      *
      * @param runnerId
      */
-    public void setRunnerId(int runnerId);
+    void setRunnerId(int runnerId);
 
     /**
      * Получение флага доступности задачи
@@ -108,19 +108,19 @@ public interface TaskSettings {
      *
      * @param description Описание задачи
      */
-    public void setDescription(String description);
+    void setDescription(String description);
 
     /**
      * Функция получения инициализированного экземпляра обработчика реплики
      *
      * @return
      */
-    public Runner getRunner();
+    Runner getRunner();
 
     /**
      * Установка инициализированного экземпляра обработчика реплики
      *
      * @param runner
      */
-    public void setRunner(Runner runner);
+    void setRunner(Runner runner);
 }
