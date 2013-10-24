@@ -29,12 +29,11 @@ import javax.persistence.Table;
 
 import ru.taximaxim.dbreplicator2.cf.BoneCPSettings;
 
-//The correct order is : public, protected, private, abstract, static, final, transient, volatile, synchronized, native, strictfp.
 /**
  * Персистентный класс настроек BoneCP
- * 
+ *
  * @author volodin_aa
- * 
+ *
  */
 @Entity
 @Table(name = "bone_cp_settings")
@@ -110,7 +109,7 @@ public class BoneCPSettingsImpl implements BoneCPSettings {
 
     /**
      * Полный конструктор
-     * 
+     *
      * @param poolId
      *            - имя пула
      * @param driver
@@ -132,10 +131,10 @@ public class BoneCPSettingsImpl implements BoneCPSettings {
      * @param closeConnectionWatchTimeoutInMs
      *            - таймаут закрытия соединения
      */
-    public BoneCPSettingsImpl(String poolId, String driver, String url,
-            String user, String pass, int minConnectionsPerPartition,
-            int maxConnectionsPerPartition, int partitionCount,
-            long connectionTimeoutInMs, long closeConnectionWatchTimeoutInMs) {
+    public BoneCPSettingsImpl(String poolId, String driver, String url, String user,
+            String pass, int minConnectionsPerPartition, int maxConnectionsPerPartition,
+            int partitionCount, long connectionTimeoutInMs,
+            long closeConnectionWatchTimeoutInMs) {
         this.poolId = poolId;
         this.driver = driver;
         this.url = url;
@@ -150,7 +149,7 @@ public class BoneCPSettingsImpl implements BoneCPSettings {
 
     /**
      * Сокращенный конструктор
-     * 
+     *
      * @param poolId
      *            - имя пула
      * @param driver
@@ -162,11 +161,11 @@ public class BoneCPSettingsImpl implements BoneCPSettings {
      * @param pass
      *            - пароль
      */
-    public BoneCPSettingsImpl(String poolId, String driver, String url,
-            String user, String pass) {
+    public BoneCPSettingsImpl(String poolId, String driver, String url, String user,
+            String pass) {
         this(poolId, driver, url, user, pass, MIN_CONNECTIONS_PER_PARTITION,
-                MAX_CONNECTIONS_PER_PARTITION, PARTITION_COUNT,
-                CONNECTION_TIMEOUT_IN_MS, CLOSE_CONNECTION_WATCH_TIMEOUT_IN_MS);
+                MAX_CONNECTIONS_PER_PARTITION, PARTITION_COUNT, CONNECTION_TIMEOUT_IN_MS,
+                CLOSE_CONNECTION_WATCH_TIMEOUT_IN_MS);
     }
 
     /**
@@ -326,14 +325,13 @@ public class BoneCPSettingsImpl implements BoneCPSettings {
      * @param closeConnectionWatchTimeoutInMs
      *            the closeConnectionWatchTimeoutInMs to set
      */
-    public void setCloseConnectionWatchTimeoutInMs(
-            long closeConnectionWatchTimeoutInMs) {
+    public void setCloseConnectionWatchTimeoutInMs(long closeConnectionWatchTimeoutInMs) {
         this.closeConnectionWatchTimeoutInMs = closeConnectionWatchTimeoutInMs;
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
@@ -348,8 +346,7 @@ public class BoneCPSettingsImpl implements BoneCPSettings {
                             .getMinConnectionsPerPartition()
                     && this.maxConnectionsPerPartition == ((BoneCPSettings) obj)
                             .getMaxConnectionsPerPartition()
-                    && this.partitionCount == ((BoneCPSettings) obj)
-                            .getPartitionCount()
+                    && this.partitionCount == ((BoneCPSettings) obj).getPartitionCount()
                     && this.connectionTimeoutInMs == ((BoneCPSettings) obj)
                             .getConnectionTimeoutInMs()
                     && this.closeConnectionWatchTimeoutInMs == ((BoneCPSettings) obj)
@@ -357,5 +354,4 @@ public class BoneCPSettingsImpl implements BoneCPSettings {
         }
         return false;
     }
-
 }

@@ -25,9 +25,6 @@ package ru.taximaxim.dbreplicator2;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
-import org.hibernate.service.ServiceRegistry;
-import org.hibernate.service.ServiceRegistryBuilder;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -44,14 +41,7 @@ public class StrategiesTest {
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
 
-        Configuration configuration = new Configuration();
-        configuration.configure();
-
-        // http://stackoverflow.com/a/15702946/2743959
-        ServiceRegistry serviceRegistry = new ServiceRegistryBuilder()
-                .applySettings(configuration.getProperties())
-                .buildServiceRegistry();
-        sessionFactory = configuration.buildSessionFactory(serviceRegistry);
+        sessionFactory = Application.getSessionFactory();
     }
 
     /**

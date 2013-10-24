@@ -38,12 +38,11 @@ public abstract class AbstractCommandLineParser {
     private Options posixOptions = new Options();
     private OptionGroup optionGroup = new OptionGroup();
 
-    private static final Logger LOG = Logger
-            .getLogger(AbstractCommandLineParser.class);
+    private static final Logger LOG = Logger.getLogger(AbstractCommandLineParser.class);
 
     /**
      * получение опций
-     * 
+     *
      * @return
      */
     protected Options getOptions() {
@@ -52,28 +51,28 @@ public abstract class AbstractCommandLineParser {
 
     /**
      * Установка опций
-     * 
+     *
      * @param opt
      *            - сокращенное имя вызова опций
-     * 
+     *
      * @param longOpt
      *            - полное имя вызова опций
-     * 
+     *
      * @param hasArg
      *            - наличие аргумента
-     * 
+     *
      * @param description
      *            - Описание
-     * 
+     *
      * @param num
      *            <code>Integer</code> - Номер аргумента
-     * 
+     *
      * @param optionalArg
      *            - Дополнительный аргумент <code>boolean</code>
-     * 
+     *
      * @param argName
      *            - Имя аргумента
-     * 
+     *
      */
     protected void setOption(String opt, String longOpt, boolean hasArg,
             String description, Integer num, boolean optionalArg, String argName) {
@@ -89,7 +88,7 @@ public abstract class AbstractCommandLineParser {
 
     /**
      * Создание новых групп опций Используеться при создание новых опций
-     * 
+     *
      * @param option
      *            - опции
      */
@@ -101,7 +100,7 @@ public abstract class AbstractCommandLineParser {
      * Установка групп опций Использование при записи опций групп Не добавляет
      * опций после того как установите послению опцию
      * <code>addOptionGroup(Option option)</code>
-     * 
+     *
      * @param option
      */
     protected void setOptionGroup(Option option) {
@@ -111,7 +110,7 @@ public abstract class AbstractCommandLineParser {
     /**
      * Добавление групп опций в опции Для создания первой опций используйте
      * <code>createOptionGroup(Option option)</code>
-     * 
+     *
      * @param option
      *            - опции
      */
@@ -121,13 +120,13 @@ public abstract class AbstractCommandLineParser {
 
     /**
      * Обработка груп опций
-     * 
+     *
      * @param option
      *            - опции
-     * 
+     *
      * @param add
      *            - добавить в группу опцию
-     * 
+     *
      * @param clear
      *            - очистить группу опцию
      */
@@ -145,7 +144,7 @@ public abstract class AbstractCommandLineParser {
 
     /**
      * parser command line
-     * 
+     *
      * @param args
      */
     protected void parserCommandLine(String[] args) {
@@ -158,8 +157,7 @@ public abstract class AbstractCommandLineParser {
             processingCmd(commandLine);
 
         } catch (AlreadySelectedException ex) {
-            LOG.error(String.format("Ошибка опций групп: %s", ex.getMessage()),
-                    ex);
+            LOG.error(String.format("Ошибка опций групп: %s", ex.getMessage()), ex);
         } catch (ParseException ex) {
             LOG.error("Неправильный синтаксис команд", ex);
         }

@@ -20,29 +20,26 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-/**
- * 
- */
 package ru.taximaxim.dbreplicator2.cf;
 
 /**
  * Интерфейс настроек подключения к БД
- * 
+ *
  * @author volodin_aa
- * 
+ *
  */
 public interface DataBaseSettings {
 
     /**
      * Получение имени пула
-     * 
+     *
      * @return - имя пула
      */
     String getPoolId();
 
     /**
      * Установка имени пула
-     * 
+     *
      * @param poolId
      *            - имя пула
      */
@@ -50,14 +47,14 @@ public interface DataBaseSettings {
 
     /**
      * Получение имени драйвера БД
-     * 
+     *
      * @return - имя драйвера БД
      */
     String getDriver();
 
     /**
      * Установка имени драйвра БД
-     * 
+     *
      * @param driver
      *            - имя драйвера БД
      */
@@ -65,14 +62,14 @@ public interface DataBaseSettings {
 
     /**
      * Получение строки подключения к БД
-     * 
+     *
      * @return - строка подключения к БД
      */
     String getUrl();
 
     /**
      * Установка строки подключения к БД
-     * 
+     *
      * @param url
      *            - строка подключения к БД
      */
@@ -80,14 +77,14 @@ public interface DataBaseSettings {
 
     /**
      * Получение имени пользователя
-     * 
+     *
      * @return - имя пользователя
      */
     String getUser();
 
     /**
      * Установка имени пользователя
-     * 
+     *
      * @param user
      *            - имя пользователя
      */
@@ -95,14 +92,14 @@ public interface DataBaseSettings {
 
     /**
      * Получение пароля
-     * 
+     *
      * @return - пароль
      */
     String getPass();
 
     /**
      * Установка пароля
-     * 
+     *
      * @param pass
      *            - пароль
      */

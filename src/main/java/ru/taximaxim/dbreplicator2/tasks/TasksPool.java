@@ -34,7 +34,7 @@ import ru.taximaxim.dbreplicator2.model.TaskSettingsService;
 
 /**
  * @author volodin_aa
- * 
+ *
  */
 public class TasksPool {
 
@@ -52,10 +52,9 @@ public class TasksPool {
     public void start() {
         Session session = Application.getSessionFactory().openSession();
 
-        List<TaskSettingsImpl> taskSettings = Utils.castList(
-                TaskSettingsImpl.class,
-                session.createQuery("from TaskSettingsImpl order by name")
-                        .list());
+        List<TaskSettingsImpl> taskSettings =
+                Utils.castList(TaskSettingsImpl.class,
+                        session.createQuery("from TaskSettingsImpl order by name").list());
 
         if (taskThreads == null)
             taskThreads = new ArrayList<TaskThread>();

@@ -38,7 +38,7 @@ public class CommandLineParser extends AbstractCommandLineParser {
 
     /**
      * Обработка
-     * 
+     *
      * @param args
      *            <code>String[]</code> - аргументы командной строки
      */
@@ -58,7 +58,7 @@ public class CommandLineParser extends AbstractCommandLineParser {
 
     /**
      * Обработка команд
-     * 
+     *
      * @param commandLine
      */
     protected void processingCmd(CommandLine commandLine) {

@@ -35,14 +35,13 @@ import com.jolbox.bonecp.BoneCPConfig;
 
 /**
  * Фабрика соединений на основе пула соединений BoneCP
- * 
+ *
  * @author volodin_aa
- * 
+ *
  */
 public class BoneCPConnectionsFactory implements ConnectionFactory {
 
-    private static final Logger LOG = Logger
-            .getLogger(BoneCPConnectionsFactory.class);
+    private static final Logger LOG = Logger.getLogger(BoneCPConnectionsFactory.class);
 
     /**
      * Инициализированные именнованные пулы соединений
@@ -56,7 +55,7 @@ public class BoneCPConnectionsFactory implements ConnectionFactory {
 
     /**
      * Конструктор фабрики
-     * 
+     *
      * @param entityManager
      *            - ссылка на объект хранилища настроек
      */
@@ -67,7 +66,7 @@ public class BoneCPConnectionsFactory implements ConnectionFactory {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see ru.taximaxim.dbreplicator2.ConnectionsFactory.IConnectionsFactory#
      * getConnection(java.lang.String)
      */
@@ -78,12 +77,11 @@ public class BoneCPConnectionsFactory implements ConnectionFactory {
         synchronized (connectionPools) {
             connectionPool = connectionPools.get(poolName);
             if (connectionPool == null) {
-                BoneCPSettings boneCPSettings = settingStorage
-                        .getDataBaseSettingsByName(poolName);
+                BoneCPSettings boneCPSettings =
+                        settingStorage.getDataBaseSettingsByName(poolName);
 
                 if (boneCPSettings == null) {
-                    LOG.error("Не найден пул соединений с базой данных: "
-                            + poolName);
+                    LOG.error("Не найден пул соединений с базой данных: " + poolName);
                     return null;
                 }
 
@@ -114,7 +112,7 @@ public class BoneCPConnectionsFactory implements ConnectionFactory {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * ru.taximaxim.dbreplicator2.ConnectionsFactory.IConnectionsFactory#close
      * (java.lang.String)
@@ -128,7 +126,7 @@ public class BoneCPConnectionsFactory implements ConnectionFactory {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * ru.taximaxim.dbreplicator2.ConnectionsFactory.IConnectionsFactory#close()
      */
@@ -140,5 +138,4 @@ public class BoneCPConnectionsFactory implements ConnectionFactory {
             connectionPools.clear();
         }
     }
-
 }

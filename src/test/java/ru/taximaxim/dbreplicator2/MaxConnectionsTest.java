@@ -30,20 +30,19 @@ import junit.framework.TestCase;
 
 import org.h2.tools.Server;
 import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
 import org.junit.Ignore;
 
 import ru.taximaxim.dbreplicator2.cf.BoneCPConnectionsFactory;
 import ru.taximaxim.dbreplicator2.cf.BoneCPDataBaseSettingsStorage;
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
-import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsImpl;
+import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
 
 /**
  * Класс для тестирования пулов соединений
- * 
+ *
  * @author volodin_aa
- * 
+ *
  */
 @Ignore
 public class MaxConnectionsTest extends TestCase {
@@ -61,7 +60,7 @@ public class MaxConnectionsTest extends TestCase {
                 new String[] { "-tcpPort", "8084", "-tcpAllowOthers" }).start();
 
         // Инициализируем Hibernate
-        sessionFactory = new Configuration().configure().buildSessionFactory();
+        sessionFactory = Application.getSessionFactory();
 
         // Инициализируем хранилище настроек пулов соединений
         settingStorage = new BoneCPSettingsService(sessionFactory);
@@ -95,7 +94,7 @@ public class MaxConnectionsTest extends TestCase {
 
     /**
      * Тест таймаута при привышении максимального количества открытых соединений
-     * 
+     *
      * @throws ClassNotFoundException
      * @throws SQLException
      */
