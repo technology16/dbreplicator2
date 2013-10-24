@@ -31,26 +31,27 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
+import ru.taximaxim.dbreplicator2.Utils;
 import ru.taximaxim.dbreplicator2.cf.BoneCPDataBaseSettingsStorage;
 import ru.taximaxim.dbreplicator2.cf.BoneCPSettings;
 
 /**
  * Хранилище настроек именнованных соединений к BoneCP на основе Hibernate
- * 
- * @author volodin_aa
  *
+ * @author volodin_aa
  */
 public class BoneCPSettingsService implements BoneCPDataBaseSettingsStorage {
-    
+
     /**
      * Хранилище настроек
      */
     protected SessionFactory sessionFactory;
-    
+
     /**
      * Конструктор хранилища настроек в Hibernate
-     * 
-     * @param sessionFactory - фабрика сессий Hibernate
+     *
+     * @param sessionFactory
+     *            - фабрика сессий Hibernate
      */
     public BoneCPSettingsService(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
@@ -69,17 +70,20 @@ public class BoneCPSettingsService implements BoneCPDataBaseSettingsStorage {
     @Override
     public Map<String, BoneCPSettings> getDataBaseSettings() {
         Map<String, BoneCPSettings> result = new HashMap<String, BoneCPSettings>();
-        
+
         Session session = sessionFactory.openSession();
         try {
-            List<BoneCPSettings> settingsList = session.createCriteria(BoneCPSettingsImpl.class).list();
-            for (BoneCPSettings settings: settingsList){
+            List<BoneCPSettings> settingsList =
+                    Utils.castList(BoneCPSettings.class,
+                            session.createCriteria(BoneCPSettingsImpl.class).list());
+
+            for (BoneCPSettings settings : settingsList) {
                 result.put(settings.getPoolId(), settings);
             }
         } finally {
             session.close();
         }
-        
+
         return result;
     }
 
@@ -112,5 +116,4 @@ public class BoneCPSettingsService implements BoneCPDataBaseSettingsStorage {
             session.close();
         }
     }
-
 }

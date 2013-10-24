@@ -28,98 +28,98 @@ public interface TaskSettings {
 
     /**
      * Получение идентификатора задачи
-     * 
+     *
      * @return
      */
-    public int getTaskId();
-    
+    int getTaskId();
+
     /**
      * Установка идентификатора задачи
-     * 
+     *
      * @param taskId
      */
-    public void setTaskId(int taskId);
-    
+    void setTaskId(int taskId);
+
     /**
      * Получение идентификатора запускаемой реплики
-     * 
+     *
      * @return
      */
     public int getRunnerId();
-    
+
     /**
      * Установка идентификатора запускаемой реплики
-     * 
+     *
      * @param runnerId
      */
     public void setRunnerId(int runnerId);
-    
+
     /**
      * Получение флага доступности задачи
-     * 
+     *
      * @return
      */
-    public boolean getEnabled();
-    
+    boolean getEnabled();
+
     /**
      * Установка флага доступности
-     * 
+     *
      * @param enabled
      */
-    public void setEnabled(boolean enabled);
-    
+    void setEnabled(boolean enabled);
+
     /**
      * Получение интервала ожидания после корректного завершения задачи, мс
-     * 
+     *
      * @return
      */
-    public int getSuccessInterval();
-    
+    int getSuccessInterval();
+
     /**
      * Установка интервала ожидания после корректного завершения задачи, мс
-     * 
+     *
      * @param successInterval
      */
-    public void setSuccessInterval(int successInterval);
-    
+    void setSuccessInterval(int successInterval);
+
     /**
      * Получение интервала ожидания после ошибочного завершения задачи, мс
-     * 
+     *
      * @return
      */
-    public int getFailInterval();
-    
+    int getFailInterval();
+
     /**
      * Установка интервала ожидания после ошибочного завершения задачи, мс
-     * 
+     *
      * @param failInterval
      */
-    public void setFailInterval(int failInterval);
-    
+    void setFailInterval(int failInterval);
+
     /**
-     * Получение интервала ожидания после ошибочного завершения задачи, мс
-     * 
-     * @return
+     * Описание задачи
+     *
+     * @return Описание задачи
      */
-    public String getDescription();
-    
+    String getDescription();
+
     /**
-     * Установка интервала ожидания после ошибочного завершения задачи, мс
-     * 
-     * @param failInterval
+     * Описание задачи
+     *
+     * @param description Описание задачи
      */
     public void setDescription(String description);
-    
+
     /**
      * Функция получения инициализированного экземпляра обработчика реплики
-     * 
+     *
      * @return
      */
     public Runner getRunner();
-    
+
     /**
      * Установка инициализированного экземпляра обработчика реплики
-     * 
+     *
      * @param runner
      */
     public void setRunner(Runner runner);

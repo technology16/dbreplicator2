@@ -29,7 +29,7 @@ package ru.taximaxim.dbreplicator2.cf;
  * Интерфейс к настройкам подключения в BoneCP
  * 
  * @author volodin_aa
- *
+ * 
  */
 public interface BoneCPSettings extends DataBaseSettings {
 
@@ -38,69 +38,74 @@ public interface BoneCPSettings extends DataBaseSettings {
      * 
      * @return - количество соединений
      */
-    public int getMinConnectionsPerPartition();
+    int getMinConnectionsPerPartition();
 
     /**
      * Установка минимального количества соединений в пуле
      * 
-     * @param minConnectionsPerPartition - количество соединений
+     * @param minConnectionsPerPartition
+     *            - количество соединений
      */
-    public void setMinConnectionsPerPartition(int minConnectionsPerPartition);
+    void setMinConnectionsPerPartition(int minConnectionsPerPartition);
 
     /**
      * Получение максимального количества соединений в пуле
      * 
      * @return - количество соединений
      */
-    public int getMaxConnectionsPerPartition();
+    int getMaxConnectionsPerPartition();
 
     /**
      * Установка максимального количества соединений в пуле
      * 
-     * @param maxConnectionsPerPartition - количество соединений
+     * @param maxConnectionsPerPartition
+     *            - количество соединений
      */
-    public void setMaxConnectionsPerPartition(int maxConnectionsPerPartition);
+    void setMaxConnectionsPerPartition(int maxConnectionsPerPartition);
 
     /**
      * Получение количесва порций соединений в пуле
      * 
      * @return - количество порций
      */
-    public int getPartitionCount();
+    int getPartitionCount();
 
     /**
      * Установка количесва порций соединений в пуле
      * 
-     * @param partitionCount - количество порций
+     * @param partitionCount
+     *            - количество порций
      */
-    public void setPartitionCount(int partitionCount);
+    void setPartitionCount(int partitionCount);
 
     /**
      * Установка таймаута на ожидание получения соединения из пула
      * 
      * @return - таймаут, мс
      */
-    public long getConnectionTimeoutInMs();
+    long getConnectionTimeoutInMs();
 
     /**
      * Получение таймаута на ожидание получения соединения из пула
      * 
-     * @param connectionTimeoutInMs - таймаут, мс
+     * @param connectionTimeoutInMs
+     *            - таймаут, мс
      */
-    public void setConnectionTimeoutInMs(long connectionTimeoutInMs);
+    void setConnectionTimeoutInMs(long connectionTimeoutInMs);
 
     /**
      * Установка таймаута на ожидание закрытия соединения
      * 
      * @return - таймаут, мс
      */
-    public long getCloseConnectionWatchTimeoutInMs();
+    long getCloseConnectionWatchTimeoutInMs();
 
     /**
      * Получение таймаута на ожидание закрытия соединения
      * 
-     * @param closeConnectionWatchTimeoutInMs - таймаут, мс
+     * @param closeConnectionWatchTimeoutInMs
+     *            - таймаут, мс
      */
-    public void setCloseConnectionWatchTimeoutInMs(long closeConnectionWatchTimeoutInMs);
+    void setCloseConnectionWatchTimeoutInMs(long closeConnectionWatchTimeoutInMs);
 
 }

@@ -35,62 +35,72 @@ import com.jolbox.bonecp.BoneCPConfig;
 
 /**
  * Фабрика соединений на основе пула соединений BoneCP
- * 
+ *
  * @author volodin_aa
  *
  */
-public class BoneCPConnectionsFactory implements ConnectionsFactory {
-	
-	private static final Logger LOG = Logger.getLogger(BoneCPConnectionsFactory.class);
+public class BoneCPConnectionsFactory implements ConnectionFactory {
+
+    private static final Logger LOG = Logger.getLogger(BoneCPConnectionsFactory.class);
 
     /**
-     * Инициализированные именнованные пулы соединений 
+     * Инициализированные именнованные пулы соединений
      */
     protected Map<String, BoneCP> connectionPools;
-    
+
     /**
      * Хранилище настроек
      */
     protected BoneCPDataBaseSettingsStorage settingStorage;
-    
+
     /**
      * Конструктор фабрики
-     * 
-     * @param entityManager - ссылка на объект хранилища настроек
+     *
+     * @param entityManager
+     *            - ссылка на объект хранилища настроек
      */
     public BoneCPConnectionsFactory(BoneCPDataBaseSettingsStorage settingStorage) {
         this.settingStorage = settingStorage;
         connectionPools = new HashMap<String, BoneCP>();
     }
 
-    /* (non-Javadoc)
-     * @see ru.taximaxim.dbreplicator2.ConnectionsFactory.IConnectionsFactory#getConnection(java.lang.String)
+    /*
+     * (non-Javadoc)
+     *
+     * @see ru.taximaxim.dbreplicator2.ConnectionsFactory.IConnectionsFactory#
+     * getConnection(java.lang.String)
      */
-    public Connection getConnection(String poolName) throws SQLException, ClassNotFoundException {
-    	BoneCP connectionPool;
-        
-    	synchronized (connectionPools) {
+    public Connection getConnection(String poolName) throws SQLException,
+            ClassNotFoundException {
+        BoneCP connectionPool;
+
+        synchronized (connectionPools) {
             connectionPool = connectionPools.get(poolName);
             if (connectionPool == null) {
-                BoneCPSettings boneCPSettings = settingStorage.getDataBaseSettingsByName(poolName);
+                BoneCPSettings boneCPSettings =
+                        settingStorage.getDataBaseSettingsByName(poolName);
 
                 if (boneCPSettings == null) {
-                	LOG.error("Не найден пул соединений с базой данных: " + poolName);
-                	return null;
+                    LOG.error("Не найден пул соединений с базой данных: " + poolName);
+                    return null;
                 }
-                
+
                 Class.forName(boneCPSettings.getDriver());
 
                 BoneCPConfig config = new BoneCPConfig();
-                config.setJdbcUrl(boneCPSettings.getUrl()); 
-                config.setUsername(boneCPSettings.getUser()); 
+                config.setJdbcUrl(boneCPSettings.getUrl());
+                config.setUsername(boneCPSettings.getUser());
                 config.setPassword(boneCPSettings.getPass());
 
-                config.setMinConnectionsPerPartition(boneCPSettings.getMinConnectionsPerPartition());
-                config.setMaxConnectionsPerPartition(boneCPSettings.getMaxConnectionsPerPartition());
+                config.setMinConnectionsPerPartition(boneCPSettings
+                        .getMinConnectionsPerPartition());
+                config.setMaxConnectionsPerPartition(boneCPSettings
+                        .getMaxConnectionsPerPartition());
                 config.setPartitionCount(boneCPSettings.getPartitionCount());
-                config.setConnectionTimeoutInMs(boneCPSettings.getConnectionTimeoutInMs());
-                config.setCloseConnectionWatchTimeoutInMs(boneCPSettings.getCloseConnectionWatchTimeoutInMs());
+                config.setConnectionTimeoutInMs(boneCPSettings
+                        .getConnectionTimeoutInMs());
+                config.setCloseConnectionWatchTimeoutInMs(boneCPSettings
+                        .getCloseConnectionWatchTimeoutInMs());
 
                 connectionPool = new BoneCP(config);
 
@@ -100,8 +110,12 @@ public class BoneCPConnectionsFactory implements ConnectionsFactory {
         return connectionPool.getConnection();
     }
 
-    /* (non-Javadoc)
-     * @see ru.taximaxim.dbreplicator2.ConnectionsFactory.IConnectionsFactory#close(java.lang.String)
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * ru.taximaxim.dbreplicator2.ConnectionsFactory.IConnectionsFactory#close
+     * (java.lang.String)
      */
     public void close(String poolName) {
         synchronized (connectionPools) {
@@ -110,16 +124,18 @@ public class BoneCPConnectionsFactory implements ConnectionsFactory {
         }
     }
 
-    /* (non-Javadoc)
-     * @see ru.taximaxim.dbreplicator2.ConnectionsFactory.IConnectionsFactory#close()
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * ru.taximaxim.dbreplicator2.ConnectionsFactory.IConnectionsFactory#close()
      */
     public void close() {
         synchronized (connectionPools) {
-            for (String poolName: connectionPools.keySet()) {
+            for (String poolName : connectionPools.keySet()) {
                 connectionPools.get(poolName).close();
             }
             connectionPools.clear();
         }
     }
-
 }

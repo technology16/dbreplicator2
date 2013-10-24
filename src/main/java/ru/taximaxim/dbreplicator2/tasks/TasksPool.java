@@ -32,11 +32,11 @@ import ru.taximaxim.dbreplicator2.model.TaskSettingsService;
  *
  */
 public class TasksPool {
-    
+
     private Map<TaskRunner, Thread> taskThreads = new HashMap<TaskRunner, Thread>();
-    
+
     private TaskSettingsService taskSettingsService;
-    
+
     public TasksPool(TaskSettingsService taskSettingsService) {
         this.taskSettingsService = taskSettingsService;
     }
@@ -46,7 +46,7 @@ public class TasksPool {
      */
     public void start() {
         Map<Integer, TaskSettings> taskSettings = taskSettingsService.getTasks();
-    	
+
     	for (Integer taskId: taskSettings.keySet()) {
     		TaskRunner taskRunner = new TaskRunner(taskSettings.get(taskId));
     		Thread thread = new Thread(taskRunner);
@@ -57,19 +57,19 @@ public class TasksPool {
 
     /**
      * Останливаем потоки задач
-     * @throws InterruptedException 
+     * @throws InterruptedException
      */
     public void stop() throws InterruptedException {
         // Сигнализируем обработчикам задач что надо остановиться
         for (TaskRunner taskRunner: taskThreads.keySet()) {
             taskRunner.stop();
         }
-        
+
         // Дожидаемся завершения потоков задач
         for (TaskRunner taskRunner: taskThreads.keySet()) {
             taskThreads.get(taskRunner).join();
         }
-        
+
         taskThreads.clear();
     }
 }

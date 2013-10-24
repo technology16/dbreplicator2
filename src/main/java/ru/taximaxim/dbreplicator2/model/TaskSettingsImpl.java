@@ -32,54 +32,54 @@ import ru.taximaxim.dbreplicator2.tasks.TaskSettings;
 
 /**
  * Класс инкапсулирующий задачу менеджера записей.
- * 
+ *
  * @author ags
  *
  */
 @Entity
 @Table( name = "tasks" )
 public class TaskSettingsImpl implements TaskSettings{
-    
+
     /**
      * Идентификатор задачи
      */
     private int taskId;
-    
+
     /**
      * Идентификатор реплики
      */
     private int runnerId;
-    
+
     /**
      * Флаг доступности задачи
      */
     private boolean enabled;
-    
+
     /**
      * Интервал после успешного выполнения задачи, мс
      */
     private int successInterval;
-    
+
     /**
      * Интервал после ошибочного выполнения задачи
      */
     private int failInterval;
-    
+
     /**
      * Интервал после ошибочного выполнения задачи
      */
     private String description;
-    
+
     /**
      * Инициализированный обработчик реплики. Будет инициализироваться сервисом хранения настроек задач.
      */
     private Runner runner;
 
-	/**
-	 * Для использования выполнения задачи будем использовать поток реплику, как
-	 * подготовленное рабочее решение.
-	 * 
-	 */
+    /**
+     * Для использования выполнения задачи будем использовать поток реплику, как
+     * подготовленное рабочее решение.
+     *
+     */
 
     @Id
     @Column(name = "task_id")
