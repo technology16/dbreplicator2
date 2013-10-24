@@ -93,7 +93,7 @@ public interface TaskSettings {
      *
      * @param description Описание задачи
      */
-    public void setDescription(String description);
+    void setDescription(String description);
 
     /**
      * Функция получения инициализированного экземпляра обработчика реплики
@@ -107,5 +107,5 @@ public interface TaskSettings {
      *
      * @param runner
      */
-    public void setRunner(RunnerModel runner);
+    void setRunner(RunnerModel runner);
 }

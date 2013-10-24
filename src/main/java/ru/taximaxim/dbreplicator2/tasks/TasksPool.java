@@ -58,16 +58,17 @@ public class TasksPool {
 
     /**
      * Останливаем потоки задач
+     *
      * @throws InterruptedException
      */
     public void stop() throws InterruptedException {
         // Сигнализируем обработчикам задач что надо остановиться
-        for (TaskRunner taskRunner: taskThreads.keySet()) {
+        for (TaskRunner taskRunner : taskThreads.keySet()) {
             taskRunner.stop();
         }
 
         // Дожидаемся завершения потоков задач
-        for (TaskRunner taskRunner: taskThreads.keySet()) {
+        for (TaskRunner taskRunner : taskThreads.keySet()) {
             taskThreads.get(taskRunner).join();
         }
 

@@ -46,13 +46,13 @@ public class TaskSettingsService {
         this.sessionFactory = sessionFactory;
     }
 
-	/**
-	 * Возвражает список задач.
-	 *
-	 * @return
-	 */
-	public Map<Integer, TaskSettings> getTasks() {
-	    Map<Integer, TaskSettings> result = new HashMap<Integer, TaskSettings>();
+    /**
+     * Возвращает список задач.
+     *
+     * @return
+     */
+    public Map<Integer, TaskSettings> getTasks() {
+        Map<Integer, TaskSettings> result = new HashMap<Integer, TaskSettings>();
 
         Session session = sessionFactory.openSession();
         try {
@@ -68,29 +68,29 @@ public class TaskSettingsService {
         }
 
         return result;
-	}
+    }
 
-	/**
-	 * Получение экземпляра настроек задачи по идентификатору
-	 *
-	 * @param taskId
-	 * @return
-	 */
-	public TaskSettings getTask(int taskId) {
+    /**
+     * Получение экземпляра настроек задачи по идентификатору
+     *
+     * @param taskId
+     * @return
+     */
+    public TaskSettings getTask(int taskId) {
         Session session = sessionFactory.openSession();
         try {
             return  (TaskSettings) session.get(TaskSettingsModel.class, taskId);
         } finally {
             session.close();
         }
-	}
+    }
 
-	/**
-	 * Сохранение экземпляра настроек задачи
-	 *
-	 * @param taskSettings
-	 */
-	public void setTask(TaskSettings taskSettings) {
+    /**
+     * Сохранение экземпляра настроек задачи
+     *
+     * @param taskSettings
+     */
+    public void setTask(TaskSettings taskSettings) {
         Session session = sessionFactory.openSession();
         session.beginTransaction();
         try {
@@ -103,5 +103,5 @@ public class TaskSettingsService {
         } finally {
             session.close();
         }
-	}
+    }
 }
