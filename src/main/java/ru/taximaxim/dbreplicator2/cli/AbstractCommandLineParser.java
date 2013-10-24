@@ -21,7 +21,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */ 
 
-package ru.taximaxim.dbreplicator2;
+package ru.taximaxim.dbreplicator2.cli;
 
 import org.apache.commons.cli.AlreadySelectedException;
 import org.apache.commons.cli.CommandLine;
@@ -33,18 +33,19 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.apache.log4j.Logger;
 
-public class CommonsCli {
+public abstract class AbstractCommandLineParser {
 
-	private static Options posixOptions = new Options();
-	private static OptionGroup optionGroup = new OptionGroup();
-	public static final Logger LOG = Logger.getLogger(CommonsCli.class);
-
+	private Options posixOptions = new Options();
+	private OptionGroup optionGroup = new OptionGroup();
+	
+	private static final Logger LOG = Logger.getLogger(AbstractCommandLineParser.class);
+	
 	/**
 	 * получение опций
 	 * 
 	 * @return
 	 */
-	protected static Options getOptions() {
+	protected Options getOptions() {
 		return posixOptions;
 	}
 
@@ -73,7 +74,7 @@ public class CommonsCli {
 	 *            - Имя аргумента
 	 * 
 	 */
-	protected static void setOption(String opt, String longOpt, boolean hasArg,
+	protected void setOption(String opt, String longOpt, boolean hasArg,
 			String description, Integer num, boolean optionalArg, String argName) {
 		Option option = new Option(opt, longOpt, hasArg, description);
 
@@ -91,7 +92,7 @@ public class CommonsCli {
 	 * @param option
 	 *            - опции
 	 */
-	protected static void createOptionGroup(Option option) {
+	protected void createOptionGroup(Option option) {
 		processingOptionGroup(option, false, true);
 	}
 
@@ -102,7 +103,7 @@ public class CommonsCli {
 	 * 
 	 * @param option
 	 */
-	protected static void setOptionGroup(Option option) {
+	protected void setOptionGroup(Option option) {
 		processingOptionGroup(option, false, false);
 	}
 
@@ -113,7 +114,7 @@ public class CommonsCli {
 	 * @param option
 	 *            - опции
 	 */
-	protected static void addOptionGroup(Option option) {
+	protected void addOptionGroup(Option option) {
 		processingOptionGroup(option, true, false);
 	}
 
@@ -129,8 +130,7 @@ public class CommonsCli {
 	 * @param clear
 	 *            - очистить группу опцию
 	 */
-	private static void processingOptionGroup(Option option, boolean add,
-			boolean clear) {
+	private void processingOptionGroup(Option option, boolean add, boolean clear) {
 		if (clear == true) {
 			optionGroup = new OptionGroup();
 		}
@@ -147,19 +147,22 @@ public class CommonsCli {
 	 * 
 	 * @param args
 	 */
-	protected static void parserCommandLine(String[] args) {
+	protected void parserCommandLine(String[] args) {
 
 		CommandLineParser cmdLinePosixParser = new PosixParser();
 		CommandLine commandLine = null;
 		try {
-			commandLine = cmdLinePosixParser.parse(CommonsCli.getOptions(),
-					args);
-			ProcessingCli.processingCmd(commandLine);
+			
+			commandLine = cmdLinePosixParser.parse(getOptions(), args);
+			processingCmd(commandLine);
+			
 		} catch (AlreadySelectedException ex) {
-			LOG.error(String.format("Ошибка опций групп: %s", ex.getMessage()));
+			LOG.error(String.format("Ошибка опций групп: %s", ex.getMessage()), ex);
 		} catch (ParseException ex) {
-			LOG.error("Неправильный синтаксис команд");
-			// ex.printStackTrace();
+			LOG.error("Неправильный синтаксис команд", ex);
 		}
 	}
+	
+	protected abstract void processingCmd(CommandLine commandLine);
+	
 }

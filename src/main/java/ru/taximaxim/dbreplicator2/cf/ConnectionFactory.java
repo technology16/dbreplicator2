@@ -35,7 +35,7 @@ import java.sql.SQLException;
  * @author volodin_aa
  *
  */
-public interface ConnectionsFactory {
+public interface ConnectionFactory {
 
     /**
      * Получение соединения из именованного пула соединений

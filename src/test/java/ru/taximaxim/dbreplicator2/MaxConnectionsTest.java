@@ -31,10 +31,11 @@ import junit.framework.TestCase;
 import org.h2.tools.Server;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
+import org.junit.Ignore;
 
 import ru.taximaxim.dbreplicator2.cf.BoneCPConnectionsFactory;
 import ru.taximaxim.dbreplicator2.cf.BoneCPDataBaseSettingsStorage;
-import ru.taximaxim.dbreplicator2.cf.ConnectionsFactory;
+import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsImpl;
 /**
@@ -43,6 +44,7 @@ import ru.taximaxim.dbreplicator2.model.BoneCPSettingsImpl;
  * @author volodin_aa
  *
  */
+@Ignore
 public class MaxConnectionsTest extends TestCase {
   
     private SessionFactory sessionFactory;
@@ -111,7 +113,7 @@ public class MaxConnectionsTest extends TestCase {
      * @throws SQLException
      */
     public void testMaxConnections() throws ClassNotFoundException, SQLException {
-        ConnectionsFactory connectionsFactory = new BoneCPConnectionsFactory(settingStorage);
+        ConnectionFactory connectionsFactory = new BoneCPConnectionsFactory(settingStorage);
         try {
             Connection connection1 = connectionsFactory.getConnection("1");
             connection1.setAutoCommit(false);

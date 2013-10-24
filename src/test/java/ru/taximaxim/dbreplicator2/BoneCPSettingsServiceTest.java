@@ -61,9 +61,7 @@ public class BoneCPSettingsServiceTest {
                 new String[] { "-tcpPort", "8084", "-tcpAllowOthers" }).start();
         
         // Инициализируем Hibernate
-        sessionFactory = new Configuration()
-            .configure()
-            .buildSessionFactory();
+        sessionFactory = Application.getSessionFactory();
 
         // Инициализируем хранилище настроек пулов соединений
         settingStorage = new BoneCPSettingsService(sessionFactory);

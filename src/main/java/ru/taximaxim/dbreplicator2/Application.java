@@ -30,7 +30,8 @@ import org.hibernate.service.ServiceRegistry;
 import org.hibernate.service.ServiceRegistryBuilder;
 
 import ru.taximaxim.dbreplicator2.cf.BoneCPConnectionsFactory;
-import ru.taximaxim.dbreplicator2.cf.ConnectionsFactory;
+import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
+import ru.taximaxim.dbreplicator2.cli.CommandLineParser;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
 
 /**
@@ -39,9 +40,17 @@ import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
  */
 public class Application {
 	
-	public static final Logger LOG = Logger.getLogger(Application.class);
+	private static final Logger LOG = Logger.getLogger(Application.class);
 
-	public static SessionFactory sessionFactory;
+	private static SessionFactory sessionFactory;
+	
+	private static ConnectionFactory connectionFactory;
+	
+	/**
+	 * Данный класс нельзя инстанциировать.
+	 */
+	private Application() {
+	}
 	
 	/**
 	 * Возвращает фабрику сессий гибернейта.
@@ -49,6 +58,8 @@ public class Application {
 	 * @return фабрику сессий гибернейта.
 	 */
 	public static SessionFactory getSessionFactory() {
+		
+		LOG.debug("Запрошено создание новой фабрики сессий hibernate");
 
 		if (sessionFactory == null) {
 		    Configuration configuration = new Configuration();
@@ -57,37 +68,33 @@ public class Application {
 		    ServiceRegistry serviceRegistry = 
 		    	    new ServiceRegistryBuilder().applySettings(configuration.getProperties()).buildServiceRegistry();        
 		    sessionFactory = configuration.buildSessionFactory(serviceRegistry);
+
+		    LOG.info("Создана новая фабрика сессий hibernate");
 		}
 	    return sessionFactory;
 	}
-	
-	private static ConnectionsFactory connectionsFactory;
 	
 	/**
 	 * Возвращает фабрику соединений
 	 * 
 	 * @return фабрику соединений
 	 */
-	public static ConnectionsFactory getConnectionFactory() {
+	public static ConnectionFactory getConnectionFactory() {
 		
-		if (connectionsFactory == null )
-			connectionsFactory = 
+		if (connectionFactory == null ) {
+			connectionFactory = 
 				new BoneCPConnectionsFactory(new BoneCPSettingsService(getSessionFactory()));
+		}
 		
-		return connectionsFactory;
+		return connectionFactory;
 	}
 	
 	public static void main(String[] args) {
-		LOG.info("Application run");
-		ProcessingCli.initialize(args);
+		
+		CommandLineParser.parse(args);
 		
 		// TODO: Чтение настроек о зарегистрированных пулах соединений и их 
 		// инициализация.
-		//TaskService service = new TaskService(); // Заменить на синглетон
-		
-		//for (Task task : service.getTasks()) {
-		//	service.run(task);
-		//}
 
 		// TODO: Определение рабочих потоков, подготовка пула потоков.
 		// 1. Расширить таблицы H2 насторйками пулов рабочих потоков.
@@ -100,4 +107,3 @@ public class Application {
 		
 	}
 }
-

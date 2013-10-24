@@ -28,6 +28,8 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import com.jolbox.bonecp.BoneCP;
 import com.jolbox.bonecp.BoneCPConfig;
 
@@ -37,7 +39,9 @@ import com.jolbox.bonecp.BoneCPConfig;
  * @author volodin_aa
  *
  */
-public class BoneCPConnectionsFactory implements ConnectionsFactory {
+public class BoneCPConnectionsFactory implements ConnectionFactory {
+	
+	private static final Logger LOG = Logger.getLogger(BoneCPConnectionsFactory.class);
 
     /**
      * Инициализированные именнованные пулы соединений 
@@ -70,6 +74,11 @@ public class BoneCPConnectionsFactory implements ConnectionsFactory {
             if (connectionPool == null) {
                 BoneCPSettings boneCPSettings = settingStorage.getDataBaseSettingsByName(poolName);
 
+                if (boneCPSettings == null) {
+                	LOG.error("Не найден пул соединений с базой данных: " + poolName);
+                	return null;
+                }
+                
                 Class.forName(boneCPSettings.getDriver());
 
                 BoneCPConfig config = new BoneCPConfig();
