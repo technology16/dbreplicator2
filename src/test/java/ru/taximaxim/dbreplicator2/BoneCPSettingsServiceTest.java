@@ -28,9 +28,9 @@ import static org.junit.Assert.*;
 import java.sql.SQLException;
 import java.util.Map;
 
-import org.h2.tools.Server;
-
 import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.service.ServiceRegistryBuilder;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -49,19 +49,18 @@ import ru.taximaxim.dbreplicator2.model.BoneCPSettingsModel;
 public class BoneCPSettingsServiceTest {
 
     static private SessionFactory sessionFactory;
-    static private Server server;
-
     // Хранилище настроек
     static protected BoneCPDataBaseSettingsStorage settingStorage;
 
     @BeforeClass
     static public void setUp() throws Exception {
-        // Инициализируем БД настроек
-        server = Server.createTcpServer(
-                new String[] { "-tcpPort", "8084", "-tcpAllowOthers" }).start();
-
+        Configuration configuration = new Configuration().configure();
+        
         // Инициализируем Hibernate
-        sessionFactory = Application.getSessionFactory();
+        sessionFactory = new Configuration()
+        .configure()
+        .buildSessionFactory(new ServiceRegistryBuilder()
+            .applySettings(configuration.getProperties()).buildServiceRegistry());
 
         // Инициализируем хранилище настроек пулов соединений
         settingStorage = new BoneCPSettingsService(sessionFactory);
@@ -72,8 +71,6 @@ public class BoneCPSettingsServiceTest {
         if (sessionFactory != null) {
             sessionFactory.close();
         }
-
-        server.shutdown();
     }
 
     /**
