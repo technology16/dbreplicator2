@@ -71,7 +71,7 @@ public class SuperLogManagerStrategy implements Strategy {
             try (
                  PreparedStatement insertRunnerData = sourceConnection.prepareStatement("INSERT INTO rep2_workpool_data (id_runner, id_superlog, id_foreign, id_table, c_operation, c_date, id_transaction) VALUES (?, ?, ?, ?, ?, ?, ?)");
                  PreparedStatement deleteSuperLog = sourceConnection.prepareStatement("DELETE FROM rep2_superlog WHERE id_superlog=?");
-                 PreparedStatement selectSuperLog = sourceConnection.prepareStatement("SELECT * FROM rep2_superlog ORDER BY superlog_id");
+                 PreparedStatement selectSuperLog = sourceConnection.prepareStatement("SELECT * FROM rep2_superlog ORDER BY id_superlog");
              ) {
                 selectSuperLog.setFetchSize(1000);
                 try (ResultSet superLogResult = selectSuperLog.executeQuery();) {
