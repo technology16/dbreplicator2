@@ -18,7 +18,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ru.taximaxim.dbreplicator2.cf.BoneCPConnectionsFactory;
-import ru.taximaxim.dbreplicator2.model.BoneCPSettingsImpl;
+import ru.taximaxim.dbreplicator2.model.BoneCPSettingsModel;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
 
 public class TriggerH2Test {
@@ -156,7 +156,7 @@ public class TriggerH2Test {
         String poolName = "pull";
         BoneCPSettingsService cpSettingsService = new BoneCPSettingsService(sessionFactory);
 
-        BoneCPSettingsImpl settingsPool = new BoneCPSettingsImpl(
+        BoneCPSettingsModel settingsPool = new BoneCPSettingsModel(
                 poolName, "org.h2.Driver", "jdbc:h2:mem://localhost/~/test", "sa", "");
         cpSettingsService.setDataBaseSettings(settingsPool);
 
