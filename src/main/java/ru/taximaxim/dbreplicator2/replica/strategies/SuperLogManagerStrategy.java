@@ -27,9 +27,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
+import ru.taximaxim.dbreplicator2.Application;
+import ru.taximaxim.dbreplicator2.WorkerThread;
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
 import ru.taximaxim.dbreplicator2.model.RunnerService;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
@@ -44,13 +45,10 @@ import ru.taximaxim.dbreplicator2.replica.StrategyException;
  */
 public class SuperLogManagerStrategy implements Strategy {
 
-    private RunnerService runnerService;
-    
     /**
      * 
      */
-    public SuperLogManagerStrategy(RunnerService runnerService) {
-        this.runnerService = runnerService;
+    public SuperLogManagerStrategy() {
     }
 
     @Override
@@ -64,7 +62,11 @@ public class SuperLogManagerStrategy implements Strategy {
                     .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
             sourceConnection.setHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT);
             // Строим список обработчиков реплик
-            List<RunnerModel> runners = new ArrayList<RunnerModel>();
+            RunnerService runnerService = 
+                    new RunnerService(Application.getSessionFactory());
+            List<RunnerModel> runners = 
+                    runnerService.getRunners("ru.taximaxim.dbreplicator2.replica.ReplicaRunner");
+            
             // Переносим данные
             try (
                  PreparedStatement insertRunnerData = sourceConnection.prepareStatement("INSERT INTO workpool_data (id_runner, id_superlog, id_foreign, id_table, c_operation, c_date, id_transaction) VALUES (?, ?, ?, ?, ?, ?, ?)");
@@ -104,6 +106,11 @@ public class SuperLogManagerStrategy implements Strategy {
             sourceConnection.commit();
             sourceConnection.setAutoCommit(lastAutoCommit);
             // Запускаем обработчики реплик
+            for (RunnerModel runner : runners) {
+                // Пока синхронный запуск!
+                WorkerThread workerThread = new WorkerThread(runner);
+                workerThread.run();
+            }
         } catch (SQLException e) {
             throw new StrategyException(e);
         }
