@@ -22,28 +22,86 @@
  */
 package ru.taximaxim.dbreplicator2.model;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import ru.taximaxim.dbreplicator2.tasks.TaskSettings;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+
+import ru.taximaxim.dbreplicator2.utils.Utils;
 
 public class TaskSettingsService {
 
-	/**
-	 * Возвражает список менеджеров записей.
-	 * 
-	 * @return
-	 */
-	public List<TaskSettingsImpl> getTasks() {
-		// TODO: Not implemented
-		return null;
-	}
+    /**
+     * Хранилище настроек
+     */
+    private SessionFactory sessionFactory;
 
-	public TaskSettings getTask(int taskId) {
-	    return null;
-	}
-	
-	public void setTask(TaskSettings taskSettings) {
-	    
-	}
-	
+    /**
+     * @param sessionFactory
+     */
+    public TaskSettingsService(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
+    }
+
+    /**
+     * Возвражает список задач.
+     *
+     * @return
+     */
+    public Map<Integer, TaskSettings> getTasks() {
+        Map<Integer, TaskSettings> result = new HashMap<Integer, TaskSettings>();
+
+        Session session = sessionFactory.openSession();
+        try {
+            List<TaskSettings> settingsList =
+                    Utils.castList(TaskSettings.class,
+                            session.createCriteria(TaskSettingsModel.class).list());
+
+            for (TaskSettings task: settingsList){
+                result.put(task.getTaskId(), task);
+            }
+        } finally {
+            session.close();
+        }
+
+        return result;
+    }
+
+    /**
+     * Получение экземпляра настроек задачи по идентификатору
+     *
+     * @param taskId
+     * @return
+     */
+    public TaskSettings getTask(int taskId) {
+        Session session = sessionFactory.openSession();
+        try {
+            return  (TaskSettings) session.get(TaskSettingsModel.class, taskId);
+        } finally {
+            session.close();
+        }
+    }
+
+    /**
+     * Сохранение экземпляра настроек задачи
+     *
+     * @param taskSettings
+     */
+    public void setTask(TaskSettings taskSettings) {
+        Session session = sessionFactory.openSession();
+        session.beginTransaction();
+        try {
+            session.saveOrUpdate(taskSettings);
+            session.saveOrUpdate(taskSettings.getRunner());
+            session.getTransaction().commit();
+        } catch (HibernateException e) {
+            session.getTransaction().rollback();
+            throw e;
+        } finally {
+            session.close();
+        }
+    }
 }

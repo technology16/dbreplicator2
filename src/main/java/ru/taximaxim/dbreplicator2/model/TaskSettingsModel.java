@@ -25,66 +25,65 @@ package ru.taximaxim.dbreplicator2.model;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import ru.taximaxim.dbreplicator2.tasks.TaskSettings;
 
 /**
  * Класс инкапсулирующий задачу менеджера записей.
- * 
+ *
  * @author ags
  *
  */
 @Entity
-@Table( name = "task_settings" )
-public class TaskSettingsImpl implements TaskSettings{
-    
+@Table( name = "tasks" )
+public class TaskSettingsModel implements TaskSettings{
+
     /**
      * Идентификатор задачи
      */
+    @Id
+    @Column(name = "task_id")
     private int taskId;
-    
-    /**
-     * Идентификатор реплики
-     */
-    private int replicaId;
-    
-    /**
-     * Приоритет, задачи выполняются в порядке возрастания приоритета
-     * 
-     * TODO: Зачем приоритет? Ведь эти потоки обслуживают абсолютно разные 
-     * базы? Потоки должны быть не должны зависеть от другого потока. Предлагаю убрать.
-     */
-    private int priority;
-    
+
     /**
      * Флаг доступности задачи
      */
+    @Column(name = "enabled")
     private boolean enabled;
-    
+
     /**
      * Интервал после успешного выполнения задачи, мс
      */
+    @Column(name = "success_interval")
     private int successInterval;
-    
+
     /**
      * Интервал после ошибочного выполнения задачи
      */
+    @Column(name = "fail_interval")
     private int failInterval;
-    
+
     /**
      * Интервал после ошибочного выполнения задачи
      */
+    @Column(name = "description")
     private String description;
 
-	/**
-	 * Для использования выполнения задачи будем использовать поток реплику, как
-	 * подготовленное рабочее решение.
-	 * 
-	 */
+    /**
+     * Обработчик реплики
+     */
+    @ManyToOne
+    @JoinColumn(name = "runner_id")
+    private RunnerModel runner;
 
-    @Id
-    @Column(name = "task_id")
+    /**
+     * Для использования выполнения задачи будем использовать поток реплику, как
+     * подготовленное рабочее решение.
+     *
+     */
+
     @Override
     public int getTaskId() {
         return taskId;
@@ -95,29 +94,6 @@ public class TaskSettingsImpl implements TaskSettings{
         this.taskId = taskId;
     }
 
-    @Column(name = "replica_id")
-    @Override
-    public int getReplicaId() {
-        return replicaId;
-    }
-
-    @Override
-    public void setReplicaId(int replicaId) {
-        this.replicaId = replicaId;
-    }
-
-    @Column(name = "priority")
-    @Override
-    public int getPriority() {
-        return priority;
-    }
-
-    @Override
-    public void setPriority(int priority) {
-        this.priority = priority;
-    }
-
-    @Column(name = "enabled")
     @Override
     public boolean getEnabled() {
         return enabled;
@@ -128,7 +104,6 @@ public class TaskSettingsImpl implements TaskSettings{
         this.enabled = enabled;
     }
 
-    @Column(name = "success_interval")
     @Override
     public int getSuccessInterval() {
         return successInterval;
@@ -139,8 +114,7 @@ public class TaskSettingsImpl implements TaskSettings{
         this.successInterval = successInterval;
     }
 
-    @Column(name = "fail_interval")
-    @Override
+     @Override
     public int getFailInterval() {
         return failInterval;
     }
@@ -150,7 +124,6 @@ public class TaskSettingsImpl implements TaskSettings{
         this.failInterval = failInterval;
     }
 
-    @Column(name = "description")
     @Override
     public String getDescription() {
         return description;
@@ -159,5 +132,15 @@ public class TaskSettingsImpl implements TaskSettings{
     @Override
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @Override
+    public RunnerModel getRunner() {
+        return runner;
+    }
+
+    @Override
+    public void setRunner(RunnerModel runner) {
+        this.runner = runner;
     }
 }

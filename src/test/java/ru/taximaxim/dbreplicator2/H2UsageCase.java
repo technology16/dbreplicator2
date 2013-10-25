@@ -39,32 +39,33 @@ import org.junit.Test;
  */
 public class H2UsageCase {
 
-	private static final String TCP_PORT = "8084";
-	private static final String JDBC_URL      = "jdbc:h2:tcp://localhost:" + TCP_PORT + "/~/H2UsageCase";
-	private static final String JDBC_USER     = "sa";
-	private static final String JDBC_PASSWORD = "";
-	
-	private static Server server;
-	
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		Class.forName("org.h2.Driver");
-	    server = Server.createTcpServer(
-	    		new String[] { "-tcpPort", TCP_PORT, "-tcpAllowOthers" }).start();
-	}
-	
-	@AfterClass
-	public static void setUpAfterClass() throws Exception {
-		server.stop();
-	}
-	
+    private static final String TCP_PORT = "8084";
+    private static final String JDBC_URL = "jdbc:h2:tcp://localhost:"
+            + TCP_PORT + "/~/H2UsageCase";
+    private static final String JDBC_USER = "sa";
+    private static final String JDBC_PASSWORD = "";
 
-	protected Connection getConnection() throws SQLException {
-		return DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASSWORD);
-	}
-	
-	@Test
-	public void testConnection() throws SQLException {
-		getConnection();
-	}
+    private static Server server;
+
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
+        Class.forName("org.h2.Driver");
+        server = Server.createTcpServer(
+                new String[] { "-tcpPort", TCP_PORT, "-tcpAllowOthers" })
+                .start();
+    }
+
+    @AfterClass
+    public static void setUpAfterClass() throws Exception {
+        server.stop();
+    }
+
+    protected Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASSWORD);
+    }
+
+    @Test
+    public void testConnection() throws SQLException {
+        getConnection();
+    }
 }

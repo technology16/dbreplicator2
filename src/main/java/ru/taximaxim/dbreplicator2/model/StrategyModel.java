@@ -31,124 +31,124 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table( name = "strategies" )
+@Table(name = "strategies")
 public class StrategyModel {
-	
-	/**
-	 * Идентификатор стратегии
-	 */
+
+    /**
+     * Идентификатор стратегии
+     */
     @Id
-	@GeneratedValue(strategy=GenerationType.SEQUENCE)
-	private Integer id;
-	
-	/**
-	 * Имя класса
-	 */
-	private String className;
-	
-	/**
-	 * Параметр
-	 */
-	private String param;
-	
-	/**
-	 * Является ли стратегия рабочей на текущий момент времени
-	 */
-	private boolean isEnabled;
-	
-	/**
-	 * Приоритет стратегии, чем меньше, тем выше.
-	 */
-	private int priority;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    private Integer id;
 
-	/**
-	 * Поток исполнитель, которому принадлежит стратегия
-	 */
-	@ManyToOne
-    @JoinColumn(name="runner_id")	
-	private RunnerModel runner;
-	
-	/**
-	 * @see StrategyModel#runner
-	 */
-	public RunnerModel getRunner() {
-		return runner;
-	}
+    /**
+     * Имя класса
+     */
+    private String className;
 
-	/**
-	 * @see StrategyModel#runner
-	 */
-	public void setRunner(RunnerModel runner) {
-		this.runner = runner;
-	}
+    /**
+     * Параметр
+     */
+    private String param;
 
-	/**
-	 * @see StrategyModel#id
-	 */
-	public Integer getId() {
-		return id;
-	}
+    /**
+     * Является ли стратегия рабочей на текущий момент времени
+     */
+    private boolean isEnabled;
 
-	/**
-	 * @see StrategyModel#id
-	 */
-	public void setId(Integer id) {
-		this.id = id;
-	}
+    /**
+     * Приоритет стратегии, чем меньше, тем выше.
+     */
+    private int priority;
 
-	/**
-	 * @see StrategyModel#className
-	 */
-	public String getClassName() {
-		return className;
-	}
+    /**
+     * Поток исполнитель, которому принадлежит стратегия
+     */
+    @ManyToOne
+    @JoinColumn(name = "runner_id")
+    private RunnerModel runner;
 
-	/**
-	 * @see StrategyModel#className
-	 */
-	public void setClassName(String className) {
-		this.className = className;
-	}
+    /**
+     * @see StrategyModel#runner
+     */
+    public RunnerModel getRunner() {
+        return runner;
+    }
 
-	/**
-	 * @see StrategyModel#param
-	 */
-	public String getParam() {
-		return param;
-	}
+    /**
+     * @see StrategyModel#runner
+     */
+    public void setRunner(RunnerModel runner) {
+        this.runner = runner;
+    }
 
-	/**
-	 * @see StrategyModel#param
-	 */
-	public void setParam(String param) {
-		this.param = param;
-	}
+    /**
+     * @see StrategyModel#id
+     */
+    public Integer getId() {
+        return id;
+    }
 
-	/**
-	 * @see StrategyModel#isEnabled
-	 */
-	public boolean isEnabled() {
-		return isEnabled;
-	}
+    /**
+     * @see StrategyModel#id
+     */
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
-	/**
-	 * @see StrategyModel#isEnabled
-	 */
-	public void setEnabled(boolean isEnabled) {
-		this.isEnabled = isEnabled;
-	}
+    /**
+     * @see StrategyModel#className
+     */
+    public String getClassName() {
+        return className;
+    }
 
-	/**
-	 * @see StrategyModel#priority
-	 */
-	public int getPriority() {
-		return priority;
-	}
+    /**
+     * @see StrategyModel#className
+     */
+    public void setClassName(String className) {
+        this.className = className;
+    }
 
-	/**
-	 * @see StrategyModel#priority
-	 */
-	public void setPriority(int priority) {
-		this.priority = priority;
-	}
+    /**
+     * @see StrategyModel#param
+     */
+    public String getParam() {
+        return param;
+    }
+
+    /**
+     * @see StrategyModel#param
+     */
+    public void setParam(String param) {
+        this.param = param;
+    }
+
+    /**
+     * @see StrategyModel#isEnabled
+     */
+    public boolean isEnabled() {
+        return isEnabled;
+    }
+
+    /**
+     * @see StrategyModel#isEnabled
+     */
+    public void setEnabled(boolean isEnabled) {
+        this.isEnabled = isEnabled;
+    }
+
+    /**
+     * @see StrategyModel#priority
+     */
+    public int getPriority() {
+        return priority;
+    }
+
+    /**
+     * @see StrategyModel#priority
+     */
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
 }

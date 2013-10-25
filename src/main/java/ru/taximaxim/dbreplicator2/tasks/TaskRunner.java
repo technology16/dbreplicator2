@@ -26,56 +26,82 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 
-import ru.taximaxim.dbreplicator2.ThreadPool;
 import ru.taximaxim.dbreplicator2.WorkerThread;
-import ru.taximaxim.dbreplicator2.model.RunnerModel;
+import ru.taximaxim.dbreplicator2.model.TaskSettings;
 
-public class TaskThread implements Runnable {
+/**
+ * Класс потока циклического запуска выполнения обработчика записей
+ *
+ * @author volodin_aa
+ *
+ */
+public class TaskRunner implements Runnable {
 
-    public static final Logger LOG = Logger.getLogger(TaskThread.class);
-    
+    public static final Logger LOG = Logger.getLogger(TaskRunner.class);
+
+    /**
+     * Текущие настройки задачи
+     */
     private TaskSettings taskSettings;
-    
-    private RunnerModel runner;
-    
+
+    /**
+     * Инициализированный рабочий поток
+     */
+    private WorkerThread workerThread;
+
+    /**
+     * Флаг активности задачи
+     */
     private boolean enabled;
 
-    public TaskThread(TaskSettings taskSettings, RunnerModel runner) {
+    /**
+     * @param taskSettings
+     */
+    public TaskRunner(TaskSettings taskSettings) {
         this.taskSettings = taskSettings;
-        this.runner = runner;
-        
+        this.workerThread = new WorkerThread(taskSettings.getRunner());
+
         enabled = true;
     }
-    
+
+    /**
+     * Метод для корректной остановки потока задачи. Поток дождется окончания текущего цикла и завершит работу
+     */
     public void stop(){
         enabled = false;
     }
 
     @Override
     public void run() {
-        LOG.info(String.format("Запуск задачи [%d] %s", 
+        LOG.info(String.format("Запуск задачи [%d] %s",
                 taskSettings.getTaskId(), taskSettings.getDescription()));
         while (enabled) {
             try {
                 long startTime = new Date().getTime();
 
-                new WorkerThread(runner).run();
-                //threadPool.start(runner);
+                workerThread.run();
 
                 // Ожидаем окончания периода синхронизации
-                long sleepTime = startTime + taskSettings.getSuccessInterval() - new Date().getTime();
+                long sleepTime = startTime + taskSettings.getSuccessInterval()
+                        - new Date().getTime();
 
                 if (sleepTime > 0) {
-                    LOG.info(String.format("Ожидаем %d милисекунд после завершения задачи [%d] %s",
-                            sleepTime, taskSettings.getTaskId(), taskSettings.getDescription()));
+                    LOG.info(String
+                            .format("Ожидаем %d милисекунд после завершения задачи [%d] %s",
+                                    sleepTime, taskSettings.getTaskId(),
+                                    taskSettings.getDescription()));
                     Thread.sleep(sleepTime);
                 }
             } catch (Exception e) {
-                LOG.error(String.format("Ошибка при выполнении задачи [%d] %s", 
-                        taskSettings.getTaskId(), taskSettings.getDescription()), e);
+                LOG.error(
+                        String.format("Ошибка при выполнении задачи [%d] %s",
+                                taskSettings.getTaskId(),
+                                taskSettings.getDescription()), e);
 
-                LOG.info(String.format("Ожидаем %d милисекунд до рестарта задачи [%d] %s", 
-                        taskSettings.getFailInterval(), taskSettings.getTaskId(), taskSettings.getDescription()));
+                LOG.info(String.format(
+                        "Ожидаем %d милисекунд до рестарта задачи [%d] %s",
+                        taskSettings.getFailInterval(),
+                        taskSettings.getTaskId(), taskSettings.getDescription()));
                 try {
                     Thread.sleep(taskSettings.getFailInterval());
                 } catch (InterruptedException ex) {

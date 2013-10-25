@@ -29,8 +29,8 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 import org.hibernate.service.ServiceRegistryBuilder;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
@@ -58,13 +58,9 @@ public class ThreadPoolTest {
 				.buildServiceRegistry();
 		sessionFactory = configuration.buildSessionFactory(serviceRegistry);
 	}
-
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-		threadPool.shutdown();
-	}
-
-	@Test
+	
+    @Test
+    @Ignore   /// Не доделан
 	public void testPool() {
 
 		Session session = sessionFactory.openSession();
@@ -115,9 +111,7 @@ public class ThreadPoolTest {
 	}
 
 	public void addStrategy(RunnerModel runner, StrategyModel strategy) {
-
 		runner.getStrategyModels().add(strategy);
 		strategy.setRunner(runner);
-
 	}
 }

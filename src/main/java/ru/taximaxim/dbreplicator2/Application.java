@@ -39,71 +39,72 @@ import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
  * 
  */
 public class Application {
-	
-	private static final Logger LOG = Logger.getLogger(Application.class);
 
-	private static SessionFactory sessionFactory;
-	
-	private static ConnectionFactory connectionFactory;
-	
-	/**
-	 * Данный класс нельзя инстанциировать.
-	 */
-	private Application() {
-	}
-	
-	/**
-	 * Возвращает фабрику сессий гибернейта.
-	 * 
-	 * @return фабрику сессий гибернейта.
-	 */
-	public static SessionFactory getSessionFactory() {
-		
-		LOG.debug("Запрошено создание новой фабрики сессий hibernate");
+    private static final Logger LOG = Logger.getLogger(Application.class);
 
-		if (sessionFactory == null) {
-		    Configuration configuration = new Configuration();
-		    configuration.configure();
-		    
-		    ServiceRegistry serviceRegistry = 
-		    	    new ServiceRegistryBuilder().applySettings(configuration.getProperties()).buildServiceRegistry();        
-		    sessionFactory = configuration.buildSessionFactory(serviceRegistry);
+    private static SessionFactory sessionFactory;
 
-		    LOG.info("Создана новая фабрика сессий hibernate");
-		}
-	    return sessionFactory;
-	}
-	
-	/**
-	 * Возвращает фабрику соединений
-	 * 
-	 * @return фабрику соединений
-	 */
-	public static ConnectionFactory getConnectionFactory() {
-		
-		if (connectionFactory == null ) {
-			connectionFactory = 
-				new BoneCPConnectionsFactory(new BoneCPSettingsService(getSessionFactory()));
-		}
-		
-		return connectionFactory;
-	}
-	
-	public static void main(String[] args) {
-		
-		CommandLineParser.parse(args);
-		
-		// TODO: Чтение настроек о зарегистрированных пулах соединений и их 
-		// инициализация.
+    private static ConnectionFactory connectionFactory;
 
-		// TODO: Определение рабочих потоков, подготовка пула потоков.
-		// 1. Расширить таблицы H2 насторйками пулов рабочих потоков.
-		// 2. Инициализация пулов потоков.
-		
-		// TODO: Определение ведущих БД и запуск процессов диспетчеров записей 
-		// для каждой ведущей БД.
-		// 1. Определяем ведущие БД по существующим настройкам.
-		// 2. Запуск диспечеров записей для каждой ведущей БД.
-		
-	}
+    /**
+     * Данный класс нельзя инстанциировать.
+     */
+    private Application() {
+    }
+
+    /**
+     * Возвращает фабрику сессий гибернейта.
+     * 
+     * @return фабрику сессий гибернейта.
+     */
+    public static SessionFactory getSessionFactory() {
+
+        LOG.debug("Запрошено создание новой фабрики сессий hibernate");
+
+        if (sessionFactory == null) {
+            Configuration configuration = new Configuration();
+            configuration.configure();
+
+            ServiceRegistry serviceRegistry = new ServiceRegistryBuilder()
+                    .applySettings(configuration.getProperties())
+                    .buildServiceRegistry();
+            sessionFactory = configuration.buildSessionFactory(serviceRegistry);
+
+            LOG.info("Создана новая фабрика сессий hibernate");
+        }
+        return sessionFactory;
+    }
+
+    /**
+     * Возвращает фабрику соединений
+     * 
+     * @return фабрику соединений
+     */
+    public static ConnectionFactory getConnectionFactory() {
+
+        if (connectionFactory == null) {
+            connectionFactory = new BoneCPConnectionsFactory(
+                    new BoneCPSettingsService(getSessionFactory()));
+        }
+
+        return connectionFactory;
+    }
+
+    public static void main(String[] args) {
+
+        CommandLineParser.parse(args);
+
+        // TODO: Чтение настроек о зарегистрированных пулах соединений и их
+        // инициализация.
+
+        // TODO: Определение рабочих потоков, подготовка пула потоков.
+        // 1. Расширить таблицы H2 насторйками пулов рабочих потоков.
+        // 2. Инициализация пулов потоков.
+
+        // TODO: Определение ведущих БД и запуск процессов диспетчеров записей
+        // для каждой ведущей БД.
+        // 1. Определяем ведущие БД по существующим настройкам.
+        // 2. Запуск диспечеров записей для каждой ведущей БД.
+
+    }
 }

@@ -24,42 +24,46 @@ package ru.taximaxim.dbreplicator2.cf;
 
 import java.util.Map;
 
+import ru.taximaxim.dbreplicator2.model.BoneCPSettings;
 
 /**
  * Интерфейс хранилища настроек именнованных соединений
  * 
  * @author volodin_aa
- *
+ * 
  */
 public interface BoneCPDataBaseSettingsStorage {
 
     /**
      * Получение объекта настроек по имени
      * 
-     * @param poolName - имя пула
+     * @param poolName
+     *            - имя пула
      * @return - объект настроек
      */
-    public BoneCPSettings getDataBaseSettingsByName(String poolName);
+    BoneCPSettings getDataBaseSettingsByName(String poolName);
 
     /**
      * Получение всех настроек из хранилища
      * 
      * @return мап именованных настроек
      */
-    public Map<String, BoneCPSettings> getDataBaseSettings();
+    Map<String, BoneCPSettings> getDataBaseSettings();
 
     /**
      * Сохранение настроек в хранилище
      * 
-     * @param dataBaseSettings - объект настроек
+     * @param dataBaseSettings
+     *            - объект настроек
      */
-    public void setDataBaseSettings(BoneCPSettings dataBaseSettings);
+    void setDataBaseSettings(BoneCPSettings dataBaseSettings);
 
     /**
      * Удаление настроек из хранилища
      * 
-     * @param dateBaseSettings - объект настроек
+     * @param dateBaseSettings
+     *            - объект настроек
      */
-    public void delDataBaseSettings(BoneCPSettings dateBaseSettings);
-  
+    void delDataBaseSettings(BoneCPSettings dateBaseSettings);
+
 }

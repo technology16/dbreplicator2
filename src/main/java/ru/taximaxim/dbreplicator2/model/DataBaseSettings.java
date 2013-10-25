@@ -20,14 +20,11 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
- /**
- * 
- */
-package ru.taximaxim.dbreplicator2.cf;
+package ru.taximaxim.dbreplicator2.model;
 
 /**
  * Интерфейс настроек подключения к БД
- * 
+ *
  * @author volodin_aa
  *
  */
@@ -35,72 +32,77 @@ public interface DataBaseSettings {
 
     /**
      * Получение имени пула
-     * 
+     *
      * @return - имя пула
      */
-    public String getPoolId();
+    String getPoolId();
 
     /**
      * Установка имени пула
-     * 
-     * @param poolId - имя пула
+     *
+     * @param poolId
+     *            - имя пула
      */
-    public void setPoolId(String poolId);
+    void setPoolId(String poolId);
 
     /**
      * Получение имени драйвера БД
-     * 
+     *
      * @return - имя драйвера БД
      */
-    public String getDriver();
+    String getDriver();
 
     /**
      * Установка имени драйвра БД
-     * 
-     * @param driver - имя драйвера БД
+     *
+     * @param driver
+     *            - имя драйвера БД
      */
-    public void setDriver(String driver);
+    void setDriver(String driver);
 
     /**
      * Получение строки подключения к БД
-     * 
+     *
      * @return - строка подключения к БД
      */
-    public String getUrl();
+    String getUrl();
 
     /**
      * Установка строки подключения к БД
-     * 
-     * @param url - строка подключения к БД
+     *
+     * @param url
+     *            - строка подключения к БД
      */
-    public void setUrl(String url);
+    void setUrl(String url);
 
     /**
      * Получение имени пользователя
-     * 
+     *
      * @return - имя пользователя
      */
-    public String getUser();
+    String getUser();
 
     /**
      * Установка имени пользователя
-     * 
-     * @param user - имя пользователя
+     *
+     * @param user
+     *            - имя пользователя
      */
-    public void setUser(String user);
+    void setUser(String user);
 
     /**
      * Получение пароля
-     * 
+     *
      * @return - пароль
      */
-    public String getPass();
+    String getPass();
 
     /**
      * Установка пароля
-     * 
-     * @param pass - пароль
+     *
+     * @param pass
+     *            - пароль
      */
-    public void setPass(String pass);
+    void setPass(String pass);
 
-  }
+}

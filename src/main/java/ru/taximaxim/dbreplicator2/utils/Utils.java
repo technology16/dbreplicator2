@@ -20,7 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ru.taximaxim.dbreplicator2;
+package ru.taximaxim.dbreplicator2.utils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,29 +30,32 @@ import java.util.List;
  * Вспомогательный алгоритмический класс
  * 
  * @author ags
- *
+ * 
  */
 public class Utils {
 
-	/**
-     * Фикс для исправления предупреждения "The expression of type List needs unchecked conversion"
+    /**
+     * Фикс для исправления предупреждения
+     * "The expression of type List needs unchecked conversion"
      * 
-     * @param clazz Класс к которому нужно кастить список
-     * @param c Коллекция объектов без приведения к нужному типу
+     * @param clazz
+     *            Класс к которому нужно кастить список
+     * @param c
+     *            Коллекция объектов без приведения к нужному типу
      * 
      * @return Проверенный список
      */
-	public static <T> List<T> castList(Class<? extends T> clazz, Collection<?> c) {
-		List<T> r = new ArrayList<T>(c.size());
-		for (Object o : c) {
-			r.add(clazz.cast(o));
-		}
-		return r;
-	}
+    public static <T> List<T> castList(Class<? extends T> clazz, Collection<?> c) {
+        List<T> r = new ArrayList<T>(c.size());
+        for (Object o : c) {
+            r.add(clazz.cast(o));
+        }
+        return r;
+    }
 
-	/**
-	 * Данный класс нельзя инстанциировать.
-	 */
-	private Utils() {
-	}
+    /**
+     * Данный класс нельзя инстанциировать.
+     */
+    private Utils() {
+    }
 }

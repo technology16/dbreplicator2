@@ -25,9 +25,6 @@ package ru.taximaxim.dbreplicator2;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
-import org.hibernate.service.ServiceRegistry;
-import org.hibernate.service.ServiceRegistryBuilder;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -37,88 +34,90 @@ import ru.taximaxim.dbreplicator2.model.StrategyModel;
 
 public class StrategiesTest {
 
-	protected static SessionFactory sessionFactory;
-	
-	protected static final Logger LOG = Logger.getLogger(StrategiesTest.class);
-	
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		
-	    Configuration configuration = new Configuration();
-	    configuration.configure();
-	    
-	    // http://stackoverflow.com/a/15702946/2743959
-	    ServiceRegistry serviceRegistry = 
-	    	    new ServiceRegistryBuilder().applySettings(configuration.getProperties()).buildServiceRegistry();        
-	    sessionFactory = configuration.buildSessionFactory(serviceRegistry);		
-	}
+    protected static SessionFactory sessionFactory;
 
-	/**
-	 * Проверка создания модели исполняемого потока и стратегии.
-	 */
-	@Test
-	public void test() {
-		
+    protected static final Logger LOG = Logger.getLogger(StrategiesTest.class);
+
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
+
+        sessionFactory = Application.getSessionFactory();
+    }
+
+    /**
+     * Проверка создания модели исполняемого потока и стратегии.
+     */
+    @Test
+    public void test() {
+
         Session session = sessionFactory.openSession();
         session.beginTransaction();
 
-        RunnerModel runner = createRunner("source", "target", "Описание исполняемого потока");
-        StrategyModel strategy = createStrategy("ru.taximaxim.Class", null, true, 100);
-        
+        RunnerModel runner = createRunner("source", "target",
+                "Описание исполняемого потока");
+        StrategyModel strategy = createStrategy("ru.taximaxim.Class", null,
+                true, 100);
+
         Assert.assertNull(runner.getId());
         LOG.debug("Идентификатор потока перед сохранением: " + runner.getId());
 
         addStrategy(runner, strategy);
         session.saveOrUpdate(runner);
         session.saveOrUpdate(strategy);
-        
-        LOG.debug("Идентификатор потока после его сохранения: " + runner.getId());
+
+        LOG.debug("Идентификатор потока после его сохранения: "
+                + runner.getId());
         Assert.assertNotNull(runner.getId());
-        
-        RunnerModel runner_compare = (RunnerModel) session.get(RunnerModel.class, runner.getId());
-        
-        LOG.debug("Идентификатор потока после его восстановления: " + runner_compare.getId());
+
+        RunnerModel runner_compare = (RunnerModel) session.get(
+                RunnerModel.class, runner.getId());
+
+        LOG.debug("Идентификатор потока после его восстановления: "
+                + runner_compare.getId());
         Assert.assertEquals(runner.getId(), runner_compare.getId());
 
-        RunnerModel runner2 = createRunner("source", "target", "Описание исполняемого потока (2)");
-        StrategyModel strategy2 = createStrategy("ru.taximaxim.Class", null, true, 100);
+        RunnerModel runner2 = createRunner("source", "target",
+                "Описание исполняемого потока (2)");
+        StrategyModel strategy2 = createStrategy("ru.taximaxim.Class", null,
+                true, 100);
         addStrategy(runner2, strategy2);
-        
+
         session.saveOrUpdate(runner2);
         session.saveOrUpdate(strategy2);
-        
-        Assert.assertNotNull(((StrategyModel)runner2.getStrategyModels().get(0)).getId());
-	}
-	
-	public RunnerModel createRunner(String source, String target, String description) {
 
-		RunnerModel runner = new RunnerModel();
-		
-		runner.setSource(source);
-		runner.setTarget(target);
-		runner.setDescription(description);
-		
-		return runner;
-	}
-	
-	public StrategyModel createStrategy(String className, String param, 
-			boolean isEnabled, int priority) {
-		
-		StrategyModel strategy = new StrategyModel();
-		
-		strategy.setClassName(className);
-		strategy.setParam(param);
-		strategy.setEnabled(isEnabled);
-		strategy.setPriority(priority);
-		
-		return strategy;
-	}
-	
-	public void addStrategy(RunnerModel runner, StrategyModel strategy) {
-		
-		runner.getStrategyModels().add(strategy);
-		strategy.setRunner(runner);
-		
-	}
+        Assert.assertNotNull(((StrategyModel) runner2.getStrategyModels()
+                .get(0)).getId());
+    }
+
+    public RunnerModel createRunner(String source, String target,
+            String description) {
+
+        RunnerModel runner = new RunnerModel();
+
+        runner.setSource(source);
+        runner.setTarget(target);
+        runner.setDescription(description);
+
+        return runner;
+    }
+
+    public StrategyModel createStrategy(String className, String param,
+            boolean isEnabled, int priority) {
+
+        StrategyModel strategy = new StrategyModel();
+
+        strategy.setClassName(className);
+        strategy.setParam(param);
+        strategy.setEnabled(isEnabled);
+        strategy.setPriority(priority);
+
+        return strategy;
+    }
+
+    public void addStrategy(RunnerModel runner, StrategyModel strategy) {
+
+        runner.getStrategyModels().add(strategy);
+        strategy.setRunner(runner);
+
+    }
 }
-

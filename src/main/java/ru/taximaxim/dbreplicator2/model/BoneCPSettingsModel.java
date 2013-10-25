@@ -27,42 +27,41 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import ru.taximaxim.dbreplicator2.cf.BoneCPSettings;
 
 /**
  * Персистентный класс настроек BoneCP
- * 
+ *
  * @author volodin_aa
  *
  */
 @Entity
-@Table( name = "bone_cp_settings" )
-public class BoneCPSettingsImpl implements BoneCPSettings {
+@Table(name = "bone_cp_settings")
+public class BoneCPSettingsModel implements BoneCPSettings {
     /**
      * Минимальное количество соединений в пуле
      */
-    final static int MIN_CONNECTIONS_PER_PARTITION = 1;
+    static final int MIN_CONNECTIONS_PER_PARTITION = 1;
     /**
      * Максимальное количество соединений в пуле
      */
-    final static int MAX_CONNECTIONS_PER_PARTITION = 100;
+    static final int MAX_CONNECTIONS_PER_PARTITION = 100;
     /**
      * Количество партиций в пуле
      */
-    final static int PARTITION_COUNT = 1;
+    static final int PARTITION_COUNT = 1;
     /**
      * Тайм аут на получение соединения из пула
      */
-    final static long CONNECTION_TIMEOUT_IN_MS = 10000;
+    static final long CONNECTION_TIMEOUT_IN_MS = 10000;
     /**
      * Тайм аут на закрытие соединения в пуле
      */
-    final static long CLOSE_CONNECTION_WATCH_TIMEOUT_IN_MS = 0;
-    
+    static final long CLOSE_CONNECTION_WATCH_TIMEOUT_IN_MS = 0;
+
     /**
      * Конструктор по умолчанию
      */
-    public BoneCPSettingsImpl() {
+    public BoneCPSettingsModel() {
     }
 
     /**
@@ -85,7 +84,7 @@ public class BoneCPSettingsImpl implements BoneCPSettings {
      * Пароль
      */
     private String pass;
-    
+
     /**
      * Минимальное количество соединений
      */
@@ -109,21 +108,32 @@ public class BoneCPSettingsImpl implements BoneCPSettings {
 
     /**
      * Полный конструктор
-     * 
-     * @param poolId - имя пула
-     * @param driver - наименование драйвера БД
-     * @param url - строка подключения к БД
-     * @param user - имя пользователя
-     * @param pass - пароль
-     * @param minConnectionsPerPartition - минимальное количество соединений
-     * @param maxConnectionsPerPartition - максимальное количество соединений
-     * @param partitionCount - количество порций соединений
-     * @param connectionTimeoutInMs - таймаут получения соединения
-     * @param closeConnectionWatchTimeoutInMs - таймаут закрытия соединения
+     *
+     * @param poolId
+     *            - имя пула
+     * @param driver
+     *            - наименование драйвера БД
+     * @param url
+     *            - строка подключения к БД
+     * @param user
+     *            - имя пользователя
+     * @param pass
+     *            - пароль
+     * @param minConnectionsPerPartition
+     *            - минимальное количество соединений
+     * @param maxConnectionsPerPartition
+     *            - максимальное количество соединений
+     * @param partitionCount
+     *            - количество порций соединений
+     * @param connectionTimeoutInMs
+     *            - таймаут получения соединения
+     * @param closeConnectionWatchTimeoutInMs
+     *            - таймаут закрытия соединения
      */
-    public BoneCPSettingsImpl(String poolId, String driver, String url, String user, String pass,
-            int minConnectionsPerPartition, int maxConnectionsPerPartition, int partitionCount,
-            long connectionTimeoutInMs, long closeConnectionWatchTimeoutInMs) {
+    public BoneCPSettingsModel(String poolId, String driver, String url, String user,
+            String pass, int minConnectionsPerPartition, int maxConnectionsPerPartition,
+            int partitionCount, long connectionTimeoutInMs,
+            long closeConnectionWatchTimeoutInMs) {
         this.poolId = poolId;
         this.driver = driver;
         this.url = url;
@@ -135,19 +145,26 @@ public class BoneCPSettingsImpl implements BoneCPSettings {
         this.connectionTimeoutInMs = connectionTimeoutInMs;
         this.closeConnectionWatchTimeoutInMs = closeConnectionWatchTimeoutInMs;
     }
-    
+
     /**
      * Сокращенный конструктор
-     * 
-     * @param poolId - имя пула
-     * @param driver - наименование драйвера БД
-     * @param url - строка подключения к БД
-     * @param user - имя пользователя
-     * @param pass - пароль
+     *
+     * @param poolId
+     *            - имя пула
+     * @param driver
+     *            - наименование драйвера БД
+     * @param url
+     *            - строка подключения к БД
+     * @param user
+     *            - имя пользователя
+     * @param pass
+     *            - пароль
      */
-    public BoneCPSettingsImpl(String poolId, String driver, String url, String user, String pass) {
-        this(poolId, driver, url, user, pass, MIN_CONNECTIONS_PER_PARTITION, MAX_CONNECTIONS_PER_PARTITION, 
-                PARTITION_COUNT, CONNECTION_TIMEOUT_IN_MS, CLOSE_CONNECTION_WATCH_TIMEOUT_IN_MS);
+    public BoneCPSettingsModel(String poolId, String driver, String url, String user,
+            String pass) {
+        this(poolId, driver, url, user, pass, MIN_CONNECTIONS_PER_PARTITION,
+                MAX_CONNECTIONS_PER_PARTITION, PARTITION_COUNT, CONNECTION_TIMEOUT_IN_MS,
+                CLOSE_CONNECTION_WATCH_TIMEOUT_IN_MS);
     }
 
     /**
@@ -160,7 +177,8 @@ public class BoneCPSettingsImpl implements BoneCPSettings {
     }
 
     /**
-     * @param name the name to set
+     * @param name
+     *            the name to set
      */
     public void setPoolId(String poolId) {
         this.poolId = poolId;
@@ -175,7 +193,8 @@ public class BoneCPSettingsImpl implements BoneCPSettings {
     }
 
     /**
-     * @param driver the driver to set
+     * @param driver
+     *            the driver to set
      */
     public void setDriver(String driver) {
         this.driver = driver;
@@ -190,7 +209,8 @@ public class BoneCPSettingsImpl implements BoneCPSettings {
     }
 
     /**
-     * @param url the url to set
+     * @param url
+     *            the url to set
      */
     public void setUrl(String url) {
         this.url = url;
@@ -205,7 +225,8 @@ public class BoneCPSettingsImpl implements BoneCPSettings {
     }
 
     /**
-     * @param user the user to set
+     * @param user
+     *            the user to set
      */
     public void setUser(String user) {
         this.user = user;
@@ -220,7 +241,8 @@ public class BoneCPSettingsImpl implements BoneCPSettings {
     }
 
     /**
-     * @param pass the pass to set
+     * @param pass
+     *            the pass to set
      */
     public void setPass(String pass) {
         this.pass = pass;
@@ -235,7 +257,8 @@ public class BoneCPSettingsImpl implements BoneCPSettings {
     }
 
     /**
-     * @param minConnectionsPerPartition the minConnectionsPerPartition to set
+     * @param minConnectionsPerPartition
+     *            the minConnectionsPerPartition to set
      */
     public void setMinConnectionsPerPartition(int minConnectionsPerPartition) {
         this.minConnectionsPerPartition = minConnectionsPerPartition;
@@ -250,7 +273,8 @@ public class BoneCPSettingsImpl implements BoneCPSettings {
     }
 
     /**
-     * @param maxConnectionsPerPartition the maxConnectionsPerPartition to set
+     * @param maxConnectionsPerPartition
+     *            the maxConnectionsPerPartition to set
      */
     public void setMaxConnectionsPerPartition(int maxConnectionsPerPartition) {
         this.maxConnectionsPerPartition = maxConnectionsPerPartition;
@@ -265,7 +289,8 @@ public class BoneCPSettingsImpl implements BoneCPSettings {
     }
 
     /**
-     * @param partitionCount the partitionCount to set
+     * @param partitionCount
+     *            the partitionCount to set
      */
     public void setPartitionCount(int partitionCount) {
         this.partitionCount = partitionCount;
@@ -280,7 +305,8 @@ public class BoneCPSettingsImpl implements BoneCPSettings {
     }
 
     /**
-     * @param connectionTimeoutInMs the connectionTimeoutInMs to set
+     * @param connectionTimeoutInMs
+     *            the connectionTimeoutInMs to set
      */
     public void setConnectionTimeoutInMs(long connectionTimeoutInMs) {
         this.connectionTimeoutInMs = connectionTimeoutInMs;
@@ -295,10 +321,31 @@ public class BoneCPSettingsImpl implements BoneCPSettings {
     }
 
     /**
-     * @param closeConnectionWatchTimeoutInMs the closeConnectionWatchTimeoutInMs to set
+     * @param closeConnectionWatchTimeoutInMs
+     *            the closeConnectionWatchTimeoutInMs to set
      */
     public void setCloseConnectionWatchTimeoutInMs(long closeConnectionWatchTimeoutInMs) {
         this.closeConnectionWatchTimeoutInMs = closeConnectionWatchTimeoutInMs;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (int) (closeConnectionWatchTimeoutInMs ^ (closeConnectionWatchTimeoutInMs >>> 32));
+        result = prime * result + (int) (connectionTimeoutInMs ^ (connectionTimeoutInMs >>> 32));
+        result = prime * result + ((driver == null) ? 0 : driver.hashCode());
+        result = prime * result + maxConnectionsPerPartition;
+        result = prime * result + minConnectionsPerPartition;
+        result = prime * result + partitionCount;
+        result = prime * result + ((pass == null) ? 0 : pass.hashCode());
+        result = prime * result + ((poolId == null) ? 0 : poolId.hashCode());
+        result = prime * result + ((url == null) ? 0 : url.hashCode());
+        result = prime * result + ((user == null) ? 0 : user.hashCode());
+        return result;
     }
 
     /* (non-Javadoc)
@@ -306,20 +353,66 @@ public class BoneCPSettingsImpl implements BoneCPSettings {
      */
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof BoneCPSettings) {
-            return poolId.equals(((BoneCPSettings) obj).getPoolId()) &&
-                    driver.equals(((BoneCPSettings) obj).getDriver()) &&
-                    url.equals(((BoneCPSettings) obj).getUrl()) &&
-                    user.equals(((BoneCPSettings) obj).getUser()) &&
-                    pass.equals(((BoneCPSettings) obj).getPass()) &&
-                    this.minConnectionsPerPartition == ((BoneCPSettings) obj).getMinConnectionsPerPartition() &&
-                    this.maxConnectionsPerPartition == ((BoneCPSettings) obj).getMaxConnectionsPerPartition() &&
-                    this.partitionCount == ((BoneCPSettings) obj).getPartitionCount() &&
-                    this.connectionTimeoutInMs == ((BoneCPSettings) obj).getConnectionTimeoutInMs() &&
-                    this.closeConnectionWatchTimeoutInMs == ((BoneCPSettings) obj).getCloseConnectionWatchTimeoutInMs();
+        if (this == obj) {
+            return true;
         }
-        return false;
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof BoneCPSettingsModel)) {
+            return false;
+        }
+        BoneCPSettingsModel other = (BoneCPSettingsModel) obj;
+        if (closeConnectionWatchTimeoutInMs != other.closeConnectionWatchTimeoutInMs) {
+            return false;
+        }
+        if (connectionTimeoutInMs != other.connectionTimeoutInMs) {
+            return false;
+        }
+        if (driver == null) {
+            if (other.driver != null) {
+                return false;
+            }
+        } else if (!driver.equals(other.driver)) {
+            return false;
+        }
+        if (maxConnectionsPerPartition != other.maxConnectionsPerPartition) {
+            return false;
+        }
+        if (minConnectionsPerPartition != other.minConnectionsPerPartition) {
+            return false;
+        }
+        if (partitionCount != other.partitionCount) {
+            return false;
+        }
+        if (pass == null) {
+            if (other.pass != null) {
+                return false;
+            }
+        } else if (!pass.equals(other.pass)) {
+            return false;
+        }
+        if (poolId == null) {
+            if (other.poolId != null) {
+                return false;
+            }
+        } else if (!poolId.equals(other.poolId)) {
+            return false;
+        }
+        if (url == null) {
+            if (other.url != null) {
+                return false;
+            }
+        } else if (!url.equals(other.url)) {
+            return false;
+        }
+        if (user == null) {
+            if (other.user != null) {
+                return false;
+            }
+        } else if (!user.equals(other.user)) {
+            return false;
+        }
+        return true;
     }
-
-
 }

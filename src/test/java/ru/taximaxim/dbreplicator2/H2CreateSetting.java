@@ -41,11 +41,11 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import ru.taximaxim.dbreplicator2.cf.BoneCPConnectionsFactory;
-import ru.taximaxim.dbreplicator2.model.BoneCPSettingsImpl;
+import ru.taximaxim.dbreplicator2.model.BoneCPSettingsModel;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
-import ru.taximaxim.dbreplicator2.model.TaskSettingsImpl;
+import ru.taximaxim.dbreplicator2.model.TaskSettingsModel;
 
 /**
  * Тест соединения с базой данных по протоколу TCP.
@@ -84,12 +84,12 @@ public class H2CreateSetting {
         String source = "source";
         BoneCPSettingsService cpSettingsService = new BoneCPSettingsService(sessionFactory);
         
-        BoneCPSettingsImpl settingsPool = new BoneCPSettingsImpl(
+        BoneCPSettingsModel settingsPool = new BoneCPSettingsModel(
                 poolName, "org.h2.Driver", "jdbc:h2:mem://localhost/~/test", "sa", "");
         
         cpSettingsService.setDataBaseSettings(settingsPool);
         
-        BoneCPSettingsImpl settingsSource = new BoneCPSettingsImpl(
+        BoneCPSettingsModel settingsSource = new BoneCPSettingsModel(
                 source,   "org.h2.Driver", "jdbc:h2:mem://localhost/~/test", "sa", "");
         
         cpSettingsService.setDataBaseSettings(settingsSource);
@@ -118,7 +118,7 @@ public class H2CreateSetting {
         strategyModel.setRunner(runnerModel);
 
         
-        BoneCPSettingsImpl settings_orig = new BoneCPSettingsImpl("test",
+        BoneCPSettingsModel settings_orig = new BoneCPSettingsModel("test",
                 "org.h2.Driver", "jdbc:h2:tcp://localhost:8084/~/H2Settings",
                 "sa", "*****", 100, 50, 90, 70, 30);
 
@@ -224,10 +224,10 @@ public class H2CreateSetting {
 //        }
         
        LOG.info("Settings: ");
-       Collection<BoneCPSettingsImpl> str = getAllSettings();
+       Collection<BoneCPSettingsModel> str = getAllSettings();
        
        LOG.info("Settings: " + str.size());
-        for (BoneCPSettingsImpl setting_base : getAllSettings()) {
+        for (BoneCPSettingsModel setting_base : getAllSettings()) {
 
 //            Assert.assertEquals(settings_orig.getPoolId(), setting_base.getPoolId());
 //            Assert.assertEquals(settings_orig.getCloseConnectionWatchTimeoutInMs(), setting_base.getCloseConnectionWatchTimeoutInMs());
@@ -306,7 +306,7 @@ public class H2CreateSetting {
     }
     // /////////////////////////////////////////////////////////////////////////////////////////////
 
-    public void add(BoneCPSettingsImpl objclass) throws SQLException {
+    public void add(BoneCPSettingsModel objclass) throws SQLException {
         try {
             isSession();
             session.beginTransaction();
@@ -321,7 +321,7 @@ public class H2CreateSetting {
         }
     }
 
-    public void update(Long id, BoneCPSettingsImpl objclass)
+    public void update(Long id, BoneCPSettingsModel objclass)
             throws SQLException {
         try {
             isSession();
@@ -337,12 +337,12 @@ public class H2CreateSetting {
         }
     }
 
-    public BoneCPSettingsImpl getSettingById(Long id) throws SQLException {
-        BoneCPSettingsImpl objclass = null;
+    public BoneCPSettingsModel getSettingById(Long id) throws SQLException {
+        BoneCPSettingsModel objclass = null;
         try {
             isSession();
-            objclass = (BoneCPSettingsImpl) session.load(
-                    BoneCPSettingsImpl.class, id);
+            objclass = (BoneCPSettingsModel) session.load(
+                    BoneCPSettingsModel.class, id);
         } catch (Exception ex) {
             LOG.error("Ошибка 'findById': " + ex.getMessage());
             ex.printStackTrace();
@@ -354,11 +354,11 @@ public class H2CreateSetting {
     }
 
     @SuppressWarnings("unchecked")
-    public Collection<BoneCPSettingsImpl> getAllSettings() throws SQLException {
-        List<BoneCPSettingsImpl> objclass = new ArrayList<BoneCPSettingsImpl>();
+    public Collection<BoneCPSettingsModel> getAllSettings() throws SQLException {
+        List<BoneCPSettingsModel> objclass = new ArrayList<BoneCPSettingsModel>();
         try {
             isSession();
-            objclass = session.createCriteria(BoneCPSettingsImpl.class).list();
+            objclass = session.createCriteria(BoneCPSettingsModel.class).list();
         } catch (Exception ex) {
             LOG.error("Ошибка 'getAll': " + ex.getMessage());
             ex.printStackTrace();
@@ -369,7 +369,7 @@ public class H2CreateSetting {
         return objclass;
     }
 
-    public void delete(BoneCPSettingsImpl objclass) throws SQLException {
+    public void delete(BoneCPSettingsModel objclass) throws SQLException {
         try {
             isSession();
             session.beginTransaction();
@@ -464,7 +464,7 @@ public class H2CreateSetting {
 
     // /////////////////////////////////////////////////////////////////////////////////////////////
 
-    public void add(TaskSettingsImpl objclass) throws SQLException {
+    public void add(TaskSettingsModel objclass) throws SQLException {
         try {
             isSession();
             session.beginTransaction();
@@ -479,7 +479,7 @@ public class H2CreateSetting {
         }
     }
 
-    public void update(Long id, TaskSettingsImpl objclass) throws SQLException {
+    public void update(Long id, TaskSettingsModel objclass) throws SQLException {
         try {
             isSession();
             session.beginTransaction();
@@ -494,12 +494,12 @@ public class H2CreateSetting {
         }
     }
 
-    public TaskSettingsImpl getTaskSettingsImplById(Long id)
+    public TaskSettingsModel getTaskSettingsImplById(Long id)
             throws SQLException {
-        TaskSettingsImpl objclass = null;
+        TaskSettingsModel objclass = null;
         try {
             isSession();
-            objclass = (TaskSettingsImpl) session.load(TaskSettingsImpl.class,
+            objclass = (TaskSettingsModel) session.load(TaskSettingsModel.class,
                     id);
         } catch (Exception ex) {
             LOG.error("Ошибка 'findById': " + ex.getMessage());
@@ -512,12 +512,12 @@ public class H2CreateSetting {
     }
 
     @SuppressWarnings("unchecked")
-    public Collection<TaskSettingsImpl> getAllTaskSettingsImpl()
+    public Collection<TaskSettingsModel> getAllTaskSettingsImpl()
             throws SQLException {
-        List<TaskSettingsImpl> objclass = new ArrayList<TaskSettingsImpl>();
+        List<TaskSettingsModel> objclass = new ArrayList<TaskSettingsModel>();
         try {
             isSession();
-            objclass = session.createCriteria(TaskSettingsImpl.class).list();
+            objclass = session.createCriteria(TaskSettingsModel.class).list();
         } catch (Exception ex) {
             LOG.error("Ошибка 'getAll': " + ex.getMessage());
             ex.printStackTrace();
@@ -528,7 +528,7 @@ public class H2CreateSetting {
         return objclass;
     }
 
-    public void delete(TaskSettingsImpl objclass) throws SQLException {
+    public void delete(TaskSettingsModel objclass) throws SQLException {
         try {
             isSession();
             session.beginTransaction();
