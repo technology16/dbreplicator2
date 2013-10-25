@@ -31,8 +31,6 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
 import ru.taximaxim.dbreplicator2.Utils;
-import ru.taximaxim.dbreplicator2.replica.Runner;
-import ru.taximaxim.dbreplicator2.tasks.TaskSettings;
 
 public class TaskSettingsService {
 
@@ -60,10 +58,9 @@ public class TaskSettingsService {
         try {
             List<TaskSettings> settingsList =
                     Utils.castList(TaskSettings.class,
-                            session.createCriteria(TaskSettingsImpl.class).list());
+                            session.createCriteria(TaskSettingsModel.class).list());
 
-            for (TaskSettings task : settingsList) {
-                task.setRunner((Runner) session.get(Runner.class, task.getRunnerId()));
+            for (TaskSettings task: settingsList){
                 result.put(task.getTaskId(), task);
             }
         } finally {
@@ -82,11 +79,7 @@ public class TaskSettingsService {
     public TaskSettings getTask(int taskId) {
         Session session = sessionFactory.openSession();
         try {
-            TaskSettings task =
-                    (TaskSettings) session.get(TaskSettingsImpl.class, taskId);
-            task.setRunner((Runner) session.get(Runner.class, task.getRunnerId()));
-
-            return task;
+            return  (TaskSettings) session.get(TaskSettingsModel.class, taskId);
         } finally {
             session.close();
         }

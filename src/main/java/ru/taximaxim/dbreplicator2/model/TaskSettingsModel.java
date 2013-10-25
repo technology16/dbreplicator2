@@ -25,10 +25,10 @@ package ru.taximaxim.dbreplicator2.model;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import ru.taximaxim.dbreplicator2.replica.Runner;
-import ru.taximaxim.dbreplicator2.tasks.TaskSettings;
 
 /**
  * Класс инкапсулирующий задачу менеджера записей.
@@ -38,42 +38,45 @@ import ru.taximaxim.dbreplicator2.tasks.TaskSettings;
  */
 @Entity
 @Table( name = "tasks" )
-public class TaskSettingsImpl implements TaskSettings{
+public class TaskSettingsModel implements TaskSettings{
 
     /**
      * Идентификатор задачи
      */
+    @Id
+    @Column(name = "task_id")
     private int taskId;
-
-    /**
-     * Идентификатор реплики
-     */
-    private int runnerId;
 
     /**
      * Флаг доступности задачи
      */
+    @Column(name = "enabled")
     private boolean enabled;
 
     /**
      * Интервал после успешного выполнения задачи, мс
      */
+    @Column(name = "success_interval")
     private int successInterval;
 
     /**
      * Интервал после ошибочного выполнения задачи
      */
+    @Column(name = "fail_interval")
     private int failInterval;
 
     /**
      * Интервал после ошибочного выполнения задачи
      */
+    @Column(name = "description")
     private String description;
 
     /**
-     * Инициализированный обработчик реплики. Будет инициализироваться сервисом хранения настроек задач.
+     * Обработчик реплики
      */
-    private Runner runner;
+    @ManyToOne
+    @JoinColumn(name = "runner_id")
+    private RunnerModel runner;
 
     /**
      * Для использования выполнения задачи будем использовать поток реплику, как
@@ -81,8 +84,6 @@ public class TaskSettingsImpl implements TaskSettings{
      *
      */
 
-    @Id
-    @Column(name = "task_id")
     @Override
     public int getTaskId() {
         return taskId;
@@ -93,18 +94,6 @@ public class TaskSettingsImpl implements TaskSettings{
         this.taskId = taskId;
     }
 
-    @Column(name = "runner_id")
-    @Override
-    public int getRunnerId() {
-        return runnerId;
-    }
-
-    @Override
-    public void setRunnerId(int runnerId) {
-        this.runnerId = runnerId;
-    }
-
-    @Column(name = "enabled")
     @Override
     public boolean getEnabled() {
         return enabled;
@@ -115,7 +104,6 @@ public class TaskSettingsImpl implements TaskSettings{
         this.enabled = enabled;
     }
 
-    @Column(name = "success_interval")
     @Override
     public int getSuccessInterval() {
         return successInterval;
@@ -126,8 +114,7 @@ public class TaskSettingsImpl implements TaskSettings{
         this.successInterval = successInterval;
     }
 
-    @Column(name = "fail_interval")
-    @Override
+     @Override
     public int getFailInterval() {
         return failInterval;
     }
@@ -137,7 +124,6 @@ public class TaskSettingsImpl implements TaskSettings{
         this.failInterval = failInterval;
     }
 
-    @Column(name = "description")
     @Override
     public String getDescription() {
         return description;
@@ -149,12 +135,12 @@ public class TaskSettingsImpl implements TaskSettings{
     }
 
     @Override
-    public Runner getRunner() {
+    public RunnerModel getRunner() {
         return runner;
     }
 
     @Override
-    public void setRunner(Runner runner) {
+    public void setRunner(RunnerModel runner) {
         this.runner = runner;
     }
 }

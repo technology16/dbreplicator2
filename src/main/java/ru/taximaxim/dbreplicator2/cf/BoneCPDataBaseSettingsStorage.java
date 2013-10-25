@@ -24,6 +24,8 @@ package ru.taximaxim.dbreplicator2.cf;
 
 import java.util.Map;
 
+import ru.taximaxim.dbreplicator2.model.BoneCPSettings;
+
 /**
  * Интерфейс хранилища настроек именнованных соединений
  * 

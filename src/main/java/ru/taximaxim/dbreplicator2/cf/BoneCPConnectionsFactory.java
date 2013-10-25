@@ -30,6 +30,8 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import ru.taximaxim.dbreplicator2.model.BoneCPSettings;
+
 import com.jolbox.bonecp.BoneCP;
 import com.jolbox.bonecp.BoneCPConfig;
 
@@ -46,12 +48,12 @@ public class BoneCPConnectionsFactory implements ConnectionFactory {
     /**
      * Инициализированные именнованные пулы соединений
      */
-    protected Map<String, BoneCP> connectionPools;
+    private Map<String, BoneCP> connectionPools;
 
     /**
      * Хранилище настроек
      */
-    protected BoneCPDataBaseSettingsStorage settingStorage;
+    private BoneCPDataBaseSettingsStorage settingStorage;
 
     /**
      * Конструктор фабрики

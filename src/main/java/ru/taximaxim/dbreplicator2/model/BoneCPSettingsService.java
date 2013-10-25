@@ -33,7 +33,6 @@ import org.hibernate.SessionFactory;
 
 import ru.taximaxim.dbreplicator2.Utils;
 import ru.taximaxim.dbreplicator2.cf.BoneCPDataBaseSettingsStorage;
-import ru.taximaxim.dbreplicator2.cf.BoneCPSettings;
 
 /**
  * Хранилище настроек именнованных соединений к BoneCP на основе Hibernate
@@ -45,7 +44,7 @@ public class BoneCPSettingsService implements BoneCPDataBaseSettingsStorage {
     /**
      * Хранилище настроек
      */
-    protected SessionFactory sessionFactory;
+    private SessionFactory sessionFactory;
 
     /**
      * Конструктор хранилища настроек в Hibernate
@@ -61,7 +60,7 @@ public class BoneCPSettingsService implements BoneCPDataBaseSettingsStorage {
     public BoneCPSettings getDataBaseSettingsByName(String poolName) {
         Session session = sessionFactory.openSession();
         try {
-            return (BoneCPSettings) session.get(BoneCPSettingsImpl.class, poolName);
+            return (BoneCPSettings) session.get(BoneCPSettingsModel.class, poolName);
         } finally {
             session.close();
         }
@@ -75,7 +74,7 @@ public class BoneCPSettingsService implements BoneCPDataBaseSettingsStorage {
         try {
             List<BoneCPSettings> settingsList =
                     Utils.castList(BoneCPSettings.class,
-                            session.createCriteria(BoneCPSettingsImpl.class).list());
+                            session.createCriteria(BoneCPSettingsModel.class).list());
 
             for (BoneCPSettings settings : settingsList) {
                 result.put(settings.getPoolId(), settings);

@@ -28,17 +28,17 @@ import static org.junit.Assert.*;
 import java.sql.SQLException;
 import java.util.Map;
 
-import org.h2.tools.Server;
-
 import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.service.ServiceRegistryBuilder;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ru.taximaxim.dbreplicator2.cf.BoneCPDataBaseSettingsStorage;
-import ru.taximaxim.dbreplicator2.cf.BoneCPSettings;
+import ru.taximaxim.dbreplicator2.model.BoneCPSettings;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
-import ru.taximaxim.dbreplicator2.model.BoneCPSettingsImpl;
+import ru.taximaxim.dbreplicator2.model.BoneCPSettingsModel;
 
 /**
  * Класс для тестирования пулов соединений
@@ -49,19 +49,18 @@ import ru.taximaxim.dbreplicator2.model.BoneCPSettingsImpl;
 public class BoneCPSettingsServiceTest {
 
     static private SessionFactory sessionFactory;
-    static private Server server;
-
     // Хранилище настроек
     static protected BoneCPDataBaseSettingsStorage settingStorage;
 
     @BeforeClass
     static public void setUp() throws Exception {
-        // Инициализируем БД настроек
-        server = Server.createTcpServer(
-                new String[] { "-tcpPort", "8084", "-tcpAllowOthers" }).start();
-
+        Configuration configuration = new Configuration().configure();
+        
         // Инициализируем Hibernate
-        sessionFactory = Application.getSessionFactory();
+        sessionFactory = new Configuration()
+        .configure()
+        .buildSessionFactory(new ServiceRegistryBuilder()
+            .applySettings(configuration.getProperties()).buildServiceRegistry());
 
         // Инициализируем хранилище настроек пулов соединений
         settingStorage = new BoneCPSettingsService(sessionFactory);
@@ -72,8 +71,6 @@ public class BoneCPSettingsServiceTest {
         if (sessionFactory != null) {
             sessionFactory.close();
         }
-
-        server.shutdown();
     }
 
     /**
@@ -93,9 +90,9 @@ public class BoneCPSettingsServiceTest {
                 boneCPSettings);
 
         // Получение существующих
-        BoneCPSettings newBoneCPSettings = new BoneCPSettingsImpl(
-                "testGetDataBaseSettingsByName", "org.postgresql.Driver",
-                "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", "ags", "");
+        BoneCPSettings newBoneCPSettings = new BoneCPSettingsModel(
+                "testGetDataBaseSettingsByName", "org.h2.Driver",
+                "jdbc:h2:mem://localhost/~/test", "sa", "");
 
         settingStorage.setDataBaseSettings(newBoneCPSettings);
         boneCPSettings = settingStorage
@@ -105,9 +102,9 @@ public class BoneCPSettingsServiceTest {
                 newBoneCPSettings, boneCPSettings);
 
         // Получение существующих
-        newBoneCPSettings = new BoneCPSettingsImpl(
-                "testGetDataBaseSettingsByName2", "org.postgresql.Driver",
-                "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", "ags", "",
+        newBoneCPSettings = new BoneCPSettingsModel(
+                "testGetDataBaseSettingsByName2", "org.h2.Driver",
+                "jdbc:h2:mem://localhost/~/test", "sa", "",
                 1, 2, 3, 4, 5);
 
         settingStorage.setDataBaseSettings(newBoneCPSettings);
@@ -132,14 +129,14 @@ public class BoneCPSettingsServiceTest {
     public void testGetDataBaseSettings() throws ClassNotFoundException,
             SQLException {
         // Создание настроек
-        BoneCPSettings newBoneCPSettings1 = new BoneCPSettingsImpl(
-                "testGetDataBaseSettings1", "org.postgresql.Driver",
-                "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", "ags", "");
+        BoneCPSettings newBoneCPSettings1 = new BoneCPSettingsModel(
+                "testGetDataBaseSettings1", "org.h2.Driver",
+                "jdbc:h2:mem://localhost/~/test", "sa", "");
         settingStorage.setDataBaseSettings(newBoneCPSettings1);
 
-        BoneCPSettings newBoneCPSettings2 = new BoneCPSettingsImpl(
-                "testGetDataBaseSettings2", "org.postgresql.Driver",
-                "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", "ags", "",
+        BoneCPSettings newBoneCPSettings2 = new BoneCPSettingsModel(
+                "testGetDataBaseSettings2", "org.h2.Driver",
+                "jdbc:h2:mem://localhost/~/test", "sa", "",
                 1, 2, 3, 4, 5);
 
         settingStorage.setDataBaseSettings(newBoneCPSettings2);
@@ -164,9 +161,9 @@ public class BoneCPSettingsServiceTest {
     public void testSetDataBaseSettings() throws ClassNotFoundException,
             SQLException {
         // Создание настроек
-        BoneCPSettings newBoneCPSettings = new BoneCPSettingsImpl(
-                "testSetDataBaseSettings", "org.postgresql.Driver",
-                "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", "ags", "");
+        BoneCPSettings newBoneCPSettings = new BoneCPSettingsModel(
+                "testSetDataBaseSettings", "org.h2.Driver",
+                "jdbc:h2:mem://localhost/~/test", "sa", "");
 
         settingStorage.setDataBaseSettings(newBoneCPSettings);
         BoneCPSettings boneCPSettings = settingStorage
@@ -211,9 +208,9 @@ public class BoneCPSettingsServiceTest {
     public void testDelDataBaseSettings() throws ClassNotFoundException,
             SQLException {
         // Создание настроек
-        BoneCPSettings newBoneCPSettings = new BoneCPSettingsImpl(
-                "testDelDataBaseSettings", "org.postgresql.Driver",
-                "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", "ags", "");
+        BoneCPSettings newBoneCPSettings = new BoneCPSettingsModel(
+                "testDelDataBaseSettings", "org.h2.Driver",
+                "jdbc:h2:mem://localhost/~/test", "sa", "");
 
         settingStorage.setDataBaseSettings(newBoneCPSettings);
         BoneCPSettings boneCPSettings = settingStorage
