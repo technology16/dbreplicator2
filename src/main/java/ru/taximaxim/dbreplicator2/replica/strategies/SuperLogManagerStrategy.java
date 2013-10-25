@@ -65,7 +65,7 @@ public class SuperLogManagerStrategy implements Strategy {
             RunnerService runnerService = 
                     new RunnerService(Application.getSessionFactory());
             List<RunnerModel> runners = 
-                    runnerService.getRunners("ru.taximaxim.dbreplicator2.replica.SuperLogRunner");
+                    runnerService.getRunners(RunnerModel.REPLICA_RUNNER_CLASS);
             
             // Переносим данные
             try (
