@@ -31,8 +31,8 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
-import ru.taximaxim.dbreplicator2.Utils;
 import ru.taximaxim.dbreplicator2.cf.BoneCPDataBaseSettingsStorage;
+import ru.taximaxim.dbreplicator2.utils.Utils;
 
 /**
  * Хранилище настроек именнованных соединений к BoneCP на основе Hibernate

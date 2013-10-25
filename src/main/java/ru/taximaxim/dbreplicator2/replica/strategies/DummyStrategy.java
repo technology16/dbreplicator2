@@ -21,21 +21,36 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ru.taximaxim.dbreplicator2.replica;
+package ru.taximaxim.dbreplicator2.replica.strategies;
 
-import java.sql.SQLException;
+import java.sql.Connection;
 
-public class StrategyException extends Exception {
+import org.apache.log4j.Logger;
 
-    public StrategyException() {
-        super();
+import ru.taximaxim.dbreplicator2.model.StrategyModel;
+import ru.taximaxim.dbreplicator2.replica.Strategy;
+import ru.taximaxim.dbreplicator2.replica.StrategyException;
+
+/**
+ * Класс стратегии заглушки, она только пишет лог то что была запущена
+ * 
+ * @author volodin_aa
+ * 
+ */
+public class DummyStrategy implements Strategy {
+
+    public static final Logger LOG = Logger.getLogger(DummyStrategy.class);
+
+    /**
+     * Конструктор по умолчанию
+     */
+    public DummyStrategy() {
     }
 
-    
-    public StrategyException(SQLException e) {
-        super(e);
+    @Override
+    public void execute(Connection sourceConnection, Connection targetConnection,
+            StrategyModel data) throws StrategyException {
+        LOG.info("Запущена стратегия-заглушка!");
     }
-
-    private static final long serialVersionUID = -4533351861802219308L;
 
 }

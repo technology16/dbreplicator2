@@ -64,4 +64,11 @@ public interface Runner {
      *         потока реплики.
      */
     List<StrategyModel> getStrategyModels();
+
+    /**
+     * Класс обработчика
+     *
+     * @return имя класса обработчика
+     */
+    String getClassName();
 }

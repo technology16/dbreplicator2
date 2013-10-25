@@ -25,6 +25,7 @@ package ru.taximaxim.dbreplicator2.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -40,6 +41,19 @@ import ru.taximaxim.dbreplicator2.replica.Runner;
 @Entity
 @Table(name = "runners")
 public class RunnerModel implements Runner {
+    
+    /**
+     * Обработчики реплики
+     */
+    final public static String REPLICA_RUNNER_CLASS = 
+            "ru.taximaxim.dbreplicator2.replica.ReplicaRunner";
+    
+    /**
+     * Менеджеры записей суперлога
+     */
+    final public static String SUPERLOG_RUNNER_CLASS = 
+            "ru.taximaxim.dbreplicator2.replica.SuperlogRunner";
+    
 
     /**
      * Идентификатор выполняемого потока
@@ -62,6 +76,12 @@ public class RunnerModel implements Runner {
      * Описание потока исполнителя
      */
     private String description;
+
+    /**
+     * Имя класса
+     */
+    @Column(name = "class_name")
+    private String className;
 
     /**
      * Список стратегий, которые необхоимо выполнить потоку
@@ -146,4 +166,14 @@ public class RunnerModel implements Runner {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    @Override
+    public String getClassName() {
+        return className;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
+    }
+    
 }
