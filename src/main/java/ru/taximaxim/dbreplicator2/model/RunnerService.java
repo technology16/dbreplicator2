@@ -26,6 +26,7 @@ import java.util.List;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Restrictions;
 
 import ru.taximaxim.dbreplicator2.utils.Utils;
 
@@ -67,7 +68,9 @@ public class RunnerService {
         Session session = sessionFactory.openSession();
         try {
             return Utils.castList(RunnerModel.class,
-                            session.createCriteria(RunnerModel.class).list());
+                            session.createCriteria(RunnerModel.class)
+                            .add(Restrictions.eq("class_name", className))
+                            .list());
         } finally {
             session.close();
         }
