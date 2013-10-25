@@ -23,7 +23,18 @@
 
 package ru.taximaxim.dbreplicator2.replica;
 
+import java.sql.SQLException;
+
 public class StrategyException extends Exception {
+
+    public StrategyException() {
+        super();
+    }
+
+    
+    public StrategyException(SQLException e) {
+        super(e);
+    }
 
     private static final long serialVersionUID = -4533351861802219308L;
 

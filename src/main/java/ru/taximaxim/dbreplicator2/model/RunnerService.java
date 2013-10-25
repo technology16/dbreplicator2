@@ -22,17 +22,14 @@
  */
 package ru.taximaxim.dbreplicator2.model;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
 import ru.taximaxim.dbreplicator2.utils.Utils;
 
-public class TaskSettingsService {
+public class RunnerService {
 
     /**
      * Хранилище настроек
@@ -42,44 +39,50 @@ public class TaskSettingsService {
     /**
      * @param sessionFactory
      */
-    public TaskSettingsService(SessionFactory sessionFactory) {
+    public RunnerService(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
 
     /**
-     * Возвражает список задач.
+     * Возвражает список обработчиков.
      *
      * @return
      */
-    public Map<Integer, TaskSettings> getTasks() {
-        Map<Integer, TaskSettings> result = new HashMap<Integer, TaskSettings>();
-
+    public List<RunnerModel> getRunners() {
         Session session = sessionFactory.openSession();
         try {
-            List<TaskSettings> settingsList =
-                    Utils.castList(TaskSettings.class,
-                            session.createCriteria(TaskSettingsModel.class).list());
-
-            for (TaskSettings task: settingsList){
-                result.put(task.getTaskId(), task);
-            }
+            return Utils.castList(RunnerModel.class,
+                            session.createCriteria(RunnerModel.class).list());
         } finally {
             session.close();
         }
+    }
 
-        return result;
+    /**
+     * Возвражает список обработчиков одного класса.
+     *
+     * @return
+     */
+    public List<RunnerModel> getRunners(String className) {
+        Session session = sessionFactory.openSession();
+        try {
+            return Utils.castList(RunnerModel.class,
+                            session.createCriteria(RunnerModel.class).list());
+        } finally {
+            session.close();
+        }
     }
 
     /**
      * Получение экземпляра настроек задачи по идентификатору
      *
-     * @param taskId
+     * @param runnerId
      * @return
      */
-    public TaskSettings getTask(int taskId) {
+    public RunnerModel getRunner(int runnerId) {
         Session session = sessionFactory.openSession();
         try {
-            return  (TaskSettings) session.get(TaskSettingsModel.class, taskId);
+            return  (RunnerModel) session.get(RunnerModel.class, runnerId);
         } finally {
             session.close();
         }
@@ -88,13 +91,13 @@ public class TaskSettingsService {
     /**
      * Сохранение экземпляра настроек задачи
      *
-     * @param taskSettings
+     * @param runner
      */
-    public void setTask(TaskSettings taskSettings) {
+    public void setRunner(RunnerModel runner) {
         Session session = sessionFactory.openSession();
         session.beginTransaction();
         try {
-            session.saveOrUpdate(taskSettings);
+            session.saveOrUpdate(runner);
             session.getTransaction().commit();
         } catch (HibernateException e) {
             session.getTransaction().rollback();
