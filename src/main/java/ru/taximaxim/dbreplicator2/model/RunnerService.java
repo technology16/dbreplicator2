@@ -69,7 +69,7 @@ public class RunnerService {
         try {
             return Utils.castList(RunnerModel.class,
                             session.createCriteria(RunnerModel.class)
-                            .add(Restrictions.eq("class_name", className))
+                            .add(Restrictions.eq("className", className))
                             .list());
         } finally {
             session.close();

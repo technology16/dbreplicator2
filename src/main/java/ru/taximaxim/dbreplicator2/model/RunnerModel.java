@@ -41,8 +41,16 @@ import ru.taximaxim.dbreplicator2.replica.Runner;
 @Entity
 @Table(name = "runners")
 public class RunnerModel implements Runner {
+    
+    /**
+     * Обработчики реплики
+     */
     final public static String REPLICA_RUNNER_CLASS = 
             "ru.taximaxim.dbreplicator2.replica.ReplicaRunner";
+    
+    /**
+     * 
+     */
     final public static String SUPERLOG_RUNNER_CLASS = 
             "ru.taximaxim.dbreplicator2.replica.SuperlogRunner";
     
