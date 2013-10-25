@@ -24,6 +24,10 @@
 package ru.taximaxim.dbreplicator2.replica.strategies;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
@@ -45,7 +49,35 @@ public class ReplicationStrategy implements Strategy {
     @Override
     public void execute(Connection sourceConnection, Connection targetConnection,
             StrategyModel data) throws StrategyException {
-        // Извлекаем данные из рабочего набора
+        try {
+            boolean lastAutoCommit = sourceConnection.getAutoCommit();
+            // Начинаем транзакцию
+            sourceConnection.setAutoCommit(false);
+            sourceConnection
+            .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+            sourceConnection.setHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT);
+            // Извлекаем список последних операций по измененым записям
+            try (
+                    PreparedStatement selectLastOperations = 
+                        sourceConnection.prepareStatement("SELECT * FROM rep2_workpool_data WHERE (SELECT forei FROM rep2_workpool_data) id_runner=?");
+            ) {
+                selectWorkData.setInt(1, data.getId());
+                try (ResultSet superLogResult = selectWorkData.executeQuery();) {
+                    while (superLogResult.next()) {
+                // Проходим по списку измененных записей
+                // Реплицируем данные
+                // Если была операция удаления, то удаляем запись в приемнике
+                // Если Была операция вставки или изменения, то сначала пытаем обновить запись,
+                // и если такой записи нет, то пытаемся вставить
+                // Очищаем данные о текущей записи из набора данных реплики
+                    }
+            }
+            // Подтверждаем транзакцию
+            sourceConnection.commit();
+            sourceConnection.setAutoCommit(lastAutoCommit);
+        } catch (SQLException e) {
+            throw new StrategyException(e);
+        }
     }
 
 }

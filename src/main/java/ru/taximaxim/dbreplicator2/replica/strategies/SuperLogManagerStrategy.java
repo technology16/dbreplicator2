@@ -79,7 +79,7 @@ public class SuperLogManagerStrategy implements Strategy {
                         // Копируем записи
                         for (RunnerModel runner : runners) {
                             insertRunnerData.setInt(1,
-                                    superLogResult.getInt(runner.getId()));
+                                    runner.getId());
                             insertRunnerData.setLong(2,
                                     superLogResult.getLong("id_superlog"));
                             insertRunnerData.setInt(3,
