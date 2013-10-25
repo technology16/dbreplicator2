@@ -56,7 +56,7 @@ public interface ConnectionFactory {
      *            - имя пула соединений
      * @return
      */
-    void close(String PoolName);
+    void close(String poolName);
 
     /**
      * Закрытие всех пулов соединений
