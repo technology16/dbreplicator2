@@ -23,12 +23,18 @@
 
 package ru.taximaxim.dbreplicator2;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.h2.api.Trigger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -44,6 +50,7 @@ import ru.taximaxim.dbreplicator2.cf.BoneCPConnectionsFactory;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsModel;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
+import ru.taximaxim.dbreplicator2.model.RunnerService;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.model.TaskSettingsModel;
 
@@ -57,222 +64,307 @@ public class H2CreateSetting {
     protected static final Logger LOG = Logger.getLogger(H2CreateSetting.class);
     protected static SessionFactory sessionFactory;
     protected static Session session;
-
-    private static ThreadPool threadPool = null;
-    private static int count = 3;
+    protected static Statement stat;
+    protected static Connection conn = null;
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-
+        sessionFactory = Application.getSessionFactory();
+        session = sessionFactory.openSession();
     }
 
     @AfterClass
     public static void setUpAfterClass() throws Exception {
-
+        
     }
 
     @Test
-    @Ignore   /// Не доделан
     public void testConnection() throws SQLException, ClassNotFoundException {
 
-        sessionFactory = Application.getSessionFactory();
-        
-        session = sessionFactory.openSession();
-        
         LOG.debug("Start: ");
-        String poolName = "pull";
+        String target = "pull";
         String source = "source";
-        BoneCPSettingsService cpSettingsService = new BoneCPSettingsService(sessionFactory);
-        
-        BoneCPSettingsModel settingsPool = new BoneCPSettingsModel(
-                poolName, "org.h2.Driver", "jdbc:h2:mem://localhost/~/test", "sa", "");
-        
-        cpSettingsService.setDataBaseSettings(settingsPool);
-        
-        BoneCPSettingsModel settingsSource = new BoneCPSettingsModel(
-                source,   "org.h2.Driver", "jdbc:h2:mem://localhost/~/test", "sa", "");
-        
+        String className = "ru.taximaxim.dbreplicator2.replica.SuperlogRunner";
+
+        BoneCPSettingsService cpSettingsService = new BoneCPSettingsService(
+                sessionFactory);
+
+        BoneCPSettingsModel settingsTarget = new BoneCPSettingsModel(target,
+                "org.h2.Driver", "jdbc:h2:mem://localhost/~/target", "sa", "");
+        cpSettingsService.setDataBaseSettings(settingsTarget);
+        BoneCPSettingsModel settingsSource = new BoneCPSettingsModel(source,
+                "org.h2.Driver", "jdbc:h2:mem://localhost/~/source", "sa", "");
         cpSettingsService.setDataBaseSettings(settingsSource);
 
-
-//        BoneCPConnectionsFactory connectionsFactory = new BoneCPConnectionsFactory(cpSettingsService);
-//        
-//        try {
-//            connectionsFactory.getConnection(poolName);
-//        } catch (ClassNotFoundException e) {
-//            e.printStackTrace();
-//            throw e;
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//            throw e;
-//        }
+//        RunnerService runnerService = 
+//                new RunnerService(Application.getSessionFactory());
         
-        
-        RunnerModel runnerModel = createRunner(source, poolName, "description");
+        CreateTeble(cpSettingsService, source);
 
-        StrategyModel strategyModel = createStrategy("ru.taximaxim.Class", null, true, 100);
+        LOG.info("<======Inception======>");
+        ResultSet rsS = stat
+                .executeQuery("select id_superlog, id_foreign, id_table, c_operation, c_date, id_transaction from rep2_superlog");
+        ResultSetMetaData rDataS = rsS.getMetaData();
+        int totalColumnS = rDataS.getColumnCount();
+        while (rsS.next()) {
+            String text = "";
+            for (int i = 1; i <= totalColumnS; i++) {
+                text += rsS.getObject(i).toString() + "\t";
+            }
+            LOG.info(text);
+            LOG.info("================================================================");
+        }
+        LOG.info(">======Inception======<");
+
+        RunnerModel runnerModel = createRunner(className, source, source, "description");
+        StrategyModel strategyModel = createStrategy(
+                "ru.taximaxim.dbreplicator2.replica.strategies.SuperLogManagerStrategy",
+                null, true, 100);
 
         runnerModel.getStrategyModels().add(strategyModel);
-        runnerModel.setStrategyModels(runnerModel.getStrategyModels());
-
         strategyModel.setRunner(runnerModel);
 
+        session.saveOrUpdate(settingsSource);
+        session.saveOrUpdate(settingsTarget);
         
-        BoneCPSettingsModel settings_orig = new BoneCPSettingsModel("test",
-                "org.h2.Driver", "jdbc:h2:tcp://localhost:8084/~/H2Settings",
-                "sa", "*****", 100, 50, 90, 70, 30);
-
-
-//        TaskSettingsImpl taskSettingsImpl = new TaskSettingsImpl();
-//        taskSettingsImpl.setDescription("pull");
-//        taskSettingsImpl.setEnabled(true);
-//        taskSettingsImpl.setFailInterval(1);
-//        taskSettingsImpl.setPriority(5);
-//        taskSettingsImpl.setReplicaId(10);
-//        taskSettingsImpl.setSuccessInterval(20);
-//        taskSettingsImpl.setTaskId(30);
-//
-//           
-        delete(settingsSource);
-        delete(settingsPool);
-        add(settingsPool);
-        add(settingsSource);
-//        add(settings_orig);
-//        //add(settings);
-//        add(runnerModel);
-//        add(strategyModel);
-//        add(taskSettingsImpl);     
-        threadPool = new ThreadPool(count);
-        threadPool.start(runnerModel);
-        threadPool.shutdown();
-//        
-//        LOG.info("TaskSettingsImpl: ");
-//        for (TaskSettingsImpl tSettingsImpl : getAllTaskSettingsImpl()) {
-//
-//            Assert.assertEquals(taskSettingsImpl.getDescription(), tSettingsImpl.getDescription());
-//            Assert.assertEquals(taskSettingsImpl.getEnabled(), tSettingsImpl.getEnabled());
-//            Assert.assertEquals(taskSettingsImpl.getFailInterval(), tSettingsImpl.getFailInterval());
-//            Assert.assertEquals(taskSettingsImpl.getPriority(), tSettingsImpl.getPriority());
-//            Assert.assertEquals(taskSettingsImpl.getReplicaId(), tSettingsImpl.getReplicaId());
-//            Assert.assertEquals(taskSettingsImpl.getSuccessInterval(), tSettingsImpl.getSuccessInterval());
-//            Assert.assertEquals(taskSettingsImpl.getTaskId(), tSettingsImpl.getTaskId());
-//            
-//            
-////            LOG.info(String.format("\nDescription: [%s]=[%s]"
-////                    + "\nEnabled: [%s]=[%s]" 
-////                    + "\nFailInterval: [%s]=[%s]"
-////                    + "\nPriority: [%s]=[%s]" 
-////                    + "\nReplicaId: [%s]=[%s]"
-////                    + "\nSuccessInterval: [%s]=[%s]"
-////                    + "\nTaskId: [%s]=[%s]"
-////                    ,taskSettingsImpl.getDescription(), tSettingsImpl.getDescription()
-////                    ,taskSettingsImpl.getEnabled(), tSettingsImpl.getEnabled()
-////                    ,taskSettingsImpl.getFailInterval(), tSettingsImpl.getFailInterval()
-////                    ,taskSettingsImpl.getPriority(), tSettingsImpl.getPriority()
-////                    ,taskSettingsImpl.getReplicaId(), tSettingsImpl.getReplicaId()
-////                    ,taskSettingsImpl.getSuccessInterval(), tSettingsImpl.getSuccessInterval()
-////                    ,taskSettingsImpl.getTaskId(), tSettingsImpl.getTaskId()
-////                    //
-////                    ));
-//        }
-//        
-//        LOG.info("StrategyModel: ");
-//        for (StrategyModel strategy : getAllStrategyModel()) {
-//
-//            Assert.assertEquals(strategyModel.getClass(), strategy.getClass());
-//            Assert.assertEquals(strategyModel.getClassName(), strategy.getClassName());
-//            Assert.assertEquals(strategyModel.getId(), strategy.getId());
-//            Assert.assertEquals(strategyModel.getParam(), strategy.getParam());
-//            Assert.assertEquals(strategyModel.getPriority(),strategy.getPriority());
-//            //Assert.assertEquals(strategyModel.getRunner(), strategy.getRunner());
-//            
-////            LOG.info(String.format("\nClassName: [%s]=[%s]"
-////                    + "\nId: [%s]=[%s]"
-////                    + "\nParam: [%s]=[%s]" 
-////                    + "\nPriority: [%s]=[%s]"
-////                    + "\nRunner: [%s]=[%s]"
-////                    ,strategyModel.getClassName(), strategy.getClassName()
-////                    ,strategyModel.getId(), strategy.getId()
-////                    ,strategyModel.getParam(),strategy.getParam()
-////                    ,strategyModel.getPriority(), strategy.getPriority()
-////                    ,strategyModel.getRunner(), strategy.getRunner()
-////                    //
-////                    ));
-//        }
-//
-//        LOG.info("RunnerModel: ");
-//        for (RunnerModel rModel : getAllRunnerModel()) {
-//            Assert.assertEquals(runnerModel.getClass(), rModel.getClass());
-//            Assert.assertEquals(runnerModel.getDescription(), rModel.getDescription());
-//            Assert.assertEquals(runnerModel.getId(), rModel.getId());
-//            Assert.assertEquals(runnerModel.getSource(), rModel.getSource());
-//            // Assert.assertEquals(runnerModel, rModel);
-//            Assert.assertEquals(runnerModel.getTarget(), rModel.getTarget());
-//            
-////            LOG.info(String.format("\nDescription: [%s]=[%s]"
-////                + "\nId: [%s]=[%s]"
-////                + "\nSource: [%s]=[%s]"
-////             //   + "\nStrategyModels: [%s]=[%s]"
-////                + "\nTarget: [%s]=[%s]"
-////                ,runnerModel.getDescription(), rModel.getDescription()
-////                ,runnerModel.getId(),rModel.getId()
-////                ,runnerModel.getSource(),rModel.getSource()
-////             //   ,runnerModel.getStrategyModels(),rModel.getStrategyModels()
-////                ,runnerModel.getTarget(),rModel.getTarget()
-////             //
-////                    ));
-//        }
+        createRunnerModel(source, target);
         
-       LOG.info("Settings: ");
-       Collection<BoneCPSettingsModel> str = getAllSettings();
-       
-       LOG.info("Settings: " + str.size());
-        for (BoneCPSettingsModel setting_base : getAllSettings()) {
-
-//            Assert.assertEquals(settings_orig.getPoolId(), setting_base.getPoolId());
-//            Assert.assertEquals(settings_orig.getCloseConnectionWatchTimeoutInMs(), setting_base.getCloseConnectionWatchTimeoutInMs());
-//            Assert.assertEquals(settings_orig.getConnectionTimeoutInMs(), setting_base.getConnectionTimeoutInMs());
-//            Assert.assertEquals(settings_orig.getDriver(), setting_base.getDriver());
-//            Assert.assertEquals(settings_orig.getMaxConnectionsPerPartition(), setting_base.getMaxConnectionsPerPartition());
-//            Assert.assertEquals(settings_orig.getMinConnectionsPerPartition(), setting_base.getMinConnectionsPerPartition());
-//            Assert.assertEquals(settings_orig.getPartitionCount(), setting_base.getPartitionCount());
-//            Assert.assertEquals(settings_orig.getPass(), setting_base.getPass());
-//            Assert.assertEquals(settings_orig.getUrl(), setting_base.getUrl());
-//            Assert.assertEquals(settings_orig.getUser(), setting_base.getUser());
-            
-            LOG.info(String.format("\nCloseConnectionWatchTimeoutInMs: [%s]=[%s]"
-                    + "\nConnectionTimeoutInMs: [%s]=[%s]"
-                    + "\nDriver: [%s]=[%s]"
-                    + "\nMaxConnectionsPerPartition: [%s]=[%s]"
-                    + "\nMinConnectionsPerPartition: [%s]=[%s]"
-                    + "\nPartitionCount: [%s]=[%s]"
-                    + "\nPass: [%s]=[%s]"
-                    + "\nPoolId: [%s]=[%s]" 
-                    + "\nUrl: [%s]=[%s]" 
-                    + "\nUser: [%s]=[%s]"
-                    ,settings_orig.getCloseConnectionWatchTimeoutInMs(), setting_base.getCloseConnectionWatchTimeoutInMs()
-                    ,settings_orig.getConnectionTimeoutInMs(), setting_base.getConnectionTimeoutInMs()
-                    ,settings_orig.getDriver(), setting_base.getDriver()
-                    ,settings_orig.getMaxConnectionsPerPartition(), setting_base.getMaxConnectionsPerPartition()
-                    ,settings_orig.getMinConnectionsPerPartition(), setting_base.getMinConnectionsPerPartition()
-                    ,settings_orig.getPartitionCount(), setting_base.getPartitionCount()
-                    ,settings_orig.getPass(), setting_base.getPass()
-                    ,settings_orig.getPoolId(), setting_base.getPoolId()
-                    ,settings_orig.getUrl(), setting_base.getUrl()
-                    ,settings_orig.getUser(), setting_base.getUser()
-                    //
-                    ));
+        Runnable worker = new WorkerThread(runnerModel);
+        worker.run();
+        
+        LOG.info("<====== RESULT ======>");
+        ResultSet rs = stat
+            .executeQuery("select id_superlog, id_foreign, id_table, c_operation, c_date, id_transaction from rep2_superlog");
+        ResultSetMetaData rData = rs.getMetaData();
+        int totalColumn = rData.getColumnCount();
+        while (rs.next()) {
+            String text = "";
+            for (int i = 1; i <= totalColumn; i++) {
+                text += rs.getObject(i).toString() + "\t";
+            }
+            LOG.info(text);
+            LOG.info("=====================");
         }
+        
+        LOG.info("======= RESULT =======");
+        
+        ResultSet rsQ = stat
+                .executeQuery("select id_runner, id_superlog, id_foreign, id_table, c_operation, c_date, id_transaction from rep2_workpool_data");
+        ResultSetMetaData rDataQ = rsQ.getMetaData();
+        int totalColumnQ = rDataQ.getColumnCount();
+
+        while (rsQ.next()) {
+            String text = "";
+            for (int i = 1; i <= totalColumnQ; i++) {
+                text += rsQ.getObject(i).toString() + "\t";
+            }
+            LOG.info(text);
+            LOG.info("=====================");
+        }
+        LOG.info(">====== RESULT ======<");
+        conn.close();
+    }
+
+    public void createRunnerModel(String source, String target) {
+
+        RunnerModel model = 
+          createRunner(RunnerModel.REPLICA_RUNNER_CLASS, source, target, "description");
+        StrategyModel strategyModel = createStrategy(
+                "ru.taximaxim.dbreplicator2.replica.strategies.DummyStrategy",
+                null, true, 100);
+
+        model.getStrategyModels().add(strategyModel);
+        strategyModel.setRunner(model);
+
+        session.beginTransaction();
+        session.saveOrUpdate(model);
+        session.getTransaction().commit();
         
     }
     
+    public void CreateTeble(BoneCPSettingsService cpSettingsService, String poolName)
+            throws SQLException, ClassNotFoundException {
+
+        Class.forName("org.h2.Driver");
+        conn = getConnection(cpSettingsService, poolName); 
+
+        stat = conn.createStatement();
+
+        delete(stat, "rep2_superlog");
+        delete(stat, "rep2_workpool_data");
+
+        delete(stat, "T_TABLE1");
+        delete(stat, "T_TABLE2");
+        delete(stat, "T_TABLE3");
+        delete(stat, "T_TABLE4");
+        delete(stat, "T_TABLE5");
+        delete(stat, "T_TABLE6");
+        delete(stat, "T_TABLE7");
+        delete(stat, "T_TABLE8");
+        delete(stat, "T_TABLE9");
+        delete(stat, "T_TABLE0");
+
+        stat.execute("CREATE TABLE rep2_superlog(id_superlog IDENTITY PRIMARY KEY, id_foreign INTEGER, id_table NVARCHAR, c_operation VARCHAR(1), c_date TIMESTAMP, id_transaction NVARCHAR);");
+        stat.execute("CREATE TABLE rep2_workpool_data(id_runner INTEGER, id_superlog BIGINT, id_foreign INTEGER, id_table NVARCHAR, c_operation VARCHAR(1), c_date TIMESTAMP, id_transaction NVARCHAR);");
+
+        stat.execute("CREATE TABLE T_TABLE1(ID INT PRIMARY KEY, C_AMOUNT DECIMAL, C_NAME VARCHAR(50))");
+        createTrigger(stat, "T_TABLE1");
+
+        stat.execute("CREATE TABLE T_TABLE2(ID INT PRIMARY KEY, C_AMOUNT DECIMAL, C_NAME VARCHAR(50))");
+        createTrigger(stat, "T_TABLE2");
+
+        stat.execute("CREATE TABLE T_TABLE3(ID INT PRIMARY KEY, C_AMOUNT DECIMAL, C_NAME VARCHAR(50))");
+        createTrigger(stat, "T_TABLE3");
+
+        stat.execute("CREATE TABLE T_TABLE4(ID INT PRIMARY KEY, C_AMOUNT DECIMAL, C_NAME VARCHAR(50))");
+        createTrigger(stat, "T_TABLE4");
+
+        stat.execute("CREATE TABLE T_TABLE5(ID INT PRIMARY KEY, C_AMOUNT DECIMAL, C_NAME VARCHAR(50))");
+        createTrigger(stat, "T_TABLE5");
+
+        stat.execute("CREATE TABLE T_TABLE6(ID INT PRIMARY KEY, C_AMOUNT DECIMAL, C_NAME VARCHAR(50))");
+        createTrigger(stat, "T_TABLE6");
+
+        stat.execute("CREATE TABLE T_TABLE7(ID INT PRIMARY KEY, C_AMOUNT DECIMAL, C_NAME VARCHAR(50))");
+        createTrigger(stat, "T_TABLE7");
+
+        stat.execute("CREATE TABLE T_TABLE8(ID INT PRIMARY KEY, C_AMOUNT DECIMAL, C_NAME VARCHAR(50))");
+        createTrigger(stat, "T_TABLE8");
+
+        stat.execute("CREATE TABLE T_TABLE9(ID INT PRIMARY KEY, C_AMOUNT DECIMAL, C_NAME VARCHAR(50))");
+        createTrigger(stat, "T_TABLE9");
+
+        stat.execute("CREATE TABLE T_TABLE0(ID INT PRIMARY KEY, C_AMOUNT DECIMAL, C_NAME VARCHAR(50))");
+        createTrigger(stat, "T_TABLE0");
+
+        try {
+
+            stat.execute("INSERT INTO T_TABLE1 VALUES(1, 10.00, 'TESTER')");
+            stat.execute("INSERT INTO T_TABLE1 VALUES(2, 19.95, 'TESTER')");
+            stat.execute("UPDATE T_TABLE1 SET C_AMOUNT = 20.0 WHERE ID = 2");
+            stat.execute("DELETE FROM T_TABLE1 WHERE ID = 1");
+
+            stat.execute("INSERT INTO T_TABLE2 VALUES(1, 14.50, 'TESTER')");
+            stat.execute("INSERT INTO T_TABLE2 VALUES(2, 12.55, 'TESTER')");
+            stat.execute("UPDATE T_TABLE2 SET C_AMOUNT = 60.0 WHERE ID = 2");
+            stat.execute("DELETE FROM T_TABLE2 WHERE ID = 1");
+
+            stat.execute("INSERT INTO T_TABLE3 VALUES(1, 05.00, 'TESTER')");
+            stat.execute("INSERT INTO T_TABLE3 VALUES(2, 78.55, 'TESTER')");
+            stat.execute("UPDATE T_TABLE3 SET C_AMOUNT = 67.99 WHERE ID = 2");
+            stat.execute("DELETE FROM T_TABLE3 WHERE ID = 1");
+
+            stat.execute("INSERT INTO T_TABLE4 VALUES(1, 37.00, 'TESTER')");
+            stat.execute("INSERT INTO T_TABLE4 VALUES(2, 13.88, 'TESTER')");
+            stat.execute("UPDATE T_TABLE4 SET C_AMOUNT = 23.78 WHERE ID = 2");
+            stat.execute("DELETE FROM T_TABLE4 WHERE ID = 1");
+
+            stat.execute("INSERT INTO T_TABLE5 VALUES(1, 86.00, 'TESTER')");
+            stat.execute("INSERT INTO T_TABLE5 VALUES(2, 99.99, 'TESTER')");
+            stat.execute("UPDATE T_TABLE5 SET C_AMOUNT = 10.09 WHERE ID = 2");
+            stat.execute("DELETE FROM T_TABLE5 WHERE ID = 1");
+
+            stat.execute("INSERT INTO T_TABLE6 VALUES(1, 44.55, 'TESTER')");
+            stat.execute("INSERT INTO T_TABLE6 VALUES(2, 36.47, 'TESTER')");
+            stat.execute("UPDATE T_TABLE6 SET C_AMOUNT = 79.80 WHERE ID = 2");
+            stat.execute("DELETE FROM T_TABLE6 WHERE ID = 1");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    public Connection getConnection(BoneCPSettingsService cpSettingsService,
+            String poolName) throws ClassNotFoundException, SQLException {
+        BoneCPConnectionsFactory connectionsFactory = new BoneCPConnectionsFactory(
+                cpSettingsService);
+        Connection conn = null;
+        try {
+            conn = connectionsFactory.getConnection(poolName);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw e;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw e;
+        }
+        return conn;
+    }
+
+    public void delete(Statement stat, String tableName) throws SQLException {
+
+        stat.execute("Drop Table if exists " + tableName);
+    }
+
+    public void createTrigger(Statement stat, String tableName) throws SQLException {
+
+        String Trigger = H2CreateSetting.MyTrigger.class.getName();
+        stat.execute("CREATE TRIGGER " + tableName + "_INS AFTER INSERT ON " + tableName
+                + " FOR EACH ROW CALL \"" + Trigger + "\"");
+        stat.execute("CREATE TRIGGER " + tableName + "_UPD AFTER UPDATE ON " + tableName
+                + " FOR EACH ROW CALL \"" + Trigger + "\"");
+        stat.execute("CREATE TRIGGER " + tableName + "_DEL AFTER DELETE ON " + tableName
+                + " FOR EACH ROW CALL \"" + Trigger + "\"");
+    }
+
+    public static class MyTrigger implements Trigger {
+
+        String tableName = null;
+        int type = -1;
+
+        public void init(Connection conn, String schemaName, String triggerName,
+                String tableName, boolean before, int type) {
+            // Initializing trigger
+            this.tableName = tableName;
+            this.type = type;
+        }
+
+        public void fire(Connection conn, Object[] oldRow, Object[] newRow)
+                throws SQLException {
+
+            String operation = null;
+            Object id_foreign = null;
+
+            if (type == 2) {
+                operation = "U";
+                id_foreign = newRow[0];
+            } else if (type == 1) {
+                operation = "I";
+                id_foreign = newRow[0];
+            } else if (type == 4) {
+                operation = "D";
+                id_foreign = oldRow[0];
+            }
+
+            PreparedStatement prep = conn.prepareStatement("INSERT INTO rep2_superlog "
+                    + "(id_foreign, id_table, c_operation, c_date, id_transaction)"
+                    + " VALUES(?, ?, ?, now(), ?)");
+            prep.setObject(1, id_foreign);
+            prep.setObject(2, tableName);
+            prep.setObject(3, operation);
+            prep.setObject(4, 0);
+            prep.execute();
+        }
+
+        @Override
+        public void close() throws SQLException {
+
+        }
+
+        @Override
+        public void remove() throws SQLException {
+
+        }
+    }
+
     // /////////////////////////////////////////////////////////////////////////////////////////////
 
-    public RunnerModel createRunner(String source, String target,
+    public RunnerModel createRunner(String className, String source, String target,
             String description) {
 
         RunnerModel runner = new RunnerModel();
-
+        runner.setClassName(className);
         runner.setSource(source);
         runner.setTarget(target);
         runner.setDescription(description);
@@ -291,333 +383,5 @@ public class H2CreateSetting {
         strategy.setPriority(priority);
 
         return strategy;
-    }
-
-    public void isSession() {
-        if (!session.isOpen()) {
-            session = sessionFactory.openSession();
-        }
-    }
-    
-    public void close() {
-//        if (session != null && session.isOpen()) {
-//            session.close();
-//        }
-    }
-    // /////////////////////////////////////////////////////////////////////////////////////////////
-
-    public void add(BoneCPSettingsModel objclass) throws SQLException {
-        try {
-            isSession();
-            session.beginTransaction();
-            session.save(objclass);
-            session.getTransaction().commit();
-        } catch (Exception ex) {
-            LOG.error("Ошибка при вставке: " + ex.getMessage());
-            ex.printStackTrace();
-            throw new SQLException(ex);
-        } finally {
-            close();
-        }
-    }
-
-    public void update(Long id, BoneCPSettingsModel objclass)
-            throws SQLException {
-        try {
-            isSession();
-            session.beginTransaction();
-            session.update(objclass);
-            session.getTransaction().commit();
-        } catch (Exception ex) {
-            LOG.error("Ошибка при обновление: " + ex.getMessage());
-            ex.printStackTrace();
-            throw new SQLException(ex);
-        } finally {
-            close();
-        }
-    }
-
-    public BoneCPSettingsModel getSettingById(Long id) throws SQLException {
-        BoneCPSettingsModel objclass = null;
-        try {
-            isSession();
-            objclass = (BoneCPSettingsModel) session.load(
-                    BoneCPSettingsModel.class, id);
-        } catch (Exception ex) {
-            LOG.error("Ошибка 'findById': " + ex.getMessage());
-            ex.printStackTrace();
-            throw new SQLException(ex);
-        } finally {
-            close();
-        }
-        return objclass;
-    }
-
-    @SuppressWarnings("unchecked")
-    public Collection<BoneCPSettingsModel> getAllSettings() throws SQLException {
-        List<BoneCPSettingsModel> objclass = new ArrayList<BoneCPSettingsModel>();
-        try {
-            isSession();
-            objclass = session.createCriteria(BoneCPSettingsModel.class).list();
-        } catch (Exception ex) {
-            LOG.error("Ошибка 'getAll': " + ex.getMessage());
-            ex.printStackTrace();
-            throw new SQLException(ex);
-        } finally {
-            close();
-        }
-        return objclass;
-    }
-
-    public void delete(BoneCPSettingsModel objclass) throws SQLException {
-        try {
-            isSession();
-            session.beginTransaction();
-            session.delete(objclass);
-            session.getTransaction().commit();
-        } catch (Exception ex) {
-            LOG.error("Ошибка при удалении: " + ex.getMessage());
-            ex.printStackTrace();
-            throw new SQLException(ex);
-        } finally {
-            close();
-        }
-    }
-
-    // /////////////////////////////////////////////////////////////////////////////////////////////
-
-    public void add(StrategyModel objclass) throws SQLException {
-        try {
-            isSession();
-            session.beginTransaction();
-            session.save(objclass);
-            session.getTransaction().commit();
-        } catch (Exception ex) {
-            LOG.error("Ошибка при вставке: " + ex.getMessage());
-            ex.printStackTrace();
-            throw new SQLException(ex);
-        } finally {
-            close();
-        }
-    }
-
-    public void update(Long id, StrategyModel objclass) throws SQLException {
-        try {
-            isSession();
-            session.beginTransaction();
-            session.update(objclass);
-            session.getTransaction().commit();
-        } catch (Exception ex) {
-            LOG.error("Ошибка при обновление: " + ex.getMessage());
-            ex.printStackTrace();
-            throw new SQLException(ex);
-        } finally {
-            close();
-        }
-    }
-
-    public StrategyModel getStrategyModelById(Long id) throws SQLException {
-        StrategyModel objclass = null;
-        try {
-            isSession();
-            objclass = (StrategyModel) session.load(StrategyModel.class, id);
-        } catch (Exception ex) {
-            LOG.error("Ошибка 'findById': " + ex.getMessage());
-            ex.printStackTrace();
-            throw new SQLException(ex);
-        } finally {
-            close();
-        }
-        return objclass;
-    }
-
-    @SuppressWarnings("unchecked")
-    public Collection<StrategyModel> getAllStrategyModel() throws SQLException {
-        List<StrategyModel> objclass = new ArrayList<StrategyModel>();
-        try {
-            isSession();
-            objclass = session.createCriteria(StrategyModel.class).list();
-        } catch (Exception ex) {
-            LOG.error("Ошибка 'getAll': " + ex.getMessage());
-            ex.printStackTrace();
-            throw new SQLException(ex);
-        } finally {
-            close();
-        }
-        return objclass;
-    }
-
-    public void delete(StrategyModel objclass) throws SQLException {
-        try {
-            isSession();
-            session.beginTransaction();
-            session.delete(objclass);
-            session.getTransaction().commit();
-        } catch (Exception ex) {
-            LOG.error("Ошибка при удалении: " + ex.getMessage());
-            ex.printStackTrace();
-            throw new SQLException(ex);
-        } finally {
-            close();
-        }
-    }
-
-    // /////////////////////////////////////////////////////////////////////////////////////////////
-
-    public void add(TaskSettingsModel objclass) throws SQLException {
-        try {
-            isSession();
-            session.beginTransaction();
-            session.save(objclass);
-            session.getTransaction().commit();
-        } catch (Exception ex) {
-            LOG.error("Ошибка при вставке: " + ex.getMessage());
-            ex.printStackTrace();
-            throw new SQLException(ex);
-        } finally {
-            close();
-        }
-    }
-
-    public void update(Long id, TaskSettingsModel objclass) throws SQLException {
-        try {
-            isSession();
-            session.beginTransaction();
-            session.update(objclass);
-            session.getTransaction().commit();
-        } catch (Exception ex) {
-            LOG.error("Ошибка при обновление: " + ex.getMessage());
-            ex.printStackTrace();
-            throw new SQLException(ex);
-        } finally {
-            close();
-        }
-    }
-
-    public TaskSettingsModel getTaskSettingsImplById(Long id)
-            throws SQLException {
-        TaskSettingsModel objclass = null;
-        try {
-            isSession();
-            objclass = (TaskSettingsModel) session.load(TaskSettingsModel.class,
-                    id);
-        } catch (Exception ex) {
-            LOG.error("Ошибка 'findById': " + ex.getMessage());
-            ex.printStackTrace();
-            throw new SQLException(ex);
-        } finally {
-            close();
-        }
-        return objclass;
-    }
-
-    @SuppressWarnings("unchecked")
-    public Collection<TaskSettingsModel> getAllTaskSettingsImpl()
-            throws SQLException {
-        List<TaskSettingsModel> objclass = new ArrayList<TaskSettingsModel>();
-        try {
-            isSession();
-            objclass = session.createCriteria(TaskSettingsModel.class).list();
-        } catch (Exception ex) {
-            LOG.error("Ошибка 'getAll': " + ex.getMessage());
-            ex.printStackTrace();
-            throw new SQLException(ex);
-        } finally {
-            close();
-        }
-        return objclass;
-    }
-
-    public void delete(TaskSettingsModel objclass) throws SQLException {
-        try {
-            isSession();
-            session.beginTransaction();
-            session.delete(objclass);
-            session.getTransaction().commit();
-        } catch (Exception ex) {
-            LOG.error("Ошибка при удалении: " + ex.getMessage());
-            ex.printStackTrace();
-            throw new SQLException(ex);
-        } finally {
-            close();
-        }
-    }
-
-    // /////////////////////////////////////////////////////////////////////////////////////////////
-
-    public void add(RunnerModel objclass) throws SQLException {
-        try {
-            isSession();
-            session.beginTransaction();
-            session.save(objclass);
-            session.getTransaction().commit();
-        } catch (Exception ex) {
-            LOG.error("Ошибка при вставке: " + ex.getMessage());
-            ex.printStackTrace();
-            throw new SQLException(ex);
-        } finally {
-            close();
-        }
-    }
-
-    public void update(Long id, RunnerModel objclass) throws SQLException {
-        try {
-            isSession();
-            session.beginTransaction();
-            session.update(objclass);
-            session.getTransaction().commit();
-        } catch (Exception ex) {
-            LOG.error("Ошибка при обновление: " + ex.getMessage());
-            ex.printStackTrace();
-            throw new SQLException(ex);
-        } finally {
-            close();
-        }
-    }
-
-    public RunnerModel getRunnerModelById(Long id) throws SQLException {
-        RunnerModel objclass = null;
-        try {
-            isSession();
-            objclass = (RunnerModel) session.load(RunnerModel.class, id);
-        } catch (Exception ex) {
-            LOG.error("Ошибка 'findById': " + ex.getMessage());
-            ex.printStackTrace();
-            throw new SQLException(ex);
-        } finally {
-            close();
-        }
-        return objclass;
-    }
-
-    @SuppressWarnings("unchecked")
-    public Collection<RunnerModel> getAllRunnerModel() throws SQLException {
-        List<RunnerModel> objclass = new ArrayList<RunnerModel>();
-        try {
-            isSession();
-            objclass = session.createCriteria(RunnerModel.class).list();
-        } catch (Exception ex) {
-            LOG.error("Ошибка 'getAll': " + ex.getMessage());
-            ex.printStackTrace();
-            throw new SQLException(ex);
-        } finally {
-            close();
-        }
-        return objclass;
-    }
-
-    public void delete(RunnerModel objclass) throws SQLException {
-        try {
-            isSession();
-            session.beginTransaction();
-            session.delete(objclass);
-            session.getTransaction().commit();
-        } catch (Exception ex) {
-            LOG.error("Ошибка при удалении: " + ex.getMessage());
-            ex.printStackTrace();
-            throw new SQLException(ex);
-        } finally {
-            close();
-        }
     }
 }
