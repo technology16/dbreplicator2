@@ -30,7 +30,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
-import ru.taximaxim.dbreplicator2.Utils;
+import ru.taximaxim.dbreplicator2.utils.Utils;
 
 public class TaskSettingsService {
 
