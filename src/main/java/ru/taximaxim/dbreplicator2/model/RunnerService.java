@@ -23,6 +23,8 @@
 package ru.taximaxim.dbreplicator2.model;
 
 import java.util.List;
+
+import org.hibernate.FetchMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -53,7 +55,9 @@ public class RunnerService {
         Session session = sessionFactory.openSession();
         try {
             return Utils.castList(RunnerModel.class,
-                            session.createCriteria(RunnerModel.class).list());
+                            session.createCriteria(RunnerModel.class, "runners")
+//                            .setFetchMode("runners", FetchMode.SELECT)
+                            .list());
         } finally {
             session.close();
         }

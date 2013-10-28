@@ -27,6 +27,7 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -34,7 +35,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.Where;
+import org.hibernate.annotations.WhereJoinTable;
 
 import ru.taximaxim.dbreplicator2.replica.Runner;
 
@@ -86,8 +90,8 @@ public class RunnerModel implements Runner {
     /**
      * Список стратегий, которые необхоимо выполнить потоку
      */
-    @OneToMany(mappedBy = "runner")
-    @Where(clause = "isEnabled=true")
+    @OneToMany(mappedBy = "runner", fetch = FetchType.EAGER)
+    @Fetch(FetchMode.SELECT)
     @OrderBy("priority ASC")
     private List<StrategyModel> strategyModels;
 

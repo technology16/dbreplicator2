@@ -49,7 +49,7 @@ public class ReplicationStrategy implements Strategy {
     @Override
     public void execute(Connection sourceConnection, Connection targetConnection,
             StrategyModel data) throws StrategyException {
-        try {
+/*        try {
             boolean lastAutoCommit = sourceConnection.getAutoCommit();
             // Начинаем транзакцию
             sourceConnection.setAutoCommit(false);
@@ -78,6 +78,7 @@ public class ReplicationStrategy implements Strategy {
         } catch (SQLException e) {
             throw new StrategyException(e);
         }
+        */
     }
 
 }

@@ -81,7 +81,9 @@ public class WorkerThread implements Runnable {
 
                 try {
                     for (StrategyModel strategyModel : strategies) {
-                        runStrategy(sourceConnection, targetConnection, strategyModel);
+                        if (strategyModel.isEnabled()) {
+                            runStrategy(sourceConnection, targetConnection, strategyModel);
+                        }
                     }
                 } catch (StopChainProcesing e) {
                     LOG.warn("Запрошена принудительная остановка обработка цепочки.", e);
