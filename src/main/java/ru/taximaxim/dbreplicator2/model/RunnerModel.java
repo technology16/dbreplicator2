@@ -37,9 +37,6 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.Where;
-import org.hibernate.annotations.WhereJoinTable;
-
 import ru.taximaxim.dbreplicator2.replica.Runner;
 
 @Entity
