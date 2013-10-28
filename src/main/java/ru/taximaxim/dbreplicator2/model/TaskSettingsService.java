@@ -47,7 +47,7 @@ public class TaskSettingsService {
     }
 
     /**
-     * Возвражает список задач.
+     * Возвращает список задач.
      *
      * @return
      */
