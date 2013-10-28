@@ -44,7 +44,7 @@ public class TaskSettingsModel implements TaskSettings{
      * Идентификатор задачи
      */
     @Id
-    @Column(name = "task_id")
+    @Column(name = "id_task")
     private int taskId;
 
     /**
@@ -75,7 +75,7 @@ public class TaskSettingsModel implements TaskSettings{
      * Обработчик реплики
      */
     @ManyToOne
-    @JoinColumn(name = "runner_id")
+    @JoinColumn(name = "id_runner")
     private RunnerModel runner;
 
     /**

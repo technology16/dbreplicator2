@@ -65,7 +65,7 @@ public class StrategyModel {
      * Поток исполнитель, которому принадлежит стратегия
      */
     @ManyToOne
-    @JoinColumn(name = "runner_id")
+    @JoinColumn(name = "id_runner")
     private RunnerModel runner;
 
     /**

@@ -143,9 +143,9 @@ public class TriggerH2Test {
         
         while (rs.next()) {
             for (int i = 1; i <= totalColumn; i++) {
-                //LOG.info(rs.getObject(i));
+                LOG.info(rs.getObject(i));
             }
-            //LOG.info("=====================");
+            LOG.info("=====================");
         }
         conn.close();
     }
@@ -216,19 +216,6 @@ public class TriggerH2Test {
                 operation = "D";
                 id_foreign = oldRow[0];
             }
-            
-//            if (newRow != null & oldRow != null) {
-//                operation = "U";
-//                if(newRow[0] == oldRow[0]) {
-//                    id_foreign = newRow[0];
-//                }
-//            } else if (newRow != null) {
-//                operation = "I";
-//                id_foreign = newRow[0]; 
-//            } else if (oldRow != null) {
-//                operation = "D";
-//                id_foreign = oldRow[0];
-//            }
             
             PreparedStatement prep = 
                 conn.prepareStatement("INSERT INTO rep2_superlog " +
