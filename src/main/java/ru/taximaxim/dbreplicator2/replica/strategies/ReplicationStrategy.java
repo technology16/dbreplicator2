@@ -27,7 +27,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
+import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
+import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
+import ru.taximaxim.dbreplicator2.jdbc.QueryConstructors;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
@@ -49,36 +53,77 @@ public class ReplicationStrategy implements Strategy {
     @Override
     public void execute(Connection sourceConnection, Connection targetConnection,
             StrategyModel data) throws StrategyException {
-/*        try {
+        try {
             boolean lastAutoCommit = sourceConnection.getAutoCommit();
+            boolean lastTargetAutoCommit = targetConnection.getAutoCommit();
             // Начинаем транзакцию
             sourceConnection.setAutoCommit(false);
             sourceConnection
             .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
             sourceConnection.setHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT);
+
+            targetConnection.setAutoCommit(true);
             // Извлекаем список последних операций по измененым записям
             try (
                     PreparedStatement selectLastOperations = 
-                        sourceConnection.prepareStatement("SELECT * FROM rep2_workpool_data WHERE (SELECT forei FROM rep2_workpool_data) id_runner=?");
+                        sourceConnection.prepareStatement("SELECT * FROM rep2_workpool_data WHERE id_superlog IN (SELECT MAX(id_superlog) FROM rep2_workpool_data WHEER id_runner=? GROUP BY id_foreign, id_table)");
+                    PreparedStatement deleteWorkPoolData = 
+                        sourceConnection.prepareStatement("DELETE FROM rep2_workpool_data WHERE id_foreign=? AND id_table=? AND id_superlog<=?");
+                    PreparedStatement deleteTarget = 
+                        targetConnection.prepareStatement("DELETE FROM ? WHERE id=?");
             ) {
-                selectWorkData.setInt(1, data.getId());
-                try (ResultSet superLogResult = selectWorkData.executeQuery();) {
-                    while (superLogResult.next()) {
-                // Проходим по списку измененных записей
-                // Реплицируем данные
-                // Если была операция удаления, то удаляем запись в приемнике
-                // Если Была операция вставки или изменения, то сначала пытаем обновить запись,
-                // и если такой записи нет, то пытаемся вставить
-                // Очищаем данные о текущей записи из набора данных реплики
+                selectLastOperations.setInt(1, data.getId());
+                try (ResultSet operationsResult = selectLastOperations.executeQuery();) {
+                    // Проходим по списку измененных записей
+                    while (operationsResult.next()) {
+                        String tableName = operationsResult.getString("id_table");
+                        // Реплицируем данные
+                        if (operationsResult.getString("c_operation").equalsIgnoreCase("D")) {
+                            // Если была операция удаления, то удаляем запись в приемнике
+                            deleteTarget.setString(1, tableName);
+                            deleteTarget.setLong(2, operationsResult.getLong("id_foreign"));
+                            deleteTarget.executeUpdate();
+                        } else {
+                            List<String> colsList = JdbcMetadata.getColumnsList(sourceConnection, tableName);
+                            // Если Была операция вставки или изменения, то сначала пытаем обновить запись,
+                            String insertSelectDestQuery = QueryConstructors
+                                    .constructInsertSelectQuery(tableName, colsList);
+                            PreparedStatement insertSelectDestStatement = targetConnection
+                                    .prepareStatement(insertSelectDestQuery);
+                            // Добавляем данные в целевую таблицу
+                            Jdbc.fillStatementFromResultSet(insertSelectDestStatement,
+                                    operationsResult, colsList);
+                            if (insertSelectDestStatement.executeUpdate()<1) {
+                                // и если такой записи нет, то пытаемся вставить
+                                String insertDestQuery = QueryConstructors
+                                        .constructInsertSelectQuery(tableName, colsList);
+                                PreparedStatement insertDestStatement = targetConnection
+                                        .prepareStatement(insertDestQuery);
+                                // Добавляем данные в целевую таблицу
+                                Jdbc.fillStatementFromResultSet(insertDestStatement,
+                                        operationsResult, colsList);
+                                insertDestStatement.executeUpdate();
+                            }
+                        }
+                        // Очищаем данные о текущей записи из набора данных реплики
+                        deleteWorkPoolData.setLong(1, operationsResult.getLong("id_foreign"));
+                        deleteWorkPoolData.setString(2, operationsResult.getString("id_table"));
+                        deleteWorkPoolData.setLong(3, operationsResult.getLong("id_superlog"));
+                        deleteWorkPoolData.addBatch();
                     }
+                }
+                // Подтверждаем транзакцию
+                deleteWorkPoolData.executeBatch();
+                sourceConnection.commit();
+            } catch (SQLException e) {
+                throw new StrategyException(e);
+            } finally {
+                sourceConnection.setAutoCommit(lastAutoCommit);
+                targetConnection.setAutoCommit(lastTargetAutoCommit);
             }
-            // Подтверждаем транзакцию
-            sourceConnection.commit();
-            sourceConnection.setAutoCommit(lastAutoCommit);
         } catch (SQLException e) {
             throw new StrategyException(e);
         }
-        */
     }
 
 }
