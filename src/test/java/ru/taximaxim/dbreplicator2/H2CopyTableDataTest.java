@@ -37,7 +37,6 @@ public class H2CopyTableDataTest {
         sessionFactory.close();
     }
     
-    @Ignore
     @Test
     public void testTableDataTest() throws SQLException, ClassNotFoundException, IOException {
 
@@ -84,8 +83,25 @@ public class H2CopyTableDataTest {
         List<MyTablesType> listSource = Helper.InfoTest(conn, "T_Source");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "T_Dest");
         
+        
+        for (int i = 0; i < listSource.size(); i++) {
+            LOG.info("====================================================================");
+            LOG.error(String.format("_int [%s]", listSource.get(i)._int));
+            LOG.error(String.format("_boolean [%s]", listSource.get(i)._boolean));
+            LOG.error(String.format("_long [%s]", listSource.get(i)._long));
+            LOG.error(String.format("_decimal [%s]", listSource.get(i)._decimal));
+            LOG.error(String.format("_string [%s]", listSource.get(i)._string));
+            LOG.error(String.format("_byte [%s]", listSource.get(i)._byte));
+            LOG.error(String.format("_date [%s]", listSource.get(i)._date));
+            LOG.error(String.format("_time [%s]", listSource.get(i)._time));
+            LOG.error(String.format("_timestamp [%s]", listSource.get(i)._timestamp));
+            LOG.error(String.format("_double [%s]", listSource.get(i)._double));
+            LOG.error(String.format("_float [%s]", listSource.get(i)._float));
+            LOG.info("====================================================================");
+        }
+        
         if(listSource.size() != listDest.size()) {
-            LOG.error(String.format("size [%s == %s]", listSource.size(), listDest.size()));
+            LOG.error(String.format("Количество записей не равны [%s == %s]", listSource.size(), listDest.size()));
         }
         Assert.assertEquals(listSource.size(), listDest.size());
         
@@ -127,6 +143,16 @@ public class H2CopyTableDataTest {
                     LOG.error(String.format("_date [%s == %s]", listSource.get(i)._date, listDest.get(i)._date));
                 }
                 Assert.assertEquals(listSource.get(i)._date, listDest.get(i)._date);
+                
+                if(listSource.get(i)._time != listDest.get(i)._time){
+                    LOG.error(String.format("_time [%s == %s]", listSource.get(i)._time, listDest.get(i)._time));
+                }
+                Assert.assertEquals(listSource.get(i)._time, listDest.get(i)._time);
+                
+                if(listSource.get(i)._timestamp != listDest.get(i)._timestamp){
+                    LOG.error(String.format("_timestamp [%s == %s]", listSource.get(i)._timestamp, listDest.get(i)._timestamp));
+                }
+                Assert.assertEquals(listSource.get(i)._timestamp, listDest.get(i)._timestamp);
                 
                 if(listSource.get(i)._double != listDest.get(i)._double) {
                     LOG.error(String.format("_double [%s == %s]", listSource.get(i)._double, listDest.get(i)._double));

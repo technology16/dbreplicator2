@@ -1,7 +1,9 @@
 package ru.taximaxim.dbreplicator2;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.sql.Date;
 
 public class MyTablesType {
 
@@ -14,4 +16,6 @@ public class MyTablesType {
     public String _string;
     public byte _byte;
     public Date _date;
+    public Time _time;
+    public Timestamp _timestamp;
 }

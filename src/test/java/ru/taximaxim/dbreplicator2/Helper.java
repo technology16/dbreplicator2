@@ -31,16 +31,17 @@ public class Helper {
         while (rs.next()) {
             
             tab = new MyTablesType();
-            tab._int = rs.getInt(1);
-            tab._boolean = rs.getBoolean(2);
-            tab._long = rs.getLong(3);
-            tab._decimal = rs.getBigDecimal(4); 
-            tab._double = rs.getDouble(5);
-            tab._float = rs.getFloat(6);
-            tab._string = rs.getString(7);
-            tab._byte = rs.getByte(8);
-            tab._date = rs.getDate(9);
-            
+            tab._int = rs.getInt("_int");
+            tab._boolean = rs.getBoolean("_boolean");
+            tab._long = rs.getLong("_long");
+            tab._decimal = rs.getBigDecimal("_decimal"); 
+            tab._double = rs.getDouble("_double");
+            tab._float = rs.getFloat("_float");
+            tab._string = rs.getString("_string");
+            tab._byte = rs.getByte("_byte");
+            tab._date = rs.getDate("_date");
+            tab._time = rs.getTime("_time");
+            tab._timestamp = rs.getTimestamp("_timestamp");
             list.add(tab);
         }
         return list;
