@@ -53,7 +53,7 @@ public class H2CopyTableDataTest {
         Connection connDest = connectionFactory.getConnection(dest);
         Helper.executeSqlFromFile(connDest, "importDest.sql");
         
-        int count = Helper.InfoCount(conn, "rep2_superlog");
+        //int count = Helper.InfoCount(conn, "rep2_superlog");
         
         RunnerService runnerService = new RunnerService(sessionFactory);
         
@@ -68,23 +68,25 @@ public class H2CopyTableDataTest {
         Assert.assertEquals(count_rep2_superlog, 0);
 
         int count_rep2_workpool_data = Helper.InfoCount(conn, "rep2_workpool_data");
-        if(count_rep2_workpool_data==0) {
-            LOG.error("в таблице rep2_workpool_data не должна пустой: count = " + count_rep2_workpool_data);
+        if(count_rep2_workpool_data!=0) {
+            LOG.error("Таблица rep2_workpool_data должна быть пустой: count = " + count_rep2_workpool_data);
         }
-        Assert.assertNotEquals(count_rep2_workpool_data, 0);
+        Assert.assertEquals(count_rep2_workpool_data, 0);
         
-        if(count_rep2_workpool_data!=count) {
-            LOG.error(String.format("кол-во записи в таблице rep2_workpool_data ",
-                    "не равны rep2_superlog до удаления: [ %s == %s ]" , count_rep2_workpool_data , count));
-        }
-        Assert.assertEquals(count_rep2_workpool_data, count);
+//        if(count_rep2_workpool_data!=count) {
+//            LOG.error(String.format("кол-во записи в таблице rep2_workpool_data ",
+//                    "не равны rep2_superlog до удаления: [ %s == %s ]" , count_rep2_workpool_data , count));
+//        }
+//        Assert.assertEquals(count_rep2_workpool_data, count);
         
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
 
-        LOG.info("<======Inception======>");
-        Helper.InfoList(listSource);
-        LOG.info(">======Inception======<");
+//        LOG.info("<======Inception======>");
+//        Helper.InfoList(listSource);
+//        LOG.info("=======Inception=======");
+//        Helper.InfoList(listDest);
+//        LOG.info(">======Inception======<");
         
         if(listSource.size() != listDest.size()) {
             LOG.error(String.format("Количество записей не равны [%s == %s]", listSource.size(), listDest.size()));
@@ -130,12 +132,12 @@ public class H2CopyTableDataTest {
                 }
                 Assert.assertEquals(listSource.get(i)._date, listDest.get(i)._date);
                 
-                if(listSource.get(i)._time != listDest.get(i)._time){
+                if(!listSource.get(i)._time.equals(listDest.get(i)._time)){
                     LOG.error(String.format("_time [%s == %s]", listSource.get(i)._time, listDest.get(i)._time));
                 }
                 Assert.assertEquals(listSource.get(i)._time, listDest.get(i)._time);
                 
-                if(listSource.get(i)._timestamp != listDest.get(i)._timestamp){
+                if(!listSource.get(i)._timestamp.equals(listDest.get(i)._timestamp)){
                     LOG.error(String.format("_timestamp [%s == %s]", listSource.get(i)._timestamp, listDest.get(i)._timestamp));
                 }
                 Assert.assertEquals(listSource.get(i)._timestamp, listDest.get(i)._timestamp);

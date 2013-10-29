@@ -26,6 +26,7 @@ public class Helper {
     public static void InfoList(List<MyTablesType> list) {
             for (int i = 0; i < list.size(); i++) {
                 LOG.info("====================================================================");
+                LOG.info(String.format("id [%s]", list.get(i).id));
                 LOG.info(String.format("_int [%s]", list.get(i)._int));
                 LOG.info(String.format("_boolean [%s]", list.get(i)._boolean));
                 LOG.info(String.format("_long [%s]", list.get(i)._long));
@@ -43,12 +44,13 @@ public class Helper {
     
     public static List<MyTablesType> InfoTest(Connection conn, String tableName) throws SQLException{
         Statement stat = conn.createStatement();
-        ResultSet rs = stat.executeQuery("select * from " + tableName);
+        ResultSet rs = stat.executeQuery("select * from " + tableName + " order by id");
         List<MyTablesType> list = new ArrayList<MyTablesType>();
         MyTablesType tab = null;
         while (rs.next()) {
             
             tab = new MyTablesType();
+            tab.id = rs.getInt("id");
             tab._int = rs.getInt("_int");
             tab._boolean = rs.getBoolean("_boolean");
             tab._long = rs.getLong("_long");

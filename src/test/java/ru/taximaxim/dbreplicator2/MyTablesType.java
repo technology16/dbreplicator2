@@ -7,6 +7,7 @@ import java.sql.Date;
 
 public class MyTablesType {
 
+    public int id;
     public int _int;
     public boolean _boolean;
     public Long _long;

@@ -16,7 +16,7 @@ import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 
 public class TriggerH2Test {
     
-    protected static final Logger LOG = Logger.getLogger(H2ManagerTest.class);
+    protected static final Logger LOG = Logger.getLogger(TriggerH2Test.class);
     protected static SessionFactory sessionFactory;
     protected static Session session;
     protected static ConnectionFactory connectionFactory;
