@@ -92,6 +92,11 @@ public class ReplicationStrategy implements Strategy {
                                 deleteDestStatement.setLong(1, operationsResult.getLong("id_foreign"));
                                 try {
                                     deleteDestStatement.executeUpdate();
+                                    // Очищаем данные о текущей записи из набора данных реплики
+                                    deleteWorkPoolData.setLong(1, operationsResult.getLong("id_foreign"));
+                                    deleteWorkPoolData.setString(2, operationsResult.getString("id_table"));
+                                    deleteWorkPoolData.setLong(3, operationsResult.getLong("id_superlog"));
+                                    deleteWorkPoolData.addBatch();
                                 } catch (SQLException e) {
                                     // Поглощаем и логгируем ошибки удаления
                                     // Это ожидаемый результат
@@ -139,12 +144,23 @@ public class ReplicationStrategy implements Strategy {
                                                                 sourceResult, colsList);
                                                         try {
                                                             insertDestStatement.executeUpdate();
+                                                            // Очищаем данные о текущей записи из набора данных реплики
+                                                            deleteWorkPoolData.setLong(1, operationsResult.getLong("id_foreign"));
+                                                            deleteWorkPoolData.setString(2, operationsResult.getString("id_table"));
+                                                            deleteWorkPoolData.setLong(3, operationsResult.getLong("id_superlog"));
+                                                            deleteWorkPoolData.addBatch();
                                                         } catch (SQLException e) {
                                                             // Поглощаем и логгируем ошибки вставки
                                                             // Это ожидаемый результат
                                                             LOG.warn("Поглощена ошибка при вставке записи: ", e);
                                                         }
                                                     }
+                                                } else {
+                                                    // Очищаем данные о текущей записи из набора данных реплики
+                                                    deleteWorkPoolData.setLong(1, operationsResult.getLong("id_foreign"));
+                                                    deleteWorkPoolData.setString(2, operationsResult.getString("id_table"));
+                                                    deleteWorkPoolData.setLong(3, operationsResult.getLong("id_superlog"));
+                                                    deleteWorkPoolData.addBatch();
                                                 }
                                             } catch (SQLException e) {
                                                 // Поглощаем и логгируем ошибки обновления
@@ -156,11 +172,6 @@ public class ReplicationStrategy implements Strategy {
                                 }
                             }
                         }
-                        // Очищаем данные о текущей записи из набора данных реплики
-                        deleteWorkPoolData.setLong(1, operationsResult.getLong("id_foreign"));
-                        deleteWorkPoolData.setString(2, operationsResult.getString("id_table"));
-                        deleteWorkPoolData.setLong(3, operationsResult.getLong("id_superlog"));
-                        deleteWorkPoolData.addBatch();
                     }
                 }
                 // Подтверждаем транзакцию
