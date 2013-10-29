@@ -22,3 +22,6 @@ INSERT INTO T_TABLE6 VALUES(1, 44.55, 'TESTER');
 INSERT INTO T_TABLE6 VALUES(2, 36.47, 'TESTER');
 UPDATE T_TABLE6 SET C_AMOUNT = 79.80 WHERE ID = 2;
 DELETE FROM T_TABLE6 WHERE ID = 1;
+INSERT INTO T_Source (_int, _boolean, _long, _decimal, _double, _float, _string, _byte, _date) VALUES(1, true, 5968326496, 99.65, 5.62, 79.6, 'nameString', 0, now());
+INSERT INTO T_Source (_int, _boolean, _long, _decimal, _double, _float, _string, _byte, _date) VALUES(2, false, 596328794, 45.92, 7.16, 21.2, 'varchar', 1, now());
+INSERT INTO T_Source (_int, _boolean, _long, _decimal, _double, _float, _string, _byte, _date) VALUES(3, true, 7963256489, 75.16, 9.15, 33.9, 'String', 2, now());

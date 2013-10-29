@@ -32,6 +32,7 @@ import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -39,13 +40,11 @@ import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 import ru.taximaxim.dbreplicator2.model.RunnerService;
 
 /**
- * Тест соединения с базой данных по протоколу TCP.
- * 
- * @author ags
+ * @author mardanov_rm
  */
-public class H2CreateSetting {
+public class H2ManagerTest {
 
-    protected static final Logger LOG = Logger.getLogger(H2CreateSetting.class);
+    protected static final Logger LOG = Logger.getLogger(H2ManagerTest.class);
     protected static SessionFactory sessionFactory;
     protected static Session session;
     protected static ConnectionFactory connectionFactory;
@@ -59,11 +58,13 @@ public class H2CreateSetting {
 
     @AfterClass
     public static void setUpAfterClass() throws Exception {
-        
+        connectionFactory.close();
+        session.close();
+        sessionFactory.close();
     }
     
     @Test
-    public void testConnection() throws SQLException, ClassNotFoundException, IOException {
+    public void testRunManager() throws SQLException, ClassNotFoundException, IOException {
 
         LOG.debug("Start: ");
         String source = "source";
@@ -74,8 +75,10 @@ public class H2CreateSetting {
         createTrigger(conn);
         Helper.executeSqlFromFile(conn, "importSourceData.sql");
         
+        int count = Helper.InfoCount(conn, "rep2_superlog");
+        
         LOG.info("<======Inception======>");
-        Helper.InfoSuperLog(conn);
+        Helper.InfoSelect(conn, "rep2_superlog");
         LOG.info(">======Inception======<");
         
         RunnerService runnerService = new RunnerService(sessionFactory);
@@ -84,11 +87,22 @@ public class H2CreateSetting {
         
         worker.run();
         
+        LOG.info("Таблица rep2_superlog должна быть пустой");
+        int count_rep2_superlog = Helper.InfoCount(conn, "rep2_superlog");
+
+        Assert.assertEquals(count_rep2_superlog, 0);
+        LOG.info("Таблица rep2_workpool_data");
+        int count_rep2_workpool_data = Helper.InfoCount(conn, "rep2_workpool_data");
+        Assert.assertNotEquals(count_rep2_workpool_data, 0);
+        
+        Assert.assertEquals(count_rep2_workpool_data, count);
+        
         LOG.info("<====== RESULT ======>");
-        Helper.InfoSuperLog(conn);
+        Helper.InfoSelect(conn, "rep2_superlog");
         LOG.info("======= RESULT =======");
-        Helper.InfoWorkPoolData(conn);
+        Helper.InfoSelect(conn, "rep2_workpool_data");
         LOG.info(">====== RESULT ======<");
+        
         conn.close();
     }
     

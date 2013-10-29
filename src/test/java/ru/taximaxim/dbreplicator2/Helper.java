@@ -9,14 +9,71 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.h2.api.Trigger;
 
+/**
+ * @author mardanov_rm
+ */
+
 public class Helper {
     
     protected static final Logger LOG = Logger.getLogger(Helper.class);
-
+    
+    public static List<MyTablesType> InfoTest(Connection conn, String tableName) throws SQLException{
+        Statement stat = conn.createStatement();
+        ResultSet rs = stat.executeQuery("select * from " + tableName);
+        List<MyTablesType> list = new ArrayList<MyTablesType>();
+        MyTablesType tab = null;
+        while (rs.next()) {
+            
+            tab = new MyTablesType();
+            tab._int = rs.getInt(1);
+            tab._boolean = rs.getBoolean(2);
+            tab._long = rs.getLong(3);
+            tab._decimal = rs.getBigDecimal(4); 
+            tab._double = rs.getDouble(5);
+            tab._float = rs.getFloat(6);
+            tab._string = rs.getString(7);
+            tab._byte = rs.getByte(8);
+            tab._date = rs.getDate(9);
+            
+            list.add(tab);
+        }
+        return list;
+    }
+    
+    /**
+     * Выполнение запроса выборки
+     */
+    public static void InfoSelect(Connection conn,  String tableName) throws SQLException{
+        Statement statSource = conn.createStatement();
+        ResultSet rsSource = statSource.executeQuery("select * from " + tableName);
+        ResultSetMetaData rDataSource = rsSource.getMetaData();
+        int totalColumnSource = rDataSource.getColumnCount();
+        while (rsSource.next()) {
+            String text = "";
+            for (int i = 1; i <= totalColumnSource; i++) {
+                text += rsSource.getObject(i).toString() + "\t";
+            }
+            LOG.info(text);
+            LOG.info("================================================================");
+        }
+    }
+    
+    public static int InfoCount(Connection conn,  String tableName) throws SQLException{
+        Statement stat = conn.createStatement();
+        ResultSet rs = stat.executeQuery("select count(*) as count from " + tableName);
+        int count = 0;
+        while (rs.next()) {
+            count = rs.getInt(1);
+        }
+        return count;
+    }
+    
     /**
      * Выполнение скрипта из текстового файла
      * 
@@ -39,44 +96,6 @@ public class Helper {
         statement.execute();
     }
     
-    /**
-     * Вывод таблицы rep2_superlog
-     */
-    public static void InfoSuperLog(Connection conn) throws SQLException{
-        Statement stat = conn.createStatement();
-        ResultSet rsS = stat.executeQuery("select id_superlog, id_foreign, id_table, c_operation, c_date, id_transaction from rep2_superlog");
-        ResultSetMetaData rDataS = rsS.getMetaData();
-        int totalColumnS = rDataS.getColumnCount();
-        while (rsS.next()) {
-            String text = "";
-            for (int i = 1; i <= totalColumnS; i++) {
-                text += rsS.getObject(i).toString() + "\t";
-            }
-            LOG.info(text);
-            LOG.info("================================================================");
-        }
-    }
-    
-    /**
-     * Вывод таблицы rep2_workpool_data
-     */
-    public static void InfoWorkPoolData(Connection conn) throws SQLException{
-        
-        Statement stat = conn.createStatement();
-        ResultSet rsQ = stat.executeQuery("select id_runner, id_superlog, id_foreign, id_table, c_operation, c_date, id_transaction from rep2_workpool_data");
-        ResultSetMetaData rDataQ = rsQ.getMetaData();
-        int totalColumnQ = rDataQ.getColumnCount();
-
-        while (rsQ.next()) {
-            String text = "";
-            for (int i = 1; i <= totalColumnQ; i++) {
-                text += rsQ.getObject(i).toString() + "\t";
-            }
-            LOG.info(text);
-            LOG.info("========================================================================");
-        }
-    }
-
     /**
      * Создание Триггера
      */
