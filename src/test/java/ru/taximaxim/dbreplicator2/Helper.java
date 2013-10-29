@@ -23,6 +23,24 @@ public class Helper {
     
     protected static final Logger LOG = Logger.getLogger(Helper.class);
     
+    public static void InfoList(List<MyTablesType> list) {
+            for (int i = 0; i < list.size(); i++) {
+                LOG.info("====================================================================");
+                LOG.info(String.format("_int [%s]", list.get(i)._int));
+                LOG.info(String.format("_boolean [%s]", list.get(i)._boolean));
+                LOG.info(String.format("_long [%s]", list.get(i)._long));
+                LOG.info(String.format("_decimal [%s]", list.get(i)._decimal));
+                LOG.info(String.format("_string [%s]", list.get(i)._string));
+                LOG.info(String.format("_byte [%s]", list.get(i)._byte));
+                LOG.info(String.format("_date [%s]", list.get(i)._date));
+                LOG.info(String.format("_time [%s]", list.get(i)._time));
+                LOG.info(String.format("_timestamp [%s]", list.get(i)._timestamp));
+                LOG.info(String.format("_double [%s]", list.get(i)._double));
+                LOG.info(String.format("_float [%s]", list.get(i)._float));
+                LOG.info("====================================================================");
+            }
+        }
+    
     public static List<MyTablesType> InfoTest(Connection conn, String tableName) throws SQLException{
         Statement stat = conn.createStatement();
         ResultSet rs = stat.executeQuery("select * from " + tableName);

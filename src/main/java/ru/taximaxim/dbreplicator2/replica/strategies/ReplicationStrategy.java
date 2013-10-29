@@ -67,7 +67,7 @@ public class ReplicationStrategy implements Strategy {
             // Извлекаем список последних операций по измененым записям
             try (
                     PreparedStatement selectLastOperations = 
-                        sourceConnection.prepareStatement("SELECT * FROM rep2_workpool_data WHERE id_superlog IN (SELECT MAX(id_superlog) FROM rep2_workpool_data WHEER id_runner=? GROUP BY id_foreign, id_table)");
+                        sourceConnection.prepareStatement("SELECT * FROM rep2_workpool_data WHERE id_superlog IN (SELECT MAX(id_superlog) FROM rep2_workpool_data WHERE id_runner=? GROUP BY id_foreign, id_table)");
                     PreparedStatement deleteWorkPoolData = 
                         sourceConnection.prepareStatement("DELETE FROM rep2_workpool_data WHERE id_foreign=? AND id_table=? AND id_superlog<=?");
             ) {

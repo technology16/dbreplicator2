@@ -11,7 +11,6 @@ import org.hibernate.SessionFactory;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
@@ -80,25 +79,12 @@ public class H2CopyTableDataTest {
         }
         Assert.assertEquals(count_rep2_workpool_data, count);
         
-        List<MyTablesType> listSource = Helper.InfoTest(conn, "T_Source");
-        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "T_Dest");
-        
-        
-        for (int i = 0; i < listSource.size(); i++) {
-            LOG.info("====================================================================");
-            LOG.error(String.format("_int [%s]", listSource.get(i)._int));
-            LOG.error(String.format("_boolean [%s]", listSource.get(i)._boolean));
-            LOG.error(String.format("_long [%s]", listSource.get(i)._long));
-            LOG.error(String.format("_decimal [%s]", listSource.get(i)._decimal));
-            LOG.error(String.format("_string [%s]", listSource.get(i)._string));
-            LOG.error(String.format("_byte [%s]", listSource.get(i)._byte));
-            LOG.error(String.format("_date [%s]", listSource.get(i)._date));
-            LOG.error(String.format("_time [%s]", listSource.get(i)._time));
-            LOG.error(String.format("_timestamp [%s]", listSource.get(i)._timestamp));
-            LOG.error(String.format("_double [%s]", listSource.get(i)._double));
-            LOG.error(String.format("_float [%s]", listSource.get(i)._float));
-            LOG.info("====================================================================");
-        }
+        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
+        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
+
+        LOG.info("<======Inception======>");
+        Helper.InfoList(listSource);
+        LOG.info(">======Inception======<");
         
         if(listSource.size() != listDest.size()) {
             LOG.error(String.format("Количество записей не равны [%s == %s]", listSource.size(), listDest.size()));
@@ -176,6 +162,6 @@ public class H2CopyTableDataTest {
      */
     public void createTrigger(Connection conn)
             throws SQLException, ClassNotFoundException {
-        Helper.createTrigger(conn, "T_Source");
+        Helper.createTrigger(conn, "t_table");
     }
 }

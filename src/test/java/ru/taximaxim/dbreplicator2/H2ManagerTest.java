@@ -120,6 +120,6 @@ public class H2ManagerTest {
      */
     public void createTrigger(Connection conn)
             throws SQLException, ClassNotFoundException {
-        Helper.createTrigger(conn, "T_Source");
+        Helper.createTrigger(conn, "t_table");
     }
 }
