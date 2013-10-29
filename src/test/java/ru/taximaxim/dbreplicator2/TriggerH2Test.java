@@ -43,14 +43,19 @@ public class TriggerH2Test {
         
         Helper.executeSqlFromFile(conn, "importRep2.sql");
         Helper.executeSqlFromFile(conn, "importSource.sql");
-        
         Helper.createTrigger(conn, "T_Source");
         Helper.executeSqlFromFile(conn, "importSourceData.sql");
         
         int countT_TABLE = Helper.InfoCount(conn, "T_Source");
+        if(countT_TABLE==0) {
+            LOG.error("Таблице T_Source не должна пустой: count = " + countT_TABLE);
+        }
         Assert.assertNotEquals(countT_TABLE, 0);
         
         int countrep2_superlog = Helper.InfoCount(conn, "rep2_superlog");
+        if(countrep2_superlog==0) {
+            LOG.error("Таблица rep2_superlog не должна пустой: count = " + countrep2_superlog);
+        }
         Assert.assertNotEquals(countrep2_superlog, 0);
         
         LOG.info("<====== T_Source ======>");

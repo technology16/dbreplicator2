@@ -87,14 +87,23 @@ public class H2ManagerTest {
         
         worker.run();
         
-        LOG.info("Таблица rep2_superlog должна быть пустой");
         int count_rep2_superlog = Helper.InfoCount(conn, "rep2_superlog");
-
+        if(count_rep2_superlog!=0) {
+            LOG.error("Таблица rep2_superlog должна быть пустой: count = " + count_rep2_superlog);
+        }
         Assert.assertEquals(count_rep2_superlog, 0);
-        LOG.info("Таблица rep2_workpool_data");
+        
         int count_rep2_workpool_data = Helper.InfoCount(conn, "rep2_workpool_data");
+        if(count_rep2_workpool_data==0) {
+            LOG.error("в таблице rep2_workpool_data не должна пустой: count = " + count_rep2_workpool_data);
+        }
         Assert.assertNotEquals(count_rep2_workpool_data, 0);
         
+        
+        if(count_rep2_workpool_data!=count) {
+            LOG.error(String.format("кол-во записи в таблице rep2_workpool_data ",
+            		"не равны rep2_superlog до удаления: [ %s == %s ]" , count_rep2_workpool_data , count));
+        }
         Assert.assertEquals(count_rep2_workpool_data, count);
         
         LOG.info("<====== RESULT ======>");
