@@ -111,15 +111,6 @@ public class H2ManagerTest {
      */
     public void createTrigger(Connection conn)
             throws SQLException, ClassNotFoundException {
-        Helper.createTrigger(conn, "T_TABLE1");
-        Helper.createTrigger(conn, "T_TABLE2");
-        Helper.createTrigger(conn, "T_TABLE3");
-        Helper.createTrigger(conn, "T_TABLE4");
-        Helper.createTrigger(conn, "T_TABLE5");
-        Helper.createTrigger(conn, "T_TABLE6");
-        Helper.createTrigger(conn, "T_TABLE7");
-        Helper.createTrigger(conn, "T_TABLE8");
-        Helper.createTrigger(conn, "T_TABLE9");
-        Helper.createTrigger(conn, "T_TABLE0");
+        Helper.createTrigger(conn, "T_Source");
     }
 }

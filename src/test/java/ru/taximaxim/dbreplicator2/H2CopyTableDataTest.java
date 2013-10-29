@@ -11,7 +11,6 @@ import org.hibernate.SessionFactory;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
@@ -37,7 +36,6 @@ public class H2CopyTableDataTest {
         sessionFactory.close();
     }
     
-    @Ignore
     @Test
     public void testTableDataTest() throws SQLException, ClassNotFoundException, IOException {
 
@@ -53,7 +51,7 @@ public class H2CopyTableDataTest {
 
         String dest = "dest";
         Connection connDest = connectionFactory.getConnection(dest);
-        Helper.executeSqlFromFile(connDest, "importSource.sql");
+        Helper.executeSqlFromFile(connDest, "importDest.sql");
         
         int count = Helper.InfoCount(conn, "rep2_superlog");
         
@@ -74,30 +72,64 @@ public class H2CopyTableDataTest {
         Assert.assertEquals(count_rep2_workpool_data, count);
         
         List<MyTablesType> listSource = Helper.InfoTest(conn, "T_Source");
-        List<MyTablesType> listDest   = Helper.InfoTest(conn, "T_Dest");
+        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "T_Dest");
         
-        LOG.debug(String.format("size [%s == %s]", listSource.size(), listDest.size()));
+        if(listSource.size() != listDest.size()) {
+            LOG.error(String.format("size [%s == %s]", listSource.size(), listDest.size()));
+        }
         Assert.assertEquals(listSource.size(), listDest.size());
         
         if(!listSource.equals(listDest)) {
+            LOG.info("====================================================================");
             for (int i = 0; i < listSource.size(); i++) {
+                
+                if(listSource.get(i)._int != listDest.get(i)._int) {
+                    LOG.error(String.format("_int [%s == %s]", listSource.get(i)._int, listDest.get(i)._int));
+                }
                 Assert.assertEquals(listSource.get(i)._int, listDest.get(i)._int);
+                
+                if(listSource.get(i)._boolean != listDest.get(i)._boolean) {
+                    LOG.error(String.format("_boolean [%s == %s]", listSource.get(i)._boolean, listDest.get(i)._boolean));
+                }
                 Assert.assertEquals(listSource.get(i)._boolean, listDest.get(i)._boolean);
+                
+                if(!listSource.get(i)._long.equals(listDest.get(i)._long)){
+                    LOG.error(String.format("_long [%s == %s]", listSource.get(i)._long, listDest.get(i)._long));
+                }
                 Assert.assertEquals(listSource.get(i)._long, listDest.get(i)._long);
+                
+                if(listSource.get(i)._decimal != listDest.get(i)._decimal) {
+                    LOG.error(String.format("_decimal [%s == %s]", listSource.get(i)._decimal, listDest.get(i)._decimal));
+                }
                 Assert.assertEquals(listSource.get(i)._decimal, listDest.get(i)._decimal);
+                
+                if(listSource.get(i)._string != listDest.get(i)._string){
+                    LOG.error(String.format("_string [%s == %s]", listSource.get(i)._string, listDest.get(i)._string));
+                }
                 Assert.assertEquals(listSource.get(i)._string, listDest.get(i)._string);
+                
+                if(listSource.get(i)._byte != listDest.get(i)._byte){
+                    LOG.error(String.format("_byte [%s == %s]", listSource.get(i)._byte, listDest.get(i)._byte));
+                }
                 Assert.assertEquals(listSource.get(i)._byte, listDest.get(i)._byte);
+                
+                if(!listSource.get(i)._date.equals(listDest.get(i)._date)) {
+                    LOG.error(String.format("_date [%s == %s]", listSource.get(i)._date, listDest.get(i)._date));
+                }
                 Assert.assertEquals(listSource.get(i)._date, listDest.get(i)._date);
+                
                 if(listSource.get(i)._double != listDest.get(i)._double) {
+                    LOG.error(String.format("_double [%s == %s]", listSource.get(i)._double, listDest.get(i)._double));
                     Assert.assertEquals(1, 0);
                 }
+               
                 if(listSource.get(i)._float != listDest.get(i)._float) {
+                    LOG.error(String.format("_float [%s == %s]", listSource.get(i)._float, listDest.get(i)._float));
                     Assert.assertEquals(1, 0);
                 }
             }
+            LOG.info("====================================================================");
         }
-        
-        Assert.assertEquals(listSource, listDest);
         
         conn.close();
         connDest.close();
@@ -108,15 +140,6 @@ public class H2CopyTableDataTest {
      */
     public void createTrigger(Connection conn)
             throws SQLException, ClassNotFoundException {
-        Helper.createTrigger(conn, "T_TABLE1");
-        Helper.createTrigger(conn, "T_TABLE2");
-        Helper.createTrigger(conn, "T_TABLE3");
-        Helper.createTrigger(conn, "T_TABLE4");
-        Helper.createTrigger(conn, "T_TABLE5");
-        Helper.createTrigger(conn, "T_TABLE6");
-        Helper.createTrigger(conn, "T_TABLE7");
-        Helper.createTrigger(conn, "T_TABLE8");
-        Helper.createTrigger(conn, "T_TABLE9");
-        Helper.createTrigger(conn, "T_TABLE0");
+        Helper.createTrigger(conn, "T_Source");
     }
 }
