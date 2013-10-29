@@ -48,7 +48,7 @@ public class TriggerH2Test {
         
         int countT_TABLE = Helper.InfoCount(conn, "t_table");
         if(countT_TABLE==0) {
-            LOG.error("Таблице T_Source не должна пустой: count = " + countT_TABLE);
+            LOG.error("Таблице t_table не должна пустой: count = " + countT_TABLE);
         }
         Assert.assertNotEquals(countT_TABLE, 0);
         

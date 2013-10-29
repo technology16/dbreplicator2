@@ -158,7 +158,7 @@ public class Helper {
                 operation = "D";
                 id_foreign = oldRow[0];
             }
-
+            
             PreparedStatement prep = conn.prepareStatement("INSERT INTO rep2_superlog "
                     + "(id_foreign, id_table, c_operation, c_date, id_transaction)"
                     + " VALUES(?, ?, ?, now(), ?)");
