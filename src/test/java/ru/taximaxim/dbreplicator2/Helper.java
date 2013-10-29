@@ -77,7 +77,8 @@ public class Helper {
                 }
                 Assert.assertEquals(listSource.get(i)._decimal, listDest.get(i)._decimal);
                 
-                if(listSource.get(i)._string != listDest.get(i)._string){
+                if(((listSource.get(i)._string != null) && (listDest.get(i)._string != null))&&
+                (listSource.get(i)._string.equals(listDest.get(i)._string))){
                     LOG.error(String.format("_string [%s == %s]", listSource.get(i)._string, listDest.get(i)._string));
                 }
                 Assert.assertEquals(listSource.get(i)._string, listDest.get(i)._string);
@@ -87,17 +88,21 @@ public class Helper {
                 }
                 Assert.assertEquals(listSource.get(i)._byte, listDest.get(i)._byte);
                 
-                if(!listSource.get(i)._date.equals(listDest.get(i)._date)) {
-                    LOG.error(String.format("_date [%s == %s]", listSource.get(i)._date, listDest.get(i)._date));
+                
+                if(((listSource.get(i)._date != null) && (listDest.get(i)._date != null))&&
+                (!listSource.get(i)._date.equals(listDest.get(i)._date))) {
+                        LOG.error(String.format("_date [%s == %s]", listSource.get(i)._date, listDest.get(i)._date));
                 }
                 Assert.assertEquals(listSource.get(i)._date, listDest.get(i)._date);
                 
-                if(!listSource.get(i)._time.equals(listDest.get(i)._time)){
+                if(((listSource.get(i)._time != null) && (listDest.get(i)._time != null))&&
+                (!listSource.get(i)._time.equals(listDest.get(i)._time))){
                     LOG.error(String.format("_time [%s == %s]", listSource.get(i)._time, listDest.get(i)._time));
                 }
                 Assert.assertEquals(listSource.get(i)._time, listDest.get(i)._time);
                 
-                if(!listSource.get(i)._timestamp.equals(listDest.get(i)._timestamp)){
+                if(((listSource.get(i)._timestamp != null) && (listDest.get(i)._timestamp != null))&&
+                (!listSource.get(i)._timestamp.equals(listDest.get(i)._timestamp))){
                     LOG.error(String.format("_timestamp [%s == %s]", listSource.get(i)._timestamp, listDest.get(i)._timestamp));
                 }
                 Assert.assertEquals(listSource.get(i)._timestamp, listDest.get(i)._timestamp);
@@ -132,6 +137,7 @@ public class Helper {
                 LOG.info(String.format("_double [%s]", list.get(i)._double));
                 LOG.info(String.format("_float [%s]", list.get(i)._float));
                 LOG.info("====================================================================");
+                
             }
         }
     
@@ -157,6 +163,8 @@ public class Helper {
             tab._timestamp = rs.getTimestamp("_timestamp");
             list.add(tab);
         }
+        rs.close();
+        stat.close();
         return list;
     }
     

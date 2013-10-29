@@ -154,6 +154,26 @@ public class H2CopyTableDataTest {
         Helper.AssertEquals(listSource, listDest);
         
         
+        
+        
+        Helper.executeSqlFromFile(conn, "sql_null.sql");   
+        worker.run();
+        
+        listSource = Helper.InfoTest(conn, "t_table4");
+        listDest   = Helper.InfoTest(connDest, "t_table4");
+        
+        Helper.AssertEquals(listSource, listDest);
+//
+        listSource = Helper.InfoTest(conn, "t_table5");
+        listDest   = Helper.InfoTest(connDest, "t_table5");
+        Helper.AssertEquals(listSource, listDest);
+        
+      LOG.info("<======Inception======>");
+      Helper.InfoList(listSource);
+      LOG.info("=======Inception=======");
+      Helper.InfoList(listDest);
+      LOG.info(">======Inception======<");
+        
         conn.close();
         connDest.close();
     }
@@ -167,5 +187,7 @@ public class H2CopyTableDataTest {
         Helper.createTrigger(conn, "t_table1");
         Helper.createTrigger(conn, "t_table2");
         Helper.createTrigger(conn, "t_table3");
+        Helper.createTrigger(conn, "t_table4");
+        Helper.createTrigger(conn, "t_table5");
     }
 }
