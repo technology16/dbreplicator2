@@ -30,6 +30,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.jdbc.QueryConstructors;
@@ -44,6 +46,8 @@ import ru.taximaxim.dbreplicator2.replica.StrategyException;
  * 
  */
 public class ReplicationStrategy implements Strategy {
+
+    private static final Logger LOG = Logger.getLogger(ReplicationStrategy.class);
 
     /**
      * Конструктор по умолчанию
@@ -85,12 +89,18 @@ public class ReplicationStrategy implements Strategy {
                             try (PreparedStatement deleteDestStatement = targetConnection
                                     .prepareStatement(deleteDestQuery);
                             ) {
-                                // Добавляем данные в целевую таблицу
                                 deleteDestStatement.setLong(1, operationsResult.getLong("id_foreign"));
-                                deleteDestStatement.executeUpdate();
+                                try {
+                                    deleteDestStatement.executeUpdate();
+                                } catch (SQLException e) {
+                                    // Поглощаем и логгируем ошибки удаления
+                                    // Это ожидаемый результат
+                                    LOG.warn("Поглощена ошибка при удалении записи: ", e);
+                                }
                             }
                         } else {
-                            // Извлекаем данные из исходной таблицы
+                           // Добавляем данные в целевую таблицу
+                           // Извлекаем данные из исходной таблицы
                             List<String> colsList = JdbcMetadata
                                     .getColumnsList(sourceConnection, tableName);
                             String selectSourceQuery = QueryConstructors
@@ -107,27 +117,39 @@ public class ReplicationStrategy implements Strategy {
                                         String updateDestQuery = QueryConstructors
                                                 .constructUpdateQuery(tableName, colsList, priColsList);
                                         try (
-                                                PreparedStatement updateDestStatement = targetConnection
+                                            PreparedStatement updateDestStatement = targetConnection
                                                 .prepareStatement(updateDestQuery);
-                                                ) {
+                                        ) {
                                             // Добавляем данные в целевую таблицу
                                             List<String> colsForUpdate = new ArrayList<String>(colsList);
                                             colsForUpdate.addAll(priColsList);
                                             Jdbc.fillStatementFromResultSet(updateDestStatement,
                                                     sourceResult, colsForUpdate);
-                                            if (updateDestStatement.executeUpdate()<1) {
-                                                // и если такой записи нет, то пытаемся вставить
-                                                String insertDestQuery = QueryConstructors
-                                                        .constructInsertQuery(tableName, colsList);
-                                                try (
+                                            try {
+                                                if (updateDestStatement.executeUpdate()<1) {
+                                                    // и если такой записи нет, то пытаемся вставить
+                                                    String insertDestQuery = QueryConstructors
+                                                            .constructInsertQuery(tableName, colsList);
+                                                    try (
                                                         PreparedStatement insertDestStatement = targetConnection
-                                                        .prepareStatement(insertDestQuery);
-                                                        ) {
-                                                    // Добавляем данные в целевую таблицу
-                                                    Jdbc.fillStatementFromResultSet(insertDestStatement,
-                                                            sourceResult, colsList);
-                                                    insertDestStatement.executeUpdate();
+                                                            .prepareStatement(insertDestQuery);
+                                                    ) {
+                                                        // Добавляем данные в целевую таблицу
+                                                        Jdbc.fillStatementFromResultSet(insertDestStatement,
+                                                                sourceResult, colsList);
+                                                        try {
+                                                            insertDestStatement.executeUpdate();
+                                                        } catch (SQLException e) {
+                                                            // Поглощаем и логгируем ошибки вставки
+                                                            // Это ожидаемый результат
+                                                            LOG.warn("Поглощена ошибка при вставке записи: ", e);
+                                                        }
+                                                    }
                                                 }
+                                            } catch (SQLException e) {
+                                                // Поглощаем и логгируем ошибки обновления
+                                                // Это ожидаемый результат
+                                                LOG.warn("Поглощена ошибка при обновлении записи: ", e);
                                             }
                                         }
                                     }
