@@ -201,4 +201,24 @@ public final class QueryConstructors {
 		return query.toString();
 	}
 	
+    
+    /**
+     * Генерирует строку запроса для обновления данных
+     * 
+     * @param tableName имя целевой таблицы
+     * @param colsList список колонок
+     * @param whereList список колонок условия
+     * @return строка запроса для обновления данных
+     */
+    public static String constructUpdateQuery(String tableName, List<String> colsList, List<String> whereList){
+        StringBuffer insertQuery = new StringBuffer()
+        .append("UPDATE ")
+        .append(tableName)
+        .append(" SET ")
+        .append(listToString(colsList, ", ", "=?"))
+        .append(" WHERE ")
+        .append(listToString(whereList, " AND ", "=?"));
+
+        return insertQuery.toString();
+    }
 }

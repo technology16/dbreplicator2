@@ -27,6 +27,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
@@ -69,40 +70,54 @@ public class ReplicationStrategy implements Strategy {
                         sourceConnection.prepareStatement("SELECT * FROM rep2_workpool_data WHERE id_superlog IN (SELECT MAX(id_superlog) FROM rep2_workpool_data WHEER id_runner=? GROUP BY id_foreign, id_table)");
                     PreparedStatement deleteWorkPoolData = 
                         sourceConnection.prepareStatement("DELETE FROM rep2_workpool_data WHERE id_foreign=? AND id_table=? AND id_superlog<=?");
-                    PreparedStatement deleteTarget = 
-                        targetConnection.prepareStatement("DELETE FROM ? WHERE id=?");
             ) {
                 selectLastOperations.setInt(1, data.getId());
                 try (ResultSet operationsResult = selectLastOperations.executeQuery();) {
                     // Проходим по списку измененных записей
                     while (operationsResult.next()) {
                         String tableName = operationsResult.getString("id_table");
+                        List<String> priColsList = JdbcMetadata.getPrimaryColumnsList(sourceConnection, tableName);
                         // Реплицируем данные
                         if (operationsResult.getString("c_operation").equalsIgnoreCase("D")) {
                             // Если была операция удаления, то удаляем запись в приемнике
-                            deleteTarget.setString(1, tableName);
-                            deleteTarget.setLong(2, operationsResult.getLong("id_foreign"));
-                            deleteTarget.executeUpdate();
+                            String deleteDestQuery = QueryConstructors
+                                    .constructDeleteQuery(tableName, priColsList);
+                            try (PreparedStatement deleteDestStatement = targetConnection
+                                    .prepareStatement(deleteDestQuery);
+                            ) {
+                                // Добавляем данные в целевую таблицу
+                                Jdbc.fillStatementFromResultSet(deleteDestStatement,
+                                        operationsResult, priColsList);
+                                deleteDestStatement.executeUpdate();
+                            }
                         } else {
                             List<String> colsList = JdbcMetadata.getColumnsList(sourceConnection, tableName);
-                            // Если Была операция вставки или изменения, то сначала пытаем обновить запись,
-                            String insertSelectDestQuery = QueryConstructors
-                                    .constructInsertSelectQuery(tableName, colsList);
-                            PreparedStatement insertSelectDestStatement = targetConnection
-                                    .prepareStatement(insertSelectDestQuery);
-                            // Добавляем данные в целевую таблицу
-                            Jdbc.fillStatementFromResultSet(insertSelectDestStatement,
-                                    operationsResult, colsList);
-                            if (insertSelectDestStatement.executeUpdate()<1) {
-                                // и если такой записи нет, то пытаемся вставить
-                               String insertDestQuery = QueryConstructors
-                                        .constructInsertSelectQuery(tableName, colsList);
-                                PreparedStatement insertDestStatement = targetConnection
-                                        .prepareStatement(insertDestQuery);
+                            // Если Была операция вставки или изменения, то сначала пытаемся обновить запись,
+                            String updateDestQuery = QueryConstructors
+                                    .constructUpdateQuery(tableName, colsList, priColsList);
+                            try (
+                                PreparedStatement updateDestStatement = targetConnection
+                                    .prepareStatement(updateDestQuery);
+                            ) {
                                 // Добавляем данные в целевую таблицу
-                                Jdbc.fillStatementFromResultSet(insertDestStatement,
-                                        operationsResult, colsList);
-                                insertDestStatement.executeUpdate();
+                                List<String> colsForUpdate = new ArrayList<String>(colsList);
+                                colsForUpdate.addAll(priColsList);
+                                Jdbc.fillStatementFromResultSet(updateDestStatement,
+                                        operationsResult, colsForUpdate);
+                                if (updateDestStatement.executeUpdate()<1) {
+                                    // и если такой записи нет, то пытаемся вставить
+                                    String insertDestQuery = QueryConstructors
+                                            .constructInsertQuery(tableName, colsList);
+                                    try (
+                                        PreparedStatement insertDestStatement = targetConnection
+                                            .prepareStatement(insertDestQuery);
+                                    ) {
+                                        // Добавляем данные в целевую таблицу
+                                        Jdbc.fillStatementFromResultSet(insertDestStatement,
+                                                operationsResult, colsList);
+                                        insertDestStatement.executeUpdate();
+                                    }
+                                }
                             }
                         }
                         // Очищаем данные о текущей записи из набора данных реплики
@@ -112,7 +127,7 @@ public class ReplicationStrategy implements Strategy {
                         deleteWorkPoolData.addBatch();
                     }
                 }
-               // Подтверждаем транзакцию
+                // Подтверждаем транзакцию
                 deleteWorkPoolData.executeBatch();
                 sourceConnection.commit();
             } catch (SQLException e) {
