@@ -86,36 +86,50 @@ public class ReplicationStrategy implements Strategy {
                                     .prepareStatement(deleteDestQuery);
                             ) {
                                 // Добавляем данные в целевую таблицу
-                                Jdbc.fillStatementFromResultSet(deleteDestStatement,
-                                        operationsResult, priColsList);
+                                deleteDestStatement.setLong(1, operationsResult.getLong("id_foreign"));
                                 deleteDestStatement.executeUpdate();
                             }
                         } else {
-                            List<String> colsList = JdbcMetadata.getColumnsList(sourceConnection, tableName);
-                            // Если Была операция вставки или изменения, то сначала пытаемся обновить запись,
-                            String updateDestQuery = QueryConstructors
-                                    .constructUpdateQuery(tableName, colsList, priColsList);
+                            // Извлекаем данные из исходной таблицы
+                            List<String> colsList = JdbcMetadata
+                                    .getColumnsList(sourceConnection, tableName);
+                            String selectSourceQuery = QueryConstructors
+                                    .constructSelectQuery(tableName, colsList, priColsList);
                             try (
-                                PreparedStatement updateDestStatement = targetConnection
-                                    .prepareStatement(updateDestQuery);
-                            ) {
-                                // Добавляем данные в целевую таблицу
-                                List<String> colsForUpdate = new ArrayList<String>(colsList);
-                                colsForUpdate.addAll(priColsList);
-                                Jdbc.fillStatementFromResultSet(updateDestStatement,
-                                        operationsResult, colsForUpdate);
-                                if (updateDestStatement.executeUpdate()<1) {
-                                    // и если такой записи нет, то пытаемся вставить
-                                    String insertDestQuery = QueryConstructors
-                                            .constructInsertQuery(tableName, colsList);
-                                    try (
-                                        PreparedStatement insertDestStatement = targetConnection
-                                            .prepareStatement(insertDestQuery);
+                                PreparedStatement selectSourceStatement = sourceConnection
+                                    .prepareStatement(selectSourceQuery);
                                     ) {
-                                        // Добавляем данные в целевую таблицу
-                                        Jdbc.fillStatementFromResultSet(insertDestStatement,
-                                                operationsResult, colsList);
-                                        insertDestStatement.executeUpdate();
+                                selectSourceStatement.setLong(1, operationsResult.getLong("id_foreign"));
+                                try (ResultSet sourceResult = selectSourceStatement.executeQuery();) {
+                                    // Проходим по списку измененных записей
+                                    if (sourceResult.next()) {
+                                        // Если Была операция вставки или изменения, то сначала пытаемся обновить запись,
+                                        String updateDestQuery = QueryConstructors
+                                                .constructUpdateQuery(tableName, colsList, priColsList);
+                                        try (
+                                                PreparedStatement updateDestStatement = targetConnection
+                                                .prepareStatement(updateDestQuery);
+                                                ) {
+                                            // Добавляем данные в целевую таблицу
+                                            List<String> colsForUpdate = new ArrayList<String>(colsList);
+                                            colsForUpdate.addAll(priColsList);
+                                            Jdbc.fillStatementFromResultSet(updateDestStatement,
+                                                    sourceResult, colsForUpdate);
+                                            if (updateDestStatement.executeUpdate()<1) {
+                                                // и если такой записи нет, то пытаемся вставить
+                                                String insertDestQuery = QueryConstructors
+                                                        .constructInsertQuery(tableName, colsList);
+                                                try (
+                                                        PreparedStatement insertDestStatement = targetConnection
+                                                        .prepareStatement(insertDestQuery);
+                                                        ) {
+                                                    // Добавляем данные в целевую таблицу
+                                                    Jdbc.fillStatementFromResultSet(insertDestStatement,
+                                                            sourceResult, colsList);
+                                                    insertDestStatement.executeUpdate();
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
