@@ -1,3 +1,26 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2013 Technologiya
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package ru.taximaxim.dbreplicator2;
 
 import java.io.File;
@@ -14,6 +37,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.h2.api.Trigger;
+import org.junit.Assert;
 
 /**
  * @author mardanov_rm
@@ -22,6 +46,75 @@ import org.h2.api.Trigger;
 public class Helper {
     
     protected static final Logger LOG = Logger.getLogger(Helper.class);
+    
+    public static void AssertEquals(List<MyTablesType> listSource, List<MyTablesType> listDest){
+        if(listSource.size() != listDest.size()) {
+            LOG.error(String.format("Количество записей не равны [%s == %s]", listSource.size(), listDest.size()));
+        }
+        Assert.assertEquals(listSource.size(), listDest.size());
+        
+        if(!listSource.equals(listDest)) {
+            LOG.info("====================================================================");
+            for (int i = 0; i < listSource.size(); i++) {
+                
+                if(listSource.get(i)._int != listDest.get(i)._int) {
+                    LOG.error(String.format("_int [%s == %s]", listSource.get(i)._int, listDest.get(i)._int));
+                }
+                Assert.assertEquals(listSource.get(i)._int, listDest.get(i)._int);
+                
+                if(listSource.get(i)._boolean != listDest.get(i)._boolean) {
+                    LOG.error(String.format("_boolean [%s == %s]", listSource.get(i)._boolean, listDest.get(i)._boolean));
+                }
+                Assert.assertEquals(listSource.get(i)._boolean, listDest.get(i)._boolean);
+                
+                if(!listSource.get(i)._long.equals(listDest.get(i)._long)){
+                    LOG.error(String.format("_long [%s == %s]", listSource.get(i)._long, listDest.get(i)._long));
+                }
+                Assert.assertEquals(listSource.get(i)._long, listDest.get(i)._long);
+                
+                if(listSource.get(i)._decimal != listDest.get(i)._decimal) {
+                    LOG.error(String.format("_decimal [%s == %s]", listSource.get(i)._decimal, listDest.get(i)._decimal));
+                }
+                Assert.assertEquals(listSource.get(i)._decimal, listDest.get(i)._decimal);
+                
+                if(listSource.get(i)._string != listDest.get(i)._string){
+                    LOG.error(String.format("_string [%s == %s]", listSource.get(i)._string, listDest.get(i)._string));
+                }
+                Assert.assertEquals(listSource.get(i)._string, listDest.get(i)._string);
+                
+                if(listSource.get(i)._byte != listDest.get(i)._byte){
+                    LOG.error(String.format("_byte [%s == %s]", listSource.get(i)._byte, listDest.get(i)._byte));
+                }
+                Assert.assertEquals(listSource.get(i)._byte, listDest.get(i)._byte);
+                
+                if(!listSource.get(i)._date.equals(listDest.get(i)._date)) {
+                    LOG.error(String.format("_date [%s == %s]", listSource.get(i)._date, listDest.get(i)._date));
+                }
+                Assert.assertEquals(listSource.get(i)._date, listDest.get(i)._date);
+                
+                if(!listSource.get(i)._time.equals(listDest.get(i)._time)){
+                    LOG.error(String.format("_time [%s == %s]", listSource.get(i)._time, listDest.get(i)._time));
+                }
+                Assert.assertEquals(listSource.get(i)._time, listDest.get(i)._time);
+                
+                if(!listSource.get(i)._timestamp.equals(listDest.get(i)._timestamp)){
+                    LOG.error(String.format("_timestamp [%s == %s]", listSource.get(i)._timestamp, listDest.get(i)._timestamp));
+                }
+                Assert.assertEquals(listSource.get(i)._timestamp, listDest.get(i)._timestamp);
+                
+                if(listSource.get(i)._double != listDest.get(i)._double) {
+                    LOG.error(String.format("_double [%s == %s]", listSource.get(i)._double, listDest.get(i)._double));
+                    Assert.assertEquals(1, 0);
+                }
+               
+                if(listSource.get(i)._float != listDest.get(i)._float) {
+                    LOG.error(String.format("_float [%s == %s]", listSource.get(i)._float, listDest.get(i)._float));
+                    Assert.assertEquals(1, 0);
+                }
+            }
+            LOG.info("====================================================================");
+        }
+    }
     
     public static void InfoList(List<MyTablesType> list) {
             for (int i = 0; i < list.size(); i++) {
