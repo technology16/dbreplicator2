@@ -45,18 +45,6 @@
 			<version>4.2.6.Final</version>
 		</dependency>
 		
-		<dependency>
-            <groupId>postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>9.1-901.jdbc4</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>com.microsoft.sqlserver</groupId>
-            <artifactId>sqljdbc4</artifactId>
-            <version>3.0</version>
-        </dependency>
-		
 	</dependencies>
 
 	<build>
