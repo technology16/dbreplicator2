@@ -25,6 +25,7 @@ package ru.taximaxim.dbreplicator2;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
@@ -36,21 +37,19 @@ public class ThreadPool {
 
     public ExecutorService executor = null;
 
-    public ThreadPool(int count) {
-        restart(count);
+    public ThreadPool(int count) throws InterruptedException {
+        restartThreadPool(count);
     }
 
     /**
      * Ожидание остановки выполнения всех потоков и завершение работы.
+     * @throws InterruptedException 
      */
-    public void shutdown() {
-
+    public void shutdownThreadPool() throws InterruptedException {
         if (executor != null) {
             executor.shutdown();
-
-            while (!executor.isTerminated()) {
-                // wait wile all tasks have completed following shut down
-            }
+            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+            executor = null;
 
             LOG.info("ThreadPool.shutdown()");
         }
@@ -59,9 +58,10 @@ public class ThreadPool {
     /**
      * Ожидание завершения всех потоков и инициализация нового пула с новым
      * значением.
+     * @throws InterruptedException 
      */
-    public void restart(int count) {
-        shutdown();
+    public final void restartThreadPool(int count) throws InterruptedException {
+        shutdownThreadPool();
         executor = Executors.newFixedThreadPool(count);
 
         LOG.info(String.format("ThreadPool.restart(%s)", count));
