@@ -58,6 +58,12 @@ public class TriggerH2Test {
           sessionFactory.close();
     }
 
+    /**
+     * Проверка тригерров
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     * @throws IOException
+     */
     @Test
     public void testTrigger() throws SQLException, ClassNotFoundException, IOException {
         

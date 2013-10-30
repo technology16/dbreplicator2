@@ -30,16 +30,74 @@ import java.sql.Date;
 
 public class MyTablesType {
 
+    /**
+     * IDENTITY
+     */
     public int id;
+    /**
+     * INT  
+     * INTEGER
+     * MEDIUMINT
+     * INT4
+     * SIGNED
+     */
     public Integer _int;
+    /**
+     * BOOLEAN
+     */
     public boolean _boolean;
+    /**
+     * BIGINT
+     * INT8
+     */
     public Long _long;
+    /**
+     * DECIMAL  
+     * NUMBER
+     * DEC
+     * NUMERIC 
+     */
     public BigDecimal _decimal; 
+    /**
+     * DOUBLE 
+     * FLOAT   
+     * FLOAT4  
+     * FLOAT8
+     */
     public double _double;
+    /**
+     * REAL
+     */
     public float _float;
+    /**
+     * VARCHAR  
+     * LONGVARCHAR
+     * VARCHAR2
+     * NVARCHAR
+     * NVARCHAR2
+     * VARCHAR_CASESENSITIVE   
+     */
     public String _string;
+    /**
+     * BINARY
+     * VARBINARY
+     * LONGVARBINARY
+     * RAW
+     * BYTEA
+     */
     public byte _byte;
+    /**
+     * DATE
+     */
     public Date _date;
+    /**
+     * TIME
+     */
     public Time _time;
+    /**
+     * TIMESTAMP  
+     * DATETIME
+     * SMALLDATETIME   
+     */
     public Timestamp _timestamp;
 }
