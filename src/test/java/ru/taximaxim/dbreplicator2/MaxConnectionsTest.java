@@ -33,8 +33,8 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistryBuilder;
 
 import ru.taximaxim.dbreplicator2.cf.BoneCPConnectionsFactory;
-import ru.taximaxim.dbreplicator2.cf.BoneCPDataBaseSettingsStorage;
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
+import ru.taximaxim.dbreplicator2.model.BoneCPDataBaseSettingsStorage;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsModel;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
 

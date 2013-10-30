@@ -30,6 +30,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import ru.taximaxim.dbreplicator2.model.BoneCPDataBaseSettingsStorage;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettings;
 
 import com.jolbox.bonecp.BoneCP;

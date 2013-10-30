@@ -32,7 +32,7 @@ import java.util.List;
  * @author ags
  * 
  */
-public class Utils {
+public final class Utils {
 
     /**
      * Фикс для исправления предупреждения

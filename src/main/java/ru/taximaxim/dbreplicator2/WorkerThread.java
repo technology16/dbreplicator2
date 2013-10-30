@@ -30,8 +30,8 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
+import ru.taximaxim.dbreplicator2.model.Runner;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
-import ru.taximaxim.dbreplicator2.replica.Runner;
 import ru.taximaxim.dbreplicator2.replica.StopChainProcesing;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;

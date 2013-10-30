@@ -22,7 +22,7 @@
  */
 package ru.taximaxim.dbreplicator2.tasks;
 
-import ru.taximaxim.dbreplicator2.replica.Runner;
+import ru.taximaxim.dbreplicator2.model.Runner;
 
 public interface TaskSettings {
 

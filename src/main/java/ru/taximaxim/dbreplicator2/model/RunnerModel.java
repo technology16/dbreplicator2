@@ -37,7 +37,6 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
-import ru.taximaxim.dbreplicator2.replica.Runner;
 
 @Entity
 @Table(name = "runners")

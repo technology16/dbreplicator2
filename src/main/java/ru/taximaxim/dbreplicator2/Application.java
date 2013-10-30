@@ -38,7 +38,7 @@ import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
  * @author TaxiMaxim
  * 
  */
-public class Application {
+public final class Application {
 
     private static final Logger LOG = Logger.getLogger(Application.class);
 

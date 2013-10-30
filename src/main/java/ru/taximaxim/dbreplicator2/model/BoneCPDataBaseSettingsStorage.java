@@ -20,11 +20,10 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ru.taximaxim.dbreplicator2.cf;
+package ru.taximaxim.dbreplicator2.model;
 
 import java.util.Map;
 
-import ru.taximaxim.dbreplicator2.model.BoneCPSettings;
 
 /**
  * Интерфейс хранилища настроек именнованных соединений

@@ -24,7 +24,6 @@ package ru.taximaxim.dbreplicator2.model;
 
 import java.util.List;
 
-import org.hibernate.FetchMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;

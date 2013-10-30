@@ -20,11 +20,10 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ru.taximaxim.dbreplicator2.replica;
+package ru.taximaxim.dbreplicator2.model;
 
 import java.util.List;
 
-import ru.taximaxim.dbreplicator2.model.StrategyModel;
 
 public interface Runner {
 
