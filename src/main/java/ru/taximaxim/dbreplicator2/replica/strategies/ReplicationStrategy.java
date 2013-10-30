@@ -41,6 +41,7 @@ import ru.taximaxim.dbreplicator2.replica.StrategyException;
 
 /**
  * Класс стратегии репликации данных из источника в приемник
+ * Записи реплицируются в порядке последних операций над ними.
  * 
  * @author volodin_aa
  * 
@@ -58,6 +59,7 @@ public class ReplicationStrategy implements Strategy {
     @Override
     public void execute(Connection sourceConnection, Connection targetConnection,
             StrategyModel data) throws StrategyException {
+        // TODO: Реализовать поддержку списка таблиц
         try {
             boolean lastAutoCommit = sourceConnection.getAutoCommit();
             boolean lastTargetAutoCommit = targetConnection.getAutoCommit();
