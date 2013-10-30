@@ -77,8 +77,7 @@ public class Helper {
                 }
                 Assert.assertEquals(listSource.get(i)._decimal, listDest.get(i)._decimal);
                 
-                if(((listSource.get(i)._string != null) && (listDest.get(i)._string != null))&&
-                (listSource.get(i)._string.equals(listDest.get(i)._string))){
+                if(listSource.get(i)._string != listDest.get(i)._string){
                     LOG.error(String.format("_string [%s == %s]", listSource.get(i)._string, listDest.get(i)._string));
                 }
                 Assert.assertEquals(listSource.get(i)._string, listDest.get(i)._string);
@@ -166,6 +165,59 @@ public class Helper {
         rs.close();
         stat.close();
         return list;
+    }
+    
+    public static void InfoNull(Connection conn, String tableName, Integer _int) throws SQLException{
+        Statement stat = conn.createStatement();
+        ResultSet rs = stat.executeQuery("select * from " + tableName + " where _int = " + _int);
+        while (rs.next()) {
+            if(rs.getObject("_long")!=null) {
+                LOG.error(String.format("_long not null [%s]", rs.getObject("_long").toString()));
+            }
+            Assert.assertNull(rs.getObject("_long"));
+            
+            if(rs.getObject("_decimal")!=null) {
+                LOG.error(String.format("_decimal not null [%s]", rs.getObject("_decimal").toString()));
+            }
+            Assert.assertNull(rs.getObject("_decimal"));
+            
+            if(rs.getObject("_double")!=null) {
+                LOG.error(String.format("_double not null [%s]", rs.getObject("_double").toString()));
+            }
+            Assert.assertNull(rs.getObject("_double"));
+            
+            if(rs.getObject("_float")!=null) {
+                LOG.error(String.format("_float not null [%s]", rs.getObject("_float").toString()));
+            }
+            Assert.assertNull(rs.getObject("_float"));
+            
+            if(rs.getObject("_string")!=null) {
+                LOG.error(String.format("_string not null [%s]", rs.getObject("_string").toString()));
+            }
+            Assert.assertNull(rs.getObject("_string"));
+            
+            if(rs.getObject("_byte")!=null) {
+                LOG.error(String.format("_byte not null [%s]", rs.getObject("_byte").toString()));
+            }
+            Assert.assertNull(rs.getObject("_byte"));
+            
+            if(rs.getObject("_date")!=null) {
+                LOG.error(String.format("_date not null [%s]", rs.getObject("_date").toString()));
+            }
+            Assert.assertNull(rs.getObject("_date"));
+            
+            if(rs.getObject("_time")!=null) {
+                LOG.error(String.format("_time not null [%s]", rs.getObject("_time").toString()));
+            }
+            Assert.assertNull(rs.getObject("_time"));
+            
+            if(rs.getObject("_timestamp")!=null) {
+                LOG.error(String.format("_timestamp not null [%s]", rs.getObject("_timestamp").toString()));
+            }
+            Assert.assertNull(rs.getObject("_timestamp"));
+        }
+        rs.close();
+        stat.close();
     }
     
     /**

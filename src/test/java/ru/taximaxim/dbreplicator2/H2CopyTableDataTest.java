@@ -25,7 +25,9 @@ package ru.taximaxim.dbreplicator2;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -44,16 +46,22 @@ public class H2CopyTableDataTest {
     protected static SessionFactory sessionFactory;
     protected static Session session;
     protected static ConnectionFactory connectionFactory;
+    protected static Connection conn = null;
+    protected static Connection connDest = null;
+    protected static Runnable worker = null;
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         sessionFactory = Application.getSessionFactory();
         session = sessionFactory.openSession();
         connectionFactory = Application.getConnectionFactory();
+        initialization();
     }
 
     @AfterClass
     public static void setUpAfterClass() throws Exception {
+        conn.close();
+        connDest.close();
         connectionFactory.close();
         session.close();
         sessionFactory.close();
@@ -61,24 +69,6 @@ public class H2CopyTableDataTest {
     
     @Test
     public void testTableDataTest() throws SQLException, ClassNotFoundException, IOException {
-
-        LOG.debug("Start: ");
-        String source = "source";
-        Connection conn = connectionFactory.getConnection(source);
-        
-        Helper.executeSqlFromFile(conn, "importRep2.sql");
-        Helper.executeSqlFromFile(conn, "importSource.sql");
-        createTrigger(conn);
-        Helper.executeSqlFromFile(conn, "importSourceData.sql");
-        
-
-        String dest = "dest";
-        Connection connDest = connectionFactory.getConnection(dest);
-        Helper.executeSqlFromFile(connDest, "importDest.sql");
-        
-        RunnerService runnerService = new RunnerService(sessionFactory);
-        
-        Runnable worker = new WorkerThread(runnerService.getRunner(1));
         
         worker.run();
         
@@ -97,70 +87,23 @@ public class H2CopyTableDataTest {
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
         Helper.AssertEquals(listSource, listDest);
-//        LOG.info("<======Inception======>");
-//        Helper.InfoList(listSource);
-//        LOG.info("=======Inception=======");
-//        Helper.InfoList(listDest);
-//        LOG.info(">======Inception======<");
         
-        
-        
-        Helper.executeSqlFromFile(conn, "sql_insert.sql");   
-        worker.run();
-        listSource = Helper.InfoTest(conn, "t_table");
-        listDest   = Helper.InfoTest(connDest, "t_table");
-        Helper.AssertEquals(listSource, listDest);
-        
-        listSource = Helper.InfoTest(conn, "t_table1");
-        listDest   = Helper.InfoTest(connDest, "t_table1");
-        Helper.AssertEquals(listSource, listDest);
-        
-        
-        
-        Helper.executeSqlFromFile(conn, "sql_update.sql");   
-        worker.run();
-        listSource = Helper.InfoTest(conn, "t_table");
-        listDest   = Helper.InfoTest(connDest, "t_table");
-        Helper.AssertEquals(listSource, listDest);
-        
-        listSource = Helper.InfoTest(conn, "t_table1");
-        listDest   = Helper.InfoTest(connDest, "t_table1");
-        Helper.AssertEquals(listSource, listDest);
-        
-        
-        
-        Helper.executeSqlFromFile(conn, "sql_delete.sql");   
-        worker.run();
-        listSource = Helper.InfoTest(conn, "t_table");
-        listDest   = Helper.InfoTest(connDest, "t_table");
-        Helper.AssertEquals(listSource, listDest);
-
-        listSource = Helper.InfoTest(conn, "t_table1");
-        listDest   = Helper.InfoTest(connDest, "t_table1");
-        Helper.AssertEquals(listSource, listDest);
-        
-        
-        
-        
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");   
-        worker.run();
-        worker.run();
-        listSource = Helper.InfoTest(conn, "t_table2");
-        listDest   = Helper.InfoTest(connDest, "t_table2");
-        Helper.AssertEquals(listSource, listDest);
-//
-        listSource = Helper.InfoTest(conn, "t_table3");
-        listDest   = Helper.InfoTest(connDest, "t_table3");
-        Helper.AssertEquals(listSource, listDest);
-        
-        
-        
-        
+        LOG.info("<======Inception======>");
+        Helper.InfoList(listSource);
+        LOG.info("=======Inception=======");
+        Helper.InfoList(listDest);
+        LOG.info(">======Inception======<");
+    }
+    
+    @Test
+    public void testNull() throws SQLException, ClassNotFoundException, IOException {
+        //Проверка null
+        LOG.info("Проверка null");
         Helper.executeSqlFromFile(conn, "sql_null.sql");   
         worker.run();
         
-        listSource = Helper.InfoTest(conn, "t_table4");
-        listDest   = Helper.InfoTest(connDest, "t_table4");
+        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table4");
+        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table4");
         
         Helper.AssertEquals(listSource, listDest);
 //
@@ -168,20 +111,111 @@ public class H2CopyTableDataTest {
         listDest   = Helper.InfoTest(connDest, "t_table5");
         Helper.AssertEquals(listSource, listDest);
         
-      LOG.info("<======Inception======>");
-      Helper.InfoList(listSource);
-      LOG.info("=======Inception=======");
-      Helper.InfoList(listDest);
-      LOG.info(">======Inception======<");
+        Helper.InfoNull(conn, "t_table4", 1);
+        Helper.InfoNull(conn, "t_table5", 2);
+
+        Helper.InfoNull(connDest, "t_table4", 1);
+        Helper.InfoNull(connDest, "t_table5", 2);
+    }
+    
+    @Test
+    public void testForeignKey() throws SQLException, ClassNotFoundException, IOException {
+        //Проверка внешних ключей
+        LOG.info("Проверка внешних ключей");
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");   
+        worker.run();
+        worker.run();
+        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table2");
+        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table2");
+        Helper.AssertEquals(listSource, listDest);
+//
+        listSource = Helper.InfoTest(conn, "t_table3");
+        listDest   = Helper.InfoTest(connDest, "t_table3");
+        Helper.AssertEquals(listSource, listDest);
+    }
+    
+    @Test
+    public void testInsert() throws SQLException, ClassNotFoundException, IOException {
+      //Проверка вставки
+        Helper.executeSqlFromFile(conn, "sql_insert.sql");   
+        worker.run();
+        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
+        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
+        Helper.AssertEquals(listSource, listDest);
         
-        conn.close();
-        connDest.close();
+        listSource = Helper.InfoTest(conn, "t_table1");
+        listDest   = Helper.InfoTest(connDest, "t_table1");
+        Helper.AssertEquals(listSource, listDest);
+    }
+    
+    @Test
+    public void testUpdate() throws SQLException, ClassNotFoundException, IOException {
+        testInsert();
+        //Проверка обновления
+        LOG.info("Проверка обновления");
+        Helper.executeSqlFromFile(conn, "sql_update.sql");   
+        worker.run();
+        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
+        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
+        Helper.AssertEquals(listSource, listDest);
+        
+        listSource = Helper.InfoTest(conn, "t_table1");
+        listDest   = Helper.InfoTest(connDest, "t_table1");
+        Helper.AssertEquals(listSource, listDest);
+    }
+    
+    @Test
+    public void testDelete() throws SQLException, ClassNotFoundException, IOException {
+        testInsert();
+        LOG.info("Проверка удаления");
+        //Проверка удаления
+        Helper.executeSqlFromFile(conn, "sql_delete.sql");   
+        worker.run();
+        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
+        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
+        Helper.AssertEquals(listSource, listDest);
+
+        listSource = Helper.InfoTest(conn, "t_table1");
+        listDest   = Helper.InfoTest(connDest, "t_table1");
+        Helper.AssertEquals(listSource, listDest);
+    }
+    
+    @Test
+    public void testInsertUpdate() throws SQLException, ClassNotFoundException, IOException {
+      //Проверка вставки и обновления
+        LOG.info("Проверка вставки и обновления");
+        Helper.executeSqlFromFile(conn, "sql_insert.sql");   
+        Helper.executeSqlFromFile(conn, "sql_update.sql");   
+        worker.run();
+        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
+        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
+        Helper.AssertEquals(listSource, listDest);
+        
+        listSource = Helper.InfoTest(conn, "t_table1");
+        listDest   = Helper.InfoTest(connDest, "t_table1");
+        Helper.AssertEquals(listSource, listDest);
+    }
+    
+    @Test
+    public void testInsertDelete() throws SQLException, ClassNotFoundException, IOException {
+        LOG.info("Проверка вставки и удаления");
+      //Проверка вставки и удаления
+        Helper.executeSqlFromFile(conn, "sql_insert.sql");   
+        Helper.executeSqlFromFile(conn, "sql_delete.sql");   
+        worker.run();
+        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
+        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
+        Helper.AssertEquals(listSource, listDest);
+
+        listSource = Helper.InfoTest(conn, "t_table1");
+        listDest   = Helper.InfoTest(connDest, "t_table1");
+        Helper.AssertEquals(listSource, listDest);
     }
     
     /**
      * Создание триггера
      */
-    public void createTrigger(Connection conn)
+    public static void createTrigger(Connection conn)
             throws SQLException, ClassNotFoundException {
         Helper.createTrigger(conn, "t_table");
         Helper.createTrigger(conn, "t_table1");
@@ -189,5 +223,27 @@ public class H2CopyTableDataTest {
         Helper.createTrigger(conn, "t_table3");
         Helper.createTrigger(conn, "t_table4");
         Helper.createTrigger(conn, "t_table5");
+    }
+    
+    /**
+     * Инициализация
+     */
+    public static void initialization() throws ClassNotFoundException, SQLException, IOException{
+        LOG.info("initialization");
+        String source = "source";
+        conn = connectionFactory.getConnection(source);
+        
+        Helper.executeSqlFromFile(conn, "importRep2.sql");
+        Helper.executeSqlFromFile(conn, "importSource.sql");
+        createTrigger(conn);
+        Helper.executeSqlFromFile(conn, "importSourceData.sql");
+        
+        String dest = "dest";
+        connDest = connectionFactory.getConnection(dest);
+        Helper.executeSqlFromFile(connDest, "importDest.sql");
+        
+        RunnerService runnerService = new RunnerService(sessionFactory);
+        
+        worker = new WorkerThread(runnerService.getRunner(1));
     }
 }
