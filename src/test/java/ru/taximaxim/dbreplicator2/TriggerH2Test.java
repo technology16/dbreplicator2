@@ -53,9 +53,9 @@ public class TriggerH2Test {
 
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
-          connectionFactory.close();
-          session.close();
-          sessionFactory.close();
+        //connectionFactory.close();
+        session.close();
+        //sessionFactory.close();
     }
 
     /**
@@ -72,7 +72,6 @@ public class TriggerH2Test {
         
         Helper.executeSqlFromFile(conn, "importRep2.sql");
         Helper.executeSqlFromFile(conn, "importSource.sql");
-        Helper.createTrigger(conn, "t_table");
         Helper.executeSqlFromFile(conn, "importSourceData.sql");
         
         int countT_TABLE = Helper.InfoCount(conn, "t_table");

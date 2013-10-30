@@ -33,6 +33,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -293,9 +294,21 @@ public class Helper {
         sqlFile.close();
 
         String sqlText = new String(sqlBytes);
-
+        
         PreparedStatement statement = connection.prepareStatement(sqlText);
         statement.execute();
+        
+        String[] triggers = sqlText.split("<#CreateTrigger#>");
+        if (triggers.length==3) {
+            String[] tableNames = triggers[1].split(",");
+            createTriggers(connection, tableNames);
+        }
+    }
+    
+    protected static void executeSqlFromFiles(Connection connection, String[] fileNames) throws IOException, SQLException{
+        for (String fileName : fileNames) {
+            executeSqlFromFile(connection, fileName);
+        }
     }
     
     /**
@@ -313,6 +326,18 @@ public class Helper {
                 + " FOR EACH ROW CALL \"" + Trigger + "\"");
     }
 
+    /**
+     * Создание тригерров
+     * @param conn - Соединение
+     * @param tableNames - список таблиц
+     * @throws SQLException
+     */
+    public static void createTriggers(Connection conn, String[] tableNames) throws SQLException{
+        for (String tableName : tableNames) {
+            createTrigger(conn, tableName);
+        }
+    }
+    
     public static class MyTrigger implements Trigger {
 
         String tableName = null;
