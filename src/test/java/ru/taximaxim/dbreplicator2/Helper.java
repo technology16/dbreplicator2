@@ -47,6 +47,11 @@ public class Helper {
     
     protected static final Logger LOG = Logger.getLogger(Helper.class);
     
+    /**
+     * Сравнивание записи по листам
+     * @param listSource
+     * @param listDest
+     */
     public static void AssertEquals(List<MyTablesType> listSource, List<MyTablesType> listDest){
         if(listSource.size() != listDest.size()) {
             LOG.error(String.format("Количество записей не равны [%s == %s]", listSource.size(), listDest.size()));
@@ -120,6 +125,10 @@ public class Helper {
         }
     }
     
+    /**
+     * Вывод информации из листа
+     * @param list
+     */
     public static void InfoList(List<MyTablesType> list) {
             for (int i = 0; i < list.size(); i++) {
                 LOG.info("====================================================================");
@@ -140,6 +149,13 @@ public class Helper {
             }
         }
     
+    /**
+     * Запись в лист выполняя запрос select * from tableName order by id
+     * @param conn - соединение
+     * @param tableName - имя талицы
+     * @return List<MyTablesType>
+     * @throws SQLException
+     */
     public static List<MyTablesType> InfoTest(Connection conn, String tableName) throws SQLException{
         Statement stat = conn.createStatement();
         ResultSet rs = stat.executeQuery("select * from " + tableName + " order by id");
@@ -167,6 +183,13 @@ public class Helper {
         return list;
     }
     
+    /**
+     * Проверка null select * from tableName where _int = _int
+     * @param conn - соединение 
+     * @param tableName - имя таблицы
+     * @param _int - поисково значение
+     * @throws SQLException
+     */
     public static void InfoNull(Connection conn, String tableName, Integer _int) throws SQLException{
         Statement stat = conn.createStatement();
         ResultSet rs = stat.executeQuery("select * from " + tableName + " where _int = " + _int);
@@ -222,6 +245,11 @@ public class Helper {
     
     /**
      * Выполнение запроса выборки
+     * select * from tableName
+     * 
+     * @param conn - Соединение
+     * @param tableName - Имя таблицы
+     * @throws SQLException
      */
     public static void InfoSelect(Connection conn,  String tableName) throws SQLException{
         Statement statSource = conn.createStatement();

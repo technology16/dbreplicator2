@@ -25,9 +25,7 @@ package ru.taximaxim.dbreplicator2;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -67,6 +65,13 @@ public class H2CopyTableDataTest {
         sessionFactory.close();
     }
     
+
+    /**
+     * Проверка Супер логов
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     * @throws IOException
+     */
     @Test
     public void testTableDataTest() throws SQLException, ClassNotFoundException, IOException {
         
@@ -95,6 +100,12 @@ public class H2CopyTableDataTest {
         LOG.info(">======Inception======<");
     }
     
+    /**
+     * Тестирование null значений в разных типах
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     * @throws IOException
+     */
     @Test
     public void testNull() throws SQLException, ClassNotFoundException, IOException {
         //Проверка null
@@ -118,6 +129,22 @@ public class H2CopyTableDataTest {
         Helper.InfoNull(connDest, "t_table5", 2);
     }
     
+    /**
+     * Проверка внешних ключей
+     * вставка в главную таблицу  
+     * вставка таблицу подчиненную
+     * изменение главной таблицы
+     * 
+     * репликация
+     * 
+     * вставка таблицу подчиненную
+     * изменение главной таблицы
+     * 
+     * 
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     * @throws IOException
+     */
     @Test
     public void testForeignKey() throws SQLException, ClassNotFoundException, IOException {
         //Проверка внешних ключей
@@ -134,6 +161,12 @@ public class H2CopyTableDataTest {
         Helper.AssertEquals(listSource, listDest);
     }
     
+    /**
+     * Проверка вставки 
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     * @throws IOException
+     */
     @Test
     public void testInsert() throws SQLException, ClassNotFoundException, IOException {
       //Проверка вставки
@@ -148,6 +181,12 @@ public class H2CopyTableDataTest {
         Helper.AssertEquals(listSource, listDest);
     }
     
+    /**
+     * Проверка обновления
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     * @throws IOException
+     */
     @Test
     public void testUpdate() throws SQLException, ClassNotFoundException, IOException {
         testInsert();
@@ -164,6 +203,12 @@ public class H2CopyTableDataTest {
         Helper.AssertEquals(listSource, listDest);
     }
     
+    /**
+     * Проверка удаления
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     * @throws IOException
+     */
     @Test
     public void testDelete() throws SQLException, ClassNotFoundException, IOException {
         testInsert();
@@ -180,6 +225,12 @@ public class H2CopyTableDataTest {
         Helper.AssertEquals(listSource, listDest);
     }
     
+    /**
+     * Проверка вставки и обновления
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     * @throws IOException
+     */
     @Test
     public void testInsertUpdate() throws SQLException, ClassNotFoundException, IOException {
       //Проверка вставки и обновления
@@ -196,6 +247,12 @@ public class H2CopyTableDataTest {
         Helper.AssertEquals(listSource, listDest);
     }
     
+    /**
+     * Проверка вставки и удаления
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     * @throws IOException
+     */
     @Test
     public void testInsertDelete() throws SQLException, ClassNotFoundException, IOException {
         LOG.info("Проверка вставки и удаления");
