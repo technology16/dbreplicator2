@@ -45,13 +45,13 @@ public class RunnerModel implements Runner {
     /**
      * Обработчики реплики
      */
-    final public static String REPLICA_RUNNER_CLASS = 
+    public static final String REPLICA_RUNNER_CLASS = 
             "ru.taximaxim.dbreplicator2.replica.ReplicaRunner";
     
     /**
      * Менеджеры записей суперлога
      */
-    final public static String SUPERLOG_RUNNER_CLASS = 
+    public static final String SUPERLOG_RUNNER_CLASS = 
             "ru.taximaxim.dbreplicator2.replica.SuperlogRunner";
     
 

@@ -30,7 +30,7 @@ import ru.taximaxim.dbreplicator2.model.TaskSettingsService;
 
 /**
  * @author volodin_aa
- *
+ * 
  */
 public class TasksPool {
 
@@ -48,17 +48,17 @@ public class TasksPool {
     public void start() {
         Map<Integer, TaskSettings> taskSettings = taskSettingsService.getTasks();
 
-    	for (TaskSettings task: taskSettings.values()) {
-    		TaskRunner taskRunner = new TaskRunner(task);
-    		Thread thread = new Thread(taskRunner);
+        for (TaskSettings task : taskSettings.values()) {
+            TaskRunner taskRunner = new TaskRunner(task);
+            Thread thread = new Thread(taskRunner);
             thread.start();
-    		taskThreads.put(taskRunner, thread);
-		}
+            taskThreads.put(taskRunner, thread);
+        }
     }
 
     /**
      * Останливаем потоки задач
-     *
+     * 
      * @throws InterruptedException
      */
     public void stop() throws InterruptedException {
