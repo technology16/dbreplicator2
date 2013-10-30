@@ -25,6 +25,7 @@ package ru.taximaxim.dbreplicator2;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -43,7 +44,13 @@ public class StrategiesTest {
 
         sessionFactory = Application.getSessionFactory();
     }
-
+    
+    @AfterClass
+    public static void tearDownAfterClass() throws Exception {
+        sessionFactory.close();
+        Application.SessionFactoryClose();
+    }
+    
     /**
      * Проверка создания модели исполняемого потока и стратегии.
      */

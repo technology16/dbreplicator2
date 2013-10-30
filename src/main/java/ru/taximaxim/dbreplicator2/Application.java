@@ -74,7 +74,15 @@ public final class Application {
         }
         return sessionFactory;
     }
-
+    
+    /**
+     * Закрываем sessionFactory
+     */
+    public static void SessionFactoryClose() {
+        sessionFactory.close();
+        sessionFactory = null;
+    }
+    
     /**
      * Возвращает фабрику соединений
      * 
@@ -90,6 +98,14 @@ public final class Application {
         return connectionFactory;
     }
 
+    /**
+     * Закрываем connectionFactory
+     */
+    public static void connectionFactoryClose() {
+        connectionFactory.close();
+        connectionFactory = null;
+    }
+    
     public static void main(String[] args) {
 
         CommandLineParser.parse(args);

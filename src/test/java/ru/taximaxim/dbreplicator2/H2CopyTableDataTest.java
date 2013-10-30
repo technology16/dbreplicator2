@@ -60,9 +60,11 @@ public class H2CopyTableDataTest {
     public static void setUpAfterClass() throws Exception {
         conn.close();
         connDest.close();
-        connectionFactory.close();
         session.close();
+        connectionFactory.close();
+        Application.connectionFactoryClose();
         sessionFactory.close();
+        Application.SessionFactoryClose();
     }
     
 
@@ -74,7 +76,8 @@ public class H2CopyTableDataTest {
      */
     @Test
     public void testTableDataTest() throws SQLException, ClassNotFoundException, IOException {
-        
+
+        Helper.executeSqlFromFile(conn, "importSourceData.sql");
         worker.run();
         
         int count_rep2_superlog = Helper.InfoCount(conn, "rep2_superlog");
@@ -270,19 +273,6 @@ public class H2CopyTableDataTest {
     }
     
     /**
-     * Создание триггера
-     */
-    public static void createTrigger(Connection conn)
-            throws SQLException, ClassNotFoundException {
-        Helper.createTrigger(conn, "t_table");
-        Helper.createTrigger(conn, "t_table1");
-        Helper.createTrigger(conn, "t_table2");
-        Helper.createTrigger(conn, "t_table3");
-        Helper.createTrigger(conn, "t_table4");
-        Helper.createTrigger(conn, "t_table5");
-    }
-    
-    /**
      * Инициализация
      */
     public static void initialization() throws ClassNotFoundException, SQLException, IOException{
@@ -292,8 +282,6 @@ public class H2CopyTableDataTest {
         
         Helper.executeSqlFromFile(conn, "importRep2.sql");
         Helper.executeSqlFromFile(conn, "importSource.sql");
-        createTrigger(conn);
-        Helper.executeSqlFromFile(conn, "importSourceData.sql");
         
         String dest = "dest";
         connDest = connectionFactory.getConnection(dest);
