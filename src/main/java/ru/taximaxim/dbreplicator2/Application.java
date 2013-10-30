@@ -78,7 +78,7 @@ public class Application {
     /**
      * Закрываем sessionFactory
      */
-    public static void SessionFactoryClose() {
+    public static void sessionFactoryClose() {
         sessionFactory.close();
         sessionFactory = null;
     }

@@ -48,7 +48,7 @@ public class StrategiesTest {
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
         sessionFactory.close();
-        Application.SessionFactoryClose();
+        Application.sessionFactoryClose();
     }
     
     /**

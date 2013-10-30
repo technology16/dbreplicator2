@@ -64,7 +64,7 @@ public class H2CopyTableDataTest {
         connectionFactory.close();
         Application.connectionFactoryClose();
         sessionFactory.close();
-        Application.SessionFactoryClose();
+        Application.sessionFactoryClose();
     }
     
 
