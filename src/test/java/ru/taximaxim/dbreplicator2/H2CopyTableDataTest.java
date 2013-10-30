@@ -60,9 +60,11 @@ public class H2CopyTableDataTest {
     public static void setUpAfterClass() throws Exception {
         conn.close();
         connDest.close();
-        //connectionFactory.close();
         session.close();
-        //sessionFactory.close();
+        connectionFactory.close();
+        Application.connectionFactoryClose();
+        sessionFactory.close();
+        Application.SessionFactoryClose();
     }
     
 

@@ -53,9 +53,11 @@ public class TriggerH2Test {
 
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
-        connectionFactory.close();
         session.close();
+        connectionFactory.close();
+        Application.connectionFactoryClose();
         sessionFactory.close();
+        Application.SessionFactoryClose();
     }
 
     /**
