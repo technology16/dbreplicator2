@@ -33,12 +33,14 @@ import ru.taximaxim.dbreplicator2.model.RunnerModel;
 
 public class ThreadPool {
 
-    public static final Logger LOG = Logger.getLogger(ThreadPool.class);
+    private static final Logger LOG = Logger.getLogger(ThreadPool.class);
 
-    public ExecutorService executor = null;
+    private ExecutorService executor = null;
 
     public ThreadPool(int count) throws InterruptedException {
-        restartThreadPool(count);
+        executor = Executors.newFixedThreadPool(count);
+
+        LOG.info(String.format("Создание и запуск пула потоков (%s)", count));
     }
 
     /**
@@ -64,7 +66,7 @@ public class ThreadPool {
         shutdownThreadPool();
         executor = Executors.newFixedThreadPool(count);
 
-        LOG.info(String.format("ThreadPool.restart(%s)", count));
+        LOG.info(String.format("Перезапуск пула потоков (%s)", count));
     }
 
     /**

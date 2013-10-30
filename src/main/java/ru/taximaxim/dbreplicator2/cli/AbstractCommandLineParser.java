@@ -131,7 +131,7 @@ public abstract class AbstractCommandLineParser {
      *            - очистить группу опцию
      */
     private void processingOptionGroup(Option option, boolean add, boolean clear) {
-        if (clear == true) {
+        if (clear) {
             optionGroup = new OptionGroup();
         }
 
@@ -152,10 +152,8 @@ public abstract class AbstractCommandLineParser {
         CommandLineParser cmdLinePosixParser = new PosixParser();
         CommandLine commandLine = null;
         try {
-
             commandLine = cmdLinePosixParser.parse(getOptions(), args);
             processingCmd(commandLine);
-
         } catch (AlreadySelectedException ex) {
             LOG.error(String.format("Ошибка опций групп: %s", ex.getMessage()), ex);
         } catch (ParseException ex) {
