@@ -25,8 +25,9 @@ package ru.taximaxim.dbreplicator2.cli;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
 import org.apache.log4j.Logger;
+
+import ru.taximaxim.dbreplicator2.Application;
 
 public class CommandLineParser extends AbstractCommandLineParser {
 
@@ -44,12 +45,15 @@ public class CommandLineParser extends AbstractCommandLineParser {
      */
     protected CommandLineParser(String[] args) {
         if (args.length != 0) {
-            setOption("h", "help", true, "Print help for this application", 0,
+            setOption("h", "help", true, "Справка", 0,
                     false, null);
-            setOption("t", "test", true, "The test test test", 1, false, "file");
+//            setOption("t", "test", true, "The test test test", 1, false, "file");
+            setOption("i", "init", false, "Инициализация настроек dbreplicator2", 0, false, null);
+            setOption("u", "update", true, "Обновление настроек dbreplicator2 скриптом из файла ", 1, false, "file");
+            setOption("s", "start", false, "Запуск репликации dbreplicator2", 0, false, null);
 
-            createOptionGroup(new Option("a", true, "A option"));
-            addOptionGroup(new Option("b", true, "B option"));
+//            createOptionGroup(new Option("a", true, "A option"));
+//            addOptionGroup(new Option("b", true, "B option"));
 
             // выполение
             parserCommandLine(args);
@@ -62,24 +66,41 @@ public class CommandLineParser extends AbstractCommandLineParser {
      * @param commandLine
      */
     protected void processingCmd(CommandLine commandLine) {
+        boolean hasOption = false;
 
-        boolean error = true;
-        if (commandLine.hasOption("t")) {
+/*        if (commandLine.hasOption("t")) {
             String[] arguments = commandLine.getOptionValues("t");
             LOG.debug("Name of the test: " + arguments[0]);
             error = false;
+        }*/
+
+        if (commandLine.hasOption("i")) {
+            // Инициализируем БД настроек
+            hasOption = true;
         }
 
-        if (commandLine.hasOption("h")) {
+        if (commandLine.hasOption("u")) {
+            // Обновляем БД настроек скриптом из файла
+            hasOption = true;
+        }
+
+        if (commandLine.hasOption("s")) {
+            // Запускаем репликацию
+            // Определение ведущих БД и запуск процессов диспетчеров записей
+            // для каждой ведущей БД.
+            // 1. Определяем ведущие БД по существующим настройкам.
+            // 2. Запуск диспечеров записей для каждой ведущей БД.
+            Application.getTasksPool().start();
+            hasOption = true;
+        }
+
+        if (commandLine.hasOption("h") || !hasOption) {
+            if (!hasOption) {
+                LOG.error("Неизвестная команда, пожалуйста воспользуетесь командой [-h] или [--help]");
+            }
 
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp("java dbreplicator2.jar", getOptions());
-
-            error = false;
-        }
-
-        if (error) {
-            LOG.error("Неизвестная команда, пожалуйста воспользуетесь командой [-h] или [--help]");
         }
     }
 }

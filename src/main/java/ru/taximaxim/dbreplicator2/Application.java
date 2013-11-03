@@ -33,6 +33,8 @@ import ru.taximaxim.dbreplicator2.cf.BoneCPConnectionsFactory;
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 import ru.taximaxim.dbreplicator2.cli.CommandLineParser;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
+import ru.taximaxim.dbreplicator2.model.TaskSettingsService;
+import ru.taximaxim.dbreplicator2.tasks.TasksPool;
 
 /**
  * @author TaxiMaxim
@@ -45,6 +47,10 @@ public final class Application {
     private static SessionFactory sessionFactory;
 
     private static ConnectionFactory connectionFactory;
+    
+    private static TaskSettingsService taskSettingsService;
+    
+    private static TasksPool tasksPool;
 
     /**
      * Данный класс нельзя инстанциировать.
@@ -58,7 +64,6 @@ public final class Application {
      * @return фабрику сессий гибернейта.
      */
     public static SessionFactory getSessionFactory() {
-
         LOG.debug("Запрошено создание новой фабрики сессий hibernate");
 
         if (sessionFactory == null) {
@@ -89,7 +94,9 @@ public final class Application {
      * @return фабрику соединений
      */
     public static ConnectionFactory getConnectionFactory() {
-
+        // Чтение настроек о зарегистрированных пулах соединений и их
+        // инициализация.
+        
         if (connectionFactory == null) {
             connectionFactory = new BoneCPConnectionsFactory(
                     new BoneCPSettingsService(getSessionFactory()));
@@ -106,21 +113,58 @@ public final class Application {
         connectionFactory = null;
     }
     
-    public static void main(String[] args) {
-
-        CommandLineParser.parse(args);
-
-        // TODO: Чтение настроек о зарегистрированных пулах соединений и их
+    /**
+     * Возвращает сервис настройки соединений
+     * 
+     * @return сервис настройки соединений
+     */
+    public static TaskSettingsService getTaskSettingsService() {
+        // Чтение настроек о зарегистрированных пулах соединений и их
         // инициализация.
+        
+        if (taskSettingsService == null) {
+            taskSettingsService = new TaskSettingsService(getSessionFactory());
+        }
 
-        // TODO: Определение рабочих потоков, подготовка пула потоков.
+        return taskSettingsService;
+    }
+    
+    /**
+     * Закрываем сервис настройки соединений
+     */
+    public static void taskSettingsServiceClose() {
+        taskSettingsService = null;
+    }
+    
+    /**
+     * Возвращает пул задач
+     * 
+     * @return пул задач
+     */
+    public static TasksPool getTasksPool() {
+        // Чтение настроек о зарегистрированных пулах соединений и их
+        // инициализация.
+        
+        if (tasksPool == null) {
+            tasksPool = new TasksPool(getTaskSettingsService());
+        }
+
+        return tasksPool;
+    }
+    
+    /**
+     * Закрываем сервис настройки соединений
+     */
+    public static void tasksPoolClose() {
+        tasksPool = null;
+    }
+    
+    public static void main(String[] args) {
+//        CommandLineParser.parse(args);
+        CommandLineParser.parse(new String[]{"-i", "-s"});
+
+        // Определение рабочих потоков, подготовка пула потоков.
         // 1. Расширить таблицы H2 насторйками пулов рабочих потоков.
         // 2. Инициализация пулов потоков.
-
-        // TODO: Определение ведущих БД и запуск процессов диспетчеров записей
-        // для каждой ведущей БД.
-        // 1. Определяем ведущие БД по существующим настройкам.
-        // 2. Запуск диспечеров записей для каждой ведущей БД.
-
     }
 }
