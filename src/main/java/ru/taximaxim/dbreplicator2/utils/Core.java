@@ -48,7 +48,7 @@ public final class Core {
      * @param hibernateXmlFile - путь к файлу настроек
      * @return
      */
-    public synchronized static Configuration getConfiguration(String hibernateXmlFile){
+    public static synchronized Configuration getConfiguration(String hibernateXmlFile){
         if (configuration == null) {
             configuration = new Configuration();
             if (hibernateXmlFile != null) {
@@ -76,7 +76,7 @@ public final class Core {
      * @param configuration - инициализированная конфигурация
      * @return фабрику сессий гибернейта.
      */
-    public synchronized static SessionFactory getSessionFactory(Configuration configuration) {
+    public static synchronized SessionFactory getSessionFactory(Configuration configuration) {
         LOG.debug("Запрошено создание новой фабрики сессий hibernate");
 
         if (sessionFactory == null) {
@@ -131,7 +131,7 @@ public final class Core {
      * 
      * @return фабрику соединений
      */
-    public synchronized static ConnectionFactory getConnectionFactory() {
+    public static synchronized ConnectionFactory getConnectionFactory() {
         // Чтение настроек о зарегистрированных пулах соединений и их
         // инициализация.
         
@@ -156,7 +156,7 @@ public final class Core {
      * 
      * @return сервис настройки соединений
      */
-    public synchronized static TaskSettingsService getTaskSettingsService() {
+    public static synchronized TaskSettingsService getTaskSettingsService() {
         // Чтение настроек о зарегистрированных пулах соединений и их
         // инициализация.
         if (taskSettingsService == null) {
@@ -178,7 +178,7 @@ public final class Core {
      * 
      * @return пул задач
      */
-    public synchronized static TasksPool getTasksPool() {
+    public static synchronized TasksPool getTasksPool() {
         // Чтение настроек о зарегистрированных пулах соединений и их
         // инициализация.
         if (tasksPool == null) {
