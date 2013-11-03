@@ -22,7 +22,7 @@ import ru.taximaxim.dbreplicator2.tasks.TasksPool;
  * @author volodin_aa
  *
  */
-public class Core {
+public final class Core {
     
     private static final Logger LOG = Logger.getLogger(Core.class);
 
