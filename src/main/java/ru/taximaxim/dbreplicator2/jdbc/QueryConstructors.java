@@ -34,7 +34,7 @@ import java.util.List;
  * @author volodin_aa
  * 
  */
-public final class QueryConstructors {
+public final class QueryConstructors implements QueryConstructor {
     /**
      * Сиглетон
      */

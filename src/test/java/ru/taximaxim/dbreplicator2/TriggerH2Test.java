@@ -36,6 +36,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
+import ru.taximaxim.dbreplicator2.utils.Core;
 
 public class TriggerH2Test {
     
@@ -46,18 +47,18 @@ public class TriggerH2Test {
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        sessionFactory = Application.getSessionFactory();
+        sessionFactory = Core.getSessionFactory();
         session = sessionFactory.openSession();
-        connectionFactory = Application.getConnectionFactory();
+        connectionFactory = Core.getConnectionFactory();
     }
 
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
         session.close();
         connectionFactory.close();
-        Application.connectionFactoryClose();
+        Core.connectionFactoryClose();
         sessionFactory.close();
-        Application.sessionFactoryClose();
+        Core.sessionFactoryClose();
     }
 
     /**

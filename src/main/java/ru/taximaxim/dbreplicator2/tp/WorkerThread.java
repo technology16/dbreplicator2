@@ -21,7 +21,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ru.taximaxim.dbreplicator2;
+package ru.taximaxim.dbreplicator2.tp;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -35,6 +35,7 @@ import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.StopChainProcesing;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
+import ru.taximaxim.dbreplicator2.utils.Core;
 
 public class WorkerThread implements Runnable {
 
@@ -68,7 +69,7 @@ public class WorkerThread implements Runnable {
      */
     protected void processCommand(Runner runner) {
 
-        ConnectionFactory connectionsFactory = Application.getConnectionFactory();
+        ConnectionFactory connectionsFactory = Core.getConnectionFactory();
 
         // Инициализируем два соединения. Используем try-with-resources для
         // каждого.

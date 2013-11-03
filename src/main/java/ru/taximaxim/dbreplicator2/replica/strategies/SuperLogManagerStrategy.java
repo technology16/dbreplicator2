@@ -29,13 +29,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-import ru.taximaxim.dbreplicator2.Application;
-import ru.taximaxim.dbreplicator2.WorkerThread;
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
 import ru.taximaxim.dbreplicator2.model.RunnerService;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
+import ru.taximaxim.dbreplicator2.tp.WorkerThread;
+import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
  * Класс стратегии менеджера записей суперлог таблицы
@@ -63,7 +63,7 @@ public class SuperLogManagerStrategy implements Strategy {
             sourceConnection.setHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT);
             // Строим список обработчиков реплик
             RunnerService runnerService = 
-                    new RunnerService(Application.getSessionFactory());
+                    new RunnerService(Core.getSessionFactory());
             List<RunnerModel> runners = 
                     runnerService.getRunners(RunnerModel.REPLICA_RUNNER_CLASS);
             

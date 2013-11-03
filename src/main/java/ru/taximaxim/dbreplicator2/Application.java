@@ -23,148 +23,108 @@
 
 package ru.taximaxim.dbreplicator2;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.HelpFormatter;
 import org.apache.log4j.Logger;
-import org.hibernate.SessionFactory;
+import org.apache.log4j.PropertyConfigurator;
 import org.hibernate.cfg.Configuration;
-import org.hibernate.service.ServiceRegistry;
-import org.hibernate.service.ServiceRegistryBuilder;
 
-import ru.taximaxim.dbreplicator2.cf.BoneCPConnectionsFactory;
-import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
-import ru.taximaxim.dbreplicator2.cli.CommandLineParser;
-import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
-import ru.taximaxim.dbreplicator2.model.TaskSettingsService;
-import ru.taximaxim.dbreplicator2.tasks.TasksPool;
+import ru.taximaxim.dbreplicator2.cli.AbstractCommandLineParser;
+import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
  * @author TaxiMaxim
  * 
  */
-public final class Application {
+public final class Application extends AbstractCommandLineParser {
 
-    private static final Logger LOG = Logger.getLogger(Application.class);
-
-    private static SessionFactory sessionFactory;
-
-    private static ConnectionFactory connectionFactory;
-    
-    private static TaskSettingsService taskSettingsService;
-    
-    private static TasksPool tasksPool;
+    private static final Logger LOG = Logger.getLogger(Core.class);
 
     /**
      * Данный класс нельзя инстанциировать.
      */
     private Application() {
+        setOption("h", "help", true, "Справка", 0, false, null);
+        setOption("i", "init", false, "Инициализация настроек dbreplicator2", 0, false,
+                null);
+        setOption("u", "update", true,
+                "Обновление настроек dbreplicator2 скриптом из файла", 1, false, "file");
+        setOption("c", "conf", true,
+                "Явное задание пути к файлу конфигурации. По умолчанию берется файл hibernate.cfg.xml", 
+                1, false, "file");
+        setOption("l", "log4j", true,
+                "Явное задание пути к файлу настроек логгирования. По умолчанию берется файл log4j.properties", 
+                1, false, "file");
+        setOption("s", "start", false, "Запуск репликации dbreplicator2", 0, false, null);
     }
 
-    /**
-     * Возвращает фабрику сессий гибернейта.
-     * 
-     * @return фабрику сессий гибернейта.
-     */
-    public static SessionFactory getSessionFactory() {
-        LOG.debug("Запрошено создание новой фабрики сессий hibernate");
+    @Override
+    protected void processingCmd(CommandLine commandLine) {
+        boolean hasOption = false;
 
-        if (sessionFactory == null) {
-            Configuration configuration = new Configuration();
-            configuration.configure();
-
-            ServiceRegistry serviceRegistry = new ServiceRegistryBuilder()
-                    .applySettings(configuration.getProperties())
-                    .buildServiceRegistry();
-            sessionFactory = configuration.buildSessionFactory(serviceRegistry);
-
-            LOG.info("Создана новая фабрика сессий hibernate");
-        }
-        return sessionFactory;
-    }
-    
-    /**
-     * Закрываем sessionFactory
-     */
-    public static void sessionFactoryClose() {
-        sessionFactory.close();
-        sessionFactory = null;
-    }
-    
-    /**
-     * Возвращает фабрику соединений
-     * 
-     * @return фабрику соединений
-     */
-    public static ConnectionFactory getConnectionFactory() {
-        // Чтение настроек о зарегистрированных пулах соединений и их
-        // инициализация.
+        LOG.info("Запускаем dbreplicator2...");
         
-        if (connectionFactory == null) {
-            connectionFactory = new BoneCPConnectionsFactory(
-                    new BoneCPSettingsService(getSessionFactory()));
+        // Конфигурируем log4j
+        String fLog4j = "log4j.properties";
+        if (commandLine.hasOption('l')) {
+            String[] arguments = commandLine.getOptionValues('l');
+            // Инициализируем БД настроек
+            fLog4j = arguments[0];
+
+            hasOption = true;
+        }        
+        PropertyConfigurator.configureAndWatch(fLog4j);
+
+        // Конфигурируем Hibernate
+        Configuration configuration;
+        if (commandLine.hasOption('c')) {
+            String[] arguments = commandLine.getOptionValues('c');
+            // Инициализируем БД настроек
+            configuration = Core.getConfiguration(arguments[0]);
+
+            hasOption = true;
+        } else {
+            configuration = Core.getConfiguration();
         }
 
-        return connectionFactory;
-    }
+        if (commandLine.hasOption('i')) {
+            // Инициализируем БД настроек
+            configuration.setProperty("hibernate.hbm2ddl.auto", "create");
 
-    /**
-     * Закрываем connectionFactory
-     */
-    public static void connectionFactoryClose() {
-        connectionFactory.close();
-        connectionFactory = null;
-    }
-    
-    /**
-     * Возвращает сервис настройки соединений
-     * 
-     * @return сервис настройки соединений
-     */
-    public static TaskSettingsService getTaskSettingsService() {
-        // Чтение настроек о зарегистрированных пулах соединений и их
-        // инициализация.
-        
-        if (taskSettingsService == null) {
-            taskSettingsService = new TaskSettingsService(getSessionFactory());
+            hasOption = true;
         }
 
-        return taskSettingsService;
-    }
-    
-    /**
-     * Закрываем сервис настройки соединений
-     */
-    public static void taskSettingsServiceClose() {
-        taskSettingsService = null;
-    }
-    
-    /**
-     * Возвращает пул задач
-     * 
-     * @return пул задач
-     */
-    public static TasksPool getTasksPool() {
-        // Чтение настроек о зарегистрированных пулах соединений и их
-        // инициализация.
-        
-        if (tasksPool == null) {
-            tasksPool = new TasksPool(getTaskSettingsService());
+        if (commandLine.hasOption('u')) {
+            String[] arguments = commandLine.getOptionValues('u');
+            configuration.setProperty("hibernate.hbm2ddl.import_files", arguments[0]);
+            // Обновляем БД настроек скриптом из файла
+            hasOption = true;
         }
 
-        return tasksPool;
+        Core.getSessionFactory(configuration);
+
+        if (commandLine.hasOption('s')) {
+            // Запускаем репликацию
+            // Определение ведущих БД и запуск процессов диспетчеров записей
+            // для каждой ведущей БД.
+            // 1. Определяем ведущие БД по существующим настройкам.
+            // 2. Запуск диспечеров записей для каждой ведущей БД.
+            Core.getTasksPool().start();
+            hasOption = true;
+        }
+
+        if (commandLine.hasOption('h') || !hasOption) {
+            if (!hasOption) {
+                LOG.error("Неизвестная команда, пожалуйста воспользуетесь командой [-h] или [--help]");
+            }
+
+            HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp("java dbreplicator2.jar", getOptions());
+        }
     }
-    
-    /**
-     * Закрываем сервис настройки соединений
-     */
-    public static void tasksPoolClose() {
-        tasksPool = null;
-    }
-    
+
     public static void main(String[] args) {
-//        CommandLineParser.parse(args);
-        CommandLineParser.parse(new String[]{"-i", "-s"});
-
-        // Определение рабочих потоков, подготовка пула потоков.
-        // 1. Расширить таблицы H2 насторйками пулов рабочих потоков.
-        // 2. Инициализация пулов потоков.
+        new Application().parserCommandLine(args);
     }
+
 }

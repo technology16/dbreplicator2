@@ -38,6 +38,8 @@ import org.junit.Test;
 
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 import ru.taximaxim.dbreplicator2.model.RunnerService;
+import ru.taximaxim.dbreplicator2.tp.WorkerThread;
+import ru.taximaxim.dbreplicator2.utils.Core;
 
 public class H2CopyTableDataTest {
     protected static final Logger LOG = Logger.getLogger(H2CopyTableDataTest.class);
@@ -50,9 +52,9 @@ public class H2CopyTableDataTest {
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        sessionFactory = Application.getSessionFactory();
+        sessionFactory = Core.getSessionFactory();
         session = sessionFactory.openSession();
-        connectionFactory = Application.getConnectionFactory();
+        connectionFactory = Core.getConnectionFactory();
         initialization();
     }
 
@@ -62,9 +64,9 @@ public class H2CopyTableDataTest {
         connDest.close();
         session.close();
         connectionFactory.close();
-        Application.connectionFactoryClose();
+        Core.connectionFactoryClose();
         sessionFactory.close();
-        Application.sessionFactoryClose();
+        Core.sessionFactoryClose();
     }
     
 

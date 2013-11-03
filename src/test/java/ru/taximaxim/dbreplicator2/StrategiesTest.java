@@ -32,6 +32,7 @@ import org.junit.Test;
 
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
+import ru.taximaxim.dbreplicator2.utils.Core;
 
 public class StrategiesTest {
 
@@ -42,13 +43,13 @@ public class StrategiesTest {
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
 
-        sessionFactory = Application.getSessionFactory();
+        sessionFactory = Core.getSessionFactory();
     }
     
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
         sessionFactory.close();
-        Application.sessionFactoryClose();
+        Core.sessionFactoryClose();
     }
     
     /**

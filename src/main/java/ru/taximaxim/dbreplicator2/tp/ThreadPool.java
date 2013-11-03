@@ -21,7 +21,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ru.taximaxim.dbreplicator2;
+package ru.taximaxim.dbreplicator2.tp;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
