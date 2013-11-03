@@ -43,31 +43,31 @@ public final class Core {
     private static Configuration configuration;
 
     /**
-     * Получение настроек по умолчанию
-     * 
-     * @return
-     */
-    public static Configuration getConfiguration(){
-        if (configuration == null) {
-            configuration = new Configuration();
-            configuration.configure();
-        }
-        return configuration;
-    }
-
-    /**
      * Получение настроек из файла
      * 
      * @param hibernateXmlFile - путь к файлу настроек
      * @return
      */
-    public static Configuration getConfiguration(String hibernateXmlFile){
+    public synchronized static Configuration getConfiguration(String hibernateXmlFile){
         if (configuration == null) {
-            File conf = new File(hibernateXmlFile);
             configuration = new Configuration();
-            configuration.configure(conf);
+            if (hibernateXmlFile != null) {
+                File conf = new File(hibernateXmlFile);
+                configuration.configure(conf);
+            } else {
+                configuration.configure();
+            }
         }
         return configuration;
+    }
+
+    /**
+     * Получение настроек по умолчанию
+     * 
+     * @return
+     */
+    public static Configuration getConfiguration(){
+        return getConfiguration((String) null);
     }
     
     /**
@@ -76,7 +76,7 @@ public final class Core {
      * @param configuration - инициализированная конфигурация
      * @return фабрику сессий гибернейта.
      */
-    public static SessionFactory getSessionFactory(Configuration configuration) {
+    public synchronized static SessionFactory getSessionFactory(Configuration configuration) {
         LOG.debug("Запрошено создание новой фабрики сессий hibernate");
 
         if (sessionFactory == null) {
@@ -131,7 +131,7 @@ public final class Core {
      * 
      * @return фабрику соединений
      */
-    public static ConnectionFactory getConnectionFactory() {
+    public synchronized static ConnectionFactory getConnectionFactory() {
         // Чтение настроек о зарегистрированных пулах соединений и их
         // инициализация.
         
@@ -156,7 +156,7 @@ public final class Core {
      * 
      * @return сервис настройки соединений
      */
-    public static TaskSettingsService getTaskSettingsService() {
+    public synchronized static TaskSettingsService getTaskSettingsService() {
         // Чтение настроек о зарегистрированных пулах соединений и их
         // инициализация.
         if (taskSettingsService == null) {
@@ -178,7 +178,7 @@ public final class Core {
      * 
      * @return пул задач
      */
-    public static TasksPool getTasksPool() {
+    public synchronized static TasksPool getTasksPool() {
         // Чтение настроек о зарегистрированных пулах соединений и их
         // инициализация.
         if (tasksPool == null) {
