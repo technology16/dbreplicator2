@@ -34,8 +34,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-//import com.microsoft.sqlserver.jdbc.SQLServerConnection;
-
 /**
  * @author volodin_aa
  * 
@@ -91,12 +89,7 @@ public final class JdbcMetadata {
         List<String> primaryKeyColsList = new ArrayList<String>();
         DatabaseMetaData metaData = connection.getMetaData();
         ResultSet primaryKeysResultSet = null;
-        /*
-         * if (connection instanceof SQLServerConnection) { primaryKeysResultSet
-         * = metaData.getPrimaryKeys(null, "DBO", tableName); } else {
-         */
         primaryKeysResultSet = metaData.getPrimaryKeys(null, null, tableName);
-        /* } */
         try {
             while (primaryKeysResultSet.next()) {
                 primaryKeyColsList.add(primaryKeysResultSet.getString("COLUMN_NAME"));
