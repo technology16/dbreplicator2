@@ -16,6 +16,7 @@ import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
 import ru.taximaxim.dbreplicator2.model.TaskSettingsService;
 import ru.taximaxim.dbreplicator2.tasks.TasksPool;
+import ru.taximaxim.dbreplicator2.tp.ThreadPool;
 
 
 /**
@@ -41,6 +42,8 @@ public final class Core {
     private static TasksPool tasksPool;
     
     private static Configuration configuration;
+    
+    private static ThreadPool threadPool;
 
     /**
      * Получение настроек из файла
@@ -193,6 +196,29 @@ public final class Core {
      */
     public static void tasksPoolClose() {
         tasksPool = null;
+    }
+    
+    /**
+     * Возвращает пул потоков
+     * 
+     * @return пул потоков
+     * @throws InterruptedException 
+     */
+    public static synchronized ThreadPool getThreadPool() throws InterruptedException {
+        if (threadPool == null) {
+            threadPool = new ThreadPool(10);
+        }
+
+        return threadPool;
+    }
+    
+    /**
+     * Закрываем сервис настройки соединений
+     * @throws InterruptedException 
+     */
+    public static void threadPoolClose() throws InterruptedException {
+        threadPool.shutdownThreadPool();
+        threadPool = null;
     }
 
 }

@@ -15,7 +15,7 @@ insert into tables (id_table, id_pool, name) values (6, 'source', 't_table5')
 insert into runners (id_runner, source, target, description, class_name) values (1, 'source', 'source', 'description', 'ru.taximaxim.dbreplicator2.replica.SuperlogRunner')
 
 --Strategies Add Super Log
-insert into strategies (id, className, param, isEnabled, priority, id_runner) values (1, 'ru.taximaxim.dbreplicator2.replica.strategies.SuperLogManagerStrategy', null, true, 100, 1)
+insert into strategies (id, className, param, isEnabled, priority, id_runner) values (1, 'ru.taximaxim.dbreplicator2.replica.strategies.FastSuperLogManagerStrategy', null, true, 100, 1)
 
 --Runner
 insert into runners (id_runner, source, target, description, class_name) values (2, 'source', 'dest', 'description', 'ru.taximaxim.dbreplicator2.replica.ReplicaRunner')

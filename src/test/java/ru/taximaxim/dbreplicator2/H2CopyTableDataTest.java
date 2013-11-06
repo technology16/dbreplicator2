@@ -40,7 +40,17 @@ import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 import ru.taximaxim.dbreplicator2.model.RunnerService;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
 import ru.taximaxim.dbreplicator2.utils.Core;
-
+/**
+ * Тест репликации данных между базами H2-H2. 
+ * 
+ * Данный тест использует асинхронный менеджер записей супер лог таблицы, 
+ * поэтому после каждого цикла репликации вызывается инструкция 
+ * Thread.sleep(100); Тест может некорректно работать на медленных машинах, 
+ * при необходимости подгонять величину задержки вручную!
+ * 
+ * @author volodin_aa
+ *
+ */
 public class H2CopyTableDataTest {
     protected static final Logger LOG = Logger.getLogger(H2CopyTableDataTest.class);
     protected static SessionFactory sessionFactory;
@@ -75,12 +85,14 @@ public class H2CopyTableDataTest {
      * @throws SQLException
      * @throws ClassNotFoundException
      * @throws IOException
+     * @throws InterruptedException 
      */
     @Test
-    public void testTableDataTest() throws SQLException, ClassNotFoundException, IOException {
+    public void testTableDataTest() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
 
         Helper.executeSqlFromFile(conn, "importSourceData.sql");
         worker.run();
+        Thread.sleep(100);
         
         int count_rep2_superlog = Helper.InfoCount(conn, "rep2_superlog");
         if(count_rep2_superlog!=0) {
@@ -110,13 +122,15 @@ public class H2CopyTableDataTest {
      * @throws SQLException
      * @throws ClassNotFoundException
      * @throws IOException
+     * @throws InterruptedException 
      */
     @Test
-    public void testNull() throws SQLException, ClassNotFoundException, IOException {
+    public void testNull() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
         //Проверка null
         LOG.info("Проверка null");
         Helper.executeSqlFromFile(conn, "sql_null.sql");   
         worker.run();
+        Thread.sleep(100);
         
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table4");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table4");
@@ -149,14 +163,17 @@ public class H2CopyTableDataTest {
      * @throws SQLException
      * @throws ClassNotFoundException
      * @throws IOException
+     * @throws InterruptedException 
      */
     @Test
-    public void testForeignKey() throws SQLException, ClassNotFoundException, IOException {
+    public void testForeignKey() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
         //Проверка внешних ключей
         LOG.info("Проверка внешних ключей");
         Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");   
         worker.run();
+        Thread.sleep(100);
         worker.run();
+        Thread.sleep(100);
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table2");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table2");
         Helper.AssertEquals(listSource, listDest);
@@ -171,12 +188,14 @@ public class H2CopyTableDataTest {
      * @throws SQLException
      * @throws ClassNotFoundException
      * @throws IOException
+     * @throws InterruptedException 
      */
     @Test
-    public void testInsert() throws SQLException, ClassNotFoundException, IOException {
+    public void testInsert() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
       //Проверка вставки
         Helper.executeSqlFromFile(conn, "sql_insert.sql");   
         worker.run();
+        Thread.sleep(100);
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
         Helper.AssertEquals(listSource, listDest);
@@ -191,14 +210,16 @@ public class H2CopyTableDataTest {
      * @throws SQLException
      * @throws ClassNotFoundException
      * @throws IOException
+     * @throws InterruptedException 
      */
     @Test
-    public void testUpdate() throws SQLException, ClassNotFoundException, IOException {
+    public void testUpdate() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
         testInsert();
         //Проверка обновления
         LOG.info("Проверка обновления");
         Helper.executeSqlFromFile(conn, "sql_update.sql");   
         worker.run();
+        Thread.sleep(100);
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
         Helper.AssertEquals(listSource, listDest);
@@ -213,14 +234,16 @@ public class H2CopyTableDataTest {
      * @throws SQLException
      * @throws ClassNotFoundException
      * @throws IOException
+     * @throws InterruptedException 
      */
     @Test
-    public void testDelete() throws SQLException, ClassNotFoundException, IOException {
+    public void testDelete() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
         testInsert();
         LOG.info("Проверка удаления");
         //Проверка удаления
         Helper.executeSqlFromFile(conn, "sql_delete.sql");   
         worker.run();
+        Thread.sleep(100);
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
         Helper.AssertEquals(listSource, listDest);
@@ -235,14 +258,16 @@ public class H2CopyTableDataTest {
      * @throws SQLException
      * @throws ClassNotFoundException
      * @throws IOException
+     * @throws InterruptedException 
      */
     @Test
-    public void testInsertUpdate() throws SQLException, ClassNotFoundException, IOException {
+    public void testInsertUpdate() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
       //Проверка вставки и обновления
         LOG.info("Проверка вставки и обновления");
         Helper.executeSqlFromFile(conn, "sql_insert.sql");   
         Helper.executeSqlFromFile(conn, "sql_update.sql");   
         worker.run();
+        Thread.sleep(100);
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
         Helper.AssertEquals(listSource, listDest);
@@ -257,14 +282,16 @@ public class H2CopyTableDataTest {
      * @throws SQLException
      * @throws ClassNotFoundException
      * @throws IOException
+     * @throws InterruptedException 
      */
     @Test
-    public void testInsertDelete() throws SQLException, ClassNotFoundException, IOException {
+    public void testInsertDelete() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
         LOG.info("Проверка вставки и удаления");
       //Проверка вставки и удаления
         Helper.executeSqlFromFile(conn, "sql_insert.sql");   
         Helper.executeSqlFromFile(conn, "sql_delete.sql");   
         worker.run();
+        Thread.sleep(100);
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
         Helper.AssertEquals(listSource, listDest);
