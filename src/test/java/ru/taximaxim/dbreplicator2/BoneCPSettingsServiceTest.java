@@ -84,13 +84,13 @@ public class BoneCPSettingsServiceTest {
     public void testGetDataBaseSettingsByName() throws ClassNotFoundException,
             SQLException {
         // Полуение несуществующих настроек
-        BoneCPSettings boneCPSettings = settingStorage
+        BoneCPSettingsModel boneCPSettings = settingStorage
                 .getDataBaseSettingsByName("testGetDataBaseSettingsByName");
         assertNull("Ошибка при получение несуществующих настроек!",
                 boneCPSettings);
 
         // Получение существующих
-        BoneCPSettings newBoneCPSettings = new BoneCPSettingsModel(
+        BoneCPSettingsModel newBoneCPSettings = new BoneCPSettingsModel(
                 "testGetDataBaseSettingsByName", "org.h2.Driver",
                 "jdbc:h2:mem://localhost/~/test", "sa", "");
 
@@ -129,19 +129,19 @@ public class BoneCPSettingsServiceTest {
     public void testGetDataBaseSettings() throws ClassNotFoundException,
             SQLException {
         // Создание настроек
-        BoneCPSettings newBoneCPSettings1 = new BoneCPSettingsModel(
+        BoneCPSettingsModel newBoneCPSettings1 = new BoneCPSettingsModel(
                 "testGetDataBaseSettings1", "org.h2.Driver",
                 "jdbc:h2:mem://localhost/~/test", "sa", "");
         settingStorage.setDataBaseSettings(newBoneCPSettings1);
 
-        BoneCPSettings newBoneCPSettings2 = new BoneCPSettingsModel(
+        BoneCPSettingsModel newBoneCPSettings2 = new BoneCPSettingsModel(
                 "testGetDataBaseSettings2", "org.h2.Driver",
                 "jdbc:h2:mem://localhost/~/test", "sa", "",
                 1, 2, 3, 4, 5);
 
         settingStorage.setDataBaseSettings(newBoneCPSettings2);
 
-        Map<String, BoneCPSettings> settingsMap = settingStorage
+        Map<String, BoneCPSettingsModel> settingsMap = settingStorage
                 .getDataBaseSettings();
         assertEquals(
                 "Ошибка при получение существующих настроек по умолчанию!",
@@ -161,12 +161,12 @@ public class BoneCPSettingsServiceTest {
     public void testSetDataBaseSettings() throws ClassNotFoundException,
             SQLException {
         // Создание настроек
-        BoneCPSettings newBoneCPSettings = new BoneCPSettingsModel(
+        BoneCPSettingsModel newBoneCPSettings = new BoneCPSettingsModel(
                 "testSetDataBaseSettings", "org.h2.Driver",
                 "jdbc:h2:mem://localhost/~/test", "sa", "");
 
         settingStorage.setDataBaseSettings(newBoneCPSettings);
-        BoneCPSettings boneCPSettings = settingStorage
+        BoneCPSettingsModel boneCPSettings = settingStorage
                 .getDataBaseSettingsByName("testSetDataBaseSettings");
         assertEquals(
                 "Ошибка при получение существующих настроек по умолчанию!",
@@ -199,7 +199,7 @@ public class BoneCPSettingsServiceTest {
     }
 
     /**
-     * Тест таймаута при привышении максимального количества открытых соединений
+     * Тест удаления настроек
      * 
      * @throws ClassNotFoundException
      * @throws SQLException
@@ -208,12 +208,41 @@ public class BoneCPSettingsServiceTest {
     public void testDelDataBaseSettings() throws ClassNotFoundException,
             SQLException {
         // Создание настроек
-        BoneCPSettings newBoneCPSettings = new BoneCPSettingsModel(
+        BoneCPSettingsModel newBoneCPSettings = new BoneCPSettingsModel(
                 "testDelDataBaseSettings", "org.h2.Driver",
                 "jdbc:h2:mem://localhost/~/test", "sa", "");
 
         settingStorage.setDataBaseSettings(newBoneCPSettings);
-        BoneCPSettings boneCPSettings = settingStorage
+        BoneCPSettingsModel boneCPSettings = settingStorage
+                .getDataBaseSettingsByName("testDelDataBaseSettings");
+        assertEquals(
+                "Ошибка при получение существующих настроек по умолчанию!",
+                newBoneCPSettings, boneCPSettings);
+
+        // Удаляем настройки
+        settingStorage.delDataBaseSettings(boneCPSettings);
+        boneCPSettings = settingStorage
+                .getDataBaseSettingsByName("testDelDataBaseSettings");
+        assertNull("Существуют удаленные настройки!", boneCPSettings);
+
+    }
+
+    /**
+     * Тест раблты со списком таблиц
+     * 
+     * @throws ClassNotFoundException
+     * @throws SQLException
+     */
+    @Test
+    public void testPoolTables() throws ClassNotFoundException,
+            SQLException {
+        // Создание настроек
+        BoneCPSettingsModel newBoneCPSettings = new BoneCPSettingsModel(
+                "testDelDataBaseSettings", "org.h2.Driver",
+                "jdbc:h2:mem://localhost/~/test", "sa", "");
+
+        settingStorage.setDataBaseSettings(newBoneCPSettings);
+        BoneCPSettingsModel boneCPSettings = settingStorage
                 .getDataBaseSettingsByName("testDelDataBaseSettings");
         assertEquals(
                 "Ошибка при получение существующих настроек по умолчанию!",

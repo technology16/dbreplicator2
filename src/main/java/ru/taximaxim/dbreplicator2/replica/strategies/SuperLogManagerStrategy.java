@@ -27,15 +27,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
-
+import ru.taximaxim.dbreplicator2.model.BoneCPSettingsModel;
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
-import ru.taximaxim.dbreplicator2.model.RunnerService;
+import ru.taximaxim.dbreplicator2.model.TableModel;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
-import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
  * Класс стратегии менеджера записей суперлог таблицы
@@ -62,37 +60,43 @@ public class SuperLogManagerStrategy implements Strategy {
                     .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
             sourceConnection.setHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT);
             // Строим список обработчиков реплик
-            RunnerService runnerService = 
-                    new RunnerService(Core.getSessionFactory());
-            List<RunnerModel> runners = 
-                    runnerService.getRunners(RunnerModel.REPLICA_RUNNER_CLASS);
+            BoneCPSettingsModel sourcePool = data.getRunner().getSource();
             
             // Переносим данные
             try (
-                 PreparedStatement insertRunnerData = sourceConnection.prepareStatement("INSERT INTO rep2_workpool_data (id_runner, id_superlog, id_foreign, id_table, c_operation, c_date, id_transaction) VALUES (?, ?, ?, ?, ?, ?, ?)");
-                 PreparedStatement deleteSuperLog = sourceConnection.prepareStatement("DELETE FROM rep2_superlog WHERE id_superlog=?");
-                 PreparedStatement selectSuperLog = sourceConnection.prepareStatement("SELECT * FROM rep2_superlog ORDER BY id_superlog");
+                 PreparedStatement insertRunnerData = 
+                     sourceConnection.prepareStatement("INSERT INTO rep2_workpool_data (id_runner, id_superlog, id_foreign, id_table, c_operation, c_date, id_transaction) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                 PreparedStatement deleteSuperLog = 
+                     sourceConnection.prepareStatement("DELETE FROM rep2_superlog WHERE id_superlog=?");
+                 PreparedStatement selectSuperLog = 
+                     sourceConnection.prepareStatement("SELECT * FROM rep2_superlog ORDER BY id_superlog");
              ) {
                 selectSuperLog.setFetchSize(1000);
                 try (ResultSet superLogResult = selectSuperLog.executeQuery();) {
                     while (superLogResult.next()) {
                         // Копируем записи
-                        for (RunnerModel runner : runners) {
-                            insertRunnerData.setInt(1,
-                                    runner.getId());
-                            insertRunnerData.setLong(2,
-                                    superLogResult.getLong("id_superlog"));
-                            insertRunnerData.setInt(3,
-                                    superLogResult.getInt("id_foreign"));
-                            insertRunnerData.setString(4,
-                                    superLogResult.getString("id_table"));
-                            insertRunnerData.setString(5,
-                                    superLogResult.getString("c_operation"));
-                            insertRunnerData.setTimestamp(6,
-                                    superLogResult.getTimestamp("c_date"));
-                            insertRunnerData.setString(7,
-                                    superLogResult.getString("id_transaction"));
-                            insertRunnerData.addBatch();
+                        // Проходим по списку слушателей текущей таблицы
+                        for (TableModel table : sourcePool.getTables()) {
+                            if (table.getName()
+                                    .equalsIgnoreCase(superLogResult.getString("id_table"))){
+                                for (RunnerModel runner : table.getRunners()) {
+                                    insertRunnerData.setInt(1,
+                                            runner.getId());
+                                    insertRunnerData.setLong(2,
+                                            superLogResult.getLong("id_superlog"));
+                                    insertRunnerData.setInt(3,
+                                            superLogResult.getInt("id_foreign"));
+                                    insertRunnerData.setString(4,
+                                            superLogResult.getString("id_table"));
+                                    insertRunnerData.setString(5,
+                                            superLogResult.getString("c_operation"));
+                                    insertRunnerData.setTimestamp(6,
+                                            superLogResult.getTimestamp("c_date"));
+                                    insertRunnerData.setString(7,
+                                            superLogResult.getString("id_transaction"));
+                                    insertRunnerData.addBatch();
+                                }
+                            }
                         }
                         // Удаляем исходную запись
                         deleteSuperLog.setLong(1, superLogResult.getLong("id_superlog"));
@@ -106,10 +110,12 @@ public class SuperLogManagerStrategy implements Strategy {
             sourceConnection.commit();
             sourceConnection.setAutoCommit(lastAutoCommit);
             // Запускаем обработчики реплик
-            for (RunnerModel runner : runners) {
+            for (RunnerModel runner : sourcePool.getRunners()) {
                 // Пока синхронный запуск!
-                WorkerThread workerThread = new WorkerThread(runner);
-                workerThread.run();
+                if (!runner.getTables().isEmpty()) {
+                    WorkerThread workerThread = new WorkerThread(runner);
+                    workerThread.run();
+                }
             }
         } catch (SQLException e) {
             throw new StrategyException(e);

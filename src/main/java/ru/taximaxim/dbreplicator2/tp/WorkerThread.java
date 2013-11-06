@@ -74,7 +74,7 @@ public class WorkerThread implements Runnable {
         // Инициализируем два соединения. Используем try-with-resources для
         // каждого.
         try (Connection sourceConnection =
-                connectionsFactory.getConnection(runner.getSource())) {
+                connectionsFactory.getConnection(runner.getSource().getPoolId())) {
             try (Connection targetConnection =
                     connectionsFactory.getConnection(runner.getTarget())) {
 

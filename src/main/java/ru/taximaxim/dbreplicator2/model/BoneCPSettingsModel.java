@@ -22,10 +22,18 @@
  */
 package ru.taximaxim.dbreplicator2.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 
 /**
@@ -171,7 +179,7 @@ public class BoneCPSettingsModel implements BoneCPSettings {
      * @return the name
      */
     @Id
-    @Column(name = "pool_id")
+    @Column(name = "id_pool")
     public String getPoolId() {
         return poolId;
     }
@@ -328,6 +336,45 @@ public class BoneCPSettingsModel implements BoneCPSettings {
         this.closeConnectionWatchTimeoutInMs = closeConnectionWatchTimeoutInMs;
     }
 
+    /**
+     * Список обрабатываемых таблиц
+     */
+    private List<TableModel> tables;
+
+    @Column
+    @OneToMany(targetEntity=TableModel.class, mappedBy="pool", fetch=FetchType.EAGER)
+    public List<TableModel> getTables() {
+        if (tables == null) {
+            tables = new ArrayList<TableModel>();
+        }
+
+        return tables;
+    }
+
+    public void setTables(List<TableModel> tables) {
+        this.tables = tables;
+    }
+
+    /**
+     * Список обрабатываемых таблиц
+     */
+    private List<RunnerModel> runners;
+
+    @Column
+    @OneToMany(targetEntity=RunnerModel.class, mappedBy="source", fetch=FetchType.EAGER)
+    @Fetch(FetchMode.SELECT)
+    public List<RunnerModel> getRunners() {
+        if (runners == null) {
+            runners = new ArrayList<RunnerModel>();
+        }
+
+        return runners;
+    }
+
+    public void setRunners(List<RunnerModel> runners) {
+        this.runners = runners;
+    }
+    
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()
      */

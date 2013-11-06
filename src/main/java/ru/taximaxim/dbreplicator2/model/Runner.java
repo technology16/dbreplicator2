@@ -32,7 +32,7 @@ public interface Runner {
      *
      * @return Строковый идентификатор пула соединений базы-истончка
      */
-    String getSource();
+    BoneCPSettingsModel getSource();
 
     /**
      * Идентификатор пула соединений целевой БД
