@@ -48,16 +48,17 @@ public class WorkerThread implements Runnable {
     }
 
     public void run() {
-
-        LOG.debug(String.format("Запуск потока: %s [%s] [%s]",
-                runner.getDescription(), runner.getId(),
-                Thread.currentThread().getName()));
-
-        processCommand(runner);
-
-        LOG.debug(String.format("Завершение потока: %s [%s] [%s]",
-                runner.getDescription(), runner.getId(),
-                Thread.currentThread().getName()));
+        synchronized (runner) {
+            LOG.debug(String.format("Запуск потока: %s [%s] [%s]",
+                    runner.getDescription(), runner.getId(),
+                    Thread.currentThread().getName()));
+    
+            processCommand(runner);
+    
+            LOG.debug(String.format("Завершение потока: %s [%s] [%s]",
+                    runner.getDescription(), runner.getId(),
+                    Thread.currentThread().getName()));
+        }
     }
 
     /**
