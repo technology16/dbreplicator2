@@ -56,26 +56,26 @@ public class BoneCPSettingsService implements BoneCPDataBaseSettingsStorage {
     }
 
     @Override
-    public BoneCPSettings getDataBaseSettingsByName(String poolName) {
+    public BoneCPSettingsModel getDataBaseSettingsByName(String poolName) {
         Session session = sessionFactory.openSession();
         try {
-            return (BoneCPSettings) session.get(BoneCPSettingsModel.class, poolName);
+            return (BoneCPSettingsModel) session.get(BoneCPSettingsModel.class, poolName);
         } finally {
             session.close();
         }
     }
 
     @Override
-    public Map<String, BoneCPSettings> getDataBaseSettings() {
-        Map<String, BoneCPSettings> result = new HashMap<String, BoneCPSettings>();
+    public Map<String, BoneCPSettingsModel> getDataBaseSettings() {
+        Map<String, BoneCPSettingsModel> result = new HashMap<String, BoneCPSettingsModel>();
 
         Session session = sessionFactory.openSession();
         try {
-            List<BoneCPSettings> settingsList =
-                    Utils.castList(BoneCPSettings.class,
+            List<BoneCPSettingsModel> settingsList =
+                    Utils.castList(BoneCPSettingsModel.class,
                             session.createCriteria(BoneCPSettingsModel.class).list());
 
-            for (BoneCPSettings settings : settingsList) {
+            for (BoneCPSettingsModel settings : settingsList) {
                 result.put(settings.getPoolId(), settings);
             }
         } finally {
@@ -86,7 +86,7 @@ public class BoneCPSettingsService implements BoneCPDataBaseSettingsStorage {
     }
 
     @Override
-    public void setDataBaseSettings(BoneCPSettings dataBaseSettings) {
+    public void setDataBaseSettings(BoneCPSettingsModel dataBaseSettings) {
         Session session = sessionFactory.openSession();
         session.beginTransaction();
         try {
@@ -101,7 +101,7 @@ public class BoneCPSettingsService implements BoneCPDataBaseSettingsStorage {
     }
 
     @Override
-    public void delDataBaseSettings(BoneCPSettings dataBaseSettings) {
+    public void delDataBaseSettings(BoneCPSettingsModel dataBaseSettings) {
         Session session = sessionFactory.openSession();
         session.beginTransaction();
         try {

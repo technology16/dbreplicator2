@@ -48,16 +48,17 @@ public class WorkerThread implements Runnable {
     }
 
     public void run() {
-
-        LOG.debug(String.format("Запуск потока: %s [%s] [%s]",
-                runner.getDescription(), runner.getId(),
-                Thread.currentThread().getName()));
-
-        processCommand(runner);
-
-        LOG.debug(String.format("Завершение потока: %s [%s] [%s]",
-                runner.getDescription(), runner.getId(),
-                Thread.currentThread().getName()));
+        synchronized (runner) {
+            LOG.debug(String.format("Запуск потока: %s [%s] [%s]",
+                    runner.getDescription(), runner.getId(),
+                    Thread.currentThread().getName()));
+    
+            processCommand(runner);
+    
+            LOG.debug(String.format("Завершение потока: %s [%s] [%s]",
+                    runner.getDescription(), runner.getId(),
+                    Thread.currentThread().getName()));
+        }
     }
 
     /**
@@ -74,7 +75,7 @@ public class WorkerThread implements Runnable {
         // Инициализируем два соединения. Используем try-with-resources для
         // каждого.
         try (Connection sourceConnection =
-                connectionsFactory.getConnection(runner.getSource())) {
+                connectionsFactory.getConnection(runner.getSource().getPoolId())) {
             try (Connection targetConnection =
                     connectionsFactory.getConnection(runner.getTarget())) {
 

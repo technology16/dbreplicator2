@@ -33,20 +33,21 @@ import ru.taximaxim.dbreplicator2.model.TableModel;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
-import ru.taximaxim.dbreplicator2.tp.WorkerThread;
+import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
- * Класс стратегии менеджера записей суперлог таблицы
+ * Класс стратегии менеджера записей суперлог таблицы с асинхронным параллельным
+ * запуском обработчиков реплик
  * 
  * @author volodin_aa
  * 
  */
-public class SuperLogManagerStrategy implements Strategy {
+public class FastSuperLogManagerStrategy implements Strategy {
 
     /**
      * Конструктор по умолчанию
      */
-    public SuperLogManagerStrategy() {
+    public FastSuperLogManagerStrategy() {
     }
 
     @Override
@@ -109,12 +110,15 @@ public class SuperLogManagerStrategy implements Strategy {
             // Подтверждаем транзакцию
             sourceConnection.commit();
             sourceConnection.setAutoCommit(lastAutoCommit);
-            // Запускаем обработчики реплик
+            // Асинхронно запускаем обработчики реплик
             for (RunnerModel runner : sourcePool.getRunners()) {
-                // Пока синхронный запуск!
                 if (!runner.getTables().isEmpty()) {
-                    WorkerThread workerThread = new WorkerThread(runner);
-                    workerThread.run();
+                    try {
+                        Core.getThreadPool().start(runner);
+                    } catch(InterruptedException e) {
+                        // Меняем класс ошибки
+                        throw new StrategyException(e);
+                    }
                 }
             }
         } catch (SQLException e) {

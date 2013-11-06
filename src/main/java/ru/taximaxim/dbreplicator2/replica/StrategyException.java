@@ -23,8 +23,6 @@
 
 package ru.taximaxim.dbreplicator2.replica;
 
-import java.sql.SQLException;
-
 public class StrategyException extends Exception {
 
     public StrategyException() {
@@ -32,7 +30,7 @@ public class StrategyException extends Exception {
     }
 
     
-    public StrategyException(SQLException e) {
+    public StrategyException(Exception e) {
         super(e);
     }
 

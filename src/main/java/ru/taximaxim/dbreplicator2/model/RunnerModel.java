@@ -31,6 +31,9 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
@@ -60,12 +63,15 @@ public class RunnerModel implements Runner {
      */
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @Column(name = "id_runner")
     private Integer id;
 
     /**
      * Именованный пул-источник
      */
-    private String source;
+    @ManyToOne
+    @JoinColumn(name = "source")
+    private BoneCPSettingsModel source;
 
     /**
      * Именованный целевой пул
@@ -106,33 +112,21 @@ public class RunnerModel implements Runner {
         return strategies;
     }
 
-    /**
-     * @see RunnerModel#source
-     */
     @Override
-    public String getSource() {
+    public BoneCPSettingsModel getSource() {
         return source;
     }
 
-    /**
-     * @see RunnerModel#target
-     */
     @Override
     public String getTarget() {
         return target;
     }
 
-    /**
-     * @see RunnerModel#id
-     */
     @Override
     public Integer getId() {
         return id;
     }
 
-    /**
-     * @see RunnerModel#description
-     */
     @Override
     public String getDescription() {
         return description;
@@ -155,7 +149,7 @@ public class RunnerModel implements Runner {
         this.id = id;
     }
 
-    public void setSource(String source) {
+    public void setSource(BoneCPSettingsModel source) {
         this.source = source;
     }
 
@@ -176,4 +170,21 @@ public class RunnerModel implements Runner {
         this.className = className;
     }
     
+    /**
+     * Список таблиц, которые обрабатывает раннер
+     */
+    @ManyToMany(fetch = FetchType.EAGER, mappedBy = "runners")
+    @Fetch(FetchMode.SELECT)
+    private List<TableModel> tables;
+    
+    public List<TableModel> getTables() {
+        if (tables == null) {
+            tables = new ArrayList<TableModel>();
+        }
+        return this.tables;
+    }
+ 
+    public void setStocks(List<TableModel> tables) {
+        this.tables = tables;
+    }
 }

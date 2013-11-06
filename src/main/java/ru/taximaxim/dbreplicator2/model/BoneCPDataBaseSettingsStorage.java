@@ -40,14 +40,14 @@ public interface BoneCPDataBaseSettingsStorage {
      *            - имя пула
      * @return - объект настроек
      */
-    BoneCPSettings getDataBaseSettingsByName(String poolName);
+    BoneCPSettingsModel getDataBaseSettingsByName(String poolName);
 
     /**
      * Получение всех настроек из хранилища
      * 
      * @return мап именованных настроек
      */
-    Map<String, BoneCPSettings> getDataBaseSettings();
+    Map<String, BoneCPSettingsModel> getDataBaseSettings();
 
     /**
      * Сохранение настроек в хранилище
@@ -55,7 +55,7 @@ public interface BoneCPDataBaseSettingsStorage {
      * @param dataBaseSettings
      *            - объект настроек
      */
-    void setDataBaseSettings(BoneCPSettings dataBaseSettings);
+    void setDataBaseSettings(BoneCPSettingsModel dataBaseSettings);
 
     /**
      * Удаление настроек из хранилища
@@ -63,6 +63,6 @@ public interface BoneCPDataBaseSettingsStorage {
      * @param dateBaseSettings
      *            - объект настроек
      */
-    void delDataBaseSettings(BoneCPSettings dateBaseSettings);
+    void delDataBaseSettings(BoneCPSettingsModel dateBaseSettings);
 
 }

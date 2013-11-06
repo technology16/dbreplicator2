@@ -83,11 +83,11 @@ public class TaskTest {
      */
     @Test public void testGetTask() throws ClassNotFoundException, SQLException {
         // Полуение несуществующих настроек
-        BoneCPSettings boneCPSettings = settingStorage.getDataBaseSettingsByName("testGetDataBaseSettingsByName");
+        BoneCPSettingsModel boneCPSettings = settingStorage.getDataBaseSettingsByName("testGetDataBaseSettingsByName");
         assertNull("Ошибка при получение несуществующих настроек!", boneCPSettings);
         
         // Получение существующих
-        BoneCPSettings newBoneCPSettings = new BoneCPSettingsModel("testGetDataBaseSettingsByName", 
+        BoneCPSettingsModel newBoneCPSettings = new BoneCPSettingsModel("testGetDataBaseSettingsByName", 
                 "org.h2.Driver",
                 "jdbc:h2:mem://localhost/~/test", 
                 "sa", 
@@ -125,14 +125,14 @@ public class TaskTest {
      */
     @Test public void testGetTasks() throws ClassNotFoundException, SQLException {
         // Создание настроек
-        BoneCPSettings newBoneCPSettings1 = new BoneCPSettingsModel("testGetDataBaseSettings1", 
+        BoneCPSettingsModel newBoneCPSettings1 = new BoneCPSettingsModel("testGetDataBaseSettings1", 
                 "org.h2.Driver",
                 "jdbc:h2:mem://localhost/~/test", 
                 "sa", 
                 "");
         settingStorage.setDataBaseSettings(newBoneCPSettings1);
         
-        BoneCPSettings newBoneCPSettings2 = new BoneCPSettingsModel("testGetDataBaseSettings2", 
+        BoneCPSettingsModel newBoneCPSettings2 = new BoneCPSettingsModel("testGetDataBaseSettings2", 
                 "org.postgresql.Driver", 
                 "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", 
                 "ags", 
@@ -145,7 +145,7 @@ public class TaskTest {
         
         settingStorage.setDataBaseSettings(newBoneCPSettings2);
         
-        Map<String, BoneCPSettings> settingsMap = settingStorage.getDataBaseSettings();
+        Map<String, BoneCPSettingsModel> settingsMap = settingStorage.getDataBaseSettings();
         assertEquals("Ошибка при получение существующих настроек по умолчанию!", 
                 newBoneCPSettings1, settingsMap.get("testGetDataBaseSettings1"));
         assertEquals("Ошибка при получение существующих настроек!", 
@@ -161,14 +161,14 @@ public class TaskTest {
      */
     @Test public void testSetTask() throws ClassNotFoundException, SQLException {
         // Создание настроек
-        BoneCPSettings newBoneCPSettings = new BoneCPSettingsModel("testSetDataBaseSettings", 
+        BoneCPSettingsModel newBoneCPSettings = new BoneCPSettingsModel("testSetDataBaseSettings", 
                 "org.h2.Driver",
                 "jdbc:h2:mem://localhost/~/test", 
                 "sa", 
                 "");
         
         settingStorage.setDataBaseSettings(newBoneCPSettings);
-        BoneCPSettings boneCPSettings = settingStorage.getDataBaseSettingsByName("testSetDataBaseSettings");
+        BoneCPSettingsModel boneCPSettings = settingStorage.getDataBaseSettingsByName("testSetDataBaseSettings");
         assertEquals("Ошибка при получение существующих настроек по умолчанию!", newBoneCPSettings, boneCPSettings);
         
         // Обновление настроек
@@ -199,14 +199,14 @@ public class TaskTest {
      */
     @Test public void testDelTask() throws ClassNotFoundException, SQLException {
         // Создание настроек
-        BoneCPSettings newBoneCPSettings = new BoneCPSettingsModel("testDelDataBaseSettings", 
+        BoneCPSettingsModel newBoneCPSettings = new BoneCPSettingsModel("testDelDataBaseSettings", 
                 "org.h2.Driver",
                 "jdbc:h2:mem://localhost/~/test", 
                 "sa", 
                 "");
         
         settingStorage.setDataBaseSettings(newBoneCPSettings);
-        BoneCPSettings boneCPSettings = settingStorage.getDataBaseSettingsByName("testDelDataBaseSettings");
+        BoneCPSettingsModel boneCPSettings = settingStorage.getDataBaseSettingsByName("testDelDataBaseSettings");
         assertEquals("Ошибка при получение существующих настроек по умолчанию!", newBoneCPSettings, boneCPSettings);
         
         // Удаляем настройки
