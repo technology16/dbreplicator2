@@ -74,6 +74,13 @@ public final class Core {
     }
     
     /**
+     * Обнуление конфигурации
+     */
+    public static void configurationClose(){
+        configuration = null;
+    }
+    
+    /**
      * Возвращает фабрику сессий гибернейта.
      * 
      * @param configuration - инициализированная конфигурация
