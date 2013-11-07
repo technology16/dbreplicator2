@@ -77,7 +77,7 @@ public class WorkerThread implements Runnable {
         try (Connection sourceConnection =
                 connectionsFactory.getConnection(runner.getSource().getPoolId())) {
             try (Connection targetConnection =
-                    connectionsFactory.getConnection(runner.getTarget())) {
+                    connectionsFactory.getConnection(runner.getTarget().getPoolId())) {
 
                 List<StrategyModel> strategies = runner.getStrategyModels();
 

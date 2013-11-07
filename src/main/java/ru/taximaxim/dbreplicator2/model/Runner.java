@@ -39,7 +39,7 @@ public interface Runner {
      *
      * @return Строковый идентификатор пула соединений целевой БД
      */
-    String getTarget();
+    BoneCPSettingsModel getTarget();
 
     /**
      * Идентификатор потока-реплики

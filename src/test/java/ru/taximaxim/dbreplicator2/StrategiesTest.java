@@ -62,7 +62,7 @@ public class StrategiesTest {
         Session session = sessionFactory.openSession();
         session.beginTransaction();
 
-        RunnerModel runner = createRunner(new BoneCPSettingsModel(), "target",
+        RunnerModel runner = createRunner(new BoneCPSettingsModel(), new BoneCPSettingsModel(),
                 "Описание исполняемого потока");
         StrategyModel strategy = createStrategy("ru.taximaxim.Class", null,
                 true, 100);
@@ -85,7 +85,7 @@ public class StrategiesTest {
                 + runner_compare.getId());
         Assert.assertEquals(runner.getId(), runner_compare.getId());
 
-        RunnerModel runner2 = createRunner(new BoneCPSettingsModel(), "target",
+        RunnerModel runner2 = createRunner(new BoneCPSettingsModel(), new BoneCPSettingsModel(),
                 "Описание исполняемого потока (2)");
         StrategyModel strategy2 = createStrategy("ru.taximaxim.Class", null,
                 true, 100);
@@ -98,7 +98,7 @@ public class StrategiesTest {
                 .get(0)).getId());
     }
 
-    public RunnerModel createRunner(BoneCPSettingsModel source, String target,
+    public RunnerModel createRunner(BoneCPSettingsModel source, BoneCPSettingsModel target,
             String description) {
 
         RunnerModel runner = new RunnerModel();

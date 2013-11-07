@@ -40,6 +40,7 @@ import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 import ru.taximaxim.dbreplicator2.model.RunnerService;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
 import ru.taximaxim.dbreplicator2.utils.Core;
+
 /**
  * Тест репликации данных между базами H2-H2. 
  * 
@@ -73,9 +74,7 @@ public class H2CopyTableDataTest {
         conn.close();
         connDest.close();
         session.close();
-        connectionFactory.close();
         Core.connectionFactoryClose();
-        sessionFactory.close();
         Core.sessionFactoryClose();
     }
     

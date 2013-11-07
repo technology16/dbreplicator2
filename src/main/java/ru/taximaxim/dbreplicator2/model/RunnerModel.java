@@ -76,7 +76,9 @@ public class RunnerModel implements Runner {
     /**
      * Именованный целевой пул
      */
-    private String target;
+    @ManyToOne
+    @JoinColumn(name = "target")
+    private BoneCPSettingsModel target;
 
     /**
      * Описание потока исполнителя
@@ -118,7 +120,7 @@ public class RunnerModel implements Runner {
     }
 
     @Override
-    public String getTarget() {
+    public BoneCPSettingsModel getTarget() {
         return target;
     }
 
@@ -153,7 +155,7 @@ public class RunnerModel implements Runner {
         this.source = source;
     }
 
-    public void setTarget(String target) {
+    public void setTarget(BoneCPSettingsModel target) {
         this.target = target;
     }
 
