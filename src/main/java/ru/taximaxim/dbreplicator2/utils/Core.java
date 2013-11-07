@@ -125,8 +125,10 @@ public final class Core {
      * Закрываем sessionFactory
      */
     public static void sessionFactoryClose() {
-        sessionFactory.close();
-        sessionFactory = null;
+        if (sessionFactory != null) {
+            sessionFactory.close();
+            sessionFactory = null;
+        }
     }
     
     /**
@@ -150,8 +152,10 @@ public final class Core {
      * Закрываем connectionFactory
      */
     public static void connectionFactoryClose() {
-        connectionFactory.close();
-        connectionFactory = null;
+        if (connectionFactory != null) {
+            connectionFactory.close();
+            connectionFactory = null;
+        }
     }
     
     /**
@@ -206,7 +210,8 @@ public final class Core {
      */
     public static synchronized ThreadPool getThreadPool() throws InterruptedException {
         if (threadPool == null) {
-            threadPool = new ThreadPool(10);
+            
+            threadPool = new ThreadPool(sessionFactory);
         }
 
         return threadPool;

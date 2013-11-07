@@ -71,9 +71,12 @@ public class H2CopyTableDataTest {
 
     @AfterClass
     public static void setUpAfterClass() throws Exception {
-        conn.close();
-        connDest.close();
-        session.close();
+        if(conn!=null)
+            conn.close();
+        if(connDest!=null)
+            connDest.close();
+        if(session!=null)
+            session.close();
         Core.connectionFactoryClose();
         Core.sessionFactoryClose();
     }
