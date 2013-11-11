@@ -132,7 +132,7 @@ public final class Core {
     /**
      * Закрываем sessionFactory
      */
-    public static void sessionFactoryClose() {
+    public static synchronized void sessionFactoryClose() {
         if (sessionFactory != null) {
             sessionFactory.close();
             sessionFactory = null;
@@ -159,7 +159,7 @@ public final class Core {
     /**
      * Закрываем connectionFactory
      */
-    public static void connectionFactoryClose() {
+    public static synchronized void connectionFactoryClose() {
         if (connectionFactory != null) {
             connectionFactory.close();
             connectionFactory = null;
@@ -230,7 +230,7 @@ public final class Core {
      * Закрываем пул потоков
      * @throws InterruptedException 
      */
-    public static void threadPoolClose() throws InterruptedException {
+    public static synchronized void threadPoolClose() throws InterruptedException {
         threadPool.shutdownThreadPool();
         threadPool = null;
     }
