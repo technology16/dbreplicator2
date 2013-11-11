@@ -37,6 +37,12 @@ public class ThreadPool {
 
     private ExecutorService executor = null;
 
+    /**
+     * Инициализация пула потоков
+     * 
+     * @param count - максимальное количество активных потоков
+     * @throws InterruptedException
+     */
     public ThreadPool(int count) throws InterruptedException { 
         executor = Executors.newFixedThreadPool(count);
 

@@ -227,7 +227,7 @@ public final class Core {
     }
     
     /**
-     * Закрываем сервис настройки соединений
+     * Закрываем пул потоков
      * @throws InterruptedException 
      */
     public static void threadPoolClose() throws InterruptedException {
