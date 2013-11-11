@@ -53,6 +53,7 @@ public class ApplicatonSettingsModel {
     private String value;
     
     /**
+     * Получение имени ключа
      * @param key
      */
     @Id
@@ -62,6 +63,7 @@ public class ApplicatonSettingsModel {
     }
 
     /**
+     * Получение значения ключа
      * @return value
      */
     @Column(name = "value")
@@ -69,12 +71,18 @@ public class ApplicatonSettingsModel {
         return value;
     }
     
-
+    /**
+     * Установка имени ключа
+     * @param key
+     */
     public void setKey(String key) {
         this.key = key;
     }
     
-    
+    /**
+     * Установка значения ключа
+     * @param value
+     */
     public void setValue(String value) {
         this.value = value;
     }

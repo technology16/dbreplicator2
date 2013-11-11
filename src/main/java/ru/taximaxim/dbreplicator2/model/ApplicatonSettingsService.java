@@ -50,9 +50,9 @@ public class ApplicatonSettingsService {
 
     
     /**
-     * Получение значения по ключу
+     * Получение значения ключа
      * @param key ключ
-     * @return
+     * @return - значение ключа
      */
     public String getValue (String key) {
         Session session = sessionFactory.openSession();
@@ -64,7 +64,7 @@ public class ApplicatonSettingsService {
     }
 
     /**
-     * Изменение значения по ключу
+     * Изменение ключа
      * @param settings
      */
     public void setApplicatonSettings(ApplicatonSettingsModel settings) {
@@ -82,7 +82,7 @@ public class ApplicatonSettingsService {
     }
 
     /**
-     * Удаление значения по ключу
+     * Удаление ключа
      * @param settings
      */
     public void delApplicatonSettings (ApplicatonSettingsModel settings) {

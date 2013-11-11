@@ -28,9 +28,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
-import org.hibernate.SessionFactory;
 
-import ru.taximaxim.dbreplicator2.model.ApplicatonSettingsService;
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
 
 public class ThreadPool {
@@ -39,9 +37,7 @@ public class ThreadPool {
 
     private ExecutorService executor = null;
 
-    public ThreadPool(SessionFactory sessionFactory) throws InterruptedException { 
-        ApplicatonSettingsService aService = new ApplicatonSettingsService(sessionFactory);
-        int count = Integer.parseInt(aService.getValue("tp.threads"));
+    public ThreadPool(int count) throws InterruptedException { 
         executor = Executors.newFixedThreadPool(count);
 
         LOG.info(String.format("Создание и запуск пула потоков (%s)", count));

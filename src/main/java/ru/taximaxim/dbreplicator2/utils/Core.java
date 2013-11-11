@@ -13,6 +13,7 @@ import org.hibernate.service.ServiceRegistryBuilder;
 
 import ru.taximaxim.dbreplicator2.cf.BoneCPConnectionsFactory;
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
+import ru.taximaxim.dbreplicator2.model.ApplicatonSettingsService;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
 import ru.taximaxim.dbreplicator2.model.TaskSettingsService;
 import ru.taximaxim.dbreplicator2.tasks.TasksPool;
@@ -217,8 +218,9 @@ public final class Core {
      */
     public static synchronized ThreadPool getThreadPool() throws InterruptedException {
         if (threadPool == null) {
-            
-            threadPool = new ThreadPool(sessionFactory);
+            ApplicatonSettingsService aService = new ApplicatonSettingsService(sessionFactory);
+            int count = Integer.parseInt(aService.getValue("tp.threads"));
+            threadPool = new ThreadPool(count);
         }
 
         return threadPool;
