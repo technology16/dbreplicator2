@@ -27,6 +27,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import org.apache.log4j.Logger;
+
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsModel;
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
 import ru.taximaxim.dbreplicator2.model.TableModel;
@@ -44,6 +47,8 @@ import ru.taximaxim.dbreplicator2.utils.Core;
  */
 public class FastSuperLogManagerStrategy implements Strategy {
 
+    private static final Logger LOG = Logger.getLogger(FastSuperLogManagerStrategy.class);
+
     /**
      * Конструктор по умолчанию
      */
@@ -53,76 +58,88 @@ public class FastSuperLogManagerStrategy implements Strategy {
     @Override
     public void execute(Connection sourceConnection, Connection targetConnection,
             StrategyModel data) throws StrategyException {
+        Boolean lastAutoCommit = null;
         try {
-            boolean lastAutoCommit = sourceConnection.getAutoCommit();
+            lastAutoCommit = sourceConnection.getAutoCommit();
             // Начинаем транзакцию
             sourceConnection.setAutoCommit(false);
-            sourceConnection
-                    .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-            sourceConnection.setHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT);
-            // Строим список обработчиков реплик
             BoneCPSettingsModel sourcePool = data.getRunner().getSource();
-            
-            // Переносим данные
-            try (
-                 PreparedStatement insertRunnerData = 
-                     sourceConnection.prepareStatement("INSERT INTO rep2_workpool_data (id_runner, id_superlog, id_foreign, id_table, c_operation, c_date, id_transaction) VALUES (?, ?, ?, ?, ?, ?, ?)");
-                 PreparedStatement deleteSuperLog = 
-                     sourceConnection.prepareStatement("DELETE FROM rep2_superlog WHERE id_superlog=?");
-                 PreparedStatement selectSuperLog = 
-                     sourceConnection.prepareStatement("SELECT * FROM rep2_superlog ORDER BY id_superlog");
-             ) {
-                selectSuperLog.setFetchSize(1000);
-                try (ResultSet superLogResult = selectSuperLog.executeQuery();) {
-                    while (superLogResult.next()) {
-                        // Копируем записи
-                        // Проходим по списку слушателей текущей таблицы
-                        for (TableModel table : sourcePool.getTables()) {
-                            if (table.getName()
-                                    .equalsIgnoreCase(superLogResult.getString("id_table"))){
-                                for (RunnerModel runner : table.getRunners()) {
-                                    insertRunnerData.setInt(1,
-                                            runner.getId());
-                                    insertRunnerData.setLong(2,
-                                            superLogResult.getLong("id_superlog"));
-                                    insertRunnerData.setInt(3,
-                                            superLogResult.getInt("id_foreign"));
-                                    insertRunnerData.setString(4,
-                                            superLogResult.getString("id_table"));
-                                    insertRunnerData.setString(5,
-                                            superLogResult.getString("c_operation"));
-                                    insertRunnerData.setTimestamp(6,
-                                            superLogResult.getTimestamp("c_date"));
-                                    insertRunnerData.setString(7,
-                                            superLogResult.getString("id_transaction"));
-                                    insertRunnerData.addBatch();
+            try {
+                sourceConnection
+                    .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+                sourceConnection.setHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT);
+                // Строим список обработчиков реплик
+
+                // Переносим данные
+                try (
+                        PreparedStatement insertRunnerData = 
+                        sourceConnection.prepareStatement("INSERT INTO rep2_workpool_data (id_runner, id_superlog, id_foreign, id_table, c_operation, c_date, id_transaction) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                        PreparedStatement deleteSuperLog = 
+                                sourceConnection.prepareStatement("DELETE FROM rep2_superlog WHERE id_superlog=?");
+                        PreparedStatement selectSuperLog = 
+                                sourceConnection.prepareStatement("SELECT * FROM rep2_superlog ORDER BY id_superlog");
+                ) {
+                    selectSuperLog.setFetchSize(1000);
+                    try (ResultSet superLogResult = selectSuperLog.executeQuery();) {
+                        while (superLogResult.next()) {
+                            // Копируем записи
+                            // Проходим по списку слушателей текущей таблицы
+                            for (TableModel table : sourcePool.getTables()) {
+                                if (table.getName()
+                                        .equalsIgnoreCase(superLogResult.getString("id_table"))){
+                                    for (RunnerModel runner : table.getRunners()) {
+                                        insertRunnerData.setInt(1,
+                                                runner.getId());
+                                        insertRunnerData.setLong(2,
+                                                superLogResult.getLong("id_superlog"));
+                                        insertRunnerData.setInt(3,
+                                                superLogResult.getInt("id_foreign"));
+                                        insertRunnerData.setString(4,
+                                                superLogResult.getString("id_table"));
+                                        insertRunnerData.setString(5,
+                                                superLogResult.getString("c_operation"));
+                                        insertRunnerData.setTimestamp(6,
+                                                superLogResult.getTimestamp("c_date"));
+                                        insertRunnerData.setString(7,
+                                                superLogResult.getString("id_transaction"));
+                                        insertRunnerData.addBatch();
+                                    }
                                 }
                             }
+                            // Удаляем исходную запись
+                            deleteSuperLog.setLong(1, superLogResult.getLong("id_superlog"));
+                            deleteSuperLog.addBatch();
                         }
-                        // Удаляем исходную запись
-                        deleteSuperLog.setLong(1, superLogResult.getLong("id_superlog"));
-                        deleteSuperLog.addBatch();
+                        insertRunnerData.executeBatch();
+                        deleteSuperLog.executeBatch();
                     }
-                    insertRunnerData.executeBatch();
-                    deleteSuperLog.executeBatch();
                 }
+                // Подтверждаем транзакцию
+                sourceConnection.commit();
+            } catch (Exception e) {
+                // Откатываемся
+                sourceConnection.rollback();
+                // Пробрасываем ошибку на уровень выше
+                throw e;
             }
-            // Подтверждаем транзакцию
-            sourceConnection.commit();
-            sourceConnection.setAutoCommit(lastAutoCommit);
             // Асинхронно запускаем обработчики реплик
             for (RunnerModel runner : sourcePool.getRunners()) {
                 if (!runner.getTables().isEmpty()) {
-                    try {
                         Core.getThreadPool().start(runner);
-                    } catch(InterruptedException e) {
-                        // Меняем класс ошибки
-                        throw new StrategyException(e);
-                    }
                 }
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
+            // Меняем класс ошибки
             throw new StrategyException(e);
+        } finally {
+            try {
+                if (lastAutoCommit != null) {
+                    sourceConnection.setAutoCommit(lastAutoCommit);
+                }
+            } catch(SQLException e){
+                // Ошибка может возникнуть если во время операции упало соединение к БД
+                LOG.warn("Ошибка при возврате автокомита в исходное состояние.", e);
+            }
         }
     }
 

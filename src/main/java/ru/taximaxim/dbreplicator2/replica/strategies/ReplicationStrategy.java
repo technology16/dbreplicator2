@@ -60,9 +60,11 @@ public class ReplicationStrategy implements Strategy {
     public void execute(Connection sourceConnection, Connection targetConnection,
             StrategyModel data) throws StrategyException {
         // TODO: Реализовать поддержку списка таблиц
+        Boolean lastAutoCommit = null;
+        Boolean lastTargetAutoCommit = null;
         try {
-            boolean lastAutoCommit = sourceConnection.getAutoCommit();
-            boolean lastTargetAutoCommit = targetConnection.getAutoCommit();
+            lastAutoCommit = sourceConnection.getAutoCommit();
+            lastTargetAutoCommit = targetConnection.getAutoCommit();
             // Начинаем транзакцию
             sourceConnection.setAutoCommit(false);
             sourceConnection
@@ -73,10 +75,10 @@ public class ReplicationStrategy implements Strategy {
             // Извлекаем список последних операций по измененым записям
             try (
                     PreparedStatement selectLastOperations = 
-                        sourceConnection.prepareStatement("SELECT * FROM rep2_workpool_data WHERE id_superlog IN (SELECT MAX(id_superlog) FROM rep2_workpool_data WHERE id_runner=? GROUP BY id_foreign, id_table)");
+                    sourceConnection.prepareStatement("SELECT * FROM rep2_workpool_data WHERE id_superlog IN (SELECT MAX(id_superlog) FROM rep2_workpool_data WHERE id_runner=? GROUP BY id_foreign, id_table)");
                     PreparedStatement deleteWorkPoolData = 
-                        sourceConnection.prepareStatement("DELETE FROM rep2_workpool_data WHERE id_foreign=? AND id_table=? AND id_superlog<=?");
-            ) {
+                            sourceConnection.prepareStatement("DELETE FROM rep2_workpool_data WHERE id_foreign=? AND id_table=? AND id_superlog<=?");
+                    ) {
                 selectLastOperations.setInt(1, data.getId());
                 try (ResultSet operationsResult = selectLastOperations.executeQuery();) {
                     // Проходим по списку измененных записей
@@ -90,7 +92,7 @@ public class ReplicationStrategy implements Strategy {
                                     .constructDeleteQuery(tableName, priColsList);
                             try (PreparedStatement deleteDestStatement = targetConnection
                                     .prepareStatement(deleteDestQuery);
-                            ) {
+                                    ) {
                                 deleteDestStatement.setLong(1, operationsResult.getLong("id_foreign"));
                                 try {
                                     deleteDestStatement.executeUpdate();
@@ -106,14 +108,14 @@ public class ReplicationStrategy implements Strategy {
                                 }
                             }
                         } else {
-                           // Добавляем данные в целевую таблицу
-                           // Извлекаем данные из исходной таблицы
+                            // Добавляем данные в целевую таблицу
+                            // Извлекаем данные из исходной таблицы
                             List<String> colsList = JdbcMetadata
                                     .getColumnsList(sourceConnection, tableName);
                             String selectSourceQuery = QueryConstructors
                                     .constructSelectQuery(tableName, colsList, priColsList);
                             try (
-                                PreparedStatement selectSourceStatement = sourceConnection
+                                    PreparedStatement selectSourceStatement = sourceConnection
                                     .prepareStatement(selectSourceQuery);
                                     ) {
                                 selectSourceStatement.setLong(1, operationsResult.getLong("id_foreign"));
@@ -124,9 +126,9 @@ public class ReplicationStrategy implements Strategy {
                                         String updateDestQuery = QueryConstructors
                                                 .constructUpdateQuery(tableName, colsList, priColsList);
                                         try (
-                                            PreparedStatement updateDestStatement = targetConnection
+                                                PreparedStatement updateDestStatement = targetConnection
                                                 .prepareStatement(updateDestQuery);
-                                        ) {
+                                                ) {
                                             // Добавляем данные в целевую таблицу
                                             List<String> colsForUpdate = new ArrayList<String>(colsList);
                                             colsForUpdate.addAll(priColsList);
@@ -138,9 +140,9 @@ public class ReplicationStrategy implements Strategy {
                                                     String insertDestQuery = QueryConstructors
                                                             .constructInsertQuery(tableName, colsList);
                                                     try (
-                                                        PreparedStatement insertDestStatement = targetConnection
+                                                            PreparedStatement insertDestStatement = targetConnection
                                                             .prepareStatement(insertDestQuery);
-                                                    ) {
+                                                            ) {
                                                         // Добавляем данные в целевую таблицу
                                                         Jdbc.fillStatementFromResultSet(insertDestStatement,
                                                                 sourceResult, colsList);
@@ -179,13 +181,28 @@ public class ReplicationStrategy implements Strategy {
                 // Подтверждаем транзакцию
                 deleteWorkPoolData.executeBatch();
                 sourceConnection.commit();
-            } catch (SQLException e) {
+            } catch (Exception e) {
+                sourceConnection.rollback();
                 throw new StrategyException(e);
-            } finally {
-                sourceConnection.setAutoCommit(lastAutoCommit);
-                targetConnection.setAutoCommit(lastTargetAutoCommit);
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
+            try {
+                if (lastAutoCommit != null) {
+                    sourceConnection.setAutoCommit(lastAutoCommit);
+                }
+            } catch(SQLException sqlException){
+                // Ошибка может возникнуть если во время операции упало соединение к БД
+                LOG.warn("Ошибка при возврате автокомита в исходное состояние.", sqlException);
+            }
+
+            try {
+                if (lastTargetAutoCommit != null) {
+                    targetConnection.setAutoCommit(lastTargetAutoCommit);
+                }
+            } catch(SQLException sqlException){
+                // Ошибка может возникнуть если во время операции упало соединение к БД
+                LOG.warn("Ошибка при возврате автокомита в исходное состояние.", sqlException);
+            }
             throw new StrategyException(e);
         }
     }
