@@ -27,8 +27,6 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
-
-
 /**
  * @author mardanov_rm
  *
@@ -52,7 +50,7 @@ public class ApplicatonSettingsService {
 
     
     /**
-     * Получение значение ключа
+     * Получение значения по ключу
      * @param key ключ
      * @return
      */
@@ -66,7 +64,7 @@ public class ApplicatonSettingsService {
     }
 
     /**
-     * Добавление изменение ключа
+     * Изменение значения по ключу
      * @param settings
      */
     public void setApplicatonSettings(ApplicatonSettingsModel settings) {
@@ -84,7 +82,7 @@ public class ApplicatonSettingsService {
     }
 
     /**
-     * Удаления ключа
+     * Удаление значения по ключу
      * @param settings
      */
     public void delApplicatonSettings (ApplicatonSettingsModel settings) {
