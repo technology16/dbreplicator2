@@ -102,7 +102,10 @@ public class ReplicationStrategy extends Skeleton implements Strategy {
                                 } catch (SQLException e) {
                                     // Поглощаем и логгируем ошибки удаления
                                     // Это ожидаемый результат
-                                    LOG.warn("Поглощена ошибка при удалении записи: ", e);
+                                    String rows = Jdbc.resultSetToString(sourceResult, colsForDelete);
+                                    LOG.error(String.format(
+                                            "Поглощена ошибка при удалении записи: [ tableName = %s  [ operation = %s  [ row   = %s ] ] ]", 
+                                            tableName, operationsResult.getString("c_operation"), rows));
                                     trackError("Ошибка при удалении записи: ", e, sourceConnection, operationsResult);
                                 }
                             }
