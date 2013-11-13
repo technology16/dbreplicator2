@@ -1,8 +1,12 @@
 package ru.taximaxim.dbreplicator2.model;
 
-import org.hibernate.HibernateException;
+import java.util.List;
+
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Restrictions;
+
+import ru.taximaxim.dbreplicator2.utils.Utils;
 
 public class IgnoreColumnsTableService {
     /**
@@ -16,47 +20,17 @@ public class IgnoreColumnsTableService {
     public IgnoreColumnsTableService(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
-
-    /**
-     * Получение экземпляра настроек задачи по идентификатору
-     *
-     * @param runnerId
-     * @return
-     */
-    public IgnoreColumnsTableModel getIgnoreColumnsTable(int id) {
+    
+    
+    public List<IgnoreColumnsTableModel> getIgnoreList(int idTable) {
         Session session = sessionFactory.openSession();
         try {
-            return  (IgnoreColumnsTableModel) session.get(IgnoreColumnsTableModel.class, id);
+            return Utils.castList(IgnoreColumnsTableModel.class,
+                            session.createCriteria(IgnoreColumnsTableModel.class, "ignore_columns_table")
+                            .list());
         } finally {
             session.close();
         }
     }
-
-    public void setIgnoreColumnsTableModel (IgnoreColumnsTableModel ignore) {
-        Session session = sessionFactory.openSession();
-        session.beginTransaction();
-        try {
-            session.saveOrUpdate(ignore);
-            session.getTransaction().commit();
-        } catch (HibernateException e) {
-            session.getTransaction().rollback();
-            throw e;
-        } finally {
-            session.close();
-        }
-    }
-
-    public void delIgnoreColumnsTableModel (IgnoreColumnsTableModel ignore) {
-        Session session = sessionFactory.openSession();
-        session.beginTransaction();
-        try {
-            session.delete(ignore);
-            session.getTransaction().commit();
-        } catch (HibernateException e) {
-            session.getTransaction().rollback();
-            throw e;
-        } finally {
-            session.close();
-        }
-    }
+    
 }

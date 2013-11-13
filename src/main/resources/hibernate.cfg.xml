@@ -22,6 +22,6 @@
         <mapping class="ru.taximaxim.dbreplicator2.model.RunnerModel"/>
         <mapping class="ru.taximaxim.dbreplicator2.model.TableModel"/>
         <mapping class="ru.taximaxim.dbreplicator2.model.ApplicatonSettingsModel"/>
-        <mapping class="ru.taximaxim.dbreplicator2.model.IgnoreColumnsTableService"/>
+        <mapping class="ru.taximaxim.dbreplicator2.model.IgnoreColumnsTableModel"/>
 	</session-factory>
 </hibernate-configuration>
