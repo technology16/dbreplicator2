@@ -73,7 +73,7 @@ public final class Jdbc {
         }
     }
 
-    public static String createRow(ResultSet data, 
+    public static String resultSetToString(ResultSet data, 
             List<String> columnsList) throws SQLException {
         String str  = "";
         for (String columnName : columnsList) {
