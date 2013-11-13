@@ -73,6 +73,15 @@ public final class Jdbc {
         }
     }
 
+    /**
+     * Преобразование resultSet в строку
+     * @param data
+     *            источник данных
+     * @param columnsList
+     *            список колонок для заполнения
+     * @return
+     * @throws SQLException
+     */
     public static String resultSetToString(ResultSet data, 
             List<String> columnsList) throws SQLException {
         String str  = "";
