@@ -36,6 +36,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Fetch;
@@ -118,4 +119,29 @@ public class TableModel {
         this.runners = runners;
     }
 
+    /**
+     * Список игнорируемых колонок
+     */
+    @OneToMany(mappedBy = "table", fetch = FetchType.EAGER)
+    @Fetch(FetchMode.SELECT)
+    private List<IgnoreColumnsTableModel> ignoreColumnsTable;
+    
+    /**
+     * Получения списка игнорируеммых колонок
+     * @return
+     */
+    public List<IgnoreColumnsTableModel> getIgnoreColumnsTable() {
+        if (ignoreColumnsTable == null) {
+            ignoreColumnsTable = new ArrayList<IgnoreColumnsTableModel>();
+        }
+        return ignoreColumnsTable;
+    }
+
+    /**
+     * Установка списка игнорируемых колонок
+     * @param ignoreColumnsTable
+     */
+    public void setIgnoreColumnsTable(List<IgnoreColumnsTableModel> ignoreColumnsTable) {
+        this.ignoreColumnsTable = ignoreColumnsTable;
+    }
 }

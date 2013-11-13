@@ -1,8 +1,6 @@
 package ru.taximaxim.dbreplicator2;
 
-import static org.junit.Assert.*;
-
-import java.util.List;
+import static org.junit.Assert.assertEquals;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
@@ -15,12 +13,12 @@ import org.junit.Test;
 
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 import ru.taximaxim.dbreplicator2.model.IgnoreColumnsTableModel;
-import ru.taximaxim.dbreplicator2.model.IgnoreColumnsTableService;
+import ru.taximaxim.dbreplicator2.model.TableModel;
 import ru.taximaxim.dbreplicator2.utils.Core;
 
-public class test {
+public class IgnoreColumnsTableModelTest {
     
-    protected static final Logger LOG = Logger.getLogger(test.class);
+    protected static final Logger LOG = Logger.getLogger(IgnoreColumnsTableModelTest.class);
     protected static SessionFactory sessionFactory;
     protected static Session session;
     protected static ConnectionFactory connectionFactory;
@@ -42,20 +40,19 @@ public class test {
     }
 
     @Test
-    public void tester() {
+    public void test() {
 
         sessionFactory = Core.getSessionFactory();
         session = sessionFactory.openSession();
         connectionFactory = Core.getConnectionFactory();
         
-        LOG.info("log");
-        IgnoreColumnsTableService ignore = new IgnoreColumnsTableService(sessionFactory);
-        List<IgnoreColumnsTableModel> tab = ignore.getIgnoreList(2);
-        
-        LOG.info(tab.size());
-        
-        for (IgnoreColumnsTableModel tableModel : tab) {
-            LOG.info(tableModel.getColumnName());
+        TableModel table = (TableModel) session.get(TableModel.class, 2);
+        for (IgnoreColumnsTableModel ignoredColumn : table.getIgnoreColumnsTable()) {
+            LOG.info("getId:         " + ignoredColumn.getId());
+            LOG.info("getColumnName: " + ignoredColumn.getColumnName());
+            LOG.info("getTable:      " + ignoredColumn.getTable().getName());
+
+            assertEquals("Ошибка Название таблиц не равны!", table.getName(), ignoredColumn.getTable().getName()); 
         }
     }
 
