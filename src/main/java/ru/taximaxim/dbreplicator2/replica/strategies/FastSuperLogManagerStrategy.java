@@ -73,7 +73,7 @@ public class FastSuperLogManagerStrategy implements Strategy {
                 // Переносим данные
                 try (
                         PreparedStatement insertRunnerData = 
-                        sourceConnection.prepareStatement("INSERT INTO rep2_workpool_data (id_runner, id_superlog, id_foreign, id_table, c_operation, c_date, id_transaction) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                        sourceConnection.prepareStatement("INSERT INTO rep2_workpool_data (id_runner, id_superlog, id_foreign, id_table, c_operation, c_date, id_transaction, c_errors_count) VALUES (?, ?, ?, ?, ?, ?, ?, 0)");
                         PreparedStatement deleteSuperLog = 
                                 sourceConnection.prepareStatement("DELETE FROM rep2_superlog WHERE id_superlog=?");
                         PreparedStatement selectSuperLog = 

@@ -46,7 +46,7 @@ import ru.taximaxim.dbreplicator2.replica.StrategyException;
  * @author volodin_aa
  * 
  */
-public class ReplicationStrategy implements Strategy {
+public class ReplicationStrategy extends ReplicationStrategySkeleton implements Strategy {
 
     private static final Logger LOG = Logger.getLogger(ReplicationStrategy.class);
 
@@ -54,6 +54,7 @@ public class ReplicationStrategy implements Strategy {
      * Конструктор по умолчанию
      */
     public ReplicationStrategy() {
+        super();
     }
 
     @Override
@@ -77,7 +78,7 @@ public class ReplicationStrategy implements Strategy {
                     PreparedStatement selectLastOperations = 
                     sourceConnection.prepareStatement("SELECT * FROM rep2_workpool_data WHERE id_superlog IN (SELECT MAX(id_superlog) FROM rep2_workpool_data WHERE id_runner=? GROUP BY id_foreign, id_table)");
                     PreparedStatement deleteWorkPoolData = 
-                            sourceConnection.prepareStatement("DELETE FROM rep2_workpool_data WHERE id_foreign=? AND id_table=? AND id_superlog<=?");
+                            sourceConnection.prepareStatement("DELETE FROM rep2_workpool_data WHERE id_runner=? AND id_foreign=? AND id_table=? AND id_superlog<=?");
                     ) {
                 selectLastOperations.setInt(1, data.getId());
                 try (ResultSet operationsResult = selectLastOperations.executeQuery();) {
@@ -96,15 +97,13 @@ public class ReplicationStrategy implements Strategy {
                                 deleteDestStatement.setLong(1, operationsResult.getLong("id_foreign"));
                                 try {
                                     deleteDestStatement.executeUpdate();
-                                    // Очищаем данные о текущей записи из набора данных реплики
-                                    deleteWorkPoolData.setLong(1, operationsResult.getLong("id_foreign"));
-                                    deleteWorkPoolData.setString(2, operationsResult.getString("id_table"));
-                                    deleteWorkPoolData.setLong(3, operationsResult.getLong("id_superlog"));
-                                    deleteWorkPoolData.addBatch();
+                                    clearWorkPoolData(deleteWorkPoolData, operationsResult);
                                 } catch (SQLException e) {
                                     // Поглощаем и логгируем ошибки удаления
                                     // Это ожидаемый результат
-                                    LOG.warn("Поглощена ошибка при удалении записи: ", e);
+                                    String message = "Поглощена ошибка при удалении записи: ";
+                                    LOG.warn(message, e);
+                                    trackError(message + "\n" + e.toString(), sourceConnection, operationsResult);
                                 }
                             }
                         } else {
@@ -148,28 +147,24 @@ public class ReplicationStrategy implements Strategy {
                                                                 sourceResult, colsList);
                                                         try {
                                                             insertDestStatement.executeUpdate();
-                                                            // Очищаем данные о текущей записи из набора данных реплики
-                                                            deleteWorkPoolData.setLong(1, operationsResult.getLong("id_foreign"));
-                                                            deleteWorkPoolData.setString(2, operationsResult.getString("id_table"));
-                                                            deleteWorkPoolData.setLong(3, operationsResult.getLong("id_superlog"));
-                                                            deleteWorkPoolData.addBatch();
+                                                            clearWorkPoolData(deleteWorkPoolData, operationsResult);
                                                         } catch (SQLException e) {
                                                             // Поглощаем и логгируем ошибки вставки
                                                             // Это ожидаемый результат
-                                                            LOG.warn("Поглощена ошибка при вставке записи: ", e);
+                                                            String message = "Поглощена ошибка при вставке записи: ";
+                                                            LOG.warn(message, e);
+                                                            trackError(message + "\n" + e.toString(), sourceConnection, operationsResult);
                                                         }
                                                     }
                                                 } else {
-                                                    // Очищаем данные о текущей записи из набора данных реплики
-                                                    deleteWorkPoolData.setLong(1, operationsResult.getLong("id_foreign"));
-                                                    deleteWorkPoolData.setString(2, operationsResult.getString("id_table"));
-                                                    deleteWorkPoolData.setLong(3, operationsResult.getLong("id_superlog"));
-                                                    deleteWorkPoolData.addBatch();
+                                                    clearWorkPoolData(deleteWorkPoolData, operationsResult);
                                                 }
                                             } catch (SQLException e) {
                                                 // Поглощаем и логгируем ошибки обновления
                                                 // Это ожидаемый результат
-                                                LOG.warn("Поглощена ошибка при обновлении записи: ", e);
+                                                String message = "Поглощена ошибка при обновлении записи: ";
+                                                LOG.warn(message, e);
+                                                trackError(message + "\n" + e.toString(), sourceConnection, operationsResult);
                                             }
                                         }
                                     }

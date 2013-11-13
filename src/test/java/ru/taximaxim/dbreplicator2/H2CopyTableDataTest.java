@@ -60,6 +60,7 @@ public class H2CopyTableDataTest {
     protected static Connection conn = null;
     protected static Connection connDest = null;
     protected static Runnable worker = null;
+    protected static Runnable errorsCountWatchdogWorker = null;
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -173,9 +174,10 @@ public class H2CopyTableDataTest {
         LOG.info("Проверка внешних ключей");
         Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");   
         worker.run();
-        Thread.sleep(500);
+        Thread.sleep(1000);
+        errorsCountWatchdogWorker.run();
         worker.run();
-        Thread.sleep(500);
+        Thread.sleep(1000);
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table2");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table2");
         Helper.AssertEquals(listSource, listDest);
@@ -319,7 +321,8 @@ public class H2CopyTableDataTest {
         Helper.executeSqlFromFile(connDest, "importDest.sql");
         
         RunnerService runnerService = new RunnerService(sessionFactory);
-        
+
         worker = new WorkerThread(runnerService.getRunner(1));
+        errorsCountWatchdogWorker = new WorkerThread(runnerService.getRunner(6));
     }
 }
