@@ -73,6 +73,15 @@ public final class Jdbc {
         }
     }
 
+    public static String resultSetToString(ResultSet data, 
+            List<String> columnsList) throws SQLException {
+        String str  = "";
+        for (String columnName : columnsList) {
+            str = str + "[ col " + columnName + " = " + data.getString(columnName) + "  ]   ";
+        }
+        return str;
+    }
+    
     /**
      * Функция заполнения параметров подготовленного запроса на основе строки
      * данных из Map<String, Object>
