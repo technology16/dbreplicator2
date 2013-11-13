@@ -68,3 +68,4 @@ insert into table_observers (id_runner, id_table) values (5, 6)
 
 --Ignore Columns Table
 insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (1, 2, '_decimal')
+insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (2, 2, '_int')

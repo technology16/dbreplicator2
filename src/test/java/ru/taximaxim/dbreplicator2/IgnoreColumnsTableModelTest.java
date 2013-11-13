@@ -2,9 +2,12 @@ package ru.taximaxim.dbreplicator2;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Restrictions;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -15,6 +18,7 @@ import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 import ru.taximaxim.dbreplicator2.model.IgnoreColumnsTableModel;
 import ru.taximaxim.dbreplicator2.model.TableModel;
 import ru.taximaxim.dbreplicator2.utils.Core;
+import ru.taximaxim.dbreplicator2.utils.Utils;
 
 public class IgnoreColumnsTableModelTest {
     
@@ -54,6 +58,17 @@ public class IgnoreColumnsTableModelTest {
 
             assertEquals("Ошибка Название таблиц не равны!", table.getName(), ignoredColumn.getTable().getName()); 
         }
+        
+        List<TableModel> tableList = Utils.castList(TableModel.class,
+                session.createCriteria(TableModel.class, "tables")
+                .add(Restrictions.eq("name", "t_table1"))
+                           .list());
+        LOG.info("LOG:");
+        for (TableModel tableModel : tableList) {
+            LOG.info("tableModel: " + tableModel.getTableId());
+            LOG.info("tableModel: " + tableModel.getName());
+        }
+        
     }
 
 }
