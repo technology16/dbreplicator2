@@ -102,11 +102,11 @@ public class ReplicationStrategy extends Skeleton implements Strategy {
                                 } catch (SQLException e) {
                                     // Поглощаем и логгируем ошибки удаления
                                     // Это ожидаемый результат
-                                    String rows = Jdbc.resultSetToString(sourceResult, colsForDelete);
-                                    LOG.error(String.format(
-                                            "Поглощена ошибка при удалении записи: [ tableName = %s  [ operation = %s  [ row   = %s ] ] ]", 
-                                            tableName, operationsResult.getString("c_operation"), rows));
-                                    trackError("Ошибка при удалении записи: ", e, sourceConnection, operationsResult);
+                                    String rowDump = String.format(
+                                            "[ tableName = %s  [ operation = D  [ row   = [ id = %s ] ] ] ]", 
+                                            tableName, String.valueOf(operationsResult.getLong("id_foreign")));
+                                    LOG.error("Поглощена ошибка при удалении записи: " + rowDump, e);
+                                    trackError("Ошибка при удалении записи: " + rowDump, e, sourceConnection, operationsResult);
                                 }
                             }
                         } else {
@@ -154,8 +154,11 @@ public class ReplicationStrategy extends Skeleton implements Strategy {
                                                         } catch (SQLException e) {
                                                             // Поглощаем и логгируем ошибки вставки
                                                             // Это ожидаемый результат
-                                                            LOG.warn("Поглощена ошибка при вставке записи: ", e);
-                                                            trackError("Ошибка при вставке записи: ", e, sourceConnection, operationsResult);
+                                                            String rowDump = String.format("[ tableName = %s  [ operation = %s  [ row   = %s ] ] ]", 
+                                                                    tableName, operationsResult.getString("c_operation"), 
+                                                                    Jdbc.resultSetToString(sourceResult, colsList));
+                                                            LOG.warn("Поглощена ошибка при вставке записи: " + rowDump, e);
+                                                            trackError("Ошибка при вставке записи: " + rowDump, e, sourceConnection, operationsResult);
                                                         }
                                                     }
                                                 } else {
@@ -164,8 +167,11 @@ public class ReplicationStrategy extends Skeleton implements Strategy {
                                             } catch (SQLException e) {
                                                 // Поглощаем и логгируем ошибки обновления
                                                 // Это ожидаемый результат
-                                                LOG.warn("Поглощена ошибка при обновлении записи: ", e);
-                                                trackError("Ошибка при обновлении записи: ", e, sourceConnection, operationsResult);
+                                                String rowDump = String.format("[ tableName = %s  [ operation = %s  [ row   = %s ] ] ]", 
+                                                        tableName, operationsResult.getString("c_operation"), 
+                                                        Jdbc.resultSetToString(sourceResult, colsList));
+                                                LOG.warn("Поглощена ошибка при обновлении записи: " + rowDump, e);
+                                                trackError("Ошибка при обновлении записи: " + rowDump, e, sourceConnection, operationsResult);
                                             }
                                         }
                                     }
