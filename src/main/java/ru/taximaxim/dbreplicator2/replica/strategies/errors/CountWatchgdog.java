@@ -21,7 +21,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ru.taximaxim.dbreplicator2.replica.strategies;
+package ru.taximaxim.dbreplicator2.replica.strategies.errors;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -39,16 +39,16 @@ import ru.taximaxim.dbreplicator2.replica.StrategyException;
  * @author volodin_aa
  * 
  */
-public class ErrorsCountWatchgdogStrategy implements Strategy {
+public class CountWatchgdog implements Strategy {
 
-    private static final Logger LOG = Logger.getLogger(ErrorsCountWatchgdogStrategy.class);
+    private static final Logger LOG = Logger.getLogger(CountWatchgdog.class);
     
     private int maxErrors = 0;
 
     /**
      * Конструктор по умолчанию
      */
-    public ErrorsCountWatchgdogStrategy() {
+    public CountWatchgdog() {
     }
 
     @Override

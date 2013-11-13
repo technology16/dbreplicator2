@@ -20,8 +20,11 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ru.taximaxim.dbreplicator2.replica.strategies;
+package ru.taximaxim.dbreplicator2.replica.strategies.replication;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -35,7 +38,7 @@ import java.util.Date;
  * @author volodin_aa
  *
  */
-public class ReplicationStrategySkeleton {
+public class Skeleton {
 
     /**
      * Функция удаления данных об операциях успешно реплицированной записи
@@ -58,12 +61,17 @@ public class ReplicationStrategySkeleton {
      * Функция записи информации об ошибке
      * @throws SQLException 
      */
-    protected void trackError(String message, Connection connection,
+    protected void trackError(String message, Throwable e, Connection connection,
             ResultSet operation) throws SQLException{
+        // Формируем сообщение об ошибке
+        Writer writer = new StringWriter();
+        PrintWriter printWriter = new PrintWriter(writer);
+        e.printStackTrace(printWriter);
+        
         // Увеличиваем счетчик ошибок на 1
         PreparedStatement incErrorsCount = 
-                connection.prepareStatement("UPDATE rep2_workpool_data SET c_errors_count = COALESCE(c_errors_count, 0) + 1, c_last_error=?, c_last_error_date=? WHERE id_runner=? AND id_foreign=? AND id_table=? AND id_superlog<=?");
-        incErrorsCount.setString(1, message);
+                connection.prepareStatement("UPDATE rep2_workpool_data SET c_errors_count = c_errors_count + 1, c_last_error=?, c_last_error_date=? WHERE id_runner=? AND id_foreign=? AND id_table=? AND id_superlog<=?");
+        incErrorsCount.setString(1, message + "\n" + writer.toString());
         incErrorsCount.setTimestamp(2, new Timestamp(new Date().getTime()));
         incErrorsCount.setInt(3, operation.getInt("id_runner"));
         incErrorsCount.setLong(4, operation.getLong("id_foreign"));

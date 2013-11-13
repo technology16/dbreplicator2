@@ -174,10 +174,10 @@ public class H2CopyTableDataTest {
         LOG.info("Проверка внешних ключей");
         Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");   
         worker.run();
-        Thread.sleep(1000);
+        Thread.sleep(500);
         errorsCountWatchdogWorker.run();
         worker.run();
-        Thread.sleep(1000);
+        Thread.sleep(500);
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table2");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table2");
         Helper.AssertEquals(listSource, listDest);

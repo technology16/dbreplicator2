@@ -63,9 +63,9 @@ insert into table_observers (id_runner, id_table) values (5, 5)
 insert into table_observers (id_runner, id_table) values (5, 6)
 
 
---Runner ErrorsCountWatchgdogStrategy
+--Runner CountWatchgdog
 insert into runners (id_runner, source, target, description, class_name) values (6, 'source', 'source', 'ErrorsCountWatchgdogStrategy', '')
---Strategy  ErrorsCountWatchgdogStrategy
-insert into strategies (id, className, param, isEnabled, priority, id_runner) values (6, 'ru.taximaxim.dbreplicator2.replica.strategies.ErrorsCountWatchgdogStrategy', null, true, 100, 6)
+--Strategy  CountWatchgdog
+insert into strategies (id, className, param, isEnabled, priority, id_runner) values (6, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.CountWatchgdog', null, true, 100, 6)
 
 
