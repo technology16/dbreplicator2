@@ -72,44 +72,38 @@ public final class Application extends AbstractCommandLineParser {
             fLog4j = arguments[0];
 
             hasOption = true;
-        }        
+        }
         PropertyConfigurator.configureAndWatch(fLog4j);
 
-        // Конфигурируем Hibernate
-        Configuration configuration;
+        
+        String configurationName = null;
         if (commandLine.hasOption('c')) {
             String[] arguments = commandLine.getOptionValues('c');
-            // Инициализируем БД настроек
-            configuration = Core.getConfiguration(arguments[0]);
-
+            configurationName = arguments[0];
             hasOption = true;
-        } else {
-            configuration = Core.getConfiguration();
         }
 
+        boolean hibernateHbm2ddlAuto = false;
         if (commandLine.hasOption('i')) {
-            // Инициализируем БД настроек
-            configuration.setProperty("hibernate.hbm2ddl.auto", "create");
-
+            hibernateHbm2ddlAuto = true;
             hasOption = true;
         }
 
+        String hibernate_hbm2ddl_import_files = null;
         if (commandLine.hasOption('u')) {
             String[] arguments = commandLine.getOptionValues('u');
-            configuration.setProperty("hibernate.hbm2ddl.import_files", arguments[0]);
-            // Обновляем БД настроек скриптом из файла
+            hibernate_hbm2ddl_import_files = arguments[0];
             hasOption = true;
         }
-
-        Core.getSessionFactory(configuration);
-
+        
+        boolean CoreGetTasksPoolStart = false;
         if (commandLine.hasOption('s')) {
             // Запускаем репликацию
             // Определение ведущих БД и запуск процессов диспетчеров записей
             // для каждой ведущей БД.
             // 1. Определяем ведущие БД по существующим настройкам.
             // 2. Запуск диспечеров записей для каждой ведущей БД.
-            Core.getTasksPool().start();
+            CoreGetTasksPoolStart = true;
             hasOption = true;
         }
 
@@ -121,8 +115,40 @@ public final class Application extends AbstractCommandLineParser {
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp("java dbreplicator2.jar", getOptions());
         }
+        
+        if(hasOption & (
+                (hibernateHbm2ddlAuto & hibernate_hbm2ddl_import_files != null) | 
+                (CoreGetTasksPoolStart) |
+                (hibernate_hbm2ddl_import_files != null)
+                )) {
+            isValidate(configurationName, hibernateHbm2ddlAuto, 
+                    hibernate_hbm2ddl_import_files, CoreGetTasksPoolStart);
+        }
     }
 
+    protected void isValidate(String configurationName, boolean hibernateHbm2ddlAuto
+            ,String hibernate_hbm2ddl_import_files, boolean CoreGetTasksPoolStart) {
+        // Конфигурируем Hibernate
+        Configuration configuration;
+        // Инициализируем БД настроек
+        configuration = Core.getConfiguration(configurationName);
+
+        if(hibernateHbm2ddlAuto) {
+            // Инициализируем БД настроек
+            configuration.setProperty("hibernate.hbm2ddl.auto", "create");
+        }
+
+        if(hibernate_hbm2ddl_import_files != null) {
+            // Обновляем БД настроек скриптом из файла
+            configuration.setProperty("hibernate.hbm2ddl.import_files", hibernate_hbm2ddl_import_files);
+        }
+        Core.getSessionFactory(configuration);
+        
+        if(CoreGetTasksPoolStart) {
+            Core.getTasksPool().start();
+        }
+    }
+    
     public static void main(String[] args) {
         new Application().parserCommandLine(args);
     }
