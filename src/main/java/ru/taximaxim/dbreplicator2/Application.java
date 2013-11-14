@@ -116,9 +116,9 @@ public final class Application extends AbstractCommandLineParser {
             formatter.printHelp("java dbreplicator2.jar", getOptions());
         }
         
-        if(hasOption & (
-                (hibernateHbm2ddlAuto & hibernateHbm2ddlImportFiles != null) | 
-                (coreGetTasksPoolStart) |
+        if(hasOption && (
+                (hibernateHbm2ddlAuto && hibernateHbm2ddlImportFiles != null) || 
+                (coreGetTasksPoolStart) ||
                 (hibernateHbm2ddlImportFiles != null)
                 )) {
             start(configurationName, hibernateHbm2ddlAuto, 
