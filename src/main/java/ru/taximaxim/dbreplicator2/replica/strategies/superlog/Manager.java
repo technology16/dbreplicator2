@@ -21,7 +21,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ru.taximaxim.dbreplicator2.replica.strategies;
+package ru.taximaxim.dbreplicator2.replica.strategies.superlog;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -44,14 +44,14 @@ import ru.taximaxim.dbreplicator2.tp.WorkerThread;
  * @author volodin_aa
  * 
  */
-public class SuperLogManagerStrategy implements Strategy {
+public class Manager implements Strategy {
 
-    private static final Logger LOG = Logger.getLogger(SuperLogManagerStrategy.class);
+    private static final Logger LOG = Logger.getLogger(Manager.class);
 
     /**
      * Конструктор по умолчанию
      */
-    public SuperLogManagerStrategy() {
+    public Manager() {
     }
 
     @Override

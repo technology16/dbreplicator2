@@ -23,7 +23,7 @@ insert into tables (id_table, id_pool, name) values (6, 'source', 't_table5')
 --Runners Super Log
 insert into runners (id_runner, source, target, description, class_name) values (1, 'source', 'source', 'description', 'ru.taximaxim.dbreplicator2.replica.SuperlogRunner')
 --Strategies Add Super Log
-insert into strategies (id, className, param, isEnabled, priority, id_runner) values (1, 'ru.taximaxim.dbreplicator2.replica.strategies.FastSuperLogManagerStrategy', null, true, 100, 1)
+insert into strategies (id, className, param, isEnabled, priority, id_runner) values (1, 'ru.taximaxim.dbreplicator2.replica.strategies.superlog.FastManager', null, true, 100, 1)
 
 
 --Runners Task
@@ -31,28 +31,28 @@ insert into strategies (id, className, param, isEnabled, priority, id_runner) va
 --Runner Table 1
 insert into runners (id_runner, source, target, description, class_name) values (2, 'source', 'dest', 'description', 'ru.taximaxim.dbreplicator2.replica.ReplicaRunner')
 --Strategy  Table 1
-insert into strategies (id, className, param, isEnabled, priority, id_runner) values (2, 'ru.taximaxim.dbreplicator2.replica.strategies.ReplicationStrategy', null, true, 100, 2)
+insert into strategies (id, className, param, isEnabled, priority, id_runner) values (2, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Generic', null, true, 100, 2)
 
 -------
 
 --Runner Table 2
 insert into runners (id_runner, source, target, description, class_name) values (3, 'source', 'dest', 'description', 'ru.taximaxim.dbreplicator2.replica.ReplicaRunner')
 --Strategy  Table 2
-insert into strategies (id, className, param, isEnabled, priority, id_runner) values (3, 'ru.taximaxim.dbreplicator2.replica.strategies.ReplicationStrategy', null, true, 100, 3)
+insert into strategies (id, className, param, isEnabled, priority, id_runner) values (3, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Generic', null, true, 100, 3)
 
 -------
 
 --Runner Table 3
 insert into runners (id_runner, source, target, description, class_name) values (4, 'source', 'dest', 'description', 'ru.taximaxim.dbreplicator2.replica.ReplicaRunner')
 --Strategy  Table 3
-insert into strategies (id, className, param, isEnabled, priority, id_runner) values (4, 'ru.taximaxim.dbreplicator2.replica.strategies.ReplicationStrategy', null, true, 100, 4)
+insert into strategies (id, className, param, isEnabled, priority, id_runner) values (4, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Generic', null, true, 100, 4)
 
 -------
 
 --Runner Table 4,5,6
 insert into runners (id_runner, source, target, description, class_name) values (5, 'source', 'dest', 'description', 'ru.taximaxim.dbreplicator2.replica.ReplicaRunner')
 --Strategy  Table 4,5,6
-insert into strategies (id, className, param, isEnabled, priority, id_runner) values (5, 'ru.taximaxim.dbreplicator2.replica.strategies.ReplicationStrategy', null, true, 100, 5)
+insert into strategies (id, className, param, isEnabled, priority, id_runner) values (5, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Generic', null, true, 100, 5)
 
 -------
 
@@ -60,10 +60,10 @@ insert into strategies (id, className, param, isEnabled, priority, id_runner) va
 --Runner tables
 insert into table_observers (id_runner, id_table) values (2, 1)
 insert into table_observers (id_runner, id_table) values (3, 2)
-insert into table_observers (id_runner, id_table) values (4, 3)
+insert into table_observers (id_runner, id_table) values (4, 6)
+insert into table_observers (id_runner, id_table) values (5, 3)
 insert into table_observers (id_runner, id_table) values (5, 4)
 insert into table_observers (id_runner, id_table) values (5, 5)
-insert into table_observers (id_runner, id_table) values (5, 6)
 
 --Runner CountWatchgdog
 insert into runners (id_runner, source, target, description, class_name) values (6, 'source', 'source', 'ErrorsCountWatchgdogStrategy', '')

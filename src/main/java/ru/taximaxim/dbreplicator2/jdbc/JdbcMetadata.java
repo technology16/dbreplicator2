@@ -64,7 +64,7 @@ public final class JdbcMetadata {
         ResultSet colsResultSet = metaData.getColumns(null, null, tableName, null);
         try {
             while (colsResultSet.next()) {
-                colsList.add(colsResultSet.getString("COLUMN_NAME"));
+                colsList.add(colsResultSet.getString("COLUMN_NAME").toUpperCase());
             }
         } finally {
             colsResultSet.close();
@@ -92,7 +92,7 @@ public final class JdbcMetadata {
         primaryKeysResultSet = metaData.getPrimaryKeys(null, null, tableName);
         try {
             while (primaryKeysResultSet.next()) {
-                primaryKeyColsList.add(primaryKeysResultSet.getString("COLUMN_NAME"));
+                primaryKeyColsList.add(primaryKeysResultSet.getString("COLUMN_NAME").toUpperCase());
             }
         } finally {
             primaryKeysResultSet.close();

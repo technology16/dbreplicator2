@@ -302,6 +302,8 @@ public class Helper {
             String[] tableNames = triggers[1].split(",");
             createTriggers(connection, tableNames);
         }
+        
+        connection.commit();
     }
     
     protected static void executeSqlFromFiles(Connection connection, String[] fileNames) throws IOException, SQLException{

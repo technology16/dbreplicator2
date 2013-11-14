@@ -28,6 +28,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import org.apache.log4j.Logger;
 
+import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
+import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
@@ -57,13 +59,16 @@ public class CountWatchgdog implements Strategy {
         // Проверияем количество ошибочных итераций
         try (PreparedStatement selectErrors = 
                 sourceConnection.prepareStatement("SELECT * FROM rep2_workpool_data WHERE id_superlog IN " +
-                		"(SELECT MAX(id_superlog) FROM rep2_workpool_data AS last_data WHERE c_errors_count>=? GROUP BY id_runner, id_table, id_foreign)");
+                		"(SELECT MAX(id_superlog) FROM rep2_workpool_data AS last_data WHERE c_errors_count>? GROUP BY id_runner, id_table, id_foreign)");
                 ) {
             selectErrors.setInt(1, maxErrors);
             ResultSet errorsResult = selectErrors.executeQuery();
             while (errorsResult.next()) {
                 // при необходимости пишем ошибку в лог
-                LOG.error("Превышен лимит в " + maxErrors + " ошибок!\n" + errorsResult.getString("c_last_error"));
+                String rowDump = String.format("[ tableName = REP2_WORKPOOL_DATA [ row = %s ] ]", 
+                        Jdbc.resultSetToString(errorsResult, JdbcMetadata.getColumnsList(sourceConnection, "REP2_WORKPOOL_DATA")));
+                LOG.error("Превышен лимит в " + maxErrors + " ошибок!\n" + 
+                        rowDump);
             }
         } catch (Exception e) {
             throw new StrategyException(e);

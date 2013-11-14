@@ -21,7 +21,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ru.taximaxim.dbreplicator2.replica.strategies;
+package ru.taximaxim.dbreplicator2.replica.strategies.replication;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -38,7 +38,6 @@ import ru.taximaxim.dbreplicator2.jdbc.QueryConstructors;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
-import ru.taximaxim.dbreplicator2.replica.strategies.replication.Skeleton;
 
 /**
  * Класс стратегии репликации данных из источника в приемник
@@ -47,14 +46,14 @@ import ru.taximaxim.dbreplicator2.replica.strategies.replication.Skeleton;
  * @author volodin_aa
  * 
  */
-public class ReplicationStrategy extends Skeleton implements Strategy {
+public class Generic extends Skeleton implements Strategy {
 
-    private static final Logger LOG = Logger.getLogger(ReplicationStrategy.class);
+    private static final Logger LOG = Logger.getLogger(Generic.class);
 
     /**
      * Конструктор по умолчанию
      */
-    public ReplicationStrategy() {
+    public Generic() {
         super();
     }
 
@@ -103,9 +102,13 @@ public class ReplicationStrategy extends Skeleton implements Strategy {
                                     // Поглощаем и логгируем ошибки удаления
                                     // Это ожидаемый результат
                                     String rowDump = String.format(
-                                            "[ tableName = %s  [ operation = D  [ row   = [ id = %s ] ] ] ]", 
+                                            "[ tableName = %s  [ operation = D  [ row = [ id = %s ] ] ] ]", 
                                             tableName, String.valueOf(operationsResult.getLong("id_foreign")));
-                                    LOG.error("Поглощена ошибка при удалении записи: " + rowDump, e);
+                                    if (LOG.isDebugEnabled()) {
+                                        LOG.debug("Поглощена ошибка при удалении записи: " + rowDump, e);
+                                    } else {
+                                        LOG.warn("Поглощена ошибка при удалении записи: " + rowDump + " " + e.getMessage());
+                                    }
                                     trackError("Ошибка при удалении записи: " + rowDump, e, sourceConnection, operationsResult);
                                 }
                             }
@@ -154,10 +157,14 @@ public class ReplicationStrategy extends Skeleton implements Strategy {
                                                         } catch (SQLException e) {
                                                             // Поглощаем и логгируем ошибки вставки
                                                             // Это ожидаемый результат
-                                                            String rowDump = String.format("[ tableName = %s  [ operation = %s  [ row   = %s ] ] ]", 
+                                                            String rowDump = String.format("[ tableName = %s  [ operation = %s  [ row = %s ] ] ]", 
                                                                     tableName, operationsResult.getString("c_operation"), 
                                                                     Jdbc.resultSetToString(sourceResult, colsList));
-                                                            LOG.warn("Поглощена ошибка при вставке записи: " + rowDump, e);
+                                                            if (LOG.isDebugEnabled()) {
+                                                                LOG.debug("Поглощена ошибка при вставке записи: " + rowDump, e);
+                                                            } else {
+                                                                LOG.warn("Поглощена ошибка при вставке записи: " + rowDump + " " + e.getMessage());
+                                                            }
                                                             trackError("Ошибка при вставке записи: " + rowDump, e, sourceConnection, operationsResult);
                                                         }
                                                     }
@@ -167,10 +174,14 @@ public class ReplicationStrategy extends Skeleton implements Strategy {
                                             } catch (SQLException e) {
                                                 // Поглощаем и логгируем ошибки обновления
                                                 // Это ожидаемый результат
-                                                String rowDump = String.format("[ tableName = %s  [ operation = %s  [ row   = %s ] ] ]", 
+                                                String rowDump = String.format("[ tableName = %s  [ operation = %s  [ row = %s ] ] ]", 
                                                         tableName, operationsResult.getString("c_operation"), 
                                                         Jdbc.resultSetToString(sourceResult, colsList));
-                                                LOG.warn("Поглощена ошибка при обновлении записи: " + rowDump, e);
+                                                if (LOG.isDebugEnabled()) {
+                                                    LOG.debug("Поглощена ошибка при обновлении записи: " + rowDump, e);
+                                                } else {
+                                                    LOG.warn("Поглощена ошибка при обновлении записи: " + rowDump + " " + e.getMessage());
+                                                }
                                                 trackError("Ошибка при обновлении записи: " + rowDump, e, sourceConnection, operationsResult);
                                             }
                                         }
