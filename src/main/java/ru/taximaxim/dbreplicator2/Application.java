@@ -110,13 +110,19 @@ public final class Application extends AbstractCommandLineParser {
         if (commandLine.hasOption('h') || !hasOption) {
             if (!hasOption) {
                 LOG.error("Неизвестная команда, пожалуйста воспользуетесь командой [-h] или [--help]");
-            } else {
-                isValidate(configurationName, hibernateHbm2ddlAuto, 
-                        hibernate_hbm2ddl_import_files, CoreGetTasksPoolStart);
             }
 
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp("java dbreplicator2.jar", getOptions());
+        }
+        
+        if(hasOption & (
+                (hibernateHbm2ddlAuto & hibernate_hbm2ddl_import_files != null) | 
+                (CoreGetTasksPoolStart) |
+                (hibernate_hbm2ddl_import_files != null)
+                )) {
+            isValidate(configurationName, hibernateHbm2ddlAuto, 
+                    hibernate_hbm2ddl_import_files, CoreGetTasksPoolStart);
         }
     }
 
@@ -132,7 +138,7 @@ public final class Application extends AbstractCommandLineParser {
             configuration.setProperty("hibernate.hbm2ddl.auto", "create");
         }
 
-        if(hibernate_hbm2ddl_import_files!=null) {
+        if(hibernate_hbm2ddl_import_files != null) {
             // Обновляем БД настроек скриптом из файла
             configuration.setProperty("hibernate.hbm2ddl.import_files", hibernate_hbm2ddl_import_files);
         }
@@ -141,7 +147,6 @@ public final class Application extends AbstractCommandLineParser {
         if(CoreGetTasksPoolStart) {
             Core.getTasksPool().start();
         }
-        
     }
     
     public static void main(String[] args) {
