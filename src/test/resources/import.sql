@@ -1,12 +1,15 @@
 --Settings
 
+
 --Connection source
 insert into bone_cp_settings (id_pool, driver, url, user, pass, min_connections_per_partition, max_connections_per_partition, partition_count, connection_timeout_in_ms, close_connection_watch_timeout_in_ms ) values ('source', 'org.h2.Driver', 'jdbc:h2:mem://localhost/~/source', 'sa', '', 1, 100, 1, 10000, 0)
 --Connection dest
 insert into bone_cp_settings (id_pool, driver, url, user, pass, min_connections_per_partition, max_connections_per_partition, partition_count, connection_timeout_in_ms, close_connection_watch_timeout_in_ms ) values ('dest', 'org.h2.Driver', 'jdbc:h2:mem://localhost/~/dest', 'sa', '', 1, 100, 1, 10000, 0)
 
+
 --application_settings
 insert into application_settings (key, value) values ('tp.threads', '10')
+
 
 --Tables
 insert into tables (id_table, id_pool, name) values (1, 'source', 't_table')
@@ -62,10 +65,11 @@ insert into table_observers (id_runner, id_table) values (5, 4)
 insert into table_observers (id_runner, id_table) values (5, 5)
 insert into table_observers (id_runner, id_table) values (5, 6)
 
-
 --Runner CountWatchgdog
 insert into runners (id_runner, source, target, description, class_name) values (6, 'source', 'source', 'ErrorsCountWatchgdogStrategy', '')
 --Strategy  CountWatchgdog
 insert into strategies (id, className, param, isEnabled, priority, id_runner) values (6, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.CountWatchgdog', null, true, 100, 6)
 
-
+--Ignore Columns Table
+insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (1, 2, '_decimal')
+insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (2, 2, '_int')
