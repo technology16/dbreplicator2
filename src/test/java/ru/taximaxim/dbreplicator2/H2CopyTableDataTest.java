@@ -137,11 +137,11 @@ public class H2CopyTableDataTest {
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table4");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table4");
         
-        Helper.AssertEquals(listSource, listDest);
+        Helper.AssertEqualsNull(listSource, listDest);
 //
         listSource = Helper.InfoTest(conn, "t_table5");
         listDest   = Helper.InfoTest(connDest, "t_table5");
-        Helper.AssertEquals(listSource, listDest);
+        Helper.AssertEqualsNull(listSource, listDest);
         
         Helper.InfoNull(conn, "t_table4", 1);
         Helper.InfoNull(conn, "t_table5", 2);

@@ -23,7 +23,7 @@ insert into tables (id_table, id_pool, name) values (6, 'source', 't_table5')
 --Runners Super Log
 insert into runners (id_runner, source, target, description, class_name) values (1, 'source', 'source', 'description', 'ru.taximaxim.dbreplicator2.replica.SuperlogRunner')
 --Strategies Add Super Log
-insert into strategies (id, className, param, isEnabled, priority, id_runner) values (1, 'ru.taximaxim.dbreplicator2.replica.strategies.FastSuperLogManagerStrategy', null, true, 100, 1)
+insert into strategies (id, className, param, isEnabled, priority, id_runner) values (1, 'ru.taximaxim.dbreplicator2.replica.strategies.SuperLogManagerStrategy', null, true, 100, 1)
 
 
 --Runners Task
@@ -67,5 +67,9 @@ insert into table_observers (id_runner, id_table) values (5, 6)
 
 
 --Ignore Columns Table
-insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (1, 2, '_decimal')
-insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (2, 2, '_int')
+insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (1, 1, '_STRING')
+insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (2, 2, '_STRING')
+insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (3, 3, '_STRING')
+insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (4, 4, '_STRING')
+insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (5, 5, '_STRING')
+insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (6, 6, '_STRING')

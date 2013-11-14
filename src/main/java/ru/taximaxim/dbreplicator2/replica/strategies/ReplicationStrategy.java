@@ -29,13 +29,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.jdbc.QueryConstructors;
+import ru.taximaxim.dbreplicator2.model.IgnoreColumnsTableModel;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
+import ru.taximaxim.dbreplicator2.model.TableModel;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
 
@@ -49,7 +53,8 @@ import ru.taximaxim.dbreplicator2.replica.StrategyException;
 public class ReplicationStrategy implements Strategy {
 
     private static final Logger LOG = Logger.getLogger(ReplicationStrategy.class);
-
+    private static Map<String, List<String>> ignoreCols = new TreeMap<String, List<String>>(String.CASE_INSENSITIVE_ORDER);
+    
     /**
      * Конструктор по умолчанию
      */
@@ -67,11 +72,11 @@ public class ReplicationStrategy implements Strategy {
             lastTargetAutoCommit = targetConnection.getAutoCommit();
             // Начинаем транзакцию
             sourceConnection.setAutoCommit(false);
-            sourceConnection
-            .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+            sourceConnection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
             sourceConnection.setHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT);
 
             targetConnection.setAutoCommit(true);
+            
             // Извлекаем список последних операций по измененым записям
             try (
                     PreparedStatement selectLastOperations = 
@@ -81,10 +86,17 @@ public class ReplicationStrategy implements Strategy {
                     ) {
                 selectLastOperations.setInt(1, data.getId());
                 try (ResultSet operationsResult = selectLastOperations.executeQuery();) {
+                    //игнорируемые колонки
+                    setIgnoreCols(data);
+                    
                     // Проходим по списку измененных записей
                     while (operationsResult.next()) {
                         String tableName = operationsResult.getString("id_table");
                         List<String> priColsList = JdbcMetadata.getPrimaryColumnsList(sourceConnection, tableName);
+
+                        for (String colm : getIgnoreCols(tableName)) {
+                            priColsList.remove(colm);
+                        }
                         // Реплицируем данные
                         if (operationsResult.getString("c_operation").equalsIgnoreCase("D")) {
                             // Если была операция удаления, то удаляем запись в приемнике
@@ -110,8 +122,10 @@ public class ReplicationStrategy implements Strategy {
                         } else {
                             // Добавляем данные в целевую таблицу
                             // Извлекаем данные из исходной таблицы
-                            List<String> colsList = JdbcMetadata
-                                    .getColumnsList(sourceConnection, tableName);
+                            List<String> colsList = JdbcMetadata.getColumnsList(sourceConnection, tableName);
+                            for (String colm : getIgnoreCols(tableName)) {
+                                colsList.remove(colm);
+                            }
                             String selectSourceQuery = QueryConstructors
                                     .constructSelectQuery(tableName, colsList, priColsList);
                             try (
@@ -206,5 +220,25 @@ public class ReplicationStrategy implements Strategy {
             throw new StrategyException(e);
         }
     }
-
+    
+    protected void setIgnoreCols(StrategyModel data) throws SQLException {
+        List<String> cols;
+        List<TableModel> tableList = data.getRunner().getSource().getTables();
+        for (TableModel tableModel : tableList) {
+            cols = new ArrayList<String>();
+            for (IgnoreColumnsTableModel ignoreCols : tableModel.getIgnoreColumnsTable()) {
+                cols.add(ignoreCols.getColumnName());
+            }
+            ignoreCols.put(tableModel.getName(), cols);
+        }
+    }
+    
+    protected List<String> getIgnoreCols(String tableName) {
+        if(ignoreCols.get(tableName) == null) {
+            return new ArrayList<String>();
+        }
+        else {
+            return ignoreCols.get(tableName);
+        }
+    }
 }
