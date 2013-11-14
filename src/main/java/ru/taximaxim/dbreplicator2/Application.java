@@ -116,13 +116,17 @@ public final class Application extends AbstractCommandLineParser {
             formatter.printHelp("java dbreplicator2.jar", getOptions());
         }
         
-        if(hasOption && (
-                (hibernateHbm2ddlAuto && hibernateHbm2ddlImportFiles != null) || 
-                (coreGetTasksPoolStart) ||
-                (hibernateHbm2ddlImportFiles != null)
-                )) {
-            start(configurationName, hibernateHbm2ddlAuto, 
-                    hibernateHbm2ddlImportFiles, coreGetTasksPoolStart);
+        if(hasOption) {
+            if(hibernateHbm2ddlAuto && hibernateHbm2ddlImportFiles != null) {
+                start(configurationName, hibernateHbm2ddlAuto, 
+                        hibernateHbm2ddlImportFiles, coreGetTasksPoolStart);
+            } else if (coreGetTasksPoolStart) {
+                start(configurationName, hibernateHbm2ddlAuto, 
+                        hibernateHbm2ddlImportFiles, coreGetTasksPoolStart);
+            } else if (hibernateHbm2ddlImportFiles != null) {
+                start(configurationName, hibernateHbm2ddlAuto, 
+                        hibernateHbm2ddlImportFiles, coreGetTasksPoolStart);
+            }
         }
     }
 
