@@ -64,6 +64,9 @@ public class Generic extends Skeleton implements Strategy {
         Boolean lastAutoCommit = null;
         Boolean lastTargetAutoCommit = null;
         try {
+            //игнорируемые колонки
+            setIgnoreCols(data);
+            
             lastAutoCommit = sourceConnection.getAutoCommit();
             lastTargetAutoCommit = targetConnection.getAutoCommit();
             // Начинаем транзакцию
@@ -117,12 +120,16 @@ public class Generic extends Skeleton implements Strategy {
                             // Извлекаем данные из исходной таблицы
                             List<String> colsList = JdbcMetadata
                                     .getColumnsList(sourceConnection, tableName);
+                            // Удаляем игнорируемые колонки
+                            for (String colm : getIgnoreCols(tableName)) {
+                                colsList.remove(colm);
+                            }
                             String selectSourceQuery = QueryConstructors
                                     .constructSelectQuery(tableName, colsList, priColsList);
                             try (
                                     PreparedStatement selectSourceStatement = sourceConnection
                                     .prepareStatement(selectSourceQuery);
-                                    ) {
+                            ) {
                                 selectSourceStatement.setLong(1, operationsResult.getLong("id_foreign"));
                                 try (ResultSet sourceResult = selectSourceStatement.executeQuery();) {
                                     // Проходим по списку измененных записей

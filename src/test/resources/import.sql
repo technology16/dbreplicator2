@@ -31,28 +31,28 @@ insert into strategies (id, className, param, isEnabled, priority, id_runner) va
 --Runner Table 1
 insert into runners (id_runner, source, target, description, class_name) values (2, 'source', 'dest', 'description', 'ru.taximaxim.dbreplicator2.replica.ReplicaRunner')
 --Strategy  Table 1
-insert into strategies (id, className, param, isEnabled, priority, id_runner) values (2, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Generic', null, true, 100, 2)
+insert into strategies (id, className, param, isEnabled, priority, id_runner) values (2, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Strict', null, true, 100, 2)
 
 -------
 
 --Runner Table 2
 insert into runners (id_runner, source, target, description, class_name) values (3, 'source', 'dest', 'description', 'ru.taximaxim.dbreplicator2.replica.ReplicaRunner')
 --Strategy  Table 2
-insert into strategies (id, className, param, isEnabled, priority, id_runner) values (3, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Generic', null, true, 100, 3)
+insert into strategies (id, className, param, isEnabled, priority, id_runner) values (3, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Strict', null, true, 100, 3)
 
 -------
 
 --Runner Table 3
 insert into runners (id_runner, source, target, description, class_name) values (4, 'source', 'dest', 'description', 'ru.taximaxim.dbreplicator2.replica.ReplicaRunner')
 --Strategy  Table 3
-insert into strategies (id, className, param, isEnabled, priority, id_runner) values (4, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Generic', null, true, 100, 4)
+insert into strategies (id, className, param, isEnabled, priority, id_runner) values (4, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Strict', null, true, 100, 4)
 
 -------
 
 --Runner Table 4,5,6
 insert into runners (id_runner, source, target, description, class_name) values (5, 'source', 'dest', 'description', 'ru.taximaxim.dbreplicator2.replica.ReplicaRunner')
 --Strategy  Table 4,5,6
-insert into strategies (id, className, param, isEnabled, priority, id_runner) values (5, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Generic', null, true, 100, 5)
+insert into strategies (id, className, param, isEnabled, priority, id_runner) values (5, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Strict', null, true, 100, 5)
 
 -------
 
@@ -71,5 +71,9 @@ insert into runners (id_runner, source, target, description, class_name) values 
 insert into strategies (id, className, param, isEnabled, priority, id_runner) values (6, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.CountWatchgdog', null, true, 100, 6)
 
 --Ignore Columns Table
-insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (1, 2, '_decimal')
-insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (2, 2, '_int')
+insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (1, 1, '_STRING')
+insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (2, 2, '_STRING')
+insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (3, 3, '_STRING')
+insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (4, 4, '_STRING')
+insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (5, 5, '_STRING')
+insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (6, 6, '_STRING')

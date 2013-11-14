@@ -64,6 +64,9 @@ public class Strict extends Skeleton implements Strategy {
         Boolean lastAutoCommit = null;
         Boolean lastTargetAutoCommit = null;
         try {
+            //игнорируемые колонки
+            setIgnoreCols(data);
+            
             lastAutoCommit = sourceConnection.getAutoCommit();
             lastTargetAutoCommit = targetConnection.getAutoCommit();
             // Начинаем транзакцию
@@ -112,6 +115,10 @@ public class Strict extends Skeleton implements Strategy {
                             // Извлекаем данные из исходной таблицы
                             List<String> colsList = JdbcMetadata
                                     .getColumnsList(sourceConnection, tableName);
+                            // Удаляем игнорируемые колонки
+                            for (String colm : getIgnoreCols(tableName)) {
+                                colsList.remove(colm);
+                            }
                             String selectSourceQuery = QueryConstructors
                                     .constructSelectQuery(tableName, colsList, priColsList);
                             try (

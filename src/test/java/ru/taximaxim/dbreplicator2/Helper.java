@@ -23,6 +23,8 @@
 
 package ru.taximaxim.dbreplicator2;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -62,64 +64,112 @@ public class Helper {
             LOG.info("====================================================================");
             for (int i = 0; i < listSource.size(); i++) {
                 
-                if(listSource.get(i)._int != listDest.get(i)._int) {
-                    LOG.error(String.format("_int [%s == %s]", listSource.get(i)._int, listDest.get(i)._int));
-                }
-                Assert.assertEquals(listSource.get(i)._int, listDest.get(i)._int);
+                assertTrue(String.format("Ошибка в поле _int [%s != %s]", listSource.get(i)._int, listDest.get(i)._int), 
+                        listSource.get(i)._int == listDest.get(i)._int);
                 
-                if(listSource.get(i)._boolean != listDest.get(i)._boolean) {
-                    LOG.error(String.format("_boolean [%s == %s]", listSource.get(i)._boolean, listDest.get(i)._boolean));
-                }
-                Assert.assertEquals(listSource.get(i)._boolean, listDest.get(i)._boolean);
+                assertTrue(String.format("Ошибка в поле _boolean [%s != %s]", listSource.get(i)._boolean, listDest.get(i)._boolean), 
+                        listSource.get(i)._boolean == listDest.get(i)._boolean);
                 
-                if(!listSource.get(i)._long.equals(listDest.get(i)._long)){
-                    LOG.error(String.format("_long [%s == %s]", listSource.get(i)._long, listDest.get(i)._long));
-                }
-                Assert.assertEquals(listSource.get(i)._long, listDest.get(i)._long);
+                assertTrue(String.format("Ошибка в поле _long [%s == %s]", listSource.get(i)._long, listDest.get(i)._long), 
+                        listSource.get(i)._long.equals(listDest.get(i)._long));
                 
-                if(listSource.get(i)._decimal != listDest.get(i)._decimal) {
-                    LOG.error(String.format("_decimal [%s == %s]", listSource.get(i)._decimal, listDest.get(i)._decimal));
-                }
-                Assert.assertEquals(listSource.get(i)._decimal, listDest.get(i)._decimal);
+                assertTrue(String.format("Ошибка в поле _decimal [%s == %s]", listSource.get(i)._decimal, listDest.get(i)._decimal), 
+                        listSource.get(i)._decimal == listDest.get(i)._decimal);
                 
-                if(listSource.get(i)._string != listDest.get(i)._string){
-                    LOG.error(String.format("_string [%s == %s]", listSource.get(i)._string, listDest.get(i)._string));
-                }
-                Assert.assertEquals(listSource.get(i)._string, listDest.get(i)._string);
+                //==============================
+                // игнорируемая колонка
+                assertTrue(String.format("Ошибка в поле _string [%s == %s]", listSource.get(i)._string, listDest.get(i)._string), 
+                        listSource.get(i)._string != listDest.get(i)._string);
+                //==============================
                 
-                if(listSource.get(i)._byte != listDest.get(i)._byte){
-                    LOG.error(String.format("_byte [%s == %s]", listSource.get(i)._byte, listDest.get(i)._byte));
-                }
-                Assert.assertEquals(listSource.get(i)._byte, listDest.get(i)._byte);
+                assertTrue(String.format("Ошибка в поле _byte [%s == %s]", listSource.get(i)._byte, listDest.get(i)._byte), 
+                        listSource.get(i)._byte == listDest.get(i)._byte);
+                
+                Assert.assertNotNull(String.format("Ошибка нулевое значение в поле _date [%s]", listSource.get(i)._date), listSource.get(i)._date);
+                Assert.assertNotNull(String.format("Ошибка нулевое значение в поле _date [%s]", listDest.get(i)._date), listDest.get(i)._date);
+                assertTrue(String.format("Ошибка в поле _date [%s == %s]", listSource.get(i)._date, listDest.get(i)._date), 
+                        listSource.get(i)._date.equals(listDest.get(i)._date));
+                
+                Assert.assertNotNull(String.format("Ошибка нулевое значение в поле _time [%s]", listSource.get(i)._time), listSource.get(i)._time);
+                Assert.assertNotNull(String.format("Ошибка нулевое значение в поле _time [%s]", listDest.get(i)._time), listDest.get(i)._time);
+                assertTrue(String.format("Ошибка в поле _time [%s == %s]", listSource.get(i)._time, listDest.get(i)._time), 
+                        listSource.get(i)._time.equals(listDest.get(i)._time));
+                
+                Assert.assertNotNull(String.format("Ошибка нулевое значение в поле _timestamp [%s]", listSource.get(i)._timestamp), listSource.get(i)._timestamp);
+                Assert.assertNotNull(String.format("Ошибка нулевое значение в поле _timestamp [%s]", listDest.get(i)._timestamp), listDest.get(i)._timestamp);
+                assertTrue(String.format("Ошибка в поле _timestamp [%s == %s]", listSource.get(i)._timestamp, listDest.get(i)._timestamp), 
+                        listSource.get(i)._timestamp.equals(listDest.get(i)._timestamp));
                 
                 
-                if(((listSource.get(i)._date != null) && (listDest.get(i)._date != null))&&
-                (!listSource.get(i)._date.equals(listDest.get(i)._date))) {
-                        LOG.error(String.format("_date [%s == %s]", listSource.get(i)._date, listDest.get(i)._date));
-                }
-                Assert.assertEquals(listSource.get(i)._date, listDest.get(i)._date);
-                
-                if(((listSource.get(i)._time != null) && (listDest.get(i)._time != null))&&
-                (!listSource.get(i)._time.equals(listDest.get(i)._time))){
-                    LOG.error(String.format("_time [%s == %s]", listSource.get(i)._time, listDest.get(i)._time));
-                }
-                Assert.assertEquals(listSource.get(i)._time, listDest.get(i)._time);
-                
-                if(((listSource.get(i)._timestamp != null) && (listDest.get(i)._timestamp != null))&&
-                (!listSource.get(i)._timestamp.equals(listDest.get(i)._timestamp))){
-                    LOG.error(String.format("_timestamp [%s == %s]", listSource.get(i)._timestamp, listDest.get(i)._timestamp));
-                }
-                Assert.assertEquals(listSource.get(i)._timestamp, listDest.get(i)._timestamp);
-                
-                if(listSource.get(i)._double != listDest.get(i)._double) {
-                    LOG.error(String.format("_double [%s == %s]", listSource.get(i)._double, listDest.get(i)._double));
-                    Assert.assertEquals(1, 0);
-                }
+                assertTrue(String.format("Ошибка в поле _double [%s == %s]", listSource.get(i)._double, listDest.get(i)._double), 
+                        listSource.get(i)._double == listDest.get(i)._double);
                
-                if(listSource.get(i)._float != listDest.get(i)._float) {
-                    LOG.error(String.format("_float [%s == %s]", listSource.get(i)._float, listDest.get(i)._float));
-                    Assert.assertEquals(1, 0);
-                }
+                
+                assertTrue(String.format("Ошибка в поле _float [%s == %s]", listSource.get(i)._float, listDest.get(i)._float), 
+                        listSource.get(i)._float == listDest.get(i)._float);
+            }
+            LOG.info("====================================================================");
+        }
+    }
+    
+    /**
+     * Сравнивание записи по листам
+     * @param listSource
+     * @param listDest
+     */
+    public static void AssertEqualsNull(List<MyTablesType> listSource, List<MyTablesType> listDest){
+        if(listSource.size() != listDest.size()) {
+            LOG.error(String.format("Количество записей не равны [%s == %s]", listSource.size(), listDest.size()));
+        }
+        Assert.assertEquals(listSource.size(), listDest.size());
+        
+        if(!listSource.equals(listDest)) {
+            LOG.info("====================================================================");
+            for (int i = 0; i < listSource.size(); i++) {
+                
+                assertTrue(String.format("Ошибка в поле _int [%s != %s]", listSource.get(i)._int, listDest.get(i)._int), 
+                        listSource.get(i)._int == listDest.get(i)._int);
+                
+                assertTrue(String.format("Ошибка в поле _boolean [%s != %s]", listSource.get(i)._boolean, listDest.get(i)._boolean), 
+                        listSource.get(i)._boolean == listDest.get(i)._boolean);
+                
+                assertTrue(String.format("Ошибка в поле _long [%s == %s]", listSource.get(i)._long, listDest.get(i)._long), 
+                        listSource.get(i)._long.equals(listDest.get(i)._long));
+                
+                assertTrue(String.format("Ошибка в поле _decimal [%s == %s]", listSource.get(i)._decimal, listDest.get(i)._decimal), 
+                        listSource.get(i)._decimal == listDest.get(i)._decimal);
+                
+                //==============================
+                // игнорируемая колонка
+                assertTrue(String.format("Ошибка в поле _string [%s == %s]", listSource.get(i)._string, listDest.get(i)._string), 
+                        listSource.get(i)._string == listDest.get(i)._string);
+                //==============================
+                
+                assertTrue(String.format("Ошибка в поле _byte [%s == %s]", listSource.get(i)._byte, listDest.get(i)._byte), 
+                        listSource.get(i)._byte == listDest.get(i)._byte);
+                
+                Assert.assertNull(String.format("Ошибка нулевое значение в поле _date [%s]", listSource.get(i)._date), listSource.get(i)._date);
+                Assert.assertNull(String.format("Ошибка нулевое значение в поле _date [%s]", listDest.get(i)._date), listDest.get(i)._date);
+                assertTrue(String.format("Ошибка в поле _date [%s == %s]", listSource.get(i)._date, listDest.get(i)._date), 
+                        listSource.get(i)._date==listDest.get(i)._date);
+                
+                Assert.assertNull(String.format("Ошибка нулевое значение в поле _time [%s]", listSource.get(i)._time), listSource.get(i)._time);
+                Assert.assertNull(String.format("Ошибка нулевое значение в поле _time [%s]", listDest.get(i)._time), listDest.get(i)._time);
+                assertTrue(String.format("Ошибка в поле _time [%s == %s]", listSource.get(i)._time, listDest.get(i)._time), 
+                        listSource.get(i)._time==listDest.get(i)._time);
+                
+                Assert.assertNull(String.format("Ошибка нулевое значение в поле _timestamp [%s]", listSource.get(i)._timestamp), listSource.get(i)._timestamp);
+                Assert.assertNull(String.format("Ошибка нулевое значение в поле _timestamp [%s]", listDest.get(i)._timestamp), listDest.get(i)._timestamp);
+                assertTrue(String.format("Ошибка в поле _timestamp [%s == %s]", listSource.get(i)._timestamp, listDest.get(i)._timestamp), 
+                        listSource.get(i)._timestamp==listDest.get(i)._timestamp);
+                
+                
+                assertTrue(String.format("Ошибка в поле _double [%s == %s]", listSource.get(i)._double, listDest.get(i)._double), 
+                        listSource.get(i)._double == listDest.get(i)._double);
+               
+                
+                assertTrue(String.format("Ошибка в поле _float [%s == %s]", listSource.get(i)._float, listDest.get(i)._float), 
+                        listSource.get(i)._float == listDest.get(i)._float);
             }
             LOG.info("====================================================================");
         }

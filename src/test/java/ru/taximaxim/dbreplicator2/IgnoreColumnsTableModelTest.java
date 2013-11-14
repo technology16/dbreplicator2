@@ -21,18 +21,25 @@ import ru.taximaxim.dbreplicator2.utils.Core;
 import ru.taximaxim.dbreplicator2.utils.Utils;
 
 public class IgnoreColumnsTableModelTest {
-    
-    protected static final Logger LOG = Logger.getLogger(IgnoreColumnsTableModelTest.class);
+
+    protected static final Logger LOG = Logger
+            .getLogger(IgnoreColumnsTableModelTest.class);
     protected static SessionFactory sessionFactory;
     protected static Session session;
     protected static ConnectionFactory connectionFactory;
-    
+
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
+        sessionFactory = Core.getSessionFactory();
+        session = sessionFactory.openSession();
+        connectionFactory = Core.getConnectionFactory();
     }
 
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
+        session.close();
+        Core.sessionFactoryClose();
+        Core.connectionFactoryClose();
     }
 
     @Before
@@ -46,29 +53,26 @@ public class IgnoreColumnsTableModelTest {
     @Test
     public void test() {
 
-        sessionFactory = Core.getSessionFactory();
-        session = sessionFactory.openSession();
-        connectionFactory = Core.getConnectionFactory();
-        
         TableModel table = (TableModel) session.get(TableModel.class, 2);
-        for (IgnoreColumnsTableModel ignoredColumn : table.getIgnoreColumnsTable()) {
-            LOG.info("getId:         " + ignoredColumn.getId());
-            LOG.info("getColumnName: " + ignoredColumn.getColumnName());
-            LOG.info("getTable:      " + ignoredColumn.getTable().getName());
+        if (table.getIgnoreColumnsTable() != null) {
+            for (IgnoreColumnsTableModel ignoredColumn : table.getIgnoreColumnsTable()) {
+                LOG.info("getId:         " + ignoredColumn.getId());
+                LOG.info("getColumnName: " + ignoredColumn.getColumnName());
+                LOG.info("getTable:      " + ignoredColumn.getTable().getName());
 
-            assertEquals("Ошибка Название таблиц не равны!", table.getName(), ignoredColumn.getTable().getName()); 
+                assertEquals("Ошибка Название таблиц не равны!", table.getName(),
+                        ignoredColumn.getTable().getName());
+            }
+
+            List<TableModel> tableList = Utils.castList(
+                    TableModel.class,
+                    session.createCriteria(TableModel.class, "tables")
+                            .add(Restrictions.eq("name", "t_table1")).list());
+            LOG.info("LOG:");
+            for (TableModel tableModel : tableList) {
+                LOG.info("tableModel: " + tableModel.getTableId());
+                LOG.info("tableModel: " + tableModel.getName());
+            }
         }
-        
-        List<TableModel> tableList = Utils.castList(TableModel.class,
-                session.createCriteria(TableModel.class, "tables")
-                .add(Restrictions.eq("name", "t_table1"))
-                           .list());
-        LOG.info("LOG:");
-        for (TableModel tableModel : tableList) {
-            LOG.info("tableModel: " + tableModel.getTableId());
-            LOG.info("tableModel: " + tableModel.getName());
-        }
-        
     }
-
 }

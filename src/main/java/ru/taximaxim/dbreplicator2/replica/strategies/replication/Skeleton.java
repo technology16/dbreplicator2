@@ -30,7 +30,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+import ru.taximaxim.dbreplicator2.model.IgnoreColumnsTableModel;
+import ru.taximaxim.dbreplicator2.model.StrategyModel;
+import ru.taximaxim.dbreplicator2.model.TableModel;
 
 /**
  * Заготовка стратегии репликации
@@ -40,6 +48,8 @@ import java.util.Date;
  */
 public class Skeleton {
 
+    private Map<String, List<String>> ignoreCols = new TreeMap<String, List<String>>(String.CASE_INSENSITIVE_ORDER);
+    
     /**
      * Функция удаления данных об операциях успешно реплицированной записи
      * 
@@ -77,6 +87,27 @@ public class Skeleton {
         incErrorsCount.setString(4, operation.getString("id_table"));
         incErrorsCount.setLong(5, operation.getLong("id_foreign"));
         incErrorsCount.executeUpdate();
+    }
+    
+    protected void setIgnoreCols(StrategyModel data) throws SQLException {
+        List<String> cols;
+        List<TableModel> tableList = data.getRunner().getSource().getTables();
+        for (TableModel tableModel : tableList) {
+            cols = new ArrayList<String>();
+            for (IgnoreColumnsTableModel ignoreCols : tableModel.getIgnoreColumnsTable()) {
+                cols.add(ignoreCols.getColumnName());
+            }
+            ignoreCols.put(tableModel.getName(), cols);
+        }
+    }
+    
+    protected List<String> getIgnoreCols(String tableName) {
+        if(ignoreCols.get(tableName) == null) {
+            return new ArrayList<String>();
+        }
+        else {
+            return ignoreCols.get(tableName);
+        }
     }
     
 }
