@@ -89,21 +89,21 @@ public final class Application extends AbstractCommandLineParser {
             hasOption = true;
         }
 
-        String hibernate_hbm2ddl_import_files = null;
+        String hibernateHbm2ddlImportFiles = null;
         if (commandLine.hasOption('u')) {
             String[] arguments = commandLine.getOptionValues('u');
-            hibernate_hbm2ddl_import_files = arguments[0];
+            hibernateHbm2ddlImportFiles = arguments[0];
             hasOption = true;
         }
         
-        boolean CoreGetTasksPoolStart = false;
+        boolean coreGetTasksPoolStart = false;
         if (commandLine.hasOption('s')) {
             // Запускаем репликацию
             // Определение ведущих БД и запуск процессов диспетчеров записей
             // для каждой ведущей БД.
             // 1. Определяем ведущие БД по существующим настройкам.
             // 2. Запуск диспечеров записей для каждой ведущей БД.
-            CoreGetTasksPoolStart = true;
+            coreGetTasksPoolStart = true;
             hasOption = true;
         }
 
@@ -116,18 +116,22 @@ public final class Application extends AbstractCommandLineParser {
             formatter.printHelp("java dbreplicator2.jar", getOptions());
         }
         
-        if(hasOption & (
-                (hibernateHbm2ddlAuto & hibernate_hbm2ddl_import_files != null) | 
-                (CoreGetTasksPoolStart) |
-                (hibernate_hbm2ddl_import_files != null)
-                )) {
-            isValidate(configurationName, hibernateHbm2ddlAuto, 
-                    hibernate_hbm2ddl_import_files, CoreGetTasksPoolStart);
+        if(hasOption) {
+            if(hibernateHbm2ddlAuto && hibernateHbm2ddlImportFiles != null) {
+                start(configurationName, hibernateHbm2ddlAuto, 
+                        hibernateHbm2ddlImportFiles, coreGetTasksPoolStart);
+            } else if (coreGetTasksPoolStart) {
+                start(configurationName, hibernateHbm2ddlAuto, 
+                        hibernateHbm2ddlImportFiles, coreGetTasksPoolStart);
+            } else if (hibernateHbm2ddlImportFiles != null) {
+                start(configurationName, hibernateHbm2ddlAuto, 
+                        hibernateHbm2ddlImportFiles, coreGetTasksPoolStart);
+            }
         }
     }
 
-    protected void isValidate(String configurationName, boolean hibernateHbm2ddlAuto
-            ,String hibernate_hbm2ddl_import_files, boolean CoreGetTasksPoolStart) {
+    protected void start(String configurationName, boolean hibernateHbm2ddlAuto
+            ,String hibernateHbm2ddlImportFiles, boolean coreGetTasksPoolStart) {
         // Конфигурируем Hibernate
         Configuration configuration;
         // Инициализируем БД настроек
@@ -138,13 +142,13 @@ public final class Application extends AbstractCommandLineParser {
             configuration.setProperty("hibernate.hbm2ddl.auto", "create");
         }
 
-        if(hibernate_hbm2ddl_import_files != null) {
+        if(hibernateHbm2ddlImportFiles != null) {
             // Обновляем БД настроек скриптом из файла
-            configuration.setProperty("hibernate.hbm2ddl.import_files", hibernate_hbm2ddl_import_files);
+            configuration.setProperty("hibernate.hbm2ddl.import_files", hibernateHbm2ddlImportFiles);
         }
         Core.getSessionFactory(configuration);
         
-        if(CoreGetTasksPoolStart) {
+        if(coreGetTasksPoolStart) {
             Core.getTasksPool().start();
         }
     }
