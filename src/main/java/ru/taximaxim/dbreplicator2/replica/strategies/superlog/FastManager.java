@@ -138,7 +138,7 @@ public class FastManager implements Strategy {
                 }
                 // Подтверждаем транзакцию
                 sourceConnection.commit();
-            } catch (Exception e) {
+            } catch (SQLException e) {
                 // Откатываемся
                 sourceConnection.rollback();
                 // Пробрасываем ошибку на уровень выше

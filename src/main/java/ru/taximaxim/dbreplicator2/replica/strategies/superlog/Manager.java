@@ -56,14 +56,14 @@ public class Manager implements Strategy {
 
     @Override
     public void execute(Connection sourceConnection, Connection targetConnection,
-            StrategyModel data) throws StrategyException {
+            StrategyModel data) throws StrategyException, SQLException {
         Boolean lastAutoCommit = null;
         try {
             lastAutoCommit = sourceConnection.getAutoCommit();
             // Начинаем транзакцию
             sourceConnection.setAutoCommit(false);
             sourceConnection
-            .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+                .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
             sourceConnection.setHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT);
             // Строим список обработчиков реплик
             BoneCPSettingsModel sourcePool = data.getRunner().getSource();
@@ -112,7 +112,7 @@ public class Manager implements Strategy {
                     deleteSuperLog.executeBatch();
                 }
 
-            } catch (Exception e) {
+            } catch (SQLException e) {
                 // Откатываемся
                 sourceConnection.rollback();
                 // Пробрасываем ошибку на уровень выше
@@ -129,9 +129,6 @@ public class Manager implements Strategy {
                     workerThread.run();
                 }
             }
-        } catch (Exception e) {
-            // Меняем класс ошибки
-            throw new StrategyException(e);
         } finally {
             try {
                 if (lastAutoCommit != null) {
