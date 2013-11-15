@@ -74,6 +74,24 @@ public final class Jdbc {
     }
 
     /**
+     * Преобразование resultSet в строку
+     * @param data
+     *            источник данных
+     * @param columnsList
+     *            список колонок для заполнения
+     * @return
+     * @throws SQLException
+     */
+    public static String resultSetToString(ResultSet data, 
+            List<String> columnsList) throws SQLException {
+        String str  = "";
+        for (String columnName : columnsList) {
+            str = str + "[ col " + columnName + " = " + data.getString(columnName) + "  ]   ";
+        }
+        return str;
+    }
+    
+    /**
      * Функция заполнения параметров подготовленного запроса на основе строки
      * данных из Map<String, Object>
      * 

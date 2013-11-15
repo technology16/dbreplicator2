@@ -37,14 +37,14 @@ import ru.taximaxim.dbreplicator2.replica.StrategyException;
  * @author volodin_aa
  * 
  */
-public class DummyStrategy implements Strategy {
+public class Dummy implements Strategy {
 
-    public static final Logger LOG = Logger.getLogger(DummyStrategy.class);
+    public static final Logger LOG = Logger.getLogger(Dummy.class);
 
     /**
      * Конструктор по умолчанию
      */
-    public DummyStrategy() {
+    public Dummy() {
     }
 
     @Override

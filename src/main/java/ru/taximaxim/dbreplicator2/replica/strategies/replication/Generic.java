@@ -21,7 +21,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ru.taximaxim.dbreplicator2.replica.strategies;
+package ru.taximaxim.dbreplicator2.replica.strategies.replication;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -46,14 +46,15 @@ import ru.taximaxim.dbreplicator2.replica.StrategyException;
  * @author volodin_aa
  * 
  */
-public class ReplicationStrategy implements Strategy {
+public class Generic extends Skeleton implements Strategy {
 
-    private static final Logger LOG = Logger.getLogger(ReplicationStrategy.class);
+    private static final Logger LOG = Logger.getLogger(Generic.class);
 
     /**
      * Конструктор по умолчанию
      */
-    public ReplicationStrategy() {
+    public Generic() {
+        super();
     }
 
     @Override
@@ -63,6 +64,9 @@ public class ReplicationStrategy implements Strategy {
         Boolean lastAutoCommit = null;
         Boolean lastTargetAutoCommit = null;
         try {
+            //игнорируемые колонки
+            setIgnoreCols(data);
+            
             lastAutoCommit = sourceConnection.getAutoCommit();
             lastTargetAutoCommit = targetConnection.getAutoCommit();
             // Начинаем транзакцию
@@ -77,7 +81,7 @@ public class ReplicationStrategy implements Strategy {
                     PreparedStatement selectLastOperations = 
                     sourceConnection.prepareStatement("SELECT * FROM rep2_workpool_data WHERE id_superlog IN (SELECT MAX(id_superlog) FROM rep2_workpool_data WHERE id_runner=? GROUP BY id_foreign, id_table)");
                     PreparedStatement deleteWorkPoolData = 
-                            sourceConnection.prepareStatement("DELETE FROM rep2_workpool_data WHERE id_foreign=? AND id_table=? AND id_superlog<=?");
+                            sourceConnection.prepareStatement("DELETE FROM rep2_workpool_data WHERE id_runner=? AND id_foreign=? AND id_table=? AND id_superlog<=?");
                     ) {
                 selectLastOperations.setInt(1, data.getId());
                 try (ResultSet operationsResult = selectLastOperations.executeQuery();) {
@@ -96,15 +100,19 @@ public class ReplicationStrategy implements Strategy {
                                 deleteDestStatement.setLong(1, operationsResult.getLong("id_foreign"));
                                 try {
                                     deleteDestStatement.executeUpdate();
-                                    // Очищаем данные о текущей записи из набора данных реплики
-                                    deleteWorkPoolData.setLong(1, operationsResult.getLong("id_foreign"));
-                                    deleteWorkPoolData.setString(2, operationsResult.getString("id_table"));
-                                    deleteWorkPoolData.setLong(3, operationsResult.getLong("id_superlog"));
-                                    deleteWorkPoolData.addBatch();
+                                    clearWorkPoolData(deleteWorkPoolData, operationsResult);
                                 } catch (SQLException e) {
                                     // Поглощаем и логгируем ошибки удаления
                                     // Это ожидаемый результат
-                                    LOG.warn("Поглощена ошибка при удалении записи: ", e);
+                                    String rowDump = String.format(
+                                            "[ tableName = %s  [ operation = D  [ row = [ id = %s ] ] ] ]", 
+                                            tableName, String.valueOf(operationsResult.getLong("id_foreign")));
+                                    if (LOG.isDebugEnabled()) {
+                                        LOG.debug("Поглощена ошибка при удалении записи: " + rowDump, e);
+                                    } else {
+                                        LOG.warn("Поглощена ошибка при удалении записи: " + rowDump + " " + e.getMessage());
+                                    }
+                                    trackError("Ошибка при удалении записи: " + rowDump, e, sourceConnection, operationsResult);
                                 }
                             }
                         } else {
@@ -112,12 +120,16 @@ public class ReplicationStrategy implements Strategy {
                             // Извлекаем данные из исходной таблицы
                             List<String> colsList = JdbcMetadata
                                     .getColumnsList(sourceConnection, tableName);
+                            // Удаляем игнорируемые колонки
+                            for (String colm : getIgnoreCols(tableName)) {
+                                colsList.remove(colm);
+                            }
                             String selectSourceQuery = QueryConstructors
                                     .constructSelectQuery(tableName, colsList, priColsList);
                             try (
                                     PreparedStatement selectSourceStatement = sourceConnection
                                     .prepareStatement(selectSourceQuery);
-                                    ) {
+                            ) {
                                 selectSourceStatement.setLong(1, operationsResult.getLong("id_foreign"));
                                 try (ResultSet sourceResult = selectSourceStatement.executeQuery();) {
                                     // Проходим по списку измененных записей
@@ -148,28 +160,36 @@ public class ReplicationStrategy implements Strategy {
                                                                 sourceResult, colsList);
                                                         try {
                                                             insertDestStatement.executeUpdate();
-                                                            // Очищаем данные о текущей записи из набора данных реплики
-                                                            deleteWorkPoolData.setLong(1, operationsResult.getLong("id_foreign"));
-                                                            deleteWorkPoolData.setString(2, operationsResult.getString("id_table"));
-                                                            deleteWorkPoolData.setLong(3, operationsResult.getLong("id_superlog"));
-                                                            deleteWorkPoolData.addBatch();
+                                                            clearWorkPoolData(deleteWorkPoolData, operationsResult);
                                                         } catch (SQLException e) {
                                                             // Поглощаем и логгируем ошибки вставки
                                                             // Это ожидаемый результат
-                                                            LOG.warn("Поглощена ошибка при вставке записи: ", e);
+                                                            String rowDump = String.format("[ tableName = %s  [ operation = %s  [ row = %s ] ] ]", 
+                                                                    tableName, operationsResult.getString("c_operation"), 
+                                                                    Jdbc.resultSetToString(sourceResult, colsList));
+                                                            if (LOG.isDebugEnabled()) {
+                                                                LOG.debug("Поглощена ошибка при вставке записи: " + rowDump, e);
+                                                            } else {
+                                                                LOG.warn("Поглощена ошибка при вставке записи: " + rowDump + " " + e.getMessage());
+                                                            }
+                                                            trackError("Ошибка при вставке записи: " + rowDump, e, sourceConnection, operationsResult);
                                                         }
                                                     }
                                                 } else {
-                                                    // Очищаем данные о текущей записи из набора данных реплики
-                                                    deleteWorkPoolData.setLong(1, operationsResult.getLong("id_foreign"));
-                                                    deleteWorkPoolData.setString(2, operationsResult.getString("id_table"));
-                                                    deleteWorkPoolData.setLong(3, operationsResult.getLong("id_superlog"));
-                                                    deleteWorkPoolData.addBatch();
+                                                    clearWorkPoolData(deleteWorkPoolData, operationsResult);
                                                 }
                                             } catch (SQLException e) {
                                                 // Поглощаем и логгируем ошибки обновления
                                                 // Это ожидаемый результат
-                                                LOG.warn("Поглощена ошибка при обновлении записи: ", e);
+                                                String rowDump = String.format("[ tableName = %s  [ operation = %s  [ row = %s ] ] ]", 
+                                                        tableName, operationsResult.getString("c_operation"), 
+                                                        Jdbc.resultSetToString(sourceResult, colsList));
+                                                if (LOG.isDebugEnabled()) {
+                                                    LOG.debug("Поглощена ошибка при обновлении записи: " + rowDump, e);
+                                                } else {
+                                                    LOG.warn("Поглощена ошибка при обновлении записи: " + rowDump + " " + e.getMessage());
+                                                }
+                                                trackError("Ошибка при обновлении записи: " + rowDump, e, sourceConnection, operationsResult);
                                             }
                                         }
                                     }

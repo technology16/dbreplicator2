@@ -25,6 +25,8 @@ package ru.taximaxim.dbreplicator2;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -37,6 +39,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
+import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
+import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.model.RunnerService;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
 import ru.taximaxim.dbreplicator2.utils.Core;
@@ -60,6 +64,7 @@ public class H2CopyTableDataTest {
     protected static Connection conn = null;
     protected static Connection connDest = null;
     protected static Runnable worker = null;
+    protected static Runnable errorsCountWatchdogWorker = null;
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -137,11 +142,11 @@ public class H2CopyTableDataTest {
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table4");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table4");
         
-        Helper.AssertEquals(listSource, listDest);
+        Helper.AssertEqualsNull(listSource, listDest);
 //
         listSource = Helper.InfoTest(conn, "t_table5");
         listDest   = Helper.InfoTest(connDest, "t_table5");
-        Helper.AssertEquals(listSource, listDest);
+        Helper.AssertEqualsNull(listSource, listDest);
         
         Helper.InfoNull(conn, "t_table4", 1);
         Helper.InfoNull(conn, "t_table5", 2);
@@ -171,15 +176,29 @@ public class H2CopyTableDataTest {
     public void testForeignKey() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
         //Проверка внешних ключей
         LOG.info("Проверка внешних ключей");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");   
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
+        
         worker.run();
         Thread.sleep(500);
+        
+        // Выводим данные из rep2_superlog_table
+        try (PreparedStatement select = 
+                conn.prepareStatement("SELECT * FROM rep2_workpool_data");
+        ) {
+            ResultSet result = select.executeQuery();
+            List<String> cols = JdbcMetadata.getColumnsList(conn, "REP2_WORKPOOL_DATA");
+            while (result.next()) {
+                LOG.info(Jdbc.resultSetToString(result, cols));
+            }
+        }
+        
+        errorsCountWatchdogWorker.run();
         worker.run();
         Thread.sleep(500);
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table2");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table2");
         Helper.AssertEquals(listSource, listDest);
-//
+
         listSource = Helper.InfoTest(conn, "t_table3");
         listDest   = Helper.InfoTest(connDest, "t_table3");
         Helper.AssertEquals(listSource, listDest);
@@ -319,7 +338,8 @@ public class H2CopyTableDataTest {
         Helper.executeSqlFromFile(connDest, "importDest.sql");
         
         RunnerService runnerService = new RunnerService(sessionFactory);
-        
+
         worker = new WorkerThread(runnerService.getRunner(1));
+        errorsCountWatchdogWorker = new WorkerThread(runnerService.getRunner(6));
     }
 }
