@@ -26,6 +26,8 @@ package ru.taximaxim.dbreplicator2.replica.strategies.errors;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
@@ -55,7 +57,7 @@ public class CountWatchgdog implements Strategy {
 
     @Override
     public void execute(Connection sourceConnection, Connection targetConnection,
-            StrategyModel data) throws StrategyException {
+            StrategyModel data) throws StrategyException, SQLException {
         // Проверияем количество ошибочных итераций
         try (PreparedStatement selectErrors = 
                 sourceConnection.prepareStatement("SELECT * FROM rep2_workpool_data WHERE id_superlog IN " +
@@ -72,8 +74,6 @@ public class CountWatchgdog implements Strategy {
                             rowDump);
                 }
             }
-        } catch (Exception e) {
-            throw new StrategyException(e);
         }
     }
 
