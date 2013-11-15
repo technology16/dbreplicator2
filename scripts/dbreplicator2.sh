@@ -2,13 +2,49 @@
 
 DBREP_HOME=$(cd "`dirname $0`/.." && pwd)
 
-#export LANG=ru_RU.UTF-8
-#export LANGUAGE=ru
-#export LC_CTYPE=ru_RU.UTF-8
+export LANG=ru_RU.UTF-8
+export LANGUAGE=ru
+export LC_CTYPE=ru_RU.UTF-8
 
-#export TZ=UTC
+export TZ=UTC
 
 logfile=/dev/stdout
+
+pidfile=$DBREP_HOME/run/dbreplicator2.pid
+
+quit() {
+    local ex=$?
+    echo -e "${1}"
+    rm $pidfile &>/dev/null
+    exit ${ex}
+}
+
+# Обработка выхода. -> dbreplicator2 stop
+if [ x"$1" == x"stop" ]; then
+    echo -n Stopping dbreplicator2... 
+    if [ -f $pidfile ]; then
+        read pid < $pidfile
+        if ps $pid &>/dev/null ; then
+            echo Process $pid found. Sending SIGTERM 
+            kill $pid && quit "Process dbreplicator2 terminated success." 
+        fi
+    else
+        echo " Error: pid file ($pidfile) not found. Please, stop dbreplicator2 manually!"
+    fi
+    exit
+fi
+
+test -f $pidfile && {
+    read pid < $pidfile
+
+    ps $pid &>/dev/null && 
+        die "$cmd is already running... exiting" || 
+        die "$cmd is dead but pidfile exists... exiting" 
+    }
+
+
+echo -n "$$" > $pidfile
+
 
 classdir=$DBREP_HOME/lib/
 
@@ -16,3 +52,5 @@ jcmd="java -Xmx512m -cp ""${classdir}dbreplicator2.jar:${classdir}log4j-1.2.17.j
 
 exec ${jcmd} ru.taximaxim.dbreplicator2.Application "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" "${10}" "${11}" >> $logfile 2>&1
 
+rm $pidfile
+exit 0

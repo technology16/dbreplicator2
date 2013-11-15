@@ -24,6 +24,7 @@
 package ru.taximaxim.dbreplicator2.replica;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 
@@ -46,8 +47,9 @@ public interface Strategy {
      * 
      *            TODO: Может быть передавать не StrategyModel как избыточную, а
      *            лишь data?
+     * @throws SQLException 
      */
     void execute(Connection sourceConnection, Connection targetConnection,
-            StrategyModel data) throws StrategyException;
+            StrategyModel data) throws StrategyException, SQLException;
 
 }

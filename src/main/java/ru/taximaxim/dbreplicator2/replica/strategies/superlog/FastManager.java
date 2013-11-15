@@ -57,7 +57,7 @@ public class FastManager implements Strategy {
 
     @Override
     public void execute(Connection sourceConnection, Connection targetConnection,
-            StrategyModel data) throws StrategyException {
+            StrategyModel data) throws StrategyException, SQLException {
         Boolean lastAutoCommit = null;
         try {
             lastAutoCommit = sourceConnection.getAutoCommit();
@@ -128,8 +128,7 @@ public class FastManager implements Strategy {
                         Core.getThreadPool().start(runner);
                 }
             }
-        } catch (Exception e) {
-            // Меняем класс ошибки
+        } catch (InterruptedException e) {
             throw new StrategyException(e);
         } finally {
             try {

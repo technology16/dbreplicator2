@@ -94,11 +94,17 @@ public class WorkerThread implements Runnable {
             } catch (InstantiationException | IllegalAccessException e) {
                 LOG.error("Ошибка при создании объекта-стратегии", e);
             }
-        } catch (ClassNotFoundException | SQLException e) {
-            LOG.error("Ошибка при инициализации соединений с базами данных " +
-                    "потока-воркера", e);
+        } catch (ClassNotFoundException e) {
+            LOG.error("Ошибка при инициализации данных ", e);
         } catch (StrategyException e) {
             LOG.error("Ошибка при выполнении стратегии", e);
+        } catch (SQLException e) {
+            LOG.error("Ошибка БД при выполнении стратегии", e);
+            SQLException nextEx = e.getNextException();
+            while (nextEx!=null){
+                LOG.error("Подробности:", nextEx);
+                nextEx = nextEx.getNextException();
+            }
         }
     }
 
@@ -116,11 +122,12 @@ public class WorkerThread implements Runnable {
      * @throws InstantiationException
      * @throws IllegalAccessException
      * @throws StrategyException
+     * @throws SQLException 
      */
     protected void runStrategy(Connection sourceConnection,
             Connection targetConnection, StrategyModel strategyModel)
             throws ClassNotFoundException, InstantiationException,
-            IllegalAccessException, StrategyException {
+            IllegalAccessException, StrategyException, SQLException {
 
         Class<?> clazz = Class.forName(strategyModel.getClassName());
         Strategy strategy = (Strategy) clazz.newInstance();
