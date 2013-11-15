@@ -226,8 +226,8 @@ public class ReplicationStrategy implements Strategy {
         List<TableModel> tableList = data.getRunner().getSource().getTables();
         for (TableModel tableModel : tableList) {
             cols = new ArrayList<String>();
-            for (IgnoreColumnsTableModel ignoreCols : tableModel.getIgnoreColumnsTable()) {
-                cols.add(ignoreCols.getColumnName());
+            for (IgnoreColumnsTableModel ignoreColumnsTableModel : tableModel.getIgnoreColumnsTable()) {
+                cols.add(ignoreColumnsTableModel.getColumnName());
             }
             ignoreCols.put(tableModel.getName(), cols);
         }
