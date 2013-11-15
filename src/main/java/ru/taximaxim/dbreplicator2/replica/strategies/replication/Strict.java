@@ -59,7 +59,7 @@ public class Strict extends Skeleton implements Strategy {
 
     @Override
     public void execute(Connection sourceConnection, Connection targetConnection,
-            StrategyModel data) throws StrategyException {
+            StrategyModel data) throws StrategyException, SQLException {
         // TODO: Реализовать поддержку списка таблиц
         Boolean lastAutoCommit = null;
         Boolean lastTargetAutoCommit = null;
@@ -186,11 +186,11 @@ public class Strict extends Skeleton implements Strategy {
                 // Подтверждаем транзакцию
                 deleteWorkPoolData.executeBatch();
                 sourceConnection.commit();
-            } catch (Exception e) {
+            } catch (SQLException e) {
                 sourceConnection.rollback();
-                throw new StrategyException(e);
+                throw e;
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             try {
                 if (lastAutoCommit != null) {
                     sourceConnection.setAutoCommit(lastAutoCommit);
@@ -208,7 +208,7 @@ public class Strict extends Skeleton implements Strategy {
                 // Ошибка может возникнуть если во время операции упало соединение к БД
                 LOG.warn("Ошибка при возврате автокомита в исходное состояние.", sqlException);
             }
-            throw new StrategyException(e);
+            throw e;
         }
     }
 

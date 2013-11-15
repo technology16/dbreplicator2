@@ -84,11 +84,12 @@ public final class Jdbc {
      */
     public static String resultSetToString(ResultSet data, 
             List<String> columnsList) throws SQLException {
-        String str  = "";
+        StringBuffer str  = new StringBuffer();
         for (String columnName : columnsList) {
-            str = str + "[ col " + columnName + " = " + data.getString(columnName) + "  ]   ";
+            str.append("[ col ").append(columnName).append(" = ")
+                .append(data.getString(columnName)).append(" ] ");
         }
-        return str;
+        return str.toString();
     }
     
     /**
