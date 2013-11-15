@@ -27,9 +27,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
+import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsModel;
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
 import ru.taximaxim.dbreplicator2.model.TableModel;
@@ -66,7 +70,7 @@ public class FastManager implements Strategy {
             BoneCPSettingsModel sourcePool = data.getRunner().getSource();
             try {
                 sourceConnection
-                    .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+                .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
                 sourceConnection.setHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT);
                 // Строим список обработчиков реплик
 
@@ -78,13 +82,27 @@ public class FastManager implements Strategy {
                                 sourceConnection.prepareStatement("DELETE FROM rep2_superlog WHERE id_superlog=?");
                         PreparedStatement selectSuperLog = 
                                 sourceConnection.prepareStatement("SELECT * FROM rep2_superlog ORDER BY id_superlog");
-                ) {
+                        ) {
                     selectSuperLog.setFetchSize(1000);
                     try (ResultSet superLogResult = selectSuperLog.executeQuery();) {
+                        List<String> cols = new ArrayList<String>();
+                        cols.add("id_superlog");
+                        cols.add("id_foreign");
+                        cols.add("id_table");
+                        cols.add("c_operation");
+                        cols.add("c_date");
+                        cols.add("id_transaction");
                         while (superLogResult.next()) {
+                            // Выводим данные из rep2_superlog_table
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug(Jdbc.resultSetToString(superLogResult, cols));
+                            }
                             // Копируем записи
                             // Проходим по списку слушателей текущей таблицы
                             for (TableModel table : sourcePool.getTables()) {
+                                if (LOG.isDebugEnabled()) {
+                                    LOG.debug(table.getName() + " id: " + table.getTableId());
+                                }
                                 if (table.getName()
                                         .equalsIgnoreCase(superLogResult.getString("id_table"))){
                                     for (RunnerModel runner : table.getRunners()) {
@@ -103,6 +121,11 @@ public class FastManager implements Strategy {
                                         insertRunnerData.setString(7,
                                                 superLogResult.getString("id_transaction"));
                                         insertRunnerData.addBatch();
+
+                                        // Выводим данные из rep2_superlog_table
+                                        if (LOG.isDebugEnabled()) {
+                                            LOG.debug("INSERT");
+                                        }
                                     }
                                 }
                             }
@@ -125,7 +148,7 @@ public class FastManager implements Strategy {
             // Асинхронно запускаем обработчики реплик
             for (RunnerModel runner : sourcePool.getRunners()) {
                 if (!runner.getTables().isEmpty()) {
-                        Core.getThreadPool().start(runner);
+                    Core.getThreadPool().start(runner);
                 }
             }
         } catch (InterruptedException e) {

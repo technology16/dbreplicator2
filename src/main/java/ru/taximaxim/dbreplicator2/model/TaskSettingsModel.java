@@ -29,6 +29,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
 
 /**
  * Класс инкапсулирующий задачу менеджера записей.
@@ -76,6 +79,7 @@ public class TaskSettingsModel implements TaskSettings{
      */
     @ManyToOne
     @JoinColumn(name = "id_runner")
+    @Fetch(FetchMode.SELECT)
     private RunnerModel runner;
 
     /**

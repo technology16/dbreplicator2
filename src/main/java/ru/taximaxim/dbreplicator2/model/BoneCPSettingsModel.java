@@ -356,7 +356,7 @@ public class BoneCPSettingsModel implements BoneCPSettings {
     }
 
     /**
-     * Список обрабатываемых таблиц
+     * Список обработчиков
      */
     private List<RunnerModel> runners;
 
