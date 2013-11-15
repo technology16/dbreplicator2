@@ -33,7 +33,6 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
-import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsModel;
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
 import ru.taximaxim.dbreplicator2.model.TableModel;
