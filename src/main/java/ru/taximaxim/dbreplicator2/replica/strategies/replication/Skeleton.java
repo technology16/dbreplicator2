@@ -95,7 +95,7 @@ public class Skeleton {
         for (TableModel tableModel : tableList) {
             cols = new ArrayList<String>();
             for (IgnoreColumnsTableModel ignoreCol : tableModel.getIgnoreColumnsTable()) {
-                cols.add(ignoreCol.getColumnName());
+                cols.add(ignoreCol.getColumnName().toUpperCase());
             }
             ignoreCols.put(tableModel.getName(), cols);
         }
