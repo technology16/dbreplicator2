@@ -47,14 +47,28 @@ public class WorkerThread implements Runnable {
         this.runner = runner;
     }
 
+    @Override
     public void run() {
         synchronized (runner) {
             LOG.debug(String.format("Запуск потока: %s [%s] [%s]",
                     runner.getDescription(), runner.getId(),
                     Thread.currentThread().getName()));
     
-            processCommand(runner);
-    
+            try {
+                processCommand();
+            } catch (ClassNotFoundException e) {
+                LOG.error("Ошибка при инициализации данных ", e);
+            } catch (StrategyException e) {
+                LOG.error("Ошибка при выполнении стратегии", e);
+            } catch (SQLException e) {
+                LOG.error("Ошибка БД при выполнении стратегии", e);
+                SQLException nextEx = e.getNextException();
+                while (nextEx!=null){
+                    LOG.error("Подробности:", nextEx);
+                    nextEx = nextEx.getNextException();
+                }
+            }
+            
             LOG.debug(String.format("Завершение потока: %s [%s] [%s]",
                     runner.getDescription(), runner.getId(),
                     Thread.currentThread().getName()));
@@ -67,8 +81,11 @@ public class WorkerThread implements Runnable {
      *
      * @param runner
      *            Настроенный runner.
+     * @throws SQLException 
+     * @throws ClassNotFoundException 
+     * @throws StrategyException 
      */
-    protected void processCommand(Runner runner) {
+    public void processCommand() throws ClassNotFoundException, SQLException, StrategyException {
 
         ConnectionFactory connectionsFactory = Core.getConnectionFactory();
 
@@ -93,17 +110,6 @@ public class WorkerThread implements Runnable {
 
             } catch (InstantiationException | IllegalAccessException e) {
                 LOG.error("Ошибка при создании объекта-стратегии", e);
-            }
-        } catch (ClassNotFoundException e) {
-            LOG.error("Ошибка при инициализации данных ", e);
-        } catch (StrategyException e) {
-            LOG.error("Ошибка при выполнении стратегии", e);
-        } catch (SQLException e) {
-            LOG.error("Ошибка БД при выполнении стратегии", e);
-            SQLException nextEx = e.getNextException();
-            while (nextEx!=null){
-                LOG.error("Подробности:", nextEx);
-                nextEx = nextEx.getNextException();
             }
         }
     }

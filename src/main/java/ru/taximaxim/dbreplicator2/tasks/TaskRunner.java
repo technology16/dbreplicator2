@@ -22,10 +22,12 @@
  */
 package ru.taximaxim.dbreplicator2.tasks;
 
+import java.sql.SQLException;
 import java.util.Date;
 
 import org.apache.log4j.Logger;
 
+import ru.taximaxim.dbreplicator2.replica.StrategyException;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
 import ru.taximaxim.dbreplicator2.model.TaskSettings;
 
@@ -76,37 +78,64 @@ public class TaskRunner implements Runnable {
         LOG.info(String.format("Запуск задачи [%d] %s",
                 taskSettings.getTaskId(), taskSettings.getDescription()));
         while (enabled) {
+            long startTime = new Date().getTime();
+            boolean isSuccess = false;
+            
             try {
-                long startTime = new Date().getTime();
-
-                workerThread.run();
-
-                // Ожидаем окончания периода синхронизации
-                long sleepTime = startTime + taskSettings.getSuccessInterval()
-                        - new Date().getTime();
-
-                if (sleepTime > 0) {
-                    LOG.info(String
-                            .format("Ожидаем %d милисекунд после завершения задачи [%d] %s",
-                                    sleepTime, taskSettings.getTaskId(),
-                                    taskSettings.getDescription()));
-                    Thread.sleep(sleepTime);
+                workerThread.processCommand();
+                isSuccess = true;
+            } catch (ClassNotFoundException e) {
+                LOG.error(
+                        String.format("Ошибка инициализации при выполнении задачи [%d] %s",
+                                taskSettings.getTaskId(),
+                                taskSettings.getDescription()), e);
+            } catch (StrategyException e) {
+                LOG.error(
+                        String.format("Ошибка при выполнении стратегии из задачи [%d] %s",
+                        taskSettings.getTaskId(),
+                        taskSettings.getDescription()), e);
+            } catch (SQLException e) {
+                LOG.error(
+                        String.format("Ошибка БД при выполнении стратегии из задачи [%d] %s",
+                        taskSettings.getTaskId(),
+                        taskSettings.getDescription()), e);
+                SQLException nextEx = e.getNextException();
+                while (nextEx!=null){
+                    LOG.error("Подробности:", nextEx);
+                    nextEx = nextEx.getNextException();
                 }
             } catch (Exception e) {
                 LOG.error(
                         String.format("Ошибка при выполнении задачи [%d] %s",
                                 taskSettings.getTaskId(),
                                 taskSettings.getDescription()), e);
-
-                LOG.info(String.format(
-                        "Ожидаем %d милисекунд до рестарта задачи [%d] %s",
-                        taskSettings.getFailInterval(),
-                        taskSettings.getTaskId(), taskSettings.getDescription()));
-                try {
-                    Thread.sleep(taskSettings.getFailInterval());
-                } catch (InterruptedException ex) {
-                    LOG.warn(ex);
+            }
+            
+            try {
+                if (isSuccess) {
+                    // Ожидаем окончания периода синхронизации
+                    long sleepTime = startTime + taskSettings.getSuccessInterval()
+                            - new Date().getTime();
+                    if (sleepTime > 0) {
+                        LOG.info(String
+                                .format("Ожидаем %d милисекунд после завершения задачи [%d] %s",
+                                        sleepTime, taskSettings.getTaskId(),
+                                        taskSettings.getDescription()));
+                        Thread.sleep(sleepTime);
+                    }
+                } else {
+                    long sleepTime = startTime + taskSettings.getFailInterval()
+                            - new Date().getTime();
+                    if (sleepTime > 0) {
+                        LOG.info(String.format(
+                                "Ожидаем %d миллисекунд до рестарта задачи [%d] %s",
+                                sleepTime, taskSettings.getTaskId(), 
+                                taskSettings.getDescription()));
+                        Thread.sleep(sleepTime);
+                    }
                 }
+            } catch (InterruptedException ex) {
+                LOG.warn(ex);
             }
         }
     }
