@@ -30,6 +30,7 @@ package ru.taximaxim.dbreplicator2.jdbc;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,6 +69,29 @@ public final class JdbcMetadata {
             }
         } finally {
             colsResultSet.close();
+        }
+
+        return colsList;
+    }
+
+    /**
+     * Функция получения списка колонок таблицы на основе метаданных ResultSet
+     * 
+     * @param result
+     *            набор результатов
+     * @param tableName
+     *            имя таблицы
+     * @return список колонок таблицы
+     * @throws SQLException
+     */
+    public static List<String> getColumnsList(ResultSet result)
+            throws SQLException {
+        // Получаем список колонок
+        List<String> colsList = new ArrayList<String>();
+        ResultSetMetaData metaData = result.getMetaData();
+        int columnCount = metaData.getColumnCount();
+        for (int i = 1; i <= columnCount; i++) {
+            colsList.add(metaData.getColumnName(i).toUpperCase());
         }
 
         return colsList;

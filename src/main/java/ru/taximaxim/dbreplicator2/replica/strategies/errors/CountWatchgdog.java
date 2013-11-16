@@ -27,6 +27,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -65,11 +66,12 @@ public class CountWatchgdog implements Strategy {
                 ) {
             selectErrors.setInt(1, maxErrors);
             try (ResultSet errorsResult = selectErrors.executeQuery();) {
+                List<String> cols =  JdbcMetadata.getColumnsList(errorsResult);
                 while (errorsResult.next()) {
                     // при необходимости пишем ошибку в лог
                     String rowDump = String.format(
                             "[ tableName = REP2_WORKPOOL_DATA [ row = %s ] ]", 
-                            Jdbc.resultSetToString(errorsResult, JdbcMetadata.getColumnsList(sourceConnection, "REP2_WORKPOOL_DATA")));
+                            Jdbc.resultSetToString(errorsResult, cols));
                     LOG.error("Превышен лимит в " + maxErrors + " ошибок!\n" + 
                             rowDump);
                 }
