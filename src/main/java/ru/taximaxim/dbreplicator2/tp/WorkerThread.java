@@ -26,7 +26,6 @@ package ru.taximaxim.dbreplicator2.tp;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
-
 import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
@@ -49,7 +48,7 @@ public class WorkerThread implements Runnable {
 
     @Override
     public void run() {
-        synchronized (runner) {
+         synchronized (runner) {
             LOG.debug(String.format("Запуск потока: %s [%s] [%s]",
                     runner.getDescription(), runner.getId(),
                     Thread.currentThread().getName()));
@@ -139,5 +138,12 @@ public class WorkerThread implements Runnable {
         Strategy strategy = (Strategy) clazz.newInstance();
 
         strategy.execute(sourceConnection, targetConnection, strategyModel);
+    }
+
+    /**
+     * @return the runner
+     */
+    protected Runner getRunner() {
+        return runner;
     }
 }
