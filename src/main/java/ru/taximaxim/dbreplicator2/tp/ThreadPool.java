@@ -83,6 +83,7 @@ public class ThreadPool {
      */
     public void start(RunnerModel runner) {
         synchronized(pendingRunners) {
+            // Если нет ожидающих потоков, то добавляем поток на обработку раннера
             if (!pendingRunners.contains(runner)) {
                 pendingRunners.add(runner);
                 Runnable worker = new PendingWorkerThread(runner, pendingRunners);
