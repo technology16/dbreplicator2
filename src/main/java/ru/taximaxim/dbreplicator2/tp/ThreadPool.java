@@ -35,6 +35,9 @@ import ru.taximaxim.dbreplicator2.model.RunnerModel;
 
 public class ThreadPool {
 
+    /**
+     * Супер логгер
+     */
     private static final Logger LOG = Logger.getLogger(ThreadPool.class);
 
     private ExecutorService executor = null;

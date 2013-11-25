@@ -28,30 +28,52 @@ import ru.taximaxim.dbreplicator2.model.RunnerModel;
 
 /**
  * Ожидающий рабочий поток. При запуске он удаляет раннера из набора
- * ожидающих обработки раннеров
+ * ожидающих обработки раннеров.
+ * Реализует паттерн Proxy для интерфейса Runnable.
  * 
  * @author volodin_aa
  *
  */
-public class PendingWorkerThread extends WorkerThread {
+public class PendingWorkerThread implements Runnable {
 
     private Set<RunnerModel> pendingRunners;
+    private Runner runner;
+    private WorkerThread workerThread;
 
     /**
-     * @param pendingRunners
-     * @param runner
+     * Конструктор по списку ожидающих раннеров и раннеру
+     * 
+     * @param pendingRunners - список ожидающих обработки раннеров
+     * @param runner - текущий раннер
      */
     public PendingWorkerThread(Runner runner, Set<RunnerModel> pendingRunners) {
-        super(runner);
         this.pendingRunners = pendingRunners;
+        this.runner = runner;
     }
 
     @Override
     public void run() {
-        synchronized(pendingRunners) {
-            pendingRunners.remove(getRunner());
+        // Пробуем захватить раннера
+        synchronized (runner) {
+            // Когда раннер захвачен и начинается обработка данных, то
+            // убераем его из списка ожидающих начала обработки
+            synchronized(pendingRunners) {
+                pendingRunners.remove(runner);
+            }
+            getWorkerThread().run();
         }
-        super.run();
+    }
+
+    /**
+     * Метод с отложенной инициализацией потока обработчика раннера
+     * 
+     * @return the workerThread - поток обработчика раннера
+     */
+    protected synchronized WorkerThread getWorkerThread() {
+        if (workerThread==null) {
+            workerThread = new WorkerThread(runner);
+        }
+        return workerThread;
     }
 
 }
