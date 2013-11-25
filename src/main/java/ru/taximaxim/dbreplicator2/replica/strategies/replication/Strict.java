@@ -103,11 +103,11 @@ public class Strict extends Skeleton implements Strategy {
                                     clearWorkPoolData(deleteWorkPoolData, operationsResult);
                                 } catch (SQLException e) {
                                     String rowDump = String.format(
-                                            "Ошибка при удалении записи: [ tableName = %s  [ operation = D  [ row = [ id = %s ] ] ] ]", 
+                                            "[ tableName = %s  [ operation = D  [ row = [ id = %s ] ] ] ]", 
                                             tableName, String.valueOf(operationsResult.getLong("id_foreign")));
-                                    LOG.error(rowDump, e);
-                                    trackError(rowDump, e, sourceConnection, operationsResult);
-                                    throw e;
+                                    LOG.warn(rowDump, e);
+                                    trackError("Ошибка при удалении записи: " + rowDump, e, sourceConnection, operationsResult);
+                                    break;
                                 }
                             }
                         } else {
@@ -157,24 +157,24 @@ public class Strict extends Skeleton implements Strategy {
                                                             insertDestStatement.executeUpdate();
                                                             clearWorkPoolData(deleteWorkPoolData, operationsResult);
                                                         } catch (SQLException e) {
-                                                            String rowDump = String.format("Ошибка при вставке записи: [ tableName = %s  [ operation = %s  [ row = %s ] ] ]", 
+                                                            String rowDump = String.format("[ tableName = %s  [ operation = %s  [ row = %s ] ] ]", 
                                                                     tableName, operationsResult.getString("c_operation"), 
                                                                     Jdbc.resultSetToString(sourceResult, colsList));
-                                                            LOG.error(rowDump, e);
-                                                            trackError(rowDump, e, sourceConnection, operationsResult);
-                                                            throw e;
+                                                            LOG.warn(rowDump, e);
+                                                            trackError("Ошибка при вставке записи: " + rowDump, e, sourceConnection, operationsResult);
+                                                            break;
                                                         }
                                                     }
                                                 } else {
                                                     clearWorkPoolData(deleteWorkPoolData, operationsResult);
                                                 }
                                             } catch (SQLException e) {
-                                                String rowDump = String.format("Ошибка при обновлении записи: [ tableName = %s  [ operation = %s  [ row = %s ] ] ]", 
+                                                String rowDump = String.format("[ tableName = %s  [ operation = %s  [ row = %s ] ] ]", 
                                                         tableName, operationsResult.getString("c_operation"), 
                                                         Jdbc.resultSetToString(sourceResult, colsList));
-                                                LOG.error(rowDump, e);
-                                                trackError(rowDump, e, sourceConnection, operationsResult);
-                                                throw e;
+                                                LOG.warn(rowDump, e);
+                                                trackError("Ошибка при обновлении записи: " + rowDump, e, sourceConnection, operationsResult);
+                                                break;
                                             }
                                         }
                                     }
