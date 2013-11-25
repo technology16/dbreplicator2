@@ -71,13 +71,20 @@ public class Skeleton {
      * Функция записи информации об ошибке
      * @throws SQLException 
      */
-    protected void trackError(String message, Throwable e, Connection connection,
+    protected void trackError(String message, SQLException e, Connection connection,
             ResultSet operation) throws SQLException{
         // Формируем сообщение об ошибке
         Writer writer = new StringWriter();
         PrintWriter printWriter = new PrintWriter(writer);
         e.printStackTrace(printWriter);
         
+        SQLException nextEx = e.getNextException();
+        while (nextEx!=null){
+            printWriter.println("Подробности: ");
+            nextEx.printStackTrace(printWriter);
+            nextEx = nextEx.getNextException();
+        }
+
         // Увеличиваем счетчик ошибок на 1
         PreparedStatement incErrorsCount = 
                 connection.prepareStatement("UPDATE rep2_workpool_data SET c_errors_count = c_errors_count + 1, c_last_error=?, c_last_error_date=? WHERE id_runner=? AND id_table=? AND id_foreign=?");
