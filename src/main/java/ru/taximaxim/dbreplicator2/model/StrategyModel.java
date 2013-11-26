@@ -22,6 +22,7 @@
  */
 package ru.taximaxim.dbreplicator2.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -49,6 +50,7 @@ public class StrategyModel {
     /**
      * Параметр
      */
+    @Column(length=2000)
     private String param;
 
     /**
