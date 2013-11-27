@@ -131,7 +131,7 @@ public final class JdbcMetadata {
      *            соединение к целевой БД
      * @param tableName
      *            имя таблицы
-     * @return список ключевых колонок таблицы
+     * @return список AUTO INCREMENT колонок таблицы
      * @throws SQLException
      */
     public static List<String> getIdentityColumnsList(Connection connection,
