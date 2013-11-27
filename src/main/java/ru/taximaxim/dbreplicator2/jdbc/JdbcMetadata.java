@@ -124,5 +124,33 @@ public final class JdbcMetadata {
 
         return primaryKeyColsList;
     }
+    /**
+     * Функция получения списка AUTO INCREMENT колонок таблицы на основе метаданных БД
+     * 
+     * @param connection
+     *            соединение к целевой БД
+     * @param tableName
+     *            имя таблицы
+     * @return список ключевых колонок таблицы
+     * @throws SQLException
+     */
+    public static List<String> getIdentityColumnsList(Connection connection,
+            String tableName) throws SQLException {
+        // Получаем список колонок
+        List<String> colsList = new ArrayList<String>();
+        DatabaseMetaData metaData = connection.getMetaData();
+        ResultSet colsResultSet = metaData.getColumns(null, null, tableName, null);
+        try {
+            while (colsResultSet.next()) {
+                if (colsResultSet.getString("IS_AUTOINCREMENT").equalsIgnoreCase("YES")) {
+                    colsList.add(colsResultSet.getString("COLUMN_NAME").toUpperCase());
+                }
+            }
+        } finally {
+            colsResultSet.close();
+        }
+
+        return colsList;
+    }
 
 }
