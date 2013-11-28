@@ -22,6 +22,10 @@
  */
 package ru.taximaxim.dbreplicator2.model;
 
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.Properties;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -115,14 +119,35 @@ public class StrategyModel {
     /**
      * @see StrategyModel#param
      */
-    public String getParam() {
-        return param;
+    public Properties getParam() {
+        Properties prop = new Properties();
+        try {
+            String[] properties = param.split("\\|");
+            for (String p : properties) {
+                prop.load(new StringReader(p.replace("\"", "'")));
+            }
+            
+        } catch (IOException e) {
+            //LOG.error("Ошибка при чтение параметров [" + param + "]!", e);
+            e.getStackTrace();
+        }
+        return prop;
     }
 
     /**
      * @see StrategyModel#param
      */
-    public void setParam(String param) {
+    public void setParam(Properties prop) {
+        String param = null;
+        
+        if(prop != null ) {
+            param = "";
+            for (String p : prop.stringPropertyNames()) {
+                param += String.format("%s=%s|",p, prop.getProperty(p));
+            }
+            param.substring(0, param.length() - 2);
+        }
+        
         this.param = param;
     }
 

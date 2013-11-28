@@ -22,6 +22,8 @@
  */
 package ru.taximaxim.dbreplicator2;
 
+import java.util.Properties;
+
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -110,7 +112,7 @@ public class StrategiesTest {
         return runner;
     }
 
-    public StrategyModel createStrategy(String className, String param,
+    public StrategyModel createStrategy(String className, Properties param,
             boolean isEnabled, int priority) {
 
         StrategyModel strategy = new StrategyModel();
