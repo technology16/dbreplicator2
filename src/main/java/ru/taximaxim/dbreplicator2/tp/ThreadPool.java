@@ -23,6 +23,8 @@
 
 package ru.taximaxim.dbreplicator2.tp;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -33,9 +35,13 @@ import ru.taximaxim.dbreplicator2.model.RunnerModel;
 
 public class ThreadPool {
 
+    /**
+     * Супер логгер
+     */
     private static final Logger LOG = Logger.getLogger(ThreadPool.class);
 
     private ExecutorService executor = null;
+    private Set<RunnerModel> pendingRunners = new HashSet<RunnerModel>();
 
     /**
      * Инициализация пула потоков
@@ -79,7 +85,13 @@ public class ThreadPool {
      * Запуск потока RunnerModel. Поток будет поставлен в очередь на выполнение.
      */
     public void start(RunnerModel runner) {
-        Runnable worker = new WorkerThread(runner);
-        executor.execute(worker);
+        synchronized(pendingRunners) {
+            // Если нет ожидающих потоков, то добавляем поток на обработку раннера
+            if (!pendingRunners.contains(runner)) {
+                pendingRunners.add(runner);
+                Runnable worker = new PendingWorkerThread(runner, pendingRunners);
+                executor.execute(worker);
+            }
+        }
     }
 }

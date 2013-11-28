@@ -26,7 +26,6 @@ package ru.taximaxim.dbreplicator2.tp;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
-
 import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
@@ -49,30 +48,28 @@ public class WorkerThread implements Runnable {
 
     @Override
     public void run() {
-        synchronized (runner) {
-            LOG.debug(String.format("Запуск потока: %s [%s] [%s]",
-                    runner.getDescription(), runner.getId(),
-                    Thread.currentThread().getName()));
-    
-            try {
-                processCommand();
-            } catch (ClassNotFoundException e) {
-                LOG.error("Ошибка при инициализации данных ", e);
-            } catch (StrategyException e) {
-                LOG.error("Ошибка при выполнении стратегии", e);
-            } catch (SQLException e) {
-                LOG.error("Ошибка БД при выполнении стратегии", e);
-                SQLException nextEx = e.getNextException();
-                while (nextEx!=null){
-                    LOG.error("Подробности:", nextEx);
-                    nextEx = nextEx.getNextException();
-                }
+        LOG.debug(String.format("Запуск потока: %s [%s] [%s]",
+                runner.getDescription(), runner.getId(),
+                Thread.currentThread().getName()));
+
+        try {
+            processCommand();
+        } catch (ClassNotFoundException e) {
+            LOG.error("Ошибка при инициализации данных ", e);
+        } catch (StrategyException e) {
+            LOG.error("Ошибка при выполнении стратегии", e);
+        } catch (SQLException e) {
+            LOG.error("Ошибка БД при выполнении стратегии", e);
+            SQLException nextEx = e.getNextException();
+            while (nextEx!=null){
+                LOG.error("Подробности:", nextEx);
+                nextEx = nextEx.getNextException();
             }
-            
-            LOG.debug(String.format("Завершение потока: %s [%s] [%s]",
-                    runner.getDescription(), runner.getId(),
-                    Thread.currentThread().getName()));
         }
+        
+        LOG.debug(String.format("Завершение потока: %s [%s] [%s]",
+                runner.getDescription(), runner.getId(),
+                    Thread.currentThread().getName()));
     }
 
     /**
@@ -139,5 +136,12 @@ public class WorkerThread implements Runnable {
         Strategy strategy = (Strategy) clazz.newInstance();
 
         strategy.execute(sourceConnection, targetConnection, strategyModel);
+    }
+
+    /**
+     * @return the runner
+     */
+    protected Runner getRunner() {
+        return runner;
     }
 }
