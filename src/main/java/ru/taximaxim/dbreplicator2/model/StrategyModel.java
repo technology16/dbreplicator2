@@ -35,6 +35,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.apache.log4j.Logger;
+
 @Entity
 @Table(name = "strategies")
 public class StrategyModel {
@@ -128,8 +130,8 @@ public class StrategyModel {
             }
             
         } catch (IOException e) {
-            //LOG.error("Ошибка при чтение параметров [" + param + "]!", e);
-            e.getStackTrace();
+            Logger LOG = Logger.getLogger(StrategyModel.class);
+            LOG.error("Ошибка при чтение параметров [" + param + "]!", e);
         }
         return prop;
     }
@@ -138,17 +140,17 @@ public class StrategyModel {
      * @see StrategyModel#param
      */
     public void setParam(Properties prop) {
-        String param = null;
+        String paramstr = null;
         
         if(prop != null ) {
-            param = "";
+            paramstr = "";
             for (String p : prop.stringPropertyNames()) {
-                param += String.format("%s=%s|",p, prop.getProperty(p));
+                paramstr += String.format("%s=%s|",p, prop.getProperty(p));
             }
-            param.substring(0, param.length() - 2);
+            paramstr = paramstr.substring(0, paramstr.length() - 1);
         }
         
-        this.param = param;
+        this.param = paramstr;
     }
 
     /**
