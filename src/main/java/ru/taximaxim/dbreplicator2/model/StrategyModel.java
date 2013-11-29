@@ -130,8 +130,7 @@ public class StrategyModel {
             }
             
         } catch (IOException e) {
-            Logger LOG = Logger.getLogger(StrategyModel.class);
-            LOG.error("Ошибка при чтение параметров [" + param + "]!", e);
+            Logger.getLogger("StrategyModel").error("Ошибка при чтение параметров [" + param + "]!", e);
         }
         return prop;
     }
