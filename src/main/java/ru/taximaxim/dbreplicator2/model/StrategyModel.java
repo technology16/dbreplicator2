@@ -40,7 +40,7 @@ import org.apache.log4j.Logger;
 @Entity
 @Table(name = "strategies")
 public class StrategyModel {
-
+    
     /**
      * Идентификатор стратегии
      */
@@ -69,6 +69,12 @@ public class StrategyModel {
      */
     private int priority;
 
+    /**
+     * Настройки
+    */
+    private Properties prop;
+    
+    
     /**
      * Поток исполнитель, которому принадлежит стратегия
      */
@@ -121,27 +127,19 @@ public class StrategyModel {
     /**
      * @see StrategyModel#param
      */
-    public Properties getParam() {
-        Properties prop = new Properties();
-        try {
-            String[] properties = param.split("\\|");
-            for (String p : properties) {
-                prop.load(new StringReader(p.replace("\"", "'")));
-            }
-            
-        } catch (IOException e) {
-            Logger.getLogger("StrategyModel").error("Ошибка при чтение параметров [" + param + "]!", e);
-        }
-        return prop;
+    public String getParam(String key) {
+        return getProp().getProperty(key);
     }
 
     /**
      * @see StrategyModel#param
      */
-    public void setParam(Properties prop) {
-        String paramstr = null;
+    public void setParam(String key, String value) {
         
-        if(prop != null ) {
+        String paramstr = null;
+        getProp().put(key, value);
+        Properties prop = getProp();
+        if(key != null) {
             paramstr = "";
             for (String p : prop.stringPropertyNames()) {
                 paramstr += String.format("%s=%s|",p, prop.getProperty(p));
@@ -178,5 +176,26 @@ public class StrategyModel {
      */
     public void setPriority(int priority) {
         this.priority = priority;
+    }
+    
+    /**
+     * Получение настроек
+     * @return
+     */
+    private Properties getProp(){
+        if(this.prop == null) {
+            this.prop = new Properties();
+            if(param != null){
+                try {
+                    String[] properties = param.split("\\|");
+                    for (String p : properties) {
+                        this.prop.load(new StringReader(p.replace("\"", "'")));
+                    }
+                } catch (IOException e) {
+                    Logger.getLogger("StrategyModel").error("Ошибка при чтение параметров [" + param + "]!", e);
+                }
+            }
+        }
+        return this.prop;
     }
 }

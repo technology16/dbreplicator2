@@ -22,8 +22,6 @@
  */
 package ru.taximaxim.dbreplicator2;
 
-import java.util.Properties;
-
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -66,7 +64,7 @@ public class StrategiesTest {
 
         RunnerModel runner = createRunner(new BoneCPSettingsModel(), new BoneCPSettingsModel(),
                 "Описание исполняемого потока");
-        StrategyModel strategy = createStrategy("ru.taximaxim.Class", null,
+        StrategyModel strategy = createStrategy("ru.taximaxim.Class", "key", "value",
                 true, 100);
 
         Assert.assertNull(runner.getId());
@@ -89,7 +87,7 @@ public class StrategiesTest {
 
         RunnerModel runner2 = createRunner(new BoneCPSettingsModel(), new BoneCPSettingsModel(),
                 "Описание исполняемого потока (2)");
-        StrategyModel strategy2 = createStrategy("ru.taximaxim.Class", null,
+        StrategyModel strategy2 = createStrategy("ru.taximaxim.Class", "key", "value",
                 true, 100);
         addStrategy(runner2, strategy2);
 
@@ -112,13 +110,13 @@ public class StrategiesTest {
         return runner;
     }
 
-    public StrategyModel createStrategy(String className, Properties param,
+    public StrategyModel createStrategy(String className, String key, String value,
             boolean isEnabled, int priority) {
 
         StrategyModel strategy = new StrategyModel();
 
         strategy.setClassName(className);
-        strategy.setParam(param);
+        strategy.setParam(key, value);
         strategy.setEnabled(isEnabled);
         strategy.setPriority(priority);
 
