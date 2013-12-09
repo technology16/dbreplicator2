@@ -323,6 +323,14 @@ public class H2CopyTableDataTest {
     }
     
     /**
+     * 
+     */
+    @Test
+    public void paramTest(){
+        
+    }
+    
+    /**
      * Инициализация
      */
     public static void initialization() throws ClassNotFoundException, SQLException, IOException{

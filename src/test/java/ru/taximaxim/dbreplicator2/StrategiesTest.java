@@ -22,6 +22,8 @@
  */
 package ru.taximaxim.dbreplicator2;
 
+import static org.junit.Assert.*;
+
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -128,5 +130,23 @@ public class StrategiesTest {
         runner.getStrategyModels().add(strategy);
         strategy.setRunner(runner);
 
+    }
+    
+    /**
+     * Тестирование работы механизма хранения многострочных параметров    
+     */
+    @Test
+    public void paramTest(){
+        StrategyModel strategy = new StrategyModel();
+
+        // Добавляем 1 параметр
+        strategy.setParam("1", "11");
+        
+        // Добавляем 2 параметр
+        strategy.setParam("2", "22");
+        
+        // Проверяем оба параметра
+        assertTrue("Ошибка в 1 параметре!", strategy.getParam("1").equals("11"));
+        assertTrue("Ошибка в 2 параметре!", strategy.getParam("2").equals("22"));
     }
 }
