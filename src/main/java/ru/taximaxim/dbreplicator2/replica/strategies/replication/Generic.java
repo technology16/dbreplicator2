@@ -51,6 +51,16 @@ public class Generic extends Skeleton implements Strategy {
     private static final Logger LOG = Logger.getLogger(Generic.class);
 
     /**
+     * Размер выборки данных (строк)
+     */
+    private int fetchSize = 1000;
+    
+    /**
+     * Размер сбрасываемых в БД данных (строк)
+     */
+    private int batchSize = 1000;
+
+    /**
      * Конструктор по умолчанию
      */
     public Generic() {
@@ -72,21 +82,26 @@ public class Generic extends Skeleton implements Strategy {
             // Начинаем транзакцию
             sourceConnection.setAutoCommit(false);
             sourceConnection
-            .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-            sourceConnection.setHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT);
+                .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 
             targetConnection.setAutoCommit(true);
             // Извлекаем список последних операций по измененым записям
             try (
                     PreparedStatement selectLastOperations = 
-                    sourceConnection.prepareStatement("SELECT * FROM rep2_workpool_data WHERE id_superlog IN (SELECT MAX(id_superlog) FROM rep2_workpool_data WHERE id_runner=? GROUP BY id_foreign, id_table)");
+                            sourceConnection.prepareStatement("SELECT * FROM rep2_workpool_data WHERE id_superlog IN (SELECT MAX(id_superlog) AS id_superlog FROM rep2_workpool_data WHERE id_runner=? GROUP BY id_foreign, id_table ORDER BY id_superlog) ORDER BY id_superlog", 
+                                    ResultSet.TYPE_FORWARD_ONLY,
+                                    ResultSet.CONCUR_READ_ONLY);
                     PreparedStatement deleteWorkPoolData = 
                             sourceConnection.prepareStatement("DELETE FROM rep2_workpool_data WHERE id_runner=? AND id_foreign=? AND id_table=? AND id_superlog<=?");
                     ) {
                 selectLastOperations.setInt(1, data.getId());
-                try (ResultSet operationsResult = selectLastOperations.executeQuery();) {
+                // Извлекаем частями равными fetchSize 
+                selectLastOperations.setFetchSize(fetchSize);
+                
+                ResultSet operationsResult = selectLastOperations.executeQuery();
+                try {
                     // Проходим по списку измененных записей
-                    while (operationsResult.next()) {
+                    for (int rowsCount = 1; operationsResult.next(); rowsCount++) {
                         String tableName = operationsResult.getString("id_table");
                         List<String> priColsList = JdbcMetadata.getPrimaryColumnsList(sourceConnection, tableName);
                         // Реплицируем данные
@@ -196,7 +211,21 @@ public class Generic extends Skeleton implements Strategy {
                                 }
                             }
                         }
+                        
+                        // Периодически сбрасываем батч в БД
+                        if ((rowsCount % batchSize) == 0) {
+                            deleteWorkPoolData.executeBatch();
+                            sourceConnection.commit();
+                            
+                            // Извлекаем новую порцию данных
+                            operationsResult.close();
+                            operationsResult = selectLastOperations.executeQuery();
+                            
+                            LOG.info(String.format("Обработано %s строк...", rowsCount));
+                        }
                     }
+                } finally {
+                    operationsResult.close();
                 }
                 // Подтверждаем транзакцию
                 deleteWorkPoolData.executeBatch();

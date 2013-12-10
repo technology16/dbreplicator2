@@ -68,11 +68,16 @@ public class Manager implements Strategy {
     public void execute(Connection sourceConnection, Connection targetConnection,
             StrategyModel data) throws StrategyException, SQLException {
         Boolean lastAutoCommit = null;
+        Boolean lastTargetAutoCommit = null;
         try {
             lastAutoCommit = sourceConnection.getAutoCommit();
+            lastTargetAutoCommit = targetConnection.getAutoCommit();
             // Начинаем транзакцию
             sourceConnection.setAutoCommit(false);
             sourceConnection
+                .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+            targetConnection.setAutoCommit(false);
+            targetConnection
                 .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
             // Строим список обработчиков реплик
             BoneCPSettingsModel sourcePool = data.getRunner().getSource();
@@ -80,9 +85,9 @@ public class Manager implements Strategy {
             // Переносим данные
             try (
                     PreparedStatement insertRunnerData = 
-                    sourceConnection.prepareStatement("INSERT INTO rep2_workpool_data (id_runner, id_superlog, id_foreign, id_table, c_operation, c_date, id_transaction, c_errors_count) VALUES (?, ?, ?, ?, ?, ?, ?, 0)");
+                            targetConnection.prepareStatement("INSERT INTO rep2_workpool_data (id_runner, id_superlog, id_foreign, id_table, c_operation, c_date, id_transaction, c_errors_count) VALUES (?, ?, ?, ?, ?, ?, ?, 0)");
                     PreparedStatement deleteSuperLog = 
-                            sourceConnection.prepareStatement("DELETE FROM rep2_superlog WHERE id_superlog=?");
+                            targetConnection.prepareStatement("DELETE FROM rep2_superlog WHERE id_superlog=?");
                     PreparedStatement selectSuperLog = 
                             sourceConnection.prepareStatement("SELECT * FROM rep2_superlog ORDER BY id_superlog");
             ) {
@@ -121,16 +126,16 @@ public class Manager implements Strategy {
                         if ((rowsCount % batchSize) == 0) {
                             insertRunnerData.executeBatch();
                             deleteSuperLog.executeBatch();
-                            sourceConnection.commit();
+                            targetConnection.commit();
                             
                             LOG.info(String.format("Обработано %s строк...", rowsCount));
                         }
                     }
                     insertRunnerData.executeBatch();
                     deleteSuperLog.executeBatch();
+                    // Подтверждаем транзакцию
+                    targetConnection.commit();
                 }
-                // Подтверждаем транзакцию
-                sourceConnection.commit();
             } catch (SQLException e) {
                 // Откатываемся
                 sourceConnection.rollback();
@@ -153,6 +158,15 @@ public class Manager implements Strategy {
             } catch(SQLException e){
                 // Ошибка может возникнуть если во время операции упало соединение к БД
                 LOG.warn("Ошибка при возврате автокомита в исходное состояние.", e);
+            }
+
+            try {
+                if (lastTargetAutoCommit != null) {
+                    targetConnection.setAutoCommit(lastTargetAutoCommit);
+                }
+            } catch(SQLException sqlException){
+                // Ошибка может возникнуть если во время операции упало соединение к БД
+                LOG.warn("Ошибка при возврате автокомита в исходное состояние.", sqlException);
             }
         }
     }
