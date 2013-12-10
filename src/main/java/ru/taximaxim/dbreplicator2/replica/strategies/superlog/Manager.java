@@ -74,7 +74,6 @@ public class Manager implements Strategy {
             sourceConnection.setAutoCommit(false);
             sourceConnection
                 .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-            sourceConnection.setHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT);
             // Строим список обработчиков реплик
             BoneCPSettingsModel sourcePool = data.getRunner().getSource();
 
@@ -123,6 +122,8 @@ public class Manager implements Strategy {
                             insertRunnerData.executeBatch();
                             deleteSuperLog.executeBatch();
                             sourceConnection.commit();
+                            
+                            LOG.info(String.format("Обработано %s строк...", rowsCount));
                         }
                     }
                     insertRunnerData.executeBatch();

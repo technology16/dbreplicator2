@@ -79,8 +79,7 @@ public class FastManager implements Strategy {
             BoneCPSettingsModel sourcePool = data.getRunner().getSource();
             try {
                 sourceConnection
-                .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-                sourceConnection.setHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT);
+                    .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
                 // Строим список обработчиков реплик
 
                 // Переносим данные
@@ -146,6 +145,9 @@ public class FastManager implements Strategy {
                             if ((rowsCount % batchSize) == 0) {
                                 insertRunnerData.executeBatch();
                                 deleteSuperLog.executeBatch();
+                                sourceConnection.commit();
+                                
+                                LOG.info(String.format("Обработано %s строк...", rowsCount));
                             }
                         }
                         insertRunnerData.executeBatch();
