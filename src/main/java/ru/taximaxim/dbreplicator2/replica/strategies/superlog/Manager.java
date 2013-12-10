@@ -122,21 +122,20 @@ public class Manager implements Strategy {
                         if ((rowsCount % batchSize) == 0) {
                             insertRunnerData.executeBatch();
                             deleteSuperLog.executeBatch();
+                            sourceConnection.commit();
                         }
                     }
                     insertRunnerData.executeBatch();
                     deleteSuperLog.executeBatch();
                 }
-
+                // Подтверждаем транзакцию
+                sourceConnection.commit();
             } catch (SQLException e) {
                 // Откатываемся
                 sourceConnection.rollback();
                 // Пробрасываем ошибку на уровень выше
                 throw e;
             }
-            // Подтверждаем транзакцию
-            sourceConnection.commit();
-            sourceConnection.setAutoCommit(lastAutoCommit);
             // Запускаем обработчики реплик
             for (RunnerModel runner : sourcePool.getRunners()) {
                 // Пока синхронный запуск!

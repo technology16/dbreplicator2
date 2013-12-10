@@ -150,6 +150,7 @@ public class FastManager implements Strategy {
                         }
                         insertRunnerData.executeBatch();
                         deleteSuperLog.executeBatch();
+                        sourceConnection.commit();
                     }
                 }
                 // Подтверждаем транзакцию
