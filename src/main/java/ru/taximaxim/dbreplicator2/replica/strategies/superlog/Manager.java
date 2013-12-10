@@ -49,6 +49,16 @@ public class Manager implements Strategy {
     private static final Logger LOG = Logger.getLogger(Manager.class);
 
     /**
+     * Размер выборки данных (строк)
+     */
+    private int fetchSize = 1000;
+    
+    /**
+     * Размер сбрасываемых в БД данных (строк)
+     */
+    private int batchSize = 1000;
+
+    /**
      * Конструктор по умолчанию
      */
     public Manager() {
@@ -77,9 +87,9 @@ public class Manager implements Strategy {
                     PreparedStatement selectSuperLog = 
                             sourceConnection.prepareStatement("SELECT * FROM rep2_superlog ORDER BY id_superlog");
             ) {
-                selectSuperLog.setFetchSize(1000);
+                selectSuperLog.setFetchSize(fetchSize);
                 try (ResultSet superLogResult = selectSuperLog.executeQuery();) {
-                    while (superLogResult.next()) {
+                    for (int rowsCount = 1; superLogResult.next(); rowsCount++) {
                         // Копируем записи
                         // Проходим по списку слушателей текущей таблицы
                         for (TableModel table : sourcePool.getTables()) {
@@ -107,6 +117,12 @@ public class Manager implements Strategy {
                         // Удаляем исходную запись
                         deleteSuperLog.setLong(1, superLogResult.getLong("id_superlog"));
                         deleteSuperLog.addBatch();
+                        
+                        // Периодически сбрасываем батч в БД
+                        if ((rowsCount % batchSize) == 0) {
+                            insertRunnerData.executeBatch();
+                            deleteSuperLog.executeBatch();
+                        }
                     }
                     insertRunnerData.executeBatch();
                     deleteSuperLog.executeBatch();
