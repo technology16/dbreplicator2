@@ -56,7 +56,7 @@ public class StrategyModel {
     private String className;
 
     /**
-     * Параметр
+     * Параметры
      */
     @Column(length=2000)
     private String param;
@@ -127,14 +127,14 @@ public class StrategyModel {
     }
 
     /**
-     * @see StrategyModel#param
+     * Получение параметра по ключу
      */
     public String getParam(String key) {
         return getProp().getProperty(key);
     }
 
     /**
-     * @see StrategyModel#param
+     * Запись параметра по ключу
      */
     public void setParam(String key, String value) {
         getProp().put(key, value);
