@@ -23,6 +23,8 @@
 
 package ru.taximaxim.dbreplicator2;
 
+import static org.junit.Assert.*;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -42,6 +44,7 @@ import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.model.RunnerService;
+import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
 import ru.taximaxim.dbreplicator2.utils.Core;
 
@@ -320,6 +323,24 @@ public class H2CopyTableDataTest {
         listSource = Helper.InfoTest(conn, "t_table1");
         listDest   = Helper.InfoTest(connDest, "t_table1");
         Helper.AssertEquals(listSource, listDest);
+    }
+    
+    /**
+     * Проверка чтения параметров стратегии 
+     */
+    @Test
+    public void paramTest(){
+        RunnerService runnerService = new RunnerService(sessionFactory);
+        List<StrategyModel> strategyModels = runnerService.getRunner(1).getStrategyModels();
+        boolean hasStrategy = false;
+        for (StrategyModel strategyModel: strategyModels) {
+            if (strategyModel.getId()==1) {
+                assertTrue("Ошибка в параметре key1 стратегии 1!", strategyModel.getParam("key1").equals("value1"));
+                assertTrue("Ошибка в параметре key2 стратегии 1!", strategyModel.getParam("key2").equals("'value2'"));
+                hasStrategy = true;
+            }
+        }
+        assertTrue("В раннере 1 отсутствует стратегия 1!", hasStrategy);
     }
     
     /**

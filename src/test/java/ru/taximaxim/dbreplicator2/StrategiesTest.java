@@ -22,6 +22,8 @@
  */
 package ru.taximaxim.dbreplicator2;
 
+import static org.junit.Assert.*;
+
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -64,7 +66,7 @@ public class StrategiesTest {
 
         RunnerModel runner = createRunner(new BoneCPSettingsModel(), new BoneCPSettingsModel(),
                 "Описание исполняемого потока");
-        StrategyModel strategy = createStrategy("ru.taximaxim.Class", null,
+        StrategyModel strategy = createStrategy("ru.taximaxim.Class", "key", "value",
                 true, 100);
 
         Assert.assertNull(runner.getId());
@@ -87,7 +89,7 @@ public class StrategiesTest {
 
         RunnerModel runner2 = createRunner(new BoneCPSettingsModel(), new BoneCPSettingsModel(),
                 "Описание исполняемого потока (2)");
-        StrategyModel strategy2 = createStrategy("ru.taximaxim.Class", null,
+        StrategyModel strategy2 = createStrategy("ru.taximaxim.Class", "key", "value",
                 true, 100);
         addStrategy(runner2, strategy2);
 
@@ -110,13 +112,13 @@ public class StrategiesTest {
         return runner;
     }
 
-    public StrategyModel createStrategy(String className, String param,
+    public StrategyModel createStrategy(String className, String key, String value,
             boolean isEnabled, int priority) {
 
         StrategyModel strategy = new StrategyModel();
 
         strategy.setClassName(className);
-        strategy.setParam(param);
+        strategy.setParam(key, value);
         strategy.setEnabled(isEnabled);
         strategy.setPriority(priority);
 
@@ -128,5 +130,23 @@ public class StrategiesTest {
         runner.getStrategyModels().add(strategy);
         strategy.setRunner(runner);
 
+    }
+    
+    /**
+     * Тестирование работы механизма хранения многострочных параметров    
+     */
+    @Test
+    public void paramTest(){
+        StrategyModel strategy = new StrategyModel();
+
+        // Добавляем 1 параметр
+        strategy.setParam("1", "11");
+        
+        // Добавляем 2 параметр
+        strategy.setParam("2", "22");
+        
+        // Проверяем оба параметра
+        assertTrue("Ошибка в 1 параметре!", strategy.getParam("1").equals("11"));
+        assertTrue("Ошибка в 2 параметре!", strategy.getParam("2").equals("22"));
     }
 }

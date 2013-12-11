@@ -22,6 +22,13 @@
  */
 package ru.taximaxim.dbreplicator2.model;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.Properties;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -30,10 +37,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.apache.log4j.Logger;
+
 @Entity
 @Table(name = "strategies")
 public class StrategyModel {
-
+    
     /**
      * Идентификатор стратегии
      */
@@ -47,8 +56,9 @@ public class StrategyModel {
     private String className;
 
     /**
-     * Параметр
+     * Параметры
      */
+    @Column(length=2000)
     private String param;
 
     /**
@@ -61,6 +71,12 @@ public class StrategyModel {
      */
     private int priority;
 
+    /**
+     * Настройки
+    */
+    private Properties prop;
+    
+    
     /**
      * Поток исполнитель, которому принадлежит стратегия
      */
@@ -111,17 +127,21 @@ public class StrategyModel {
     }
 
     /**
-     * @see StrategyModel#param
+     * Получение параметра по ключу
      */
-    public String getParam() {
-        return param;
+    public String getParam(String key) {
+        return getProp().getProperty(key);
     }
 
     /**
-     * @see StrategyModel#param
+     * Запись параметра по ключу
      */
-    public void setParam(String param) {
-        this.param = param;
+    public void setParam(String key, String value) {
+        getProp().put(key, value);
+        
+        StringWriter writer = new StringWriter();
+        prop.list(new PrintWriter(writer));
+        this.param =  writer.getBuffer().toString();
     }
 
     /**
@@ -150,5 +170,23 @@ public class StrategyModel {
      */
     public void setPriority(int priority) {
         this.priority = priority;
+    }
+    
+    /**
+     * Получение настроек
+     * @return
+     */
+    private Properties getProp(){
+        if(this.prop == null) {
+            this.prop = new Properties();
+            if(param != null){
+                try {
+                    this.prop.load(new StringReader(param));
+                } catch (IOException e) {
+                    Logger.getLogger("StrategyModel").error("Ошибка при чтение параметров [" + param + "]!", e);
+                }
+            }
+        }
+        return this.prop;
     }
 }
