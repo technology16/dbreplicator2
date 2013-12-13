@@ -64,13 +64,11 @@ public final class JdbcMetadata {
         // Получаем список колонок
         List<String> colsList = new ArrayList<String>();
         DatabaseMetaData metaData = connection.getMetaData();
-        ResultSet colsResultSet = metaData.getColumns(null, null, tableName, null);
-        try {
+        
+        try (ResultSet colsResultSet = metaData.getColumns(null, null, tableName, null);) {
             while (colsResultSet.next()) {
                 colsList.add(colsResultSet.getString("COLUMN_NAME").toUpperCase());
             }
-        } finally {
-            colsResultSet.close();
         }
 
         return colsList;
@@ -114,14 +112,11 @@ public final class JdbcMetadata {
         // Получаем список ключевых колонок
         List<String> primaryKeyColsList = new ArrayList<String>();
         DatabaseMetaData metaData = connection.getMetaData();
-        ResultSet primaryKeysResultSet = null;
-        primaryKeysResultSet = metaData.getPrimaryKeys(null, null, tableName);
-        try {
+        
+        try (ResultSet primaryKeysResultSet = metaData.getPrimaryKeys(null, null, tableName);) {
             while (primaryKeysResultSet.next()) {
                 primaryKeyColsList.add(primaryKeysResultSet.getString("COLUMN_NAME").toUpperCase());
             }
-        } finally {
-            primaryKeysResultSet.close();
         }
 
         return primaryKeyColsList;
@@ -142,15 +137,12 @@ public final class JdbcMetadata {
         // Получаем список колонок
         List<String> colsList = new ArrayList<String>();
         DatabaseMetaData metaData = connection.getMetaData();
-        ResultSet colsResultSet = metaData.getColumns(null, null, tableName, null);
-        try {
+        try (ResultSet colsResultSet = metaData.getColumns(null, null, tableName, null);) {
             while (colsResultSet.next()) {
                 if (colsResultSet.getString("IS_AUTOINCREMENT").equalsIgnoreCase("YES")) {
                     colsList.add(colsResultSet.getString("COLUMN_NAME").toUpperCase());
                 }
             }
-        } finally {
-            colsResultSet.close();
         }
 
         return colsList;
@@ -172,15 +164,12 @@ public final class JdbcMetadata {
         // Получаем список колонок
         Set<String> cols = new HashSet<String>();
         DatabaseMetaData metaData = connection.getMetaData();
-        ResultSet colsResultSet = metaData.getColumns(null, null, tableName, null);
-        try {
+        try (ResultSet colsResultSet = metaData.getColumns(null, null, tableName, null);) {
             while (colsResultSet.next()) {
                 if (colsResultSet.getString("IS_NULLABLE").equalsIgnoreCase("YES")) {
                     cols.add(colsResultSet.getString("COLUMN_NAME").toUpperCase());
                 }
             }
-        } finally {
-            colsResultSet.close();
         }
 
         return cols;

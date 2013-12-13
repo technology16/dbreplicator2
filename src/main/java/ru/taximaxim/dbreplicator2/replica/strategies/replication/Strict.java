@@ -94,7 +94,7 @@ public class Strict extends Skeleton implements Strategy {
                     PreparedStatement deleteWorkPoolData = 
                             sourceConnection.prepareStatement("DELETE FROM rep2_workpool_data WHERE id_runner=? AND id_foreign=? AND id_table=? AND id_superlog<=?");
                     ) {
-                selectLastOperations.setInt(1, data.getId());
+                selectLastOperations.setInt(1, data.getRunner().getId());
                 // Извлекаем частями равными fetchSize 
                 selectLastOperations.setFetchSize(fetchSize);
                 
