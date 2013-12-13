@@ -33,7 +33,9 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author volodin_aa
@@ -124,6 +126,7 @@ public final class JdbcMetadata {
 
         return primaryKeyColsList;
     }
+    
     /**
      * Функция получения списка AUTO INCREMENT колонок таблицы на основе метаданных БД
      * 
@@ -151,6 +154,36 @@ public final class JdbcMetadata {
         }
 
         return colsList;
+    }
+    
+    /**
+     * Функция получения набора колонок таблицы с возможностью вставки значений 
+     * NULL на основе метаданных БД
+     * 
+     * @param connection
+     *            соединение к целевой БД
+     * @param tableName
+     *            имя таблицы
+     * @return набор колонок таблицы с возможностью вставки значений NULL
+     * @throws SQLException
+     */
+    public static Set<String> getNullableColumns(Connection connection,
+            String tableName) throws SQLException {
+        // Получаем список колонок
+        Set<String> cols = new HashSet<String>();
+        DatabaseMetaData metaData = connection.getMetaData();
+        ResultSet colsResultSet = metaData.getColumns(null, null, tableName, null);
+        try {
+            while (colsResultSet.next()) {
+                if (colsResultSet.getString("IS_NULLABLE").equalsIgnoreCase("YES")) {
+                    cols.add(colsResultSet.getString("COLUMN_NAME").toUpperCase());
+                }
+            }
+        } finally {
+            colsResultSet.close();
+        }
+
+        return cols;
     }
 
 }
