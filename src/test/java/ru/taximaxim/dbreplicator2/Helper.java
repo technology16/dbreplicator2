@@ -78,7 +78,7 @@ public class Helper {
                 
                 //==============================
                 // игнорируемая колонка
-                assertTrue(String.format("Ошибка в поле _string [%s == %s]", listSource.get(i)._string, listDest.get(i)._string), 
+                assertTrue(String.format("Ошибка в поле _string [%s != %s]", listSource.get(i)._string, listDest.get(i)._string), 
                         listSource.get(i)._string != listDest.get(i)._string);
                 //==============================
                 
@@ -356,6 +356,13 @@ public class Helper {
         connection.commit();
     }
     
+    protected static void executeSqlFromSql(Connection connection, String sql, String name) throws IOException, SQLException{
+        PreparedStatement statement = connection.prepareStatement(sql);
+        statement.setString(1, name);
+        statement.execute();
+        connection.commit();
+    }
+    
     protected static void executeSqlFromFiles(Connection connection, String[] fileNames) throws IOException, SQLException{
         for (String fileName : fileNames) {
             executeSqlFromFile(connection, fileName);
@@ -417,14 +424,21 @@ public class Helper {
                 operation = "D";
                 id_foreign = oldRow[0];
             }
+            String id_pool = "";
+            PreparedStatement prep2 = conn.prepareStatement("SELECT _value FROM T_TAB");
+            ResultSet sourceResultSet = prep2.executeQuery();
+            while (sourceResultSet.next()) {
+                id_pool =  sourceResultSet.getString("_value");
+            }
             
             PreparedStatement prep = conn.prepareStatement("INSERT INTO rep2_superlog "
-                    + "(id_foreign, id_table, c_operation, c_date, id_transaction)"
-                    + " VALUES(?, ?, ?, now(), ?)");
+                    + "(id_foreign, id_table, c_operation, c_date, id_transaction, id_pool)"
+                    + " VALUES(?, ?, ?, now(), ?, ?)");
             prep.setObject(1, id_foreign);
             prep.setObject(2, tableName);
             prep.setObject(3, operation);
             prep.setObject(4, 0);
+            prep.setObject(5, id_pool);
             prep.execute();
         }
 

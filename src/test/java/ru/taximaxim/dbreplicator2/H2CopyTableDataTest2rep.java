@@ -23,8 +23,6 @@
 
 package ru.taximaxim.dbreplicator2;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -36,15 +34,14 @@ import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.model.RunnerService;
-import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
 import ru.taximaxim.dbreplicator2.utils.Core;
 
@@ -59,7 +56,7 @@ import ru.taximaxim.dbreplicator2.utils.Core;
  * @author volodin_aa
  *
  */
-public class H2CopyTableDataTest {
+public class H2CopyTableDataTest2rep {
     protected static final Logger LOG = Logger.getLogger(H2CopyTableDataTest.class);
     protected static SessionFactory sessionFactory;
     protected static Session session;
@@ -90,75 +87,6 @@ public class H2CopyTableDataTest {
         Core.sessionFactoryClose();
     }
     
-
-    /**
-     * Проверка Супер логов
-     * @throws SQLException
-     * @throws ClassNotFoundException
-     * @throws IOException
-     * @throws InterruptedException 
-     */
-    @Test
-    public void testTableDataTest() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
-
-        Helper.executeSqlFromFile(conn, "importSourceData.sql");
-        worker.run();
-        Thread.sleep(500);
-        
-        int count_rep2_superlog = Helper.InfoCount(conn, "rep2_superlog");
-        if(count_rep2_superlog!=0) {
-            LOG.error("Таблица rep2_superlog должна быть пустой: count = " + count_rep2_superlog);
-        }
-        Assert.assertEquals(count_rep2_superlog, 0);
-
-        int count_rep2_workpool_data = Helper.InfoCount(conn, "rep2_workpool_data");
-        if(count_rep2_workpool_data!=0) {
-            LOG.error("Таблица rep2_workpool_data должна быть пустой: count = " + count_rep2_workpool_data);
-        }
-        Assert.assertEquals(count_rep2_workpool_data, 0);
-        
-        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
-        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
-        Helper.AssertEquals(listSource, listDest);
-        
-        LOG.info("<======Inception======>");
-        Helper.InfoList(listSource);
-        LOG.info("=======Inception=======");
-        Helper.InfoList(listDest);
-        LOG.info(">======Inception======<");
-    }
-    
-    /**
-     * Тестирование null значений в разных типах
-     * @throws SQLException
-     * @throws ClassNotFoundException
-     * @throws IOException
-     * @throws InterruptedException 
-     */
-    @Test
-    public void testNull() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
-        //Проверка null
-        LOG.info("Проверка null");
-        Helper.executeSqlFromFile(conn, "sql_null.sql");   
-        worker.run();
-        Thread.sleep(500);
-        
-        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table4");
-        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table4");
-        
-        Helper.AssertEqualsNull(listSource, listDest);
-//
-        listSource = Helper.InfoTest(conn, "t_table5");
-        listDest   = Helper.InfoTest(connDest, "t_table5");
-        Helper.AssertEqualsNull(listSource, listDest);
-        
-        Helper.InfoNull(conn, "t_table4", 1);
-        Helper.InfoNull(conn, "t_table5", 2);
-
-        Helper.InfoNull(connDest, "t_table4", 1);
-        Helper.InfoNull(connDest, "t_table5", 2);
-    }
-    
     /**
      * Проверка внешних ключей
      * вставка в главную таблицу  
@@ -182,8 +110,22 @@ public class H2CopyTableDataTest {
         LOG.info("Проверка внешних ключей");
         Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
         
-        worker.run();
-        Thread.sleep(500);
+        workerRun();
+        Thread.sleep(1500);
+        Helper.executeSqlFromFile(connDest,  "sql_foreign_key2.sql");
+        workerRun2();
+        
+        workerRun();
+        workerRun2();
+        
+        workerRun();
+        workerRun2();
+        
+        workerRun();
+        workerRun2();
+        
+        workerRun();
+        workerRun2();
         
         // Выводим данные из rep2_superlog_table
         try (PreparedStatement select = 
@@ -197,7 +139,7 @@ public class H2CopyTableDataTest {
         }
         
         errorsCountWatchdogWorker.run();
-        worker.run();
+        workerRun();
         Thread.sleep(500);
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table2");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table2");
@@ -206,29 +148,26 @@ public class H2CopyTableDataTest {
         listSource = Helper.InfoTest(conn, "t_table3");
         listDest   = Helper.InfoTest(connDest, "t_table3");
         Helper.AssertEquals(listSource, listDest);
-    }
-    
-    /**
-     * Проверка вставки 
-     * @throws SQLException
-     * @throws ClassNotFoundException
-     * @throws IOException
-     * @throws InterruptedException 
-     */
-    @Test
-    public void testInsert() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
-      //Проверка вставки
-        Helper.executeSqlFromFile(conn, "sql_insert.sql");   
-        worker.run();
-        Thread.sleep(500);
-        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
-        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
+        
+        listSource = Helper.InfoTest(conn, "t_table2");
+        listDest   = Helper.InfoTest(connDest, "t_table2");
         Helper.AssertEquals(listSource, listDest);
         
-        listSource = Helper.InfoTest(conn, "t_table1");
-        listDest   = Helper.InfoTest(connDest, "t_table1");
+        listSource = Helper.InfoTest(conn, "t_table3");
+        listDest   = Helper.InfoTest(connDest, "t_table3");
         Helper.AssertEquals(listSource, listDest);
-    }
+        
+        listSource = Helper.InfoTest(conn, "t_table4");
+        listDest   = Helper.InfoTest(connDest, "t_table4");
+        Helper.AssertEquals(listSource, listDest);
+        
+        listSource = Helper.InfoTest(conn, "t_table5");
+        listDest   = Helper.InfoTest(connDest, "t_table5");
+        Helper.AssertEquals(listSource, listDest);
+        
+        workerEnd();
+        workerEnd2();
+    }    
     
     /**
      * Проверка обновления
@@ -243,8 +182,23 @@ public class H2CopyTableDataTest {
         //Проверка обновления
         LOG.info("Проверка обновления");
         Helper.executeSqlFromFile(conn, "sql_update.sql");   
-        worker.run();
-        Thread.sleep(500);
+        workerRun();
+        Thread.sleep(1500);
+        Helper.executeSqlFromFile(connDest,  "sql_update2.sql");     
+        workerRun2();
+        
+        workerRun();
+        workerRun2();
+        
+        workerRun();
+        workerRun2();
+        
+        workerRun();
+        workerRun2();
+        
+        workerRun();
+        workerRun2();
+        
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
         Helper.AssertEquals(listSource, listDest);
@@ -252,6 +206,25 @@ public class H2CopyTableDataTest {
         listSource = Helper.InfoTest(conn, "t_table1");
         listDest   = Helper.InfoTest(connDest, "t_table1");
         Helper.AssertEquals(listSource, listDest);
+        
+        listSource = Helper.InfoTest(conn, "t_table2");
+        listDest   = Helper.InfoTest(connDest, "t_table2");
+        Helper.AssertEquals(listSource, listDest);
+        
+        listSource = Helper.InfoTest(conn, "t_table3");
+        listDest   = Helper.InfoTest(connDest, "t_table3");
+        Helper.AssertEquals(listSource, listDest);
+        
+        listSource = Helper.InfoTest(conn, "t_table4");
+        listDest   = Helper.InfoTest(connDest, "t_table4");
+        Helper.AssertEquals(listSource, listDest);
+        
+        listSource = Helper.InfoTest(conn, "t_table5");
+        listDest   = Helper.InfoTest(connDest, "t_table5");
+        Helper.AssertEquals(listSource, listDest);
+        
+        workerEnd();
+        workerEnd2();
     }
     
     /**
@@ -267,8 +240,23 @@ public class H2CopyTableDataTest {
         LOG.info("Проверка удаления");
         //Проверка удаления
         Helper.executeSqlFromFile(conn, "sql_delete.sql");   
-        worker.run();
-        Thread.sleep(500);
+        workerRun();
+        Thread.sleep(1500);
+        Helper.executeSqlFromFile(connDest, "sql_delete.sql");    
+        workerRun2();
+        
+        workerRun();
+        workerRun2();
+        
+        workerRun();
+        workerRun2();
+        
+        workerRun();
+        workerRun2();
+        
+        workerRun();
+        workerRun2();
+        
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
         Helper.AssertEquals(listSource, listDest);
@@ -276,6 +264,25 @@ public class H2CopyTableDataTest {
         listSource = Helper.InfoTest(conn, "t_table1");
         listDest   = Helper.InfoTest(connDest, "t_table1");
         Helper.AssertEquals(listSource, listDest);
+        
+        listSource = Helper.InfoTest(conn, "t_table2");
+        listDest   = Helper.InfoTest(connDest, "t_table2");
+        Helper.AssertEquals(listSource, listDest);
+        
+        listSource = Helper.InfoTest(conn, "t_table3");
+        listDest   = Helper.InfoTest(connDest, "t_table3");
+        Helper.AssertEquals(listSource, listDest);
+        
+        listSource = Helper.InfoTest(conn, "t_table4");
+        listDest   = Helper.InfoTest(connDest, "t_table4");
+        Helper.AssertEquals(listSource, listDest);
+        
+        listSource = Helper.InfoTest(conn, "t_table5");
+        listDest   = Helper.InfoTest(connDest, "t_table5");
+        Helper.AssertEquals(listSource, listDest);
+        
+        workerEnd();
+        workerEnd2();
     }
     
     /**
@@ -285,14 +292,30 @@ public class H2CopyTableDataTest {
      * @throws IOException
      * @throws InterruptedException 
      */
-    @Test
+    @Test//error//TODO
     public void testInsertUpdate() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
       //Проверка вставки и обновления
         LOG.info("Проверка вставки и обновления");
         Helper.executeSqlFromFile(conn, "sql_insert.sql");   
         Helper.executeSqlFromFile(conn, "sql_update.sql");   
-        worker.run();
-        Thread.sleep(500);
+        workerRun();
+        Thread.sleep(1500);
+        //Helper.executeSqlFromFile(connDest, "sql_insert.sql");   
+        Helper.executeSqlFromFile(connDest, "sql_update2.sql");  
+        workerRun2();
+        
+        workerRun();
+        workerRun2();
+        
+        workerRun();
+        workerRun2();
+        
+        workerRun();
+        workerRun2();
+        
+        workerRun();
+        workerRun2();
+        
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
         Helper.AssertEquals(listSource, listDest);
@@ -300,6 +323,25 @@ public class H2CopyTableDataTest {
         listSource = Helper.InfoTest(conn, "t_table1");
         listDest   = Helper.InfoTest(connDest, "t_table1");
         Helper.AssertEquals(listSource, listDest);
+        
+        listSource = Helper.InfoTest(conn, "t_table2");
+        listDest   = Helper.InfoTest(connDest, "t_table2");
+        Helper.AssertEquals(listSource, listDest);
+        
+        listSource = Helper.InfoTest(conn, "t_table3");
+        listDest   = Helper.InfoTest(connDest, "t_table3");
+        Helper.AssertEquals(listSource, listDest);
+        
+        listSource = Helper.InfoTest(conn, "t_table4");
+        listDest   = Helper.InfoTest(connDest, "t_table4");
+        Helper.AssertEquals(listSource, listDest);
+        
+        listSource = Helper.InfoTest(conn, "t_table5");
+        listDest   = Helper.InfoTest(connDest, "t_table5");
+        Helper.AssertEquals(listSource, listDest);
+        
+        workerEnd();
+        workerEnd2();
     }
     
     /**
@@ -315,8 +357,24 @@ public class H2CopyTableDataTest {
       //Проверка вставки и удаления
         Helper.executeSqlFromFile(conn, "sql_insert.sql");   
         Helper.executeSqlFromFile(conn, "sql_delete.sql");   
-        worker.run();
-        Thread.sleep(500);
+        workerRun();
+        Thread.sleep(1500);
+        Helper.executeSqlFromFile(connDest, "sql_insert.sql");   
+        Helper.executeSqlFromFile(connDest, "sql_delete.sql");   
+        workerRun2();
+        
+        workerRun();
+        workerRun2();
+        
+        workerRun();
+        workerRun2();
+        
+        workerRun();
+        workerRun2();
+        
+        workerRun();
+        workerRun2();
+        
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
         Helper.AssertEquals(listSource, listDest);
@@ -324,24 +382,25 @@ public class H2CopyTableDataTest {
         listSource = Helper.InfoTest(conn, "t_table1");
         listDest   = Helper.InfoTest(connDest, "t_table1");
         Helper.AssertEquals(listSource, listDest);
-    }
-    
-    /**
-     * Проверка чтения параметров стратегии 
-     */
-    @Test
-    public void paramTest(){
-        RunnerService runnerService = new RunnerService(sessionFactory);
-        List<StrategyModel> strategyModels = runnerService.getRunner(1).getStrategyModels();
-        boolean hasStrategy = false;
-        for (StrategyModel strategyModel: strategyModels) {
-            if (strategyModel.getId()==1) {
-                assertTrue("Ошибка в параметре key1 стратегии 1!", strategyModel.getParam("key1").equals("value1"));
-                assertTrue("Ошибка в параметре key2 стратегии 1!", strategyModel.getParam("key2").equals("'value2'"));
-                hasStrategy = true;
-            }
-        }
-        assertTrue("В раннере 1 отсутствует стратегия 1!", hasStrategy);
+        
+        listSource = Helper.InfoTest(conn, "t_table2");
+        listDest   = Helper.InfoTest(connDest, "t_table2");
+        Helper.AssertEquals(listSource, listDest);
+        
+        listSource = Helper.InfoTest(conn, "t_table3");
+        listDest   = Helper.InfoTest(connDest, "t_table3");
+        Helper.AssertEquals(listSource, listDest);
+        
+        listSource = Helper.InfoTest(conn, "t_table4");
+        listDest   = Helper.InfoTest(connDest, "t_table4");
+        Helper.AssertEquals(listSource, listDest);
+        
+        listSource = Helper.InfoTest(conn, "t_table5");
+        listDest   = Helper.InfoTest(connDest, "t_table5");
+        Helper.AssertEquals(listSource, listDest);
+        
+        workerEnd();
+        workerEnd2();
     }
     
     /**
@@ -363,6 +422,86 @@ public class H2CopyTableDataTest {
         RunnerService runnerService = new RunnerService(sessionFactory);
 
         worker = new WorkerThread(runnerService.getRunner(1));
+        worker2 = new WorkerThread(runnerService.getRunner(2));
         errorsCountWatchdogWorker = new WorkerThread(runnerService.getRunner(6));
+    }
+
+    /**
+     * Проверка вставки 
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     * @throws IOException
+     * @throws InterruptedException 
+     */
+    @Test
+    public void testInsert() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
+      //Проверка вставки
+        Helper.executeSqlFromFile(conn, "sql_insert.sql");
+        workerRun();
+        Thread.sleep(1500);
+        //Helper.executeSqlFromFile(connDest, "sql_insert.sql"); 
+        workerRun2();
+        
+       // Helper.executeSqlFromSql(conn, "UPDATE T_TAB SET _value = ?", "source");
+       // Helper.executeSqlFromSql(conn, "UPDATE T_TAB SET _value = ?", "dest");
+        
+        workerRun();
+        workerRun2();
+        
+        workerRun();
+        workerRun2();
+        
+        workerRun();
+        workerRun2();
+        
+        workerRun();
+        workerRun2();
+        
+        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
+        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
+        Helper.AssertEquals(listSource, listDest);
+        
+        listSource = Helper.InfoTest(conn, "t_table1");
+        listDest   = Helper.InfoTest(connDest, "t_table1");
+        Helper.AssertEquals(listSource, listDest);
+        
+        listSource = Helper.InfoTest(conn, "t_table2");
+        listDest   = Helper.InfoTest(connDest, "t_table2");
+        Helper.AssertEquals(listSource, listDest);
+        
+        listSource = Helper.InfoTest(conn, "t_table3");
+        listDest   = Helper.InfoTest(connDest, "t_table3");
+        Helper.AssertEquals(listSource, listDest);
+        
+        listSource = Helper.InfoTest(conn, "t_table4");
+        listDest   = Helper.InfoTest(connDest, "t_table4");
+        Helper.AssertEquals(listSource, listDest);
+        
+        listSource = Helper.InfoTest(conn, "t_table5");
+        listDest   = Helper.InfoTest(connDest, "t_table5");
+        Helper.AssertEquals(listSource, listDest);
+        
+        workerEnd();
+        workerEnd2();
+    }
+    
+    public void workerRun() throws IOException, SQLException, InterruptedException{
+        worker.run();
+        Helper.executeSqlFromSql(conn, "UPDATE T_TAB SET _value = ?", "dest");
+        Thread.sleep(500);
+    }
+    
+    public void workerRun2() throws IOException, SQLException, InterruptedException{
+        worker2.run();
+        Helper.executeSqlFromSql(connDest, "UPDATE T_TAB SET _value = ?", "source");
+        Thread.sleep(500);
+    }
+    
+    public void workerEnd() throws IOException, SQLException, InterruptedException{
+        Helper.executeSqlFromSql(conn, "UPDATE T_TAB SET _value = ?", "");
+    }
+    
+    public void workerEnd2() throws IOException, SQLException, InterruptedException{
+        Helper.executeSqlFromSql(connDest, "UPDATE T_TAB SET _value = ?", "");
     }
 }

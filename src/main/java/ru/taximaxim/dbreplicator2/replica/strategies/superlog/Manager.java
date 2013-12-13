@@ -100,21 +100,23 @@ public class Manager implements Strategy {
                             if (table.getName()
                                     .equalsIgnoreCase(superLogResult.getString("id_table"))){
                                 for (RunnerModel runner : table.getRunners()) {
-                                    insertRunnerData.setInt(1,
-                                            runner.getId());
-                                    insertRunnerData.setLong(2,
-                                            superLogResult.getLong("id_superlog"));
-                                    insertRunnerData.setInt(3,
-                                            superLogResult.getInt("id_foreign"));
-                                    insertRunnerData.setString(4,
-                                            superLogResult.getString("id_table"));
-                                    insertRunnerData.setString(5,
-                                            superLogResult.getString("c_operation"));
-                                    insertRunnerData.setTimestamp(6,
-                                            superLogResult.getTimestamp("c_date"));
-                                    insertRunnerData.setString(7,
-                                            superLogResult.getString("id_transaction"));
-                                    insertRunnerData.addBatch();
+                                    if(!superLogResult.getString("id_pool").equals(runner.getTarget().getPoolId())) {
+                                        insertRunnerData.setInt(1,
+                                                runner.getId());
+                                        insertRunnerData.setLong(2,
+                                                superLogResult.getLong("id_superlog"));
+                                        insertRunnerData.setInt(3,
+                                                superLogResult.getInt("id_foreign"));
+                                        insertRunnerData.setString(4,
+                                                superLogResult.getString("id_table"));
+                                        insertRunnerData.setString(5,
+                                                superLogResult.getString("c_operation"));
+                                        insertRunnerData.setTimestamp(6,
+                                                superLogResult.getTimestamp("c_date"));
+                                        insertRunnerData.setString(7,
+                                                superLogResult.getString("id_transaction"));
+                                        insertRunnerData.addBatch();
+                                    }
                                 }
                             }
                         }

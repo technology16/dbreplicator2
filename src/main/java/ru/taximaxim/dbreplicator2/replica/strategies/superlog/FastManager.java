@@ -56,12 +56,12 @@ public class FastManager implements Strategy {
      * Размер выборки данных (строк)
      */
     private int fetchSize = 1000;
-    
+
     /**
      * Размер сбрасываемых в БД данных (строк)
      */
     private int batchSize = 1000;
-    
+
     /**
      * Конструктор по умолчанию
      */
@@ -82,20 +82,15 @@ public class FastManager implements Strategy {
             BoneCPSettingsModel sourcePool = data.getRunner().getSource();
             try {
                 sourceConnection
-                    .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+                        .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
                 targetConnection
-                    .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+                        .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
                 // Строим список обработчиков реплик
 
                 // Переносим данные
-                try (
-                        PreparedStatement insertRunnerData = 
-                                targetConnection.prepareStatement("INSERT INTO rep2_workpool_data (id_runner, id_superlog, id_foreign, id_table, c_operation, c_date, id_transaction, c_errors_count) VALUES (?, ?, ?, ?, ?, ?, ?, 0)");
-                        PreparedStatement deleteSuperLog = 
-                                targetConnection.prepareStatement("DELETE FROM rep2_superlog WHERE id_superlog=?");
-                        PreparedStatement selectSuperLog = 
-                                sourceConnection.prepareStatement("SELECT * FROM rep2_superlog ORDER BY id_superlog");
-                        ) {
+                try (PreparedStatement insertRunnerData = targetConnection.prepareStatement("INSERT INTO rep2_workpool_data (id_runner, id_superlog, id_foreign, id_table, c_operation, c_date, id_transaction, c_errors_count) VALUES (?, ?, ?, ?, ?, ?, ?, 0)");
+                     PreparedStatement deleteSuperLog = targetConnection.prepareStatement("DELETE FROM rep2_superlog WHERE id_superlog=?");
+                     PreparedStatement selectSuperLog = sourceConnection.prepareStatement("SELECT * FROM rep2_superlog ORDER BY id_superlog");) {
                     selectSuperLog.setFetchSize(fetchSize);
                     try (ResultSet superLogResult = selectSuperLog.executeQuery();) {
                         List<String> cols = new ArrayList<String>();
@@ -105,6 +100,7 @@ public class FastManager implements Strategy {
                         cols.add("c_operation");
                         cols.add("c_date");
                         cols.add("id_transaction");
+
                         for (int rowsCount = 1; superLogResult.next(); rowsCount++) {
                             // Выводим данные из rep2_superlog_table
                             if (LOG.isDebugEnabled()) {
@@ -114,44 +110,42 @@ public class FastManager implements Strategy {
                             // Проходим по списку слушателей текущей таблицы
                             for (TableModel table : sourcePool.getTables()) {
                                 if (LOG.isDebugEnabled()) {
-                                    LOG.debug(table.getName() + " id: " + table.getTableId());
+                                    LOG.debug(table.getName() + " id: "
+                                            + table.getTableId());
                                 }
-                                if (table.getName()
-                                        .equalsIgnoreCase(superLogResult.getString("id_table"))){
+                                if (table.getName().equalsIgnoreCase(
+                                        superLogResult.getString("id_table"))) {
                                     for (RunnerModel runner : table.getRunners()) {
-                                        insertRunnerData.setInt(1,
-                                                runner.getId());
-                                        insertRunnerData.setLong(2,
-                                                superLogResult.getLong("id_superlog"));
-                                        insertRunnerData.setInt(3,
-                                                superLogResult.getInt("id_foreign"));
-                                        insertRunnerData.setString(4,
-                                                superLogResult.getString("id_table"));
-                                        insertRunnerData.setString(5,
-                                                superLogResult.getString("c_operation"));
-                                        insertRunnerData.setTimestamp(6,
-                                                superLogResult.getTimestamp("c_date"));
-                                        insertRunnerData.setString(7,
-                                                superLogResult.getString("id_transaction"));
-                                        insertRunnerData.addBatch();
-
-                                        // Выводим данные из rep2_superlog_table
-                                        if (LOG.isDebugEnabled()) {
-                                            LOG.debug("INSERT");
+                                        if(!superLogResult.getString("id_pool").equals(runner.getTarget().getPoolId())) {
+                                            insertRunnerData.setInt(1, runner.getId());
+                                            insertRunnerData.setLong(2, superLogResult.getLong("id_superlog"));
+                                            insertRunnerData.setInt(3, superLogResult.getInt("id_foreign"));
+                                            insertRunnerData.setString(4, superLogResult.getString("id_table"));
+                                            insertRunnerData.setString(5, superLogResult.getString("c_operation"));
+                                            insertRunnerData.setTimestamp(6, superLogResult.getTimestamp("c_date"));
+                                            insertRunnerData.setString(7, superLogResult .getString("id_transaction"));
+                                            insertRunnerData.addBatch();
+    
+                                            // Выводим данные из rep2_superlog_table
+                                            if (LOG.isDebugEnabled()) {
+                                                LOG.debug("INSERT");
+                                            }
                                         }
                                     }
                                 }
+
                             }
                             // Удаляем исходную запись
-                            deleteSuperLog.setLong(1, superLogResult.getLong("id_superlog"));
+                            deleteSuperLog.setLong(1,
+                                    superLogResult.getLong("id_superlog"));
                             deleteSuperLog.addBatch();
-                            
+
                             // Периодически сбрасываем батч в БД
                             if ((rowsCount % batchSize) == 0) {
                                 insertRunnerData.executeBatch();
                                 deleteSuperLog.executeBatch();
                                 targetConnection.commit();
-                                
+
                                 LOG.info(String.format("Обработано %s строк...", rowsCount));
                             }
                         }
@@ -179,8 +173,9 @@ public class FastManager implements Strategy {
                 if (lastAutoCommit != null) {
                     sourceConnection.setAutoCommit(lastAutoCommit);
                 }
-            } catch(SQLException e){
-                // Ошибка может возникнуть если во время операции упало соединение к БД
+            } catch (SQLException e) {
+                // Ошибка может возникнуть если во время операции упало
+                // соединение к БД
                 LOG.warn("Ошибка при возврате автокомита в исходное состояние.", e);
             }
 
@@ -188,8 +183,9 @@ public class FastManager implements Strategy {
                 if (lastTargetAutoCommit != null) {
                     targetConnection.setAutoCommit(lastTargetAutoCommit);
                 }
-            } catch(SQLException sqlException){
-                // Ошибка может возникнуть если во время операции упало соединение к БД
+            } catch (SQLException sqlException) {
+                // Ошибка может возникнуть если во время операции упало
+                // соединение к БД
                 LOG.warn("Ошибка при возврате автокомита в исходное состояние.", sqlException);
             }
         }
