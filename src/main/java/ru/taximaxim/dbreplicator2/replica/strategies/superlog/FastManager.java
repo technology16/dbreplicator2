@@ -95,6 +95,7 @@ public class FastManager implements Strategy {
                     try (ResultSet superLogResult = selectSuperLog.executeQuery();) {
                         List<String> cols = new ArrayList<String>();
                         cols.add("id_superlog");
+                        cols.add("id_pool");
                         cols.add("id_foreign");
                         cols.add("id_table");
                         cols.add("c_operation");
