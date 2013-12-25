@@ -195,23 +195,11 @@ public class H2CopyTableDataTest {
         Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
         Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
         worker.run();
-        Thread.sleep(500);
-        
-        // Выводим данные из rep2_superlog_table
-        try (PreparedStatement select = 
-                conn.prepareStatement("SELECT * FROM rep2_workpool_data");
-        ) {
-            ResultSet result = select.executeQuery();
-            List<String> cols = JdbcMetadata.getColumnsList(conn, "REP2_WORKPOOL_DATA");
-            while (result.next()) {
-                LOG.info(Jdbc.resultSetToString(result, cols));
-            }
-        }
-        
+        Thread.sleep(1000);
         errorsCountWatchdogWorker.run();
-        Thread.sleep(5000);
+        Thread.sleep(1000);
         worker.run();
-        Thread.sleep(500);
+        Thread.sleep(1000);
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table2");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table2");
         Helper.AssertEquals(listSource, listDest);
