@@ -181,6 +181,19 @@ public class H2CopyTableDataTest {
         //Проверка внешних ключей
         LOG.info("Проверка внешних ключей");
         Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
         worker.run();
         Thread.sleep(500);
         

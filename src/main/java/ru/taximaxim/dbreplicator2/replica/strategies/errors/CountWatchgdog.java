@@ -97,36 +97,26 @@ public class CountWatchgdog implements Strategy {
                 try (ResultSet errorsResult = selectErrors.executeQuery();) {
                     List<String> cols =  JdbcMetadata.getColumnsList(errorsResult);
                     int count = 0;
-                    StringBuffer rowDumpEmail = new StringBuffer();
-                    while (errorsResult.next()) {
+                    StringBuffer rowDumpEmail = new StringBuffer(
+                            String.format("\n\nВ %s превышен лимит в %s ошибок!\n\n",
+                                    data.getRunner().getSource().getPoolId(),
+                                    maxErrors));
+                    while (errorsResult.next() && (count < partEmail)) {
                         count++;
                         // при необходимости пишем ошибку в лог
                         String rowDump = String.format(
-                                "Ошибок в %s : (%s/%s)\nПревышен лимит в %s ошибок!\n" +
-                                "[ tableName = REP2_WORKPOOL_DATA [ row = %s ] ]%s",
-                                data.getRunner().getSource().getPoolId(),
+                                "Ошибка %s из %s \n[ tableName = REP2_WORKPOOL_DATA [ row = %s ] ]%s",
                                 count,
                                 rowCount,
-                                maxErrors,
                                 Jdbc.resultSetToString(errorsResult, cols),
                                 "\n==========================================\n"
                                 );
                         rowDumpEmail.append(rowDump);
-                        if(count % partEmail == 0) {
-                            rowDumpEmail.append("Всего ");
-                            rowDumpEmail.append(rowCount);
-                            rowDumpEmail.append(" ошибочных записей. Полный список ошибок доступен в таблице rep2_workpool_data");
-                            LOG.error(rowDumpEmail.toString());
-                            rowDumpEmail = new StringBuffer();
-                            break;
-                        }
                     } 
-                    if(count % partEmail != 0) {
-                        rowDumpEmail.append("Всего ");
-                        rowDumpEmail.append(rowCount);
-                        rowDumpEmail.append(" ошибочных записей. Полный список ошибок доступен в таблице rep2_workpool_data");
-                        LOG.error(rowDumpEmail.toString());
-                    }
+                    rowDumpEmail.append("Всего ");
+                    rowDumpEmail.append(rowCount);
+                    rowDumpEmail.append(" ошибочных записей. Полный список ошибок доступен в таблице rep2_workpool_data.");
+                    LOG.error(rowDumpEmail.toString());
                 }
             }
         }
