@@ -181,7 +181,6 @@ public class H2CopyTableDataTest {
         //Проверка внешних ключей
         LOG.info("Проверка внешних ключей");
         Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        
         worker.run();
         Thread.sleep(500);
         
@@ -197,6 +196,7 @@ public class H2CopyTableDataTest {
         }
         
         errorsCountWatchdogWorker.run();
+        Thread.sleep(5000);
         worker.run();
         Thread.sleep(500);
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table2");
@@ -363,6 +363,6 @@ public class H2CopyTableDataTest {
         RunnerService runnerService = new RunnerService(sessionFactory);
 
         worker = new WorkerThread(runnerService.getRunner(1));
-        errorsCountWatchdogWorker = new WorkerThread(runnerService.getRunner(6));
+        errorsCountWatchdogWorker = new WorkerThread(runnerService.getRunner(7));
     }
 }
