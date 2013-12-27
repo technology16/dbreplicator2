@@ -223,10 +223,7 @@ public class GenericAlgorithm implements Strategy {
                         if (isStrict) {
                             throw e;
                         }
-                    }     * @param dataService - сервис для работы с приемником
-                    * @param operationsResult - текущая запись из очереди операций.
-                    * @param table - модель таблицы источника
-
+                    }
                     if (updationCount > 0) {
                         workPoolService.clearWorkPoolData(operationsResult);
                     } else if (updationCount == 0) {
