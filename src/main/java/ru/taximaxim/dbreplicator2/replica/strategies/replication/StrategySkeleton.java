@@ -23,34 +23,36 @@
 
 package ru.taximaxim.dbreplicator2.replica.strategies.replication;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
-import ru.taximaxim.dbreplicator2.replica.GenericDataService;
-import ru.taximaxim.dbreplicator2.replica.GenericWorkPoolService;
-import ru.taximaxim.dbreplicator2.replica.Strategy;
-import ru.taximaxim.dbreplicator2.replica.StrategyException;
 
 /**
- * Класс стратегии репликации данных из источника в приемник
- * Записи реплицируются в порядке последних операций над ними.
- * 
  * @author volodin_aa
- * 
+ *
  */
-public class Generic extends StrategySkeleton implements Strategy {
+public class StrategySkeleton {
 
-    @Override
-    public void execute(Connection sourceConnection, Connection targetConnection,
-            StrategyModel data) throws StrategyException, SQLException {
-        GenericAlgorithm strategy = new GenericAlgorithm(getFetchSize(data), 
-                getBatchSize(data), 
-                false, 
-                new GenericWorkPoolService(sourceConnection), 
-                new GenericDataService(sourceConnection), 
-                new GenericDataService(targetConnection));
-        strategy.execute(sourceConnection, targetConnection, data);
+    /**
+     * Размер выборки данных (строк)
+     */
+    private int fetchSize = 1000;
+    
+    protected int getFetchSize(StrategyModel data) {
+        if (data.getParam("fetchSize") != null) {
+            fetchSize = Integer.parseInt(data.getParam("fetchSize"));
+        }
+        return fetchSize;
+    }
+
+    /**
+     * Размер сбрасываемых в БД данных (строк)
+     */
+    private int batchSize = 1000;
+    
+    protected int getBatchSize(StrategyModel data) {
+        if (data.getParam("batchSize") != null) {
+            batchSize = Integer.parseInt(data.getParam("batchSize"));
+        }
+        return batchSize;
     }
 
 }

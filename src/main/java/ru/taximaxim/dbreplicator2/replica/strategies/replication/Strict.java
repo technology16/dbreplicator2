@@ -27,6 +27,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
+import ru.taximaxim.dbreplicator2.replica.GenericDataService;
 import ru.taximaxim.dbreplicator2.replica.GenericWorkPoolService;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
@@ -43,8 +44,10 @@ public class Strict extends Generic implements Strategy {
     @Override
     public void execute(Connection sourceConnection, Connection targetConnection,
             StrategyModel data) throws StrategyException, SQLException {
-        Skeleton strategy = new Skeleton(1000, 1000, true, 
-                new GenericWorkPoolService(sourceConnection));
+        GenericAlgorithm strategy = new GenericAlgorithm(1000, 1000, true, 
+                new GenericWorkPoolService(sourceConnection), 
+                new GenericDataService(sourceConnection), 
+                new GenericDataService(targetConnection));
         strategy.execute(sourceConnection, targetConnection, data);
     }
 

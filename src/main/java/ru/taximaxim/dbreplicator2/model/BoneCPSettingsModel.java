@@ -23,7 +23,9 @@
 package ru.taximaxim.dbreplicator2.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -461,5 +463,17 @@ public class BoneCPSettingsModel implements BoneCPSettings {
             return false;
         }
         return true;
+    }
+
+    private Map<String, TableModel> tablesMap = null;
+    
+    public TableModel getTable(String tableName) {
+        if (tablesMap == null) {
+            tablesMap = new HashMap<String, TableModel>();
+            for (TableModel table: getTables()) {
+                tablesMap.put(table.getName().toUpperCase(), table);
+            }
+        }
+        return tablesMap.get(tableName.toUpperCase());
     }
 }

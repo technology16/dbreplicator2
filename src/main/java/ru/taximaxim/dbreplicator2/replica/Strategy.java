@@ -44,9 +44,6 @@ public interface Strategy {
      *            Целевая БД
      * @param data
      *            Модель данных описывающая стратегию.
-     * 
-     *            TODO: Может быть передавать не StrategyModel как избыточную, а
-     *            лишь data?
      * @throws SQLException 
      */
     void execute(Connection sourceConnection, Connection targetConnection,

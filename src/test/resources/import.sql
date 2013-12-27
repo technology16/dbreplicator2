@@ -12,18 +12,18 @@ insert into application_settings (key, value) values ('tp.threads', '10');
 
 
 --Tables
-insert into tables (id_table, id_pool, name) values (1, 'source', 't_table');
-insert into tables (id_table, id_pool, name) values (2, 'source', 't_table1');
-insert into tables (id_table, id_pool, name) values (3, 'source', 't_table2');
-insert into tables (id_table, id_pool, name) values (4, 'source', 't_table3');
-insert into tables (id_table, id_pool, name) values (5, 'source', 't_table4');
-insert into tables (id_table, id_pool, name) values (6, 'source', 't_table5');
-insert into tables (id_table, id_pool, name) values (8, 'dest',   't_table');
-insert into tables (id_table, id_pool, name) values (9, 'dest', 't_table1');
-insert into tables (id_table, id_pool, name) values (10, 'dest', 't_table2');
-insert into tables (id_table, id_pool, name) values (11, 'dest', 't_table3');
-insert into tables (id_table, id_pool, name) values (12, 'dest', 't_table4');
-insert into tables (id_table, id_pool, name) values (13, 'dest', 't_table5');
+insert into tables (id_table, id_pool, name) values (1, 'source', 'T_TABLE');
+insert into tables (id_table, id_pool, name) values (2, 'source', 'T_TABLE1');
+insert into tables (id_table, id_pool, name) values (3, 'source', 'T_TABLE2');
+insert into tables (id_table, id_pool, name) values (4, 'source', 'T_TABLE3');
+insert into tables (id_table, id_pool, name) values (5, 'source', 'T_TABLE4');
+insert into tables (id_table, id_pool, name) values (6, 'source', 'T_TABLE5');
+insert into tables (id_table, id_pool, name) values (8, 'dest',   'T_TABLE');
+insert into tables (id_table, id_pool, name) values (9, 'dest', 'T_TABLE1');
+insert into tables (id_table, id_pool, name) values (10, 'dest', 'T_TABLE2');
+insert into tables (id_table, id_pool, name) values (11, 'dest', 'T_TABLE3');
+insert into tables (id_table, id_pool, name) values (12, 'dest', 'T_TABLE4');
+insert into tables (id_table, id_pool, name) values (13, 'dest', 'T_TABLE5');
 
 --Runners Super Log
 insert into runners (id_runner, source, target, description, class_name) values (1, 'source', 'source', 'description', 'ru.taximaxim.dbreplicator2.replica.SuperlogRunner');

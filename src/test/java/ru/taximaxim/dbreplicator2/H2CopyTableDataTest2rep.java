@@ -28,6 +28,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -131,7 +132,8 @@ public class H2CopyTableDataTest2rep {
                 conn.prepareStatement("SELECT * FROM rep2_workpool_data");
         ) {
             ResultSet result = select.executeQuery();
-            List<String> cols = JdbcMetadata.getColumnsList(conn, "REP2_WORKPOOL_DATA");
+            List<String> cols = 
+                    new ArrayList<String>(JdbcMetadata.getColumnsList(conn, "REP2_WORKPOOL_DATA"));
             while (result.next()) {
                 LOG.info(Jdbc.resultSetToString(result, cols));
             }

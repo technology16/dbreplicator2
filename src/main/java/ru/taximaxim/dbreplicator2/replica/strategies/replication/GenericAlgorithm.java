@@ -28,17 +28,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-
 import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
-import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
-import ru.taximaxim.dbreplicator2.jdbc.QueryConstructors;
-import ru.taximaxim.dbreplicator2.model.IgnoreColumnsTableModel;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.model.TableModel;
+import ru.taximaxim.dbreplicator2.replica.DataService;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
 import ru.taximaxim.dbreplicator2.replica.WorkPoolService;
@@ -49,9 +44,9 @@ import ru.taximaxim.dbreplicator2.replica.WorkPoolService;
  * @author volodin_aa
  *
  */
-public class Skeleton implements Strategy {
+public class GenericAlgorithm implements Strategy {
 
-    private static final Logger LOG = Logger.getLogger(Skeleton.class);
+    private static final Logger LOG = Logger.getLogger(GenericAlgorithm.class);
 
     /**
      * Размер выборки данных (строк)
@@ -65,9 +60,11 @@ public class Skeleton implements Strategy {
 
     private boolean isStrict = false;
     
-    WorkPoolService workPoolService;
-
-    private Map<String, List<String>> ignoreCols = new TreeMap<String, List<String>>(String.CASE_INSENSITIVE_ORDER);
+    private WorkPoolService workPoolService;
+    
+    private DataService sourceDataService;
+    
+    private DataService destDataService;
 
     /**
      * 
@@ -75,101 +72,69 @@ public class Skeleton implements Strategy {
      * @param batchSize
      * @param isStrict
      */
-    Skeleton(int fetchSize, int batchSize, boolean isStrict, WorkPoolService workPoolService) {
+    GenericAlgorithm(int fetchSize, int batchSize, boolean isStrict, 
+            WorkPoolService workPoolService,
+            DataService sourceDataService,
+            DataService destDataService) {
         this.fetchSize = fetchSize;
         this.batchSize = batchSize;
         this.isStrict = isStrict;
         this.workPoolService = workPoolService;
+        this.sourceDataService = sourceDataService;
+        this.destDataService = destDataService;
     }
-    
-    protected void setIgnoreCols(StrategyModel data) throws SQLException {
-        List<String> cols;
-        List<TableModel> tableList = data.getRunner().getSource().getTables();
-        for (TableModel tableModel : tableList) {
-            cols = new ArrayList<String>();
-            for (IgnoreColumnsTableModel ignoreCol : tableModel.getIgnoreColumnsTable()) {
-                cols.add(ignoreCol.getColumnName().toUpperCase());
-            }
-            ignoreCols.put(tableModel.getName(), cols);
-        }
-    }
-    
-    protected List<String> getIgnoreCols(String tableName) {
-        if(ignoreCols.get(tableName) == null) {
-            return new ArrayList<String>();
-        }
-        else {
-            return ignoreCols.get(tableName);
-        }
-    }
-    
+
     protected int replicateInsertion(Connection sourceConnection, 
             Connection targetConnection,
             WorkPoolService workPoolService, 
             ResultSet operationsResult,
-            String tableName,
-            List<String> colsList,
+            TableModel table,
             ResultSet sourceResult) throws SQLException {
-        String insertDestQuery = QueryConstructors
-                .constructInsertQuery(tableName, colsList);
-        try (
-                PreparedStatement insertDestStatement = targetConnection
-                .prepareStatement(insertDestQuery);
-                ) {
-            // Добавляем данные в целевую таблицу
-            Jdbc.fillStatementFromResultSet(insertDestStatement,
-                    sourceResult, colsList);
-            return insertDestStatement.executeUpdate();
-        }
+        PreparedStatement insertDestStatement = 
+                destDataService.getInsertStatement(table);
+        // Добавляем данные в целевую таблицу
+        Jdbc.fillStatementFromResultSet(insertDestStatement,
+                sourceResult, 
+                new ArrayList<String>(destDataService.getAllCols(table)));
+        return insertDestStatement.executeUpdate();
     }
 
     protected int replicateUpdation(Connection sourceConnection, 
             Connection targetConnection,
             WorkPoolService workPoolService, 
             ResultSet operationsResult,
-            String tableName,
-            List<String> colsList,
-            List<String> priColsList,
+            TableModel table,
             ResultSet sourceResult) throws SQLException {
         // Если Была операция вставки или изменения, то сначала пытаемся обновить запись,
-        String updateDestQuery = QueryConstructors
-                .constructUpdateQuery(tableName, colsList, priColsList);
-        try (
-                PreparedStatement updateDestStatement = targetConnection
-                .prepareStatement(updateDestQuery);
-                ) {
-            // Добавляем данные в целевую таблицу
-            List<String> colsForUpdate = new ArrayList<String>(colsList);
-            colsForUpdate.addAll(priColsList);
-            Jdbc.fillStatementFromResultSet(updateDestStatement,
-                    sourceResult, colsForUpdate);
-            return updateDestStatement.executeUpdate();
-        }
+        PreparedStatement updateDestStatement = 
+                destDataService.getUpdateStatement(table);
+        // Добавляем данные в целевую таблицу
+        List<String> colsForUpdate = new ArrayList<String>(destDataService.getDataCols(table));
+        colsForUpdate.addAll(destDataService.getPriCols(table));
+        Jdbc.fillStatementFromResultSet(updateDestStatement,
+                sourceResult, colsForUpdate);
+        return updateDestStatement.executeUpdate();
     }
 
     protected int replicateDeletion(Connection sourceConnection, 
             Connection targetConnection,
             WorkPoolService workPoolService, 
             ResultSet operationsResult,
-            String tableName) throws SQLException{
-        List<String> priColsList = 
-                JdbcMetadata.getPrimaryColumnsList(sourceConnection, tableName);
+            TableModel table) throws SQLException{
         // Если была операция удаления, то удаляем запись в приемнике
-        String deleteDestQuery = QueryConstructors
-                .constructDeleteQuery(tableName, priColsList);
-        try (PreparedStatement deleteDestStatement = targetConnection
-                .prepareStatement(deleteDestQuery);
-                ) {
-            deleteDestStatement.setLong(1, operationsResult.getLong("id_foreign"));
-            return deleteDestStatement.executeUpdate();
-        }
+        PreparedStatement deleteDestStatement = 
+                destDataService.getDeleteStatement(table);
+        deleteDestStatement.setLong(1, operationsResult.getLong("id_foreign"));
+        return deleteDestStatement.executeUpdate();
     }
-
+    
     protected void replicateOperation(Connection sourceConnection, 
             Connection targetConnection, 
+            StrategyModel data, 
             WorkPoolService workPoolService, 
             ResultSet operationsResult) throws SQLException{
-        String tableName = operationsResult.getString("id_table");
+        TableModel table = data.getRunner().getSource()
+                .getTable(operationsResult.getString("id_table"));
         // Реплицируем данные
         if (operationsResult.getString("c_operation").equalsIgnoreCase("D")) {
             try {
@@ -177,14 +142,14 @@ public class Skeleton implements Strategy {
                         targetConnection,
                         workPoolService, 
                         operationsResult,
-                        tableName);
+                        table);
                 workPoolService.clearWorkPoolData(operationsResult);
             } catch (SQLException e) {
                 // Поглощаем и логгируем ошибки удаления
                 // Это ожидаемый результат
                 String rowDump = String.format(
                         "[ tableName = %s  [ operation = D  [ row = [ id = %s ] ] ] ]", 
-                        tableName, String.valueOf(operationsResult.getLong("id_foreign")));
+                        table, String.valueOf(operationsResult.getLong("id_foreign")));
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Поглощена ошибка при удалении записи: " + rowDump, e);
                 } else {
@@ -197,85 +162,71 @@ public class Skeleton implements Strategy {
                 }
             }
         } else {
-            List<String> priColsList = 
-                    JdbcMetadata.getPrimaryColumnsList(sourceConnection, tableName);
             // Добавляем данные в целевую таблицу
             // Извлекаем данные из исходной таблицы
-            List<String> colsList = JdbcMetadata
-                    .getColumnsList(sourceConnection, tableName);
-            // Удаляем игнорируемые колонки
-            for (String colm : getIgnoreCols(tableName)) {
-                colsList.remove(colm);
-            }
-            String selectSourceQuery = QueryConstructors
-                    .constructSelectQuery(tableName, colsList, priColsList);
-            try (
-                    PreparedStatement selectSourceStatement = sourceConnection
-                    .prepareStatement(selectSourceQuery);
-                    ) {
-                selectSourceStatement.setLong(1, operationsResult.getLong("id_foreign"));
-                try (ResultSet sourceResult = selectSourceStatement.executeQuery();) {
-                    // Проходим по списку измененных записей
-                    if (sourceResult.next()) {
-                        int updationCount = -1;
-                        // -1   - была ошибка при обновлении
-                        // 0    - запись отсутствует в приемнике
-                        // 1    - запись обновлена
+            PreparedStatement selectSourceStatement = 
+                    sourceDataService.getSelectStatement(table);
+            selectSourceStatement.setLong(1, operationsResult.getLong("id_foreign"));
+            try (ResultSet sourceResult = selectSourceStatement.executeQuery();) {
+                // Проходим по списку измененных записей
+                if (sourceResult.next()) {
+                    int updationCount = -1;
+                    // -1   - была ошибка при обновлении
+                    // 0    - запись отсутствует в приемнике
+                    // 1    - запись обновлена
+                    try {
+                        updationCount = replicateUpdation(sourceConnection, 
+                                targetConnection,
+                                workPoolService, 
+                                operationsResult,
+                                table,
+                                sourceResult);
+                    } catch (SQLException e) {
+                        // Поглощаем и логгируем ошибки обновления
+                        // Это ожидаемый результат
+                        String rowDump = String.format("[ tableName = %s  [ operation = %s  [ row = %s ] ] ]", 
+                                table, operationsResult.getString("c_operation"), 
+                                Jdbc.resultSetToString(sourceResult, 
+                                        new ArrayList<String>(sourceDataService.getAllCols(table))));
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Поглощена ошибка при обновлении записи: " + rowDump, e);
+                        } else {
+                            LOG.warn("Поглощена ошибка при обновлении записи: " + rowDump + " " + e.getMessage());
+                        }
+                        workPoolService.trackError("Ошибка при обновлении записи: " + rowDump, e, operationsResult);
+
+                        if (isStrict) {
+                            throw e;
+                        }
+                    }
+                    if (updationCount > 0) {
+                        workPoolService.clearWorkPoolData(operationsResult);
+                    } else if (updationCount == 0) {
                         try {
-                            updationCount = replicateUpdation(sourceConnection, 
+                            // и если такой записи нет, то пытаемся вставить
+                            replicateInsertion(sourceConnection, 
                                     targetConnection,
                                     workPoolService, 
                                     operationsResult,
-                                    tableName,
-                                    colsList,
-                                    colsList,
+                                    table,
                                     sourceResult);
+                            workPoolService.clearWorkPoolData(operationsResult);
                         } catch (SQLException e) {
-                            // Поглощаем и логгируем ошибки обновления
+                            // Поглощаем и логгируем ошибки вставки
                             // Это ожидаемый результат
                             String rowDump = String.format("[ tableName = %s  [ operation = %s  [ row = %s ] ] ]", 
-                                    tableName, operationsResult.getString("c_operation"), 
-                                    Jdbc.resultSetToString(sourceResult, colsList));
+                                    table, operationsResult.getString("c_operation"), 
+                                    Jdbc.resultSetToString(sourceResult, 
+                                            new ArrayList<String>(sourceDataService.getAllCols(table))));
                             if (LOG.isDebugEnabled()) {
-                                LOG.debug("Поглощена ошибка при обновлении записи: " + rowDump, e);
+                                LOG.debug("Поглощена ошибка при вставке записи: " + rowDump, e);
                             } else {
-                                LOG.warn("Поглощена ошибка при обновлении записи: " + rowDump + " " + e.getMessage());
+                                LOG.warn("Поглощена ошибка при вставке записи: " + rowDump + " " + e.getMessage());
                             }
-                            workPoolService.trackError("Ошибка при обновлении записи: " + rowDump, e, operationsResult);
-                            
+                            workPoolService.trackError("Ошибка при вставке записи: " + rowDump, e, operationsResult);
+
                             if (isStrict) {
                                 throw e;
-                            }
-                        }
-                        if (updationCount > 0) {
-                            workPoolService.clearWorkPoolData(operationsResult);
-                        } else if (updationCount == 0) {
-                            try {
-                                // и если такой записи нет, то пытаемся вставить
-                                replicateInsertion(sourceConnection, 
-                                        targetConnection,
-                                        workPoolService, 
-                                        operationsResult,
-                                        tableName,
-                                        colsList,
-                                        sourceResult);
-                                workPoolService.clearWorkPoolData(operationsResult);
-                            } catch (SQLException e) {
-                                // Поглощаем и логгируем ошибки вставки
-                                // Это ожидаемый результат
-                                String rowDump = String.format("[ tableName = %s  [ operation = %s  [ row = %s ] ] ]", 
-                                        tableName, operationsResult.getString("c_operation"), 
-                                        Jdbc.resultSetToString(sourceResult, colsList));
-                                if (LOG.isDebugEnabled()) {
-                                    LOG.debug("Поглощена ошибка при вставке записи: " + rowDump, e);
-                                } else {
-                                    LOG.warn("Поглощена ошибка при вставке записи: " + rowDump + " " + e.getMessage());
-                                }
-                                workPoolService.trackError("Ошибка при вставке записи: " + rowDump, e, operationsResult);
-                                
-                                if (isStrict) {
-                                    throw e;
-                                }
                             }
                         }
                     }
@@ -300,7 +251,7 @@ public class Skeleton implements Strategy {
                 for (int rowsCount = 1; operationsResult.next(); rowsCount++) {
                     // Реплицируем операцию
                     replicateOperation(sourceConnection, targetConnection, 
-                            workPoolService, operationsResult);
+                            data, workPoolService, operationsResult);
 
                     // Периодически сбрасываем батч в БД
                     if ((rowsCount % batchSize) == 0) {
@@ -331,9 +282,6 @@ public class Skeleton implements Strategy {
         Boolean lastAutoCommit = null;
         Boolean lastTargetAutoCommit = null;
         try {
-            //игнорируемые колонки
-            setIgnoreCols(data);
-
             lastAutoCommit = sourceConnection.getAutoCommit();
             lastTargetAutoCommit = targetConnection.getAutoCommit();
             // Начинаем транзакцию

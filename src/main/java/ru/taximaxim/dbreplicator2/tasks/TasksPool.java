@@ -49,10 +49,12 @@ public class TasksPool {
         Map<Integer, TaskSettings> taskSettings = taskSettingsService.getTasks();
 
         for (TaskSettings task : taskSettings.values()) {
-            TaskRunner taskRunner = new TaskRunner(task);
-            Thread thread = new Thread(taskRunner);
-            thread.start();
-            taskThreads.put(taskRunner, thread);
+            if (task.getEnabled()) {
+                TaskRunner taskRunner = new TaskRunner(task);
+                Thread thread = new Thread(taskRunner);
+                thread.start();
+                taskThreads.put(taskRunner, thread);
+            }
         }
     }
 

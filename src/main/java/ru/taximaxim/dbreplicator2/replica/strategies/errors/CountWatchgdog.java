@@ -27,6 +27,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -95,7 +96,8 @@ public class CountWatchgdog implements Strategy {
             if(rowCount != 0) {
                 selectErrors.setInt(1, maxErrors);
                 try (ResultSet errorsResult = selectErrors.executeQuery();) {
-                    List<String> cols =  JdbcMetadata.getColumnsList(errorsResult);
+                    List<String> cols =  
+                            new ArrayList<String>(JdbcMetadata.getColumnsList(errorsResult));
                     int count = 0;
                     StringBuffer rowDumpEmail = new StringBuffer(
                             String.format("\n\nВ %s превышен лимит в %s ошибок!\n\n",

@@ -32,9 +32,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -42,12 +40,6 @@ import java.util.Set;
  * 
  */
 public final class JdbcMetadata {
-    /**
-     * Сиглетон
-     */
-    private JdbcMetadata() {
-
-    }
 
     /**
      * Функция получения списка колонок таблицы на основе метаданных БД
@@ -59,10 +51,10 @@ public final class JdbcMetadata {
      * @return список колонок таблицы
      * @throws SQLException
      */
-    public static List<String> getColumnsList(Connection connection, String tableName)
+    public static Set<String> getColumnsList(Connection connection, String tableName)
             throws SQLException {
         // Получаем список колонок
-        List<String> colsList = new ArrayList<String>();
+        Set<String> colsList = new HashSet<String>();
         DatabaseMetaData metaData = connection.getMetaData();
         
         try (ResultSet colsResultSet = metaData.getColumns(null, null, tableName, null);) {
@@ -84,10 +76,10 @@ public final class JdbcMetadata {
      * @return список колонок таблицы
      * @throws SQLException
      */
-    public static List<String> getColumnsList(ResultSet result)
+    public static Set<String> getColumnsList(ResultSet result)
             throws SQLException {
         // Получаем список колонок
-        List<String> colsList = new ArrayList<String>();
+        Set<String> colsList = new HashSet<String>();
         ResultSetMetaData metaData = result.getMetaData();
         int columnCount = metaData.getColumnCount();
         for (int i = 1; i <= columnCount; i++) {
@@ -107,10 +99,10 @@ public final class JdbcMetadata {
      * @return список ключевых колонок таблицы
      * @throws SQLException
      */
-    public static List<String> getPrimaryColumnsList(Connection connection,
+    public static Set<String> getPrimaryColumnsList(Connection connection,
             String tableName) throws SQLException {
         // Получаем список ключевых колонок
-        List<String> primaryKeyColsList = new ArrayList<String>();
+        Set<String> primaryKeyColsList = new HashSet<String>();
         DatabaseMetaData metaData = connection.getMetaData();
         
         try (ResultSet primaryKeysResultSet = metaData.getPrimaryKeys(null, null, tableName);) {
@@ -132,10 +124,10 @@ public final class JdbcMetadata {
      * @return список AUTO INCREMENT колонок таблицы
      * @throws SQLException
      */
-    public static List<String> getIdentityColumnsList(Connection connection,
+    public static Set<String> getIdentityColumnsList(Connection connection,
             String tableName) throws SQLException {
         // Получаем список колонок
-        List<String> colsList = new ArrayList<String>();
+        Set<String> colsList = new HashSet<String>();
         DatabaseMetaData metaData = connection.getMetaData();
         try (ResultSet colsResultSet = metaData.getColumns(null, null, tableName, null);) {
             while (colsResultSet.next()) {
