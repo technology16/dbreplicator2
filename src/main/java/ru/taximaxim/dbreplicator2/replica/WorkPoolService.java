@@ -21,31 +21,34 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ru.taximaxim.dbreplicator2.replica.strategies.replication;
+package ru.taximaxim.dbreplicator2.replica;
 
-import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import ru.taximaxim.dbreplicator2.model.StrategyModel;
-import ru.taximaxim.dbreplicator2.replica.GenericWorkPoolService;
-import ru.taximaxim.dbreplicator2.replica.Strategy;
-import ru.taximaxim.dbreplicator2.replica.StrategyException;
-
 /**
- * Класс стратегии репликации данных из источника в приемник
- * Записи реплицируются в порядке последних операций над ними.
+ * ИНтерфейс для инкапсуляции работы стратегии с данными в очереди репликации.
+ * Необходим для реализации стратегии шаблонный метод.
  * 
  * @author volodin_aa
- * 
+ *
  */
-public class Generic implements Strategy {
-
-    @Override
-    public void execute(Connection sourceConnection, Connection targetConnection,
-            StrategyModel data) throws StrategyException, SQLException {
-        Skeleton strategy = new Skeleton(1000, 1000, false, 
-                new GenericWorkPoolService(sourceConnection));
-        strategy.execute(sourceConnection, targetConnection, data);
-    }
+public interface WorkPoolService {
+    
+    /**
+     * Получение подготовленного выражения для выборки последних операций
+     * 
+     * @return
+     * @throws SQLException 
+     */
+    PreparedStatement getLastOperationsStatement(int runnerId, int fetchSize) throws SQLException;
+    
+    PreparedStatement getClearWorkPoolDataStatement() throws SQLException;
+    
+    void clearWorkPoolData(ResultSet operationsResult) throws SQLException;
+    
+    void trackError(String message, SQLException e, ResultSet operation) 
+            throws SQLException;
 
 }
