@@ -84,63 +84,91 @@ public class GenericAlgorithm implements Strategy {
         this.destDataService = destDataService;
     }
 
-    protected int replicateInsertion(Connection sourceConnection, 
-            Connection targetConnection,
-            WorkPoolService workPoolService, 
-            ResultSet operationsResult,
+    /**
+     * Функция репликации вставки записи.
+     * 
+     * @param dataService   - сервис для работы с приемником
+     * @param table         - модель таблицы источника
+     * @param sourceResult  - текущая запись из источника.
+     * @return количество измененых записей
+     * @throws SQLException
+     */
+    protected int replicateInsertion(DataService dataService,
             TableModel table,
             ResultSet sourceResult) throws SQLException {
         PreparedStatement insertDestStatement = 
-                destDataService.getInsertStatement(table);
+                dataService.getInsertStatement(table);
         // Добавляем данные в целевую таблицу
         Jdbc.fillStatementFromResultSet(insertDestStatement,
                 sourceResult, 
-                new ArrayList<String>(destDataService.getAllCols(table)));
+                new ArrayList<String>(dataService.getAllCols(table)));
         return insertDestStatement.executeUpdate();
     }
 
-    protected int replicateUpdation(Connection sourceConnection, 
-            Connection targetConnection,
-            WorkPoolService workPoolService, 
-            ResultSet operationsResult,
+    /**
+     * Функция репликации обновления записи.
+     * 
+     * @param dataService   - сервис для работы с приемником
+     * @param table         - модель таблицы источника
+     * @param sourceResult  - текущая запись из источника.
+     * @return количество измененых записей
+     * @throws SQLException
+     */
+    protected int replicateUpdation(DataService dataService,
             TableModel table,
             ResultSet sourceResult) throws SQLException {
         // Если Была операция вставки или изменения, то сначала пытаемся обновить запись,
         PreparedStatement updateDestStatement = 
-                destDataService.getUpdateStatement(table);
+                dataService.getUpdateStatement(table);
         // Добавляем данные в целевую таблицу
-        List<String> colsForUpdate = new ArrayList<String>(destDataService.getDataCols(table));
-        colsForUpdate.addAll(destDataService.getPriCols(table));
+        List<String> colsForUpdate = new ArrayList<String>(dataService.getDataCols(table));
+        colsForUpdate.addAll(dataService.getPriCols(table));
         Jdbc.fillStatementFromResultSet(updateDestStatement,
                 sourceResult, colsForUpdate);
         return updateDestStatement.executeUpdate();
     }
 
-    protected int replicateDeletion(Connection sourceConnection, 
-            Connection targetConnection,
-            WorkPoolService workPoolService, 
+    /**
+     * Функция репликации удаления записи.
+     * 
+     * @param dataService       - сервис для работы с приемником
+     * @param operationsResult  - текущая запись из очереди операций.
+     * @param table             - модель таблицы источника
+     * @return количество измененых записей
+     * @throws SQLException
+     */
+    protected int replicateDeletion(DataService dataService, 
             ResultSet operationsResult,
             TableModel table) throws SQLException{
         // Если была операция удаления, то удаляем запись в приемнике
         PreparedStatement deleteDestStatement = 
-                destDataService.getDeleteStatement(table);
+                dataService.getDeleteStatement(table);
         deleteDestStatement.setLong(1, operationsResult.getLong("id_foreign"));
         return deleteDestStatement.executeUpdate();
     }
     
-    protected void replicateOperation(Connection sourceConnection, 
-            Connection targetConnection, 
-            StrategyModel data, 
-            WorkPoolService workPoolService, 
+    /**
+     * Функция для репликации данных. Здесь вызываются подфункции репликации 
+     * конкретных операций и обрабатываются исключительнык ситуации.
+     * 
+     * @param data              - настройки стратегии
+     * @param workPoolService   - сервис для работы с очередью опереций
+     * @param sourceDataService - сервис для работы с источником
+     * @param destDataService   - сервис для работы с приемником
+     * @param operationsResult  - текущая запись из очереди операций.
+     * @throws SQLException
+     */
+    protected void replicateOperation(StrategyModel data, 
+            WorkPoolService workPoolService,
+            DataService sourceDataService,
+            DataService destDataService, 
             ResultSet operationsResult) throws SQLException{
         TableModel table = data.getRunner().getSource()
                 .getTable(operationsResult.getString("id_table"));
         // Реплицируем данные
         if (operationsResult.getString("c_operation").equalsIgnoreCase("D")) {
             try {
-                replicateDeletion(sourceConnection, 
-                        targetConnection,
-                        workPoolService, 
+                replicateDeletion(destDataService, 
                         operationsResult,
                         table);
                 workPoolService.clearWorkPoolData(operationsResult);
@@ -175,10 +203,7 @@ public class GenericAlgorithm implements Strategy {
                     // 0    - запись отсутствует в приемнике
                     // 1    - запись обновлена
                     try {
-                        updationCount = replicateUpdation(sourceConnection, 
-                                targetConnection,
-                                workPoolService, 
-                                operationsResult,
+                        updationCount = replicateUpdation(destDataService,
                                 table,
                                 sourceResult);
                     } catch (SQLException e) {
@@ -198,16 +223,16 @@ public class GenericAlgorithm implements Strategy {
                         if (isStrict) {
                             throw e;
                         }
-                    }
+                    }     * @param dataService - сервис для работы с приемником
+                    * @param operationsResult - текущая запись из очереди операций.
+                    * @param table - модель таблицы источника
+
                     if (updationCount > 0) {
                         workPoolService.clearWorkPoolData(operationsResult);
                     } else if (updationCount == 0) {
                         try {
                             // и если такой записи нет, то пытаемся вставить
-                            replicateInsertion(sourceConnection, 
-                                    targetConnection,
-                                    workPoolService, 
-                                    operationsResult,
+                            replicateInsertion(destDataService,
                                     table,
                                     sourceResult);
                             workPoolService.clearWorkPoolData(operationsResult);
@@ -235,9 +260,24 @@ public class GenericAlgorithm implements Strategy {
         }
     }
 
+    /**
+     * Функция отбора обрабатываемых операций из очереди операций.
+     * Для каждой операции вызывается функция replicateOperation(...).
+     * 
+     * 
+     * @param sourceConnection  - соединение к источнику данных
+     * @param targetConnection  - целевое соединение
+     * @param data              - данные стратегии
+     * @param workPoolService   - сервис для работы с очередью опереций
+     * @param sourceDataService - сервис для работы с источником
+     * @param destDataService   - сервис для работы с приемником
+     * @throws SQLException
+     */
     protected void selectLastOperations(Connection sourceConnection, 
             Connection targetConnection, StrategyModel data, 
-            WorkPoolService workPoolService) throws SQLException{
+            WorkPoolService workPoolService,
+            DataService sourceDataService,
+            DataService destDataService) throws SQLException{
         // Извлекаем список последних операций по измененым записям
         try {
             PreparedStatement selectLastOperations = 
@@ -250,8 +290,10 @@ public class GenericAlgorithm implements Strategy {
                 // Проходим по списку измененных записей
                 for (int rowsCount = 1; operationsResult.next(); rowsCount++) {
                     // Реплицируем операцию
-                    replicateOperation(sourceConnection, targetConnection, 
-                            data, workPoolService, operationsResult);
+                    replicateOperation(data, workPoolService,
+                            sourceDataService,
+                            destDataService, 
+                            operationsResult);
 
                     // Периодически сбрасываем батч в БД
                     if ((rowsCount % batchSize) == 0) {
@@ -277,6 +319,11 @@ public class GenericAlgorithm implements Strategy {
         }
     }
 
+    /**
+     * Точка входа в алгоритм репликации.
+     * Здесь настраивается режим работы соединений к БД и вызывается функция
+     * отбора операций selectLastOperations(...).
+     */
     public void execute(Connection sourceConnection, Connection targetConnection,
             StrategyModel data) throws StrategyException, SQLException {
         Boolean lastAutoCommit = null;
@@ -293,7 +340,9 @@ public class GenericAlgorithm implements Strategy {
 
             selectLastOperations(sourceConnection, 
                     targetConnection, data, 
-                    workPoolService);        
+                    workPoolService,
+                    sourceDataService,
+                    destDataService);        
         } catch (SQLException e) {
             try {
                 if (lastAutoCommit != null) {
