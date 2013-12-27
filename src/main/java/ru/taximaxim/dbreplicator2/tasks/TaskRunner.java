@@ -73,6 +73,14 @@ public class TaskRunner implements Runnable {
         enabled = false;
     }
 
+    protected void wait(long startTime, long interval, String message) throws InterruptedException {
+        long sleepTime = startTime + interval - new Date().getTime();
+        if (sleepTime > 0) {
+            LOG.info(String.format(message, sleepTime));
+            Thread.sleep(sleepTime);
+        }
+    }
+    
     @Override
     public void run() {
         LOG.info(String.format("Запуск задачи [%d] %s",
@@ -114,25 +122,16 @@ public class TaskRunner implements Runnable {
             try {
                 if (isSuccess) {
                     // Ожидаем окончания периода синхронизации
-                    long sleepTime = startTime + taskSettings.getSuccessInterval()
-                            - new Date().getTime();
-                    if (sleepTime > 0) {
-                        LOG.info(String
-                                .format("Ожидаем %d милисекунд после завершения задачи [%d] %s",
-                                        sleepTime, taskSettings.getTaskId(),
-                                        taskSettings.getDescription()));
-                        Thread.sleep(sleepTime);
-                    }
+                    wait(startTime, taskSettings.getSuccessInterval(), 
+                            String.format("Ожидаем %s милисекунд после завершения задачи [%d] %s",
+                                    "%d", taskSettings.getTaskId(),
+                                    taskSettings.getDescription()));
                 } else {
-                    long sleepTime = startTime + taskSettings.getFailInterval()
-                            - new Date().getTime();
-                    if (sleepTime > 0) {
-                        LOG.info(String.format(
-                                "Ожидаем %d миллисекунд до рестарта задачи [%d] %s",
-                                sleepTime, taskSettings.getTaskId(), 
+                    wait(startTime, taskSettings.getFailInterval(), 
+                        String.format(
+                                "Ожидаем %s миллисекунд до рестарта задачи [%d] %s",
+                                "%d", taskSettings.getTaskId(), 
                                 taskSettings.getDescription()));
-                        Thread.sleep(sleepTime);
-                    }
                 }
             } catch (InterruptedException ex) {
                 LOG.warn(ex);

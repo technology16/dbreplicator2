@@ -15,7 +15,7 @@ public interface DataService {
      * @return the deleteDestStatements
      * @throws SQLException
      */
-    public abstract PreparedStatement getDeleteStatement(TableModel table)
+     PreparedStatement getDeleteStatement(TableModel table)
             throws SQLException;
 
     /**
@@ -25,7 +25,7 @@ public interface DataService {
      * @return the selectSourceStatements
      * @throws SQLException
      */
-    public abstract PreparedStatement getSelectStatement(TableModel table)
+    PreparedStatement getSelectStatement(TableModel table)
             throws SQLException;
 
     /**
@@ -35,7 +35,7 @@ public interface DataService {
      * @return the updateDestStatements
      * @throws SQLException
      */
-    public abstract PreparedStatement getUpdateStatement(TableModel table)
+    PreparedStatement getUpdateStatement(TableModel table)
             throws SQLException;
 
     /**
@@ -45,7 +45,7 @@ public interface DataService {
      * @return the insertDestStatements
      * @throws SQLException
      */
-    public abstract PreparedStatement getInsertStatement(TableModel table)
+    PreparedStatement getInsertStatement(TableModel table)
             throws SQLException;
     
     /**
@@ -56,7 +56,7 @@ public interface DataService {
      * @return
      * @throws SQLException
      */
-    public Set<String> getPriCols(TableModel table) throws SQLException;
+    Set<String> getPriCols(TableModel table) throws SQLException;
 
 
     /**
@@ -67,7 +67,7 @@ public interface DataService {
      * @return
      * @throws SQLException
      */
-    public Set<String> getAllCols(TableModel table) throws SQLException;
+    Set<String> getAllCols(TableModel table) throws SQLException;
     
     /**
      * Кешированное получение списка колонок с данными
@@ -77,7 +77,7 @@ public interface DataService {
      * @return
      * @throws SQLException
      */
-    public Set<String> getDataCols(TableModel table)
+    Set<String> getDataCols(TableModel table)
             throws SQLException;    
     
     /**
@@ -88,7 +88,7 @@ public interface DataService {
      * @return
      * @throws SQLException
      */
-    public Set<String> getIdentityCols(TableModel table) throws SQLException;
+    Set<String> getIdentityCols(TableModel table) throws SQLException;
     
     /**
      * Кешированное получение списка игнорируемых колонок
@@ -98,6 +98,6 @@ public interface DataService {
      * @return
      * @throws SQLException
      */
-    public Set<String> getIgnoredCols(TableModel table) throws SQLException;
+    Set<String> getIgnoredCols(TableModel table) throws SQLException;
 
 }

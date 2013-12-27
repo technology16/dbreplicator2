@@ -42,6 +42,13 @@ import java.util.Set;
 public final class JdbcMetadata {
 
     /**
+     * Сиглетон
+     */
+    private JdbcMetadata() {
+
+    }
+
+    /**
      * Функция получения списка колонок таблицы на основе метаданных БД
      * 
      * @param connection
