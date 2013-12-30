@@ -179,11 +179,14 @@ public class GenericAlgorithm implements Strategy {
                         "[ tableName = %s  [ operation = D  [ row = [ id = %s ] ] ] ]", 
                         table, String.valueOf(operationsResult.getLong("id_foreign")));
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Поглощена ошибка при удалении записи: " + rowDump, e);
+                    LOG.debug(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при удалении записи: ", 
+                            data.getRunner().getId(), data.getRunner().getDescription(), data.getId()) + rowDump, e);
                 } else {
-                    LOG.warn("Поглощена ошибка при удалении записи: " + rowDump + " " + e.getMessage());
+                    LOG.warn(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при удалении записи: ", 
+                            data.getRunner().getId(), data.getRunner().getDescription(), data.getId()) + rowDump + " " + e.getMessage());
                 }
-                workPoolService.trackError("Ошибка при удалении записи: " + rowDump, e, operationsResult);
+                workPoolService.trackError(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Ошибка при удалении записи: ", 
+                        data.getRunner().getId(), data.getRunner().getDescription(), data.getId()) + rowDump, e, operationsResult);
                 
                 if (isStrict) {
                     throw e;
@@ -214,11 +217,15 @@ public class GenericAlgorithm implements Strategy {
                                 Jdbc.resultSetToString(sourceResult, 
                                         new ArrayList<String>(sourceDataService.getAllCols(table))));
                         if (LOG.isDebugEnabled()) {
-                            LOG.debug("Поглощена ошибка при обновлении записи: " + rowDump, e);
+                            LOG.debug(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при обновлении записи: ", 
+                                    data.getRunner().getId(), data.getRunner().getDescription(), data.getId()) + rowDump, e);
                         } else {
-                            LOG.warn("Поглощена ошибка при обновлении записи: " + rowDump + " " + e.getMessage());
+                            LOG.warn(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при обновлении записи: ", 
+                                    data.getRunner().getId(), data.getRunner().getDescription(), data.getId()) 
+                                    + rowDump + " " + e.getMessage());
                         }
-                        workPoolService.trackError("Ошибка при обновлении записи: " + rowDump, e, operationsResult);
+                        workPoolService.trackError(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Ошибка при обновлении записи: ", 
+                                data.getRunner().getId(), data.getRunner().getDescription(), data.getId()) + rowDump, e, operationsResult);
 
                         if (isStrict) {
                             throw e;
@@ -241,11 +248,14 @@ public class GenericAlgorithm implements Strategy {
                                     Jdbc.resultSetToString(sourceResult, 
                                             new ArrayList<String>(sourceDataService.getAllCols(table))));
                             if (LOG.isDebugEnabled()) {
-                                LOG.debug("Поглощена ошибка при вставке записи: " + rowDump, e);
+                                LOG.debug(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при вставке записи: ", 
+                                        data.getRunner().getId(), data.getRunner().getDescription(), data.getId()) + rowDump, e);
                             } else {
-                                LOG.warn("Поглощена ошибка при вставке записи: " + rowDump + " " + e.getMessage());
+                                LOG.warn(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при вставке записи: ", 
+                                        data.getRunner().getId(), data.getRunner().getDescription(), data.getId()) + rowDump + " " + e.getMessage());
                             }
-                            workPoolService.trackError("Ошибка при вставке записи: " + rowDump, e, operationsResult);
+                            workPoolService.trackError(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Ошибка при вставке записи: ", 
+                                    data.getRunner().getId(), data.getRunner().getDescription(), data.getId()) + rowDump, e, operationsResult);
 
                             if (isStrict) {
                                 throw e;
@@ -301,7 +311,8 @@ public class GenericAlgorithm implements Strategy {
                         operationsResult.close();
                         operationsResult = selectLastOperations.executeQuery();
 
-                        LOG.info(String.format("Обработано %s строк...", rowsCount));
+                        LOG.info(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Обработано %s строк...", 
+                                data.getRunner().getId(), data.getRunner().getDescription(), data.getId(), rowsCount));
                     }
                 }
             } finally {
@@ -347,7 +358,8 @@ public class GenericAlgorithm implements Strategy {
                 }
             } catch(SQLException sqlException){
                 // Ошибка может возникнуть если во время операции упало соединение к БД
-                LOG.warn("Ошибка при возврате автокомита в исходное состояние.", sqlException);
+                LOG.warn(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Ошибка при возврате автокомита в исходное состояние.", 
+                        data.getRunner().getId(), data.getRunner().getDescription(), data.getId()), sqlException);
             }
 
             try {
@@ -356,7 +368,8 @@ public class GenericAlgorithm implements Strategy {
                 }
             } catch(SQLException sqlException){
                 // Ошибка может возникнуть если во время операции упало соединение к БД
-                LOG.warn("Ошибка при возврате автокомита в исходное состояние.", sqlException);
+                LOG.warn(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Ошибка при возврате автокомита в исходное состояние.", 
+                        data.getRunner().getId(), data.getRunner().getDescription(), data.getId()), sqlException);
             }
             throw e;
         }
