@@ -73,14 +73,6 @@ public class TaskRunner implements Runnable {
         enabled = false;
     }
 
-    protected void wait(long startTime, long interval, String message) throws InterruptedException {
-        long sleepTime = startTime + interval - new Date().getTime();
-        if (sleepTime > 0) {
-            LOG.info(String.format(message, sleepTime));
-            Thread.sleep(sleepTime);
-        }
-    }
-    
     @Override
     public void run() {
         LOG.info(String.format("Запуск задачи [%d] %s",
@@ -94,17 +86,17 @@ public class TaskRunner implements Runnable {
                 isSuccess = true;
             } catch (ClassNotFoundException e) {
                 LOG.error(
-                        String.format("Ошибка инициализации при выполнении задачи [%d] %s",
+                        String.format("Ошибка инициализации при выполнении задачи [id_task = %d, %s]",
                                 taskSettings.getTaskId(),
                                 taskSettings.getDescription()), e);
             } catch (StrategyException e) {
                 LOG.error(
-                        String.format("Ошибка при выполнении стратегии из задачи [%d] %s",
+                        String.format("Ошибка при выполнении стратегии из задачи [id_task = %d, %s]",
                         taskSettings.getTaskId(),
                         taskSettings.getDescription()), e);
             } catch (SQLException e) {
                 LOG.error(
-                        String.format("Ошибка БД при выполнении стратегии из задачи [%d] %s",
+                        String.format("Ошибка БД при выполнении стратегии из задачи [id_task = %d, %s]",
                         taskSettings.getTaskId(),
                         taskSettings.getDescription()), e);
                 SQLException nextEx = e.getNextException();
@@ -114,7 +106,7 @@ public class TaskRunner implements Runnable {
                 }
             } catch (Exception e) {
                 LOG.error(
-                        String.format("Ошибка при выполнении задачи [%d] %s",
+                        String.format("Ошибка при выполнении задачи [id_task = %d, %s]",
                                 taskSettings.getTaskId(),
                                 taskSettings.getDescription()), e);
             }
@@ -122,16 +114,25 @@ public class TaskRunner implements Runnable {
             try {
                 if (isSuccess) {
                     // Ожидаем окончания периода синхронизации
-                    wait(startTime, taskSettings.getSuccessInterval(), 
-                            String.format("Ожидаем %s милисекунд после завершения задачи [%d] %s",
-                                    "%d", taskSettings.getTaskId(),
-                                    taskSettings.getDescription()));
+                    long sleepTime = startTime + taskSettings.getSuccessInterval()
+                            - new Date().getTime();
+                    if (sleepTime > 0) {
+                        LOG.info(String
+                                .format("Ожидаем %d милисекунд после завершения задачи [id_task = %d, %s]",
+                                        sleepTime, taskSettings.getTaskId(),
+                                        taskSettings.getDescription()));
+                        Thread.sleep(sleepTime);
+                    }
                 } else {
-                    wait(startTime, taskSettings.getFailInterval(), 
-                        String.format(
-                                "Ожидаем %s миллисекунд до рестарта задачи [%d] %s",
-                                "%d", taskSettings.getTaskId(), 
+                    long sleepTime = startTime + taskSettings.getFailInterval()
+                            - new Date().getTime();
+                    if (sleepTime > 0) {
+                        LOG.info(String.format(
+                                "Ожидаем %d миллисекунд до рестарта задачи [id_task = %d, %s]",
+                                sleepTime, taskSettings.getTaskId(), 
                                 taskSettings.getDescription()));
+                        Thread.sleep(sleepTime);
+                    }
                 }
             } catch (InterruptedException ex) {
                 LOG.warn(ex);

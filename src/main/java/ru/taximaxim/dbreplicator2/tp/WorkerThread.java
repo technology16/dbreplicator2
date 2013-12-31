@@ -48,18 +48,21 @@ public class WorkerThread implements Runnable {
 
     @Override
     public void run() {
-        LOG.debug(String.format("Запуск потока: %s [%s] [%s]",
-                runner.getDescription(), runner.getId(),
-                Thread.currentThread().getName()));
+        LOG.debug(String.format("Запуск потока [%s] раннера [id_runner = %d, %s]...",
+                Thread.currentThread().getName(), runner.getId(),
+                runner.getDescription()));
 
         try {
             processCommand();
         } catch (ClassNotFoundException e) {
-            LOG.error("Ошибка при инициализации данных ", e);
+            LOG.error(String.format("Ошибка при инициализации данных раннера [id_runner = %d, %s]", 
+                    runner.getId(), runner.getDescription()), e);
         } catch (StrategyException e) {
-            LOG.error("Ошибка при выполнении стратегии", e);
+            LOG.error(String.format("Ошибка при выполнении стратегии раннера [id_runner = %d, %s]", 
+                    runner.getId(), runner.getDescription()), e);
         } catch (SQLException e) {
-            LOG.error("Ошибка БД при выполнении стратегии", e);
+            LOG.error(String.format("Ошибка БД при выполнении стратегии раннера [id_runner = %d, %s]", 
+                    runner.getId(), runner.getDescription()), e);
             SQLException nextEx = e.getNextException();
             while (nextEx!=null){
                 LOG.error("Подробности:", nextEx);
@@ -67,9 +70,9 @@ public class WorkerThread implements Runnable {
             }
         }
         
-        LOG.debug(String.format("Завершение потока: %s [%s] [%s]",
-                runner.getDescription(), runner.getId(),
-                    Thread.currentThread().getName()));
+        LOG.debug(String.format("Завершение потока [%s] раннера [id_runner = %d, %s]",
+                Thread.currentThread().getName(), runner.getId(),
+                runner.getDescription()));
     }
 
     /**
@@ -89,25 +92,27 @@ public class WorkerThread implements Runnable {
         // Инициализируем два соединения. Используем try-with-resources для
         // каждого.
         try (Connection sourceConnection =
-                connectionsFactory.getConnection(runner.getSource().getPoolId())) {
-            try (Connection targetConnection =
-                    connectionsFactory.getConnection(runner.getTarget().getPoolId())) {
+                connectionsFactory.getConnection(runner.getSource().getPoolId());
+             Connection targetConnection =
+                connectionsFactory.getConnection(runner.getTarget().getPoolId())
+            ) {
 
-                List<StrategyModel> strategies = runner.getStrategyModels();
+            List<StrategyModel> strategies = runner.getStrategyModels();
 
-                try {
-                    for (StrategyModel strategyModel : strategies) {
-                        if (strategyModel.isEnabled()) {
-                            runStrategy(sourceConnection, targetConnection, strategyModel);
-                        }
+            try {
+                for (StrategyModel strategyModel : strategies) {
+                    if (strategyModel.isEnabled()) {
+                        runStrategy(sourceConnection, targetConnection, strategyModel);
                     }
-                } catch (StopChainProcesing e) {
-                    LOG.warn("Запрошена принудительная остановка обработка цепочки.", e);
                 }
-
-            } catch (InstantiationException | IllegalAccessException e) {
-                LOG.error("Ошибка при создании объекта-стратегии", e);
+            } catch (StopChainProcesing e) {
+                LOG.warn(String.format("Запрошена принудительная остановка обработки цепочки стратегий раннера [id_runner = %d, %s].", 
+                        runner.getId(), runner.getDescription()), e);
             }
+
+        } catch (InstantiationException | IllegalAccessException e) {
+            LOG.error(String.format("Ошибка при создании объекта-стратегии раннера [id_runner = %d, %s].", 
+                    runner.getId(), runner.getDescription()), e);
         }
     }
 
