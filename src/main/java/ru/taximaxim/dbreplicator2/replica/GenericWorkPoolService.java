@@ -40,7 +40,6 @@ import java.util.Date;
 public class GenericWorkPoolService implements WorkPoolService {
 
     private Connection connection;
-    private PreparedStatement clearWorkPoolDataStatement;
     
     /**
      * Конструктор на основе соединения к БД 
@@ -48,11 +47,20 @@ public class GenericWorkPoolService implements WorkPoolService {
     public GenericWorkPoolService(Connection connection) {
         this.connection = connection;
     }
+    
+    /**
+     * @return the connection
+     */
+    protected Connection getConnection() {
+        return connection;
+    }
+
+    private PreparedStatement clearWorkPoolDataStatement;
 
     @Override
     public PreparedStatement getLastOperationsStatement(int runnerId, int fetchSize) throws SQLException {
         PreparedStatement statement = 
-                connection.prepareStatement("SELECT * FROM rep2_workpool_data WHERE id_superlog IN (SELECT MAX(id_superlog) AS id_superlog FROM rep2_workpool_data WHERE id_runner=? GROUP BY id_foreign, id_table ORDER BY id_superlog) ORDER BY id_superlog", 
+                getConnection().prepareStatement("SELECT * FROM rep2_workpool_data WHERE id_superlog IN (SELECT MAX(id_superlog) AS id_superlog FROM rep2_workpool_data WHERE id_runner=? GROUP BY id_foreign, id_table ORDER BY id_superlog) ORDER BY id_superlog", 
                         ResultSet.TYPE_FORWARD_ONLY,
                         ResultSet.CONCUR_READ_ONLY);
 
@@ -67,7 +75,7 @@ public class GenericWorkPoolService implements WorkPoolService {
     public PreparedStatement getClearWorkPoolDataStatement() throws SQLException {
         if (clearWorkPoolDataStatement == null) {
             clearWorkPoolDataStatement = 
-                    connection.prepareStatement("DELETE FROM rep2_workpool_data WHERE id_runner=? AND id_foreign=? AND id_table=? AND id_superlog<=?");
+                    getConnection().prepareStatement("DELETE FROM rep2_workpool_data WHERE id_runner=? AND id_foreign=? AND id_table=? AND id_superlog<=?");
         }
         
         return clearWorkPoolDataStatement;
@@ -111,7 +119,7 @@ public class GenericWorkPoolService implements WorkPoolService {
 
         // Увеличиваем счетчик ошибок на 1
         PreparedStatement incErrorsCount = 
-                connection.prepareStatement("UPDATE rep2_workpool_data SET c_errors_count = c_errors_count + 1, c_last_error=?, c_last_error_date=? WHERE id_runner=? AND id_table=? AND id_foreign=?");
+                getConnection().prepareStatement("UPDATE rep2_workpool_data SET c_errors_count = c_errors_count + 1, c_last_error=?, c_last_error_date=? WHERE id_runner=? AND id_table=? AND id_foreign=?");
         incErrorsCount.setString(1, message + "\n" + writer.toString());
         incErrorsCount.setTimestamp(2, new Timestamp(new Date().getTime()));
         incErrorsCount.setInt(3, operation.getInt("id_runner"));

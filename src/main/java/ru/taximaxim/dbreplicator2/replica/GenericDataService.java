@@ -47,6 +47,13 @@ public class GenericDataService implements DataService {
     private Connection connection;
 
     /**
+     * @return the connection
+     */
+    protected Connection getConnection() {
+        return connection;
+    }
+
+    /**
      * Кешированные запросы удаления данных в приемнике
      */
     private Map<TableModel, PreparedStatement> deleteStatements = new HashMap<TableModel, PreparedStatement>();
@@ -81,15 +88,43 @@ public class GenericDataService implements DataService {
      */
     @Override
     public PreparedStatement getDeleteStatement(TableModel table) throws SQLException {
-        PreparedStatement statement = deleteStatements.get(table);
+        PreparedStatement statement = getDeleteStatements().get(table);
         if (statement == null) {
             statement = connection.prepareStatement(QueryConstructors
                     .constructDeleteQuery(table.getName(),
                             new ArrayList<String>(getPriCols(table))));
-            deleteStatements.put(table, statement);
+            getDeleteStatements().put(table, statement);
         }
 
         return statement;
+    }
+
+    /**
+     * @return the deleteStatements
+     */
+    protected Map<TableModel, PreparedStatement> getDeleteStatements() {
+        return deleteStatements;
+    }
+
+    /**
+     * @return the selectStatements
+     */
+    protected Map<TableModel, PreparedStatement> getSelectStatements() {
+        return selectStatements;
+    }
+
+    /**
+     * @return the updateStatements
+     */
+    protected Map<TableModel, PreparedStatement> getUpdateStatements() {
+        return updateStatements;
+    }
+
+    /**
+     * @return the insertStatements
+     */
+    protected Map<TableModel, PreparedStatement> getInsertStatements() {
+        return insertStatements;
     }
 
     /* (non-Javadoc)
@@ -97,14 +132,14 @@ public class GenericDataService implements DataService {
      */
     @Override
     public PreparedStatement getSelectStatement(TableModel table) throws SQLException {
-        PreparedStatement statement = selectStatements.get(table);
+        PreparedStatement statement = getSelectStatements().get(table);
         if (statement == null) {
             statement = connection.prepareStatement(QueryConstructors
                     .constructSelectQuery(table.getName(),
                             new ArrayList<String>(getAllCols(table)),
                                     new ArrayList<String>(getPriCols(table))));
 
-            selectStatements.put(table, statement);
+            getSelectStatements().put(table, statement);
         }
 
         return statement;
@@ -115,14 +150,14 @@ public class GenericDataService implements DataService {
      */
     @Override
     public PreparedStatement getUpdateStatement(TableModel table) throws SQLException {
-        PreparedStatement statement = updateStatements.get(table);
+        PreparedStatement statement = getUpdateStatements().get(table);
         if (statement == null) {
             statement = connection.prepareStatement(QueryConstructors
                     .constructUpdateQuery(table.getName(),
                             new ArrayList<String>(getDataCols(table)),
                                     new ArrayList<String>(getPriCols(table))));
 
-            updateStatements.put(table, statement);
+            getUpdateStatements().put(table, statement);
         }
 
         return statement;
@@ -133,13 +168,13 @@ public class GenericDataService implements DataService {
      */
     @Override
     public PreparedStatement getInsertStatement(TableModel table) throws SQLException {
-        PreparedStatement statement = insertStatements.get(table);
+        PreparedStatement statement = getInsertStatements().get(table);
         if (statement == null) {
             String insertQuery = QueryConstructors.constructInsertQuery(table.getName(), 
                     new ArrayList<String>(getAllCols(table)));
             statement = connection.prepareStatement(insertQuery);
 
-            insertStatements.put(table, statement);
+            getInsertStatements().put(table, statement);
         }
 
         return statement;
