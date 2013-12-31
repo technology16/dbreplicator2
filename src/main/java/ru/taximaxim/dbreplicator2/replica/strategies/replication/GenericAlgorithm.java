@@ -284,15 +284,19 @@ public class GenericAlgorithm implements Strategy {
             Connection targetConnection, StrategyModel data, 
             WorkPoolService workPoolService,
             DataService sourceDataService,
-            DataService destDataService) throws SQLException{
+            DataService destDataService) throws SQLException {
+        // Задаем первоначальное смещение выборки равное 0.
+        // При появлении ошибочных записей будем его увеличивать на 1.
+        int offset = 0;
         // Извлекаем список последних операций по измененым записям
         try {
             PreparedStatement selectLastOperations = 
-                    workPoolService.getLastOperationsStatement(data.getRunner().getId(), fetchSize);
+                    workPoolService.getLastOperationsStatement();
             PreparedStatement deleteWorkPoolData = 
                     workPoolService.getClearWorkPoolDataStatement();
 
-            ResultSet operationsResult = selectLastOperations.executeQuery();
+            ResultSet operationsResult = 
+                    workPoolService.getLastOperations(data.getRunner().getId(), fetchSize, offset);
             try {
                 // Проходим по списку измененных записей
                 for (int rowsCount = 1; operationsResult.next(); rowsCount++) {
@@ -309,7 +313,7 @@ public class GenericAlgorithm implements Strategy {
 
                         // Извлекаем новую порцию данных
                         operationsResult.close();
-                        operationsResult = selectLastOperations.executeQuery();
+                        operationsResult = workPoolService.getLastOperations(data.getRunner().getId(), fetchSize, offset);
 
                         LOG.info(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Обработано %s строк...", 
                                 data.getRunner().getId(), data.getRunner().getDescription(), data.getId(), rowsCount));

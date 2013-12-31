@@ -57,18 +57,33 @@ public class GenericWorkPoolService implements WorkPoolService {
 
     private PreparedStatement clearWorkPoolDataStatement;
 
+    private PreparedStatement lastOperationsStatement;
+
     @Override
-    public PreparedStatement getLastOperationsStatement(int runnerId, int fetchSize) throws SQLException {
-        PreparedStatement statement = 
+    public PreparedStatement getLastOperationsStatement() throws SQLException {
+        if (lastOperationsStatement == null) {
+            lastOperationsStatement = 
                 getConnection().prepareStatement("SELECT * FROM rep2_workpool_data WHERE id_superlog IN (SELECT MAX(id_superlog) AS id_superlog FROM rep2_workpool_data WHERE id_runner=? GROUP BY id_foreign, id_table ORDER BY id_superlog) ORDER BY id_superlog", 
                         ResultSet.TYPE_FORWARD_ONLY,
                         ResultSet.CONCUR_READ_ONLY);
+        }
+        
+        return lastOperationsStatement;
+    }
 
+    /* (non-Javadoc)
+     * @see ru.taximaxim.dbreplicator2.replica.WorkPoolService#getLastOperations(int, int, int)
+     */
+    @Override
+    public ResultSet getLastOperations(int runnerId, int fetchSize, int offset)
+            throws SQLException {
+        PreparedStatement statement = getLastOperationsStatement();
+        
         statement.setInt(1, runnerId);
         // Извлекаем частями равными fetchSize 
         statement.setFetchSize(fetchSize);
         
-        return statement;
+        return statement.executeQuery();
     }
 
     @Override

@@ -42,7 +42,15 @@ public interface WorkPoolService {
      * @return
      * @throws SQLException 
      */
-    PreparedStatement getLastOperationsStatement(int runnerId, int fetchSize) throws SQLException;
+    PreparedStatement getLastOperationsStatement() throws SQLException;
+    
+    /**
+     * Получение подготовленного выражения для выборки последних операций
+     * 
+     * @return
+     * @throws SQLException 
+     */
+    ResultSet getLastOperations(int runnerId, int fetchSize, int offset) throws SQLException;
     
     PreparedStatement getClearWorkPoolDataStatement() throws SQLException;
     
