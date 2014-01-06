@@ -25,7 +25,7 @@
  * Функции для работы с метаданными
  * 
  */
-package ru.taximaxim.dbreplicator2.replica;
+package ru.taximaxim.dbreplicator2.replica.strategies.replication.data;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;

@@ -21,7 +21,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ru.taximaxim.dbreplicator2.replica;
+package ru.taximaxim.dbreplicator2.replica.strategies.replication.workpool;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -32,6 +32,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
+
 
 /**
  * @author volodin_aa

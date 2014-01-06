@@ -33,10 +33,10 @@ import org.apache.log4j.Logger;
 import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.model.TableModel;
-import ru.taximaxim.dbreplicator2.replica.DataService;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
-import ru.taximaxim.dbreplicator2.replica.WorkPoolService;
+import ru.taximaxim.dbreplicator2.replica.strategies.replication.data.DataService;
+import ru.taximaxim.dbreplicator2.replica.strategies.replication.workpool.WorkPoolService;
 
 /**
  * Заготовка стратегии репликации
@@ -290,11 +290,8 @@ public class GenericAlgorithm implements Strategy {
         int offset = 0;
         // Извлекаем список последних операций по измененым записям
         try {
-            PreparedStatement selectLastOperations = 
-                    workPoolService.getLastOperationsStatement();
             PreparedStatement deleteWorkPoolData = 
                     workPoolService.getClearWorkPoolDataStatement();
-
             ResultSet operationsResult = 
                     workPoolService.getLastOperations(data.getRunner().getId(), fetchSize, offset);
             try {

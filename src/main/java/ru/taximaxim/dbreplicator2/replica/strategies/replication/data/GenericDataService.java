@@ -21,7 +21,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ru.taximaxim.dbreplicator2.replica;
+package ru.taximaxim.dbreplicator2.replica.strategies.replication.data;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -107,6 +107,8 @@ public class GenericDataService implements DataService {
     }
 
     /**
+     * Получение кеша запросов на выборку данных из источника
+     * 
      * @return the selectStatements
      */
     protected Map<TableModel, PreparedStatement> getSelectStatements() {
@@ -121,6 +123,8 @@ public class GenericDataService implements DataService {
     }
 
     /**
+     * Получение кеша запросов на вставку данных в приемник
+     * 
      * @return the insertStatements
      */
     protected Map<TableModel, PreparedStatement> getInsertStatements() {
@@ -286,24 +290,6 @@ public class GenericDataService implements DataService {
         }
 
         return cols;
-    }
-
-    /**
-     * Получение кеша запросов на выборку данных из источника
-     * 
-     * @return the selectSourceStatements
-     */
-    protected Map<TableModel, PreparedStatement> getSelectSourceStatements() {
-        return selectStatements;
-    }
-
-    /**
-     * Получение кеша запросов на вставку данных в приемник
-     * 
-     * @return the insertDestStatements
-     */
-    protected Map<TableModel, PreparedStatement> getInsertDestStatements() {
-        return insertStatements;
     }
 
     /**

@@ -27,10 +27,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
-import ru.taximaxim.dbreplicator2.replica.GenericDataService;
-import ru.taximaxim.dbreplicator2.replica.GenericWorkPoolService;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
+import ru.taximaxim.dbreplicator2.replica.strategies.replication.data.GenericDataService;
+import ru.taximaxim.dbreplicator2.replica.strategies.replication.workpool.GenericWorkPoolService;
 
 /**
  * Класс стратегии репликации данных из источника в приемник

@@ -21,7 +21,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ru.taximaxim.dbreplicator2.replica;
+package ru.taximaxim.dbreplicator2.replica.strategies.replication.workpool;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
