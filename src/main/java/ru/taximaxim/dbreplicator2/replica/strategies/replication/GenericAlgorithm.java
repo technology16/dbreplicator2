@@ -351,7 +351,8 @@ public class GenericAlgorithm implements Strategy {
             sourceConnection.commit();
         } catch (SQLException e) {
             sourceConnection.rollback();
-            
+            throw e;
+        } finally {    
             try {
                 if (lastAutoCommit != null) {
                     sourceConnection.setAutoCommit(lastAutoCommit);
@@ -371,7 +372,6 @@ public class GenericAlgorithm implements Strategy {
                 LOG.warn(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Ошибка при возврате автокомита в исходное состояние.", 
                         data.getRunner().getId(), data.getRunner().getDescription(), data.getId()), sqlException);
             }
-            throw e;
         }
     }
     
