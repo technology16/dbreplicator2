@@ -97,7 +97,7 @@ public class CountWatchgdog implements Strategy {
                 selectErrors.setInt(1, maxErrors);
                 try (ResultSet errorsResult = selectErrors.executeQuery();) {
                     List<String> cols =  
-                            new ArrayList<String>(JdbcMetadata.getColumnsList(errorsResult));
+                            new ArrayList<String>(JdbcMetadata.getColumns(errorsResult));
                     int count = 0;
                     StringBuffer rowDumpEmail = new StringBuffer(
                             String.format("\n\nВ %s превышен лимит в %s ошибок!\n\n",

@@ -196,7 +196,7 @@ public class GenericDataService implements DataService {
             throws SQLException {
         Set<String> cols = priCols.get(table);
         if (cols == null) {
-            cols = JdbcMetadata.getPrimaryColumnsList(connection, table.getName());
+            cols = JdbcMetadata.getPrimaryColumns(connection, table.getName());
             priCols.put(table, cols);
         }
 
@@ -215,11 +215,11 @@ public class GenericDataService implements DataService {
             throws SQLException {
         Set<String> cols = allCols.get(table);
         if (cols == null) {
-            cols = JdbcMetadata.getColumnsList(connection, table.getName());
+            cols = JdbcMetadata.getColumns(connection, table.getName());
             
             // Удаляем игнорируемые колонки
             for (String ignoredCol: getIgnoredCols(table)) {
-                cols.remove(ignoredCol);
+                cols.remove(ignoredCol.toUpperCase());
             }
             
             allCols.put(table, cols);
@@ -264,7 +264,7 @@ public class GenericDataService implements DataService {
     public Set<String> getIdentityCols(TableModel table) throws SQLException {
         Set<String> cols = identityCols.get(table);
         if (cols == null) {
-            cols = JdbcMetadata.getIdentityColumnsList(connection, table.getName());
+            cols = JdbcMetadata.getIdentityColumns(connection, table.getName());
             identityCols.put(table, cols);
         }
 

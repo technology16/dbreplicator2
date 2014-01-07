@@ -133,7 +133,7 @@ public class H2CopyTableDataTest2rep {
         ) {
             ResultSet result = select.executeQuery();
             List<String> cols = 
-                    new ArrayList<String>(JdbcMetadata.getColumnsList(conn, "REP2_WORKPOOL_DATA"));
+                    new ArrayList<String>(JdbcMetadata.getColumns(conn, "REP2_WORKPOOL_DATA"));
             while (result.next()) {
                 LOG.info(Jdbc.resultSetToString(result, cols));
             }

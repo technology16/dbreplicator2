@@ -58,7 +58,7 @@ public final class JdbcMetadata {
      * @return список колонок таблицы
      * @throws SQLException
      */
-    public static Set<String> getColumnsList(Connection connection, String tableName)
+    public static Set<String> getColumns(Connection connection, String tableName)
             throws SQLException {
         // Получаем список колонок
         Set<String> colsList = new HashSet<String>();
@@ -83,7 +83,7 @@ public final class JdbcMetadata {
      * @return список колонок таблицы
      * @throws SQLException
      */
-    public static Set<String> getColumnsList(ResultSet result)
+    public static Set<String> getColumns(ResultSet result)
             throws SQLException {
         // Получаем список колонок
         Set<String> colsList = new HashSet<String>();
@@ -106,7 +106,7 @@ public final class JdbcMetadata {
      * @return список ключевых колонок таблицы
      * @throws SQLException
      */
-    public static Set<String> getPrimaryColumnsList(Connection connection,
+    public static Set<String> getPrimaryColumns(Connection connection,
             String tableName) throws SQLException {
         // Получаем список ключевых колонок
         Set<String> primaryKeyColsList = new HashSet<String>();
@@ -131,7 +131,7 @@ public final class JdbcMetadata {
      * @return список AUTO INCREMENT колонок таблицы
      * @throws SQLException
      */
-    public static Set<String> getIdentityColumnsList(Connection connection,
+    public static Set<String> getIdentityColumns(Connection connection,
             String tableName) throws SQLException {
         // Получаем список колонок
         Set<String> colsList = new HashSet<String>();
