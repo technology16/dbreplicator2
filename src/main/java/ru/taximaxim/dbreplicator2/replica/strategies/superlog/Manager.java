@@ -138,11 +138,6 @@ public class Manager implements Strategy {
                     // Подтверждаем транзакцию
                     targetConnection.commit();
                 }
-            } catch (SQLException e) {
-                // Откатываемся
-                sourceConnection.rollback();
-                // Пробрасываем ошибку на уровень выше
-                throw e;
             }
             // Запускаем обработчики реплик
             for (RunnerModel runner : sourcePool.getRunners()) {

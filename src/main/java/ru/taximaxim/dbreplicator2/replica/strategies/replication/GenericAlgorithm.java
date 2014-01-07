@@ -289,43 +289,38 @@ public class GenericAlgorithm implements Strategy {
         // При появлении ошибочных записей будем его увеличивать на 1.
         int offset = 0;
         // Извлекаем список последних операций по измененым записям
+        PreparedStatement deleteWorkPoolData = 
+                workPoolService.getClearWorkPoolDataStatement();
+        ResultSet operationsResult = 
+                workPoolService.getLastOperations(data.getRunner().getId(), fetchSize, offset);
         try {
-            PreparedStatement deleteWorkPoolData = 
-                    workPoolService.getClearWorkPoolDataStatement();
-            ResultSet operationsResult = 
-                    workPoolService.getLastOperations(data.getRunner().getId(), fetchSize, offset);
-            try {
-                // Проходим по списку измененных записей
-                for (int rowsCount = 1; operationsResult.next(); rowsCount++) {
-                    // Реплицируем операцию
-                    replicateOperation(data, workPoolService,
-                            sourceDataService,
-                            destDataService, 
-                            operationsResult);
+            // Проходим по списку измененных записей
+            for (int rowsCount = 1; operationsResult.next(); rowsCount++) {
+                // Реплицируем операцию
+                replicateOperation(data, workPoolService,
+                        sourceDataService,
+                        destDataService, 
+                        operationsResult);
 
-                    // Периодически сбрасываем батч в БД
-                    if ((rowsCount % batchSize) == 0) {
-                        deleteWorkPoolData.executeBatch();
-                        sourceConnection.commit();
+                // Периодически сбрасываем батч в БД
+                if ((rowsCount % batchSize) == 0) {
+                    deleteWorkPoolData.executeBatch();
+                    sourceConnection.commit();
 
-                        // Извлекаем новую порцию данных
-                        operationsResult.close();
-                        operationsResult = workPoolService.getLastOperations(data.getRunner().getId(), fetchSize, offset);
+                    // Извлекаем новую порцию данных
+                    operationsResult.close();
+                    operationsResult = workPoolService.getLastOperations(data.getRunner().getId(), fetchSize, offset);
 
-                        LOG.info(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Обработано %s строк...", 
-                                data.getRunner().getId(), data.getRunner().getDescription(), data.getId(), rowsCount));
-                    }
+                    LOG.info(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Обработано %s строк...", 
+                            data.getRunner().getId(), data.getRunner().getDescription(), data.getId(), rowsCount));
                 }
-            } finally {
-                operationsResult.close();
             }
-            // Подтверждаем транзакцию
-            deleteWorkPoolData.executeBatch();
-            sourceConnection.commit();
-        } catch (SQLException e) {
-            sourceConnection.rollback();
-            throw e;
+        } finally {
+            operationsResult.close();
         }
+        // Подтверждаем транзакцию
+        deleteWorkPoolData.executeBatch();
+        sourceConnection.commit();
     }
 
     /**
@@ -351,8 +346,12 @@ public class GenericAlgorithm implements Strategy {
                     targetConnection, data, 
                     workPoolService,
                     sourceDataService,
-                    destDataService);        
+                    destDataService);
+            
+            sourceConnection.commit();
         } catch (SQLException e) {
+            sourceConnection.rollback();
+            
             try {
                 if (lastAutoCommit != null) {
                     sourceConnection.setAutoCommit(lastAutoCommit);
