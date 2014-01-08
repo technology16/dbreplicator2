@@ -85,6 +85,13 @@ public class GenericAlgorithm implements Strategy {
     }
 
     /**
+     * @return the isStrict
+     */
+    protected boolean isStrict() {
+        return isStrict;
+    }
+
+    /**
      * Функция репликации вставки записи.
      * 
      * @param dataService   - сервис для работы с приемником
@@ -188,7 +195,7 @@ public class GenericAlgorithm implements Strategy {
                 workPoolService.trackError(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Ошибка при удалении записи: ", 
                         data.getRunner().getId(), data.getRunner().getDescription(), data.getId()) + rowDump, e, operationsResult);
                 
-                if (isStrict) {
+                if (isStrict()) {
                     throw e;
                 }
             }
@@ -227,7 +234,7 @@ public class GenericAlgorithm implements Strategy {
                         workPoolService.trackError(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Ошибка при обновлении записи: ", 
                                 data.getRunner().getId(), data.getRunner().getDescription(), data.getId()) + rowDump, e, operationsResult);
 
-                        if (isStrict) {
+                        if (isStrict()) {
                             throw e;
                         }
                     }
@@ -257,7 +264,7 @@ public class GenericAlgorithm implements Strategy {
                             workPoolService.trackError(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Ошибка при вставке записи: ", 
                                     data.getRunner().getId(), data.getRunner().getDescription(), data.getId()) + rowDump, e, operationsResult);
 
-                            if (isStrict) {
+                            if (isStrict()) {
                                 throw e;
                             }
                         }
