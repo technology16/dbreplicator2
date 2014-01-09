@@ -127,4 +127,15 @@ public interface DataService {
      */
     Set<String> getIgnoredCols(TableModel table) throws SQLException;
 
+
+    /**
+     * Устанавливает сессионную переменную с именем текущео владельца записи.
+     * Триггер который отслеживает изменение записей реагирует на этот флаг и заполняет
+     * соответствующее поле в таблице rep2_superlog.
+     * 
+     * @throws Exception
+     */
+    void setRepServerName(String repServerName)
+            throws SQLException;
+
 }

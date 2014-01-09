@@ -298,7 +298,7 @@ public class GenericDataService implements DataService {
      * 
      * @throws Exception
      */
-    protected void setRepServerName(Connection connection, String repServerName)
+    public void setRepServerName(String repServerName)
             throws SQLException {
 
     }

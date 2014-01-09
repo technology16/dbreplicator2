@@ -349,6 +349,10 @@ public class GenericAlgorithm implements Strategy {
 
             targetConnection.setAutoCommit(true);
 
+            // Устанавливаем флаг текущего владельца записей
+            sourceDataService.setRepServerName(data.getRunner().getTarget().getPoolId());
+            destDataService.setRepServerName(data.getRunner().getSource().getPoolId());
+            
             selectLastOperations(sourceConnection, 
                     targetConnection, data, 
                     workPoolService,
@@ -360,6 +364,10 @@ public class GenericAlgorithm implements Strategy {
             sourceConnection.rollback();
             throw e;
         } finally {    
+            // Сбрасываем флаг текущего владельца записей
+            sourceDataService.setRepServerName(null);
+            destDataService.setRepServerName(null);
+            
             try {
                 if (lastAutoCommit != null) {
                     sourceConnection.setAutoCommit(lastAutoCommit);
