@@ -20,7 +20,7 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package ru.taximaxim.dbreplicator2.replica.strategies.replication;
+package ru.taximaxim.dbreplicator2.replica.strategies.replication.algorithms;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -72,7 +72,7 @@ public class GenericAlgorithm implements Strategy {
      * @param batchSize
      * @param isStrict
      */
-    GenericAlgorithm(int fetchSize, int batchSize, boolean isStrict, 
+    public GenericAlgorithm(int fetchSize, int batchSize, boolean isStrict, 
             WorkPoolService workPoolService,
             DataService sourceDataService,
             DataService destDataService) {
