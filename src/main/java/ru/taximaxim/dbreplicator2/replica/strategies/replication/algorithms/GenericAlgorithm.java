@@ -328,7 +328,7 @@ public class GenericAlgorithm implements Strategy {
             WorkPoolService workPoolService,
             DataService sourceDataService,
             DataService destDataService,
-            int fetchSize, boolean isStrict) throws SQLException {
+            int fetchSize, int batchSize, boolean isStrict) throws SQLException {
         // Задаем первоначальное смещение выборки равное 0.
         // При появлении ошибочных записей будем его увеличивать на 1.
         int offset = 0;
@@ -347,7 +347,7 @@ public class GenericAlgorithm implements Strategy {
                         operationsResult, isStrict);
 
                 // Периодически сбрасываем батч в БД
-                if ((rowsCount % getBatchSize()) == 0) {
+                if ((rowsCount % batchSize) == 0) {
                     deleteWorkPoolData.executeBatch();
                     sourceConnection.commit();
 
@@ -396,6 +396,7 @@ public class GenericAlgorithm implements Strategy {
                     getSourceDataService(),
                     getDestDataService(),
                     getFetchSize(),
+                    getBatchSize(),
                     isStrict());
             
             sourceConnection.commit();
