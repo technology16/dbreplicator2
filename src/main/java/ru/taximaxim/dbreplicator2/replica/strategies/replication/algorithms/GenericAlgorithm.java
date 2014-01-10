@@ -85,6 +85,41 @@ public class GenericAlgorithm implements Strategy {
     }
 
     /**
+     * @return the fetchSize
+     */
+    protected int getFetchSize() {
+        return fetchSize;
+    }
+
+    /**
+     * @return the batchSize
+     */
+    protected int getBatchSize() {
+        return batchSize;
+    }
+
+    /**
+     * @return the workPoolService
+     */
+    protected WorkPoolService getWorkPoolService() {
+        return workPoolService;
+    }
+
+    /**
+     * @return the sourceDataService
+     */
+    protected DataService getSourceDataService() {
+        return sourceDataService;
+    }
+
+    /**
+     * @return the destDataService
+     */
+    protected DataService getDestDataService() {
+        return destDataService;
+    }
+
+    /**
      * @return the isStrict
      */
     protected boolean isStrict() {
@@ -169,7 +204,8 @@ public class GenericAlgorithm implements Strategy {
             WorkPoolService workPoolService,
             DataService sourceDataService,
             DataService destDataService, 
-            ResultSet operationsResult) throws SQLException{
+            ResultSet operationsResult,
+            boolean isStrict) throws SQLException{
         TableModel table = data.getRunner().getSource()
                 .getTable(operationsResult.getString("id_table"));
         // Реплицируем данные
@@ -195,7 +231,7 @@ public class GenericAlgorithm implements Strategy {
                 workPoolService.trackError(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Ошибка при удалении записи: ", 
                         data.getRunner().getId(), data.getRunner().getDescription(), data.getId()) + rowDump, e, operationsResult);
                 
-                if (isStrict()) {
+                if (isStrict) {
                     throw e;
                 }
             }
@@ -234,7 +270,7 @@ public class GenericAlgorithm implements Strategy {
                         workPoolService.trackError(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Ошибка при обновлении записи: ", 
                                 data.getRunner().getId(), data.getRunner().getDescription(), data.getId()) + rowDump, e, operationsResult);
 
-                        if (isStrict()) {
+                        if (isStrict) {
                             throw e;
                         }
                     }
@@ -264,7 +300,7 @@ public class GenericAlgorithm implements Strategy {
                             workPoolService.trackError(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Ошибка при вставке записи: ", 
                                     data.getRunner().getId(), data.getRunner().getDescription(), data.getId()) + rowDump, e, operationsResult);
 
-                            if (isStrict()) {
+                            if (isStrict) {
                                 throw e;
                             }
                         }
@@ -291,7 +327,8 @@ public class GenericAlgorithm implements Strategy {
             Connection targetConnection, StrategyModel data, 
             WorkPoolService workPoolService,
             DataService sourceDataService,
-            DataService destDataService) throws SQLException {
+            DataService destDataService,
+            int fetchSize, boolean isStrict) throws SQLException {
         // Задаем первоначальное смещение выборки равное 0.
         // При появлении ошибочных записей будем его увеличивать на 1.
         int offset = 0;
@@ -307,10 +344,10 @@ public class GenericAlgorithm implements Strategy {
                 replicateOperation(data, workPoolService,
                         sourceDataService,
                         destDataService, 
-                        operationsResult);
+                        operationsResult, isStrict);
 
                 // Периодически сбрасываем батч в БД
-                if ((rowsCount % batchSize) == 0) {
+                if ((rowsCount % getBatchSize()) == 0) {
                     deleteWorkPoolData.executeBatch();
                     sourceConnection.commit();
 
@@ -350,14 +387,16 @@ public class GenericAlgorithm implements Strategy {
             targetConnection.setAutoCommit(true);
 
             // Устанавливаем флаг текущего владельца записей
-            sourceDataService.setRepServerName(data.getRunner().getTarget().getPoolId());
-            destDataService.setRepServerName(data.getRunner().getSource().getPoolId());
+            getSourceDataService().setRepServerName(data.getRunner().getTarget().getPoolId());
+            getDestDataService().setRepServerName(data.getRunner().getSource().getPoolId());
             
             selectLastOperations(sourceConnection, 
                     targetConnection, data, 
-                    workPoolService,
-                    sourceDataService,
-                    destDataService);
+                    getWorkPoolService(),
+                    getSourceDataService(),
+                    getDestDataService(),
+                    getFetchSize(),
+                    isStrict());
             
             sourceConnection.commit();
         } catch (SQLException e) {
@@ -365,8 +404,8 @@ public class GenericAlgorithm implements Strategy {
             throw e;
         } finally {    
             // Сбрасываем флаг текущего владельца записей
-            sourceDataService.setRepServerName(null);
-            destDataService.setRepServerName(null);
+            getSourceDataService().setRepServerName(null);
+            getDestDataService().setRepServerName(null);
             
             try {
                 if (lastAutoCommit != null) {
