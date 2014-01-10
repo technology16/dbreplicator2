@@ -35,6 +35,7 @@ import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 import ru.taximaxim.dbreplicator2.model.ApplicatonSettingsService;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
 import ru.taximaxim.dbreplicator2.model.TaskSettingsService;
+import ru.taximaxim.dbreplicator2.stats.StatsService;
 import ru.taximaxim.dbreplicator2.tasks.TasksPool;
 import ru.taximaxim.dbreplicator2.tp.ThreadPool;
 
@@ -64,6 +65,8 @@ public final class Core {
     private static Configuration configuration;
     
     private static ThreadPool threadPool;
+    
+    private static StatsService statsService;
 
     /**
      * Получение настроек из файла
@@ -252,6 +255,28 @@ public final class Core {
     public static synchronized void threadPoolClose() throws InterruptedException {
         threadPool.shutdownThreadPool();
         threadPool = null;
+    }
+    
+    /**
+     * Получаем сервис статситики
+     * 
+     * @return сервис статситики
+     */
+    public static synchronized StatsService getstatsService() {
+        if (statsService == null) {
+            ApplicatonSettingsService aService = new ApplicatonSettingsService(sessionFactory);
+            String baseConnName = aService.getValue("stats.dest").toString();
+            statsService = new StatsService(baseConnName);
+        }
+
+        return statsService;
+    }
+    
+    /**
+     * Закрываем сервис статситики
+     */
+    public static synchronized void statsServiceClose() {
+        statsService = null;
     }
 
 }

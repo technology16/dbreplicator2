@@ -9,6 +9,7 @@ insert into bone_cp_settings (id_pool, driver, url, user, pass, min_connections_
 
 --application_settings
 insert into application_settings (key, value) values ('tp.threads', '10');
+insert into application_settings (key, value) values ('stats.dest', 'source');
 
 
 --Tables
