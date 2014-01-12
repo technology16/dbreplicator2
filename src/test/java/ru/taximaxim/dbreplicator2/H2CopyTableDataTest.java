@@ -49,14 +49,18 @@ import ru.taximaxim.dbreplicator2.utils.Core;
  * 
  * Данный тест использует асинхронный менеджер записей супер лог таблицы, 
  * поэтому после каждого цикла репликации вызывается инструкция 
- * Thread.sleep(500); Тест может некорректно работать на медленных машинах, 
- * при необходимости подгонять величину задержки вручную!
+ * Thread.sleep(REPLICATION_DELAY); Тест может некорректно работать на медленных 
+ * машинах, при необходимости подгонять величину задержки вручную!
  * 
  * @author volodin_aa
  *
  */
 public class H2CopyTableDataTest {
     protected static final Logger LOG = Logger.getLogger(H2CopyTableDataTest.class);
+    
+    // Задержка между циклами репликации
+    private static final int REPLICATION_DELAY = 1000;
+    
     protected static SessionFactory sessionFactory;
     protected static Session session;
     protected static ConnectionFactory connectionFactory;
@@ -99,7 +103,7 @@ public class H2CopyTableDataTest {
 
         Helper.executeSqlFromFile(conn, "importSourceData.sql");
         worker.run();
-        Thread.sleep(500);
+        Thread.sleep(REPLICATION_DELAY);
         
         int count_rep2_superlog = Helper.InfoCount(conn, "rep2_superlog");
         if(count_rep2_superlog!=0) {
@@ -137,7 +141,7 @@ public class H2CopyTableDataTest {
         LOG.info("Проверка null");
         Helper.executeSqlFromFile(conn, "sql_null.sql");   
         worker.run();
-        Thread.sleep(500);
+        Thread.sleep(REPLICATION_DELAY);
         
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table4");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table4");
@@ -191,11 +195,11 @@ public class H2CopyTableDataTest {
         Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
         Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
         worker.run();
-        Thread.sleep(1000);
+        Thread.sleep(REPLICATION_DELAY);
         errorsCountWatchdogWorker.run();
-        Thread.sleep(1000);
+        Thread.sleep(REPLICATION_DELAY);
         worker.run();
-        Thread.sleep(1000);
+        Thread.sleep(REPLICATION_DELAY);
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table2");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table2");
         Helper.AssertEquals(listSource, listDest);
@@ -217,7 +221,7 @@ public class H2CopyTableDataTest {
       //Проверка вставки
         Helper.executeSqlFromFile(conn, "sql_insert.sql");   
         worker.run();
-        Thread.sleep(500);
+        Thread.sleep(REPLICATION_DELAY);
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
         Helper.AssertEquals(listSource, listDest);
@@ -241,7 +245,7 @@ public class H2CopyTableDataTest {
         LOG.info("Проверка обновления");
         Helper.executeSqlFromFile(conn, "sql_update.sql");   
         worker.run();
-        Thread.sleep(500);
+        Thread.sleep(REPLICATION_DELAY);
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
         Helper.AssertEquals(listSource, listDest);
@@ -265,7 +269,7 @@ public class H2CopyTableDataTest {
         //Проверка удаления
         Helper.executeSqlFromFile(conn, "sql_delete.sql");   
         worker.run();
-        Thread.sleep(500);
+        Thread.sleep(REPLICATION_DELAY);
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
         Helper.AssertEquals(listSource, listDest);
@@ -289,7 +293,7 @@ public class H2CopyTableDataTest {
         Helper.executeSqlFromFile(conn, "sql_insert.sql");   
         Helper.executeSqlFromFile(conn, "sql_update.sql");   
         worker.run();
-        Thread.sleep(500);
+        Thread.sleep(REPLICATION_DELAY);
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
         Helper.AssertEquals(listSource, listDest);
@@ -313,7 +317,7 @@ public class H2CopyTableDataTest {
         Helper.executeSqlFromFile(conn, "sql_insert.sql");   
         Helper.executeSqlFromFile(conn, "sql_delete.sql");   
         worker.run();
-        Thread.sleep(500);
+        Thread.sleep(REPLICATION_DELAY);
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
         Helper.AssertEquals(listSource, listDest);

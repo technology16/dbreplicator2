@@ -244,8 +244,8 @@ public class GenericAlgorithm implements Strategy {
             try (ResultSet sourceResult = selectSourceStatement.executeQuery();) {
                 // Проходим по списку измененных записей
                 if (sourceResult.next()) {
-                    int updationCount = -1;
-                    // -1   - была ошибка при обновлении
+                    int updationCount = 0;
+                    boolean hasError = false;
                     // 0    - запись отсутствует в приемнике
                     // 1    - запись обновлена
                     try {
@@ -253,6 +253,7 @@ public class GenericAlgorithm implements Strategy {
                                 table,
                                 sourceResult);
                     } catch (SQLException e) {
+                        hasError = true;
                         // Поглощаем и логгируем ошибки обновления
                         // Это ожидаемый результат
                         String rowDump = String.format("[ tableName = %s  [ operation = %s  [ row = %s ] ] ]", 
@@ -274,34 +275,36 @@ public class GenericAlgorithm implements Strategy {
                             throw e;
                         }
                     }
-                    if (updationCount > 0) {
-                        workPoolService.clearWorkPoolData(operationsResult);
-                    } else if (updationCount == 0) {
-                        try {
-                            // и если такой записи нет, то пытаемся вставить
-                            replicateInsertion(destDataService,
-                                    table,
-                                    sourceResult);
+                    if (!hasError) {
+                        if (updationCount > 0) {
                             workPoolService.clearWorkPoolData(operationsResult);
-                        } catch (SQLException e) {
-                            // Поглощаем и логгируем ошибки вставки
-                            // Это ожидаемый результат
-                            String rowDump = String.format("[ tableName = %s  [ operation = %s  [ row = %s ] ] ]", 
-                                    table, operationsResult.getString("c_operation"), 
-                                    Jdbc.resultSetToString(sourceResult, 
-                                            new ArrayList<String>(sourceDataService.getAllCols(table))));
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при вставке записи: ", 
-                                        data.getRunner().getId(), data.getRunner().getDescription(), data.getId()) + rowDump, e);
-                            } else {
-                                LOG.warn(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при вставке записи: ", 
-                                        data.getRunner().getId(), data.getRunner().getDescription(), data.getId()) + rowDump + " " + e.getMessage());
-                            }
-                            workPoolService.trackError(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Ошибка при вставке записи: ", 
-                                    data.getRunner().getId(), data.getRunner().getDescription(), data.getId()) + rowDump, e, operationsResult);
+                        } else {
+                            try {
+                                // и если такой записи нет, то пытаемся вставить
+                                replicateInsertion(destDataService,
+                                        table,
+                                        sourceResult);
+                                workPoolService.clearWorkPoolData(operationsResult);
+                            } catch (SQLException e) {
+                                // Поглощаем и логгируем ошибки вставки
+                                // Это ожидаемый результат
+                                String rowDump = String.format("[ tableName = %s  [ operation = %s  [ row = %s ] ] ]", 
+                                        table, operationsResult.getString("c_operation"), 
+                                        Jdbc.resultSetToString(sourceResult, 
+                                                new ArrayList<String>(sourceDataService.getAllCols(table))));
+                                if (LOG.isDebugEnabled()) {
+                                    LOG.debug(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при вставке записи: ", 
+                                            data.getRunner().getId(), data.getRunner().getDescription(), data.getId()) + rowDump, e);
+                                } else {
+                                    LOG.warn(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при вставке записи: ", 
+                                            data.getRunner().getId(), data.getRunner().getDescription(), data.getId()) + rowDump + " " + e.getMessage());
+                                }
+                                workPoolService.trackError(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Ошибка при вставке записи: ", 
+                                        data.getRunner().getId(), data.getRunner().getDescription(), data.getId()) + rowDump, e, operationsResult);
 
-                            if (isStrict) {
-                                throw e;
+                                if (isStrict) {
+                                    throw e;
+                                }
                             }
                         }
                     }
