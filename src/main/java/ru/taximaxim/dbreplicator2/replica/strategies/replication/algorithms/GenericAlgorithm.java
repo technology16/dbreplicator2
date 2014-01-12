@@ -135,15 +135,14 @@ public class GenericAlgorithm implements Strategy {
      * @return количество измененых записей
      * @throws SQLException
      */
-    protected int replicateInsertion(DataService dataService,
-            TableModel table,
+    protected int replicateInsertion(TableModel table,
             ResultSet sourceResult) throws SQLException {
         PreparedStatement insertDestStatement = 
-                dataService.getInsertStatement(table);
+                getDestDataService().getInsertStatement(table);
         // Добавляем данные в целевую таблицу
         Jdbc.fillStatementFromResultSet(insertDestStatement,
                 sourceResult, 
-                new ArrayList<String>(dataService.getAllCols(table)));
+                new ArrayList<String>(getDestDataService().getAllCols(table)));
         return insertDestStatement.executeUpdate();
     }
 
@@ -156,15 +155,14 @@ public class GenericAlgorithm implements Strategy {
      * @return количество измененых записей
      * @throws SQLException
      */
-    protected int replicateUpdation(DataService dataService,
-            TableModel table,
+    protected int replicateUpdation(TableModel table,
             ResultSet sourceResult) throws SQLException {
         // Если Была операция вставки или изменения, то сначала пытаемся обновить запись,
         PreparedStatement updateDestStatement = 
-                dataService.getUpdateStatement(table);
+                getDestDataService().getUpdateStatement(table);
         // Добавляем данные в целевую таблицу
-        List<String> colsForUpdate = new ArrayList<String>(dataService.getDataCols(table));
-        colsForUpdate.addAll(dataService.getPriCols(table));
+        List<String> colsForUpdate = new ArrayList<String>(getDestDataService().getDataCols(table));
+        colsForUpdate.addAll(getDestDataService().getPriCols(table));
         Jdbc.fillStatementFromResultSet(updateDestStatement,
                 sourceResult, colsForUpdate);
         return updateDestStatement.executeUpdate();
@@ -179,12 +177,11 @@ public class GenericAlgorithm implements Strategy {
      * @return количество измененых записей
      * @throws SQLException
      */
-    protected int replicateDeletion(DataService dataService, 
-            ResultSet operationsResult,
+    protected int replicateDeletion(ResultSet operationsResult,
             TableModel table) throws SQLException{
         // Если была операция удаления, то удаляем запись в приемнике
         PreparedStatement deleteDestStatement = 
-                dataService.getDeleteStatement(table);
+                getDestDataService().getDeleteStatement(table);
         deleteDestStatement.setLong(1, operationsResult.getLong("id_foreign"));
         return deleteDestStatement.executeUpdate();
     }
@@ -201,20 +198,14 @@ public class GenericAlgorithm implements Strategy {
      * @throws SQLException
      */
     protected void replicateOperation(StrategyModel data, 
-            WorkPoolService workPoolService,
-            DataService sourceDataService,
-            DataService destDataService, 
-            ResultSet operationsResult,
-            boolean isStrict) throws SQLException{
+            ResultSet operationsResult) throws SQLException{
         TableModel table = data.getRunner().getSource()
                 .getTable(operationsResult.getString("id_table"));
         // Реплицируем данные
         if (operationsResult.getString("c_operation").equalsIgnoreCase("D")) {
             try {
-                replicateDeletion(destDataService, 
-                        operationsResult,
-                        table);
-                workPoolService.clearWorkPoolData(operationsResult);
+                replicateDeletion(operationsResult, table);
+                getWorkPoolService().clearWorkPoolData(operationsResult);
             } catch (SQLException e) {
                 // Поглощаем и логгируем ошибки удаления
                 // Это ожидаемый результат
@@ -228,10 +219,10 @@ public class GenericAlgorithm implements Strategy {
                     LOG.warn(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при удалении записи: ", 
                             data.getRunner().getId(), data.getRunner().getDescription(), data.getId()) + rowDump + " " + e.getMessage());
                 }
-                workPoolService.trackError(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Ошибка при удалении записи: ", 
+                getWorkPoolService().trackError(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Ошибка при удалении записи: ", 
                         data.getRunner().getId(), data.getRunner().getDescription(), data.getId()) + rowDump, e, operationsResult);
                 
-                if (isStrict) {
+                if (isStrict()) {
                     throw e;
                 }
             }
@@ -239,7 +230,7 @@ public class GenericAlgorithm implements Strategy {
             // Добавляем данные в целевую таблицу
             // Извлекаем данные из исходной таблицы
             PreparedStatement selectSourceStatement = 
-                    sourceDataService.getSelectStatement(table);
+                    getSourceDataService().getSelectStatement(table);
             selectSourceStatement.setLong(1, operationsResult.getLong("id_foreign"));
             try (ResultSet sourceResult = selectSourceStatement.executeQuery();) {
                 // Проходим по списку измененных записей
@@ -249,9 +240,7 @@ public class GenericAlgorithm implements Strategy {
                     // 0    - запись отсутствует в приемнике
                     // 1    - запись обновлена
                     try {
-                        updationCount = replicateUpdation(destDataService,
-                                table,
-                                sourceResult);
+                        updationCount = replicateUpdation(table, sourceResult);
                     } catch (SQLException e) {
                         hasError = true;
                         // Поглощаем и логгируем ошибки обновления
@@ -259,7 +248,7 @@ public class GenericAlgorithm implements Strategy {
                         String rowDump = String.format("[ tableName = %s  [ operation = %s  [ row = %s ] ] ]", 
                                 table, operationsResult.getString("c_operation"), 
                                 Jdbc.resultSetToString(sourceResult, 
-                                        new ArrayList<String>(sourceDataService.getAllCols(table))));
+                                        new ArrayList<String>(getSourceDataService().getAllCols(table))));
                         if (LOG.isDebugEnabled()) {
                             LOG.debug(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при обновлении записи: ", 
                                     data.getRunner().getId(), data.getRunner().getDescription(), data.getId()) + rowDump, e);
@@ -268,23 +257,21 @@ public class GenericAlgorithm implements Strategy {
                                     data.getRunner().getId(), data.getRunner().getDescription(), data.getId()) 
                                     + rowDump + " " + e.getMessage());
                         }
-                        workPoolService.trackError(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Ошибка при обновлении записи: ", 
+                        getWorkPoolService().trackError(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Ошибка при обновлении записи: ", 
                                 data.getRunner().getId(), data.getRunner().getDescription(), data.getId()) + rowDump, e, operationsResult);
 
-                        if (isStrict) {
+                        if (isStrict()) {
                             throw e;
                         }
                     }
                     if (!hasError) {
                         if (updationCount > 0) {
-                            workPoolService.clearWorkPoolData(operationsResult);
+                            getWorkPoolService().clearWorkPoolData(operationsResult);
                         } else {
                             try {
                                 // и если такой записи нет, то пытаемся вставить
-                                replicateInsertion(destDataService,
-                                        table,
-                                        sourceResult);
-                                workPoolService.clearWorkPoolData(operationsResult);
+                                replicateInsertion(table, sourceResult);
+                                getWorkPoolService().clearWorkPoolData(operationsResult);
                             } catch (SQLException e) {
                                 // Поглощаем и логгируем ошибки вставки
                                 // Это ожидаемый результат
@@ -299,10 +286,10 @@ public class GenericAlgorithm implements Strategy {
                                     LOG.warn(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при вставке записи: ", 
                                             data.getRunner().getId(), data.getRunner().getDescription(), data.getId()) + rowDump + " " + e.getMessage());
                                 }
-                                workPoolService.trackError(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Ошибка при вставке записи: ", 
+                                getWorkPoolService().trackError(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Ошибка при вставке записи: ", 
                                         data.getRunner().getId(), data.getRunner().getDescription(), data.getId()) + rowDump, e, operationsResult);
 
-                                if (isStrict) {
+                                if (isStrict()) {
                                     throw e;
                                 }
                             }
@@ -327,36 +314,30 @@ public class GenericAlgorithm implements Strategy {
      * @throws SQLException
      */
     protected void selectLastOperations(Connection sourceConnection, 
-            Connection targetConnection, StrategyModel data, 
-            WorkPoolService workPoolService,
-            DataService sourceDataService,
-            DataService destDataService,
-            int fetchSize, int batchSize, boolean isStrict) throws SQLException {
+            Connection targetConnection, StrategyModel data) throws SQLException {
         // Задаем первоначальное смещение выборки равное 0.
         // При появлении ошибочных записей будем его увеличивать на 1.
         int offset = 0;
         // Извлекаем список последних операций по измененым записям
         PreparedStatement deleteWorkPoolData = 
-                workPoolService.getClearWorkPoolDataStatement();
+                getWorkPoolService().getClearWorkPoolDataStatement();
         ResultSet operationsResult = 
-                workPoolService.getLastOperations(data.getRunner().getId(), fetchSize, offset);
+                getWorkPoolService().getLastOperations(data.getRunner().getId(), fetchSize, offset);
         try {
             // Проходим по списку измененных записей
             for (int rowsCount = 1; operationsResult.next(); rowsCount++) {
                 // Реплицируем операцию
-                replicateOperation(data, workPoolService,
-                        sourceDataService,
-                        destDataService, 
-                        operationsResult, isStrict);
+                replicateOperation(data, 
+                        operationsResult);
 
                 // Периодически сбрасываем батч в БД
-                if ((rowsCount % batchSize) == 0) {
+                if ((rowsCount % getBatchSize()) == 0) {
                     deleteWorkPoolData.executeBatch();
                     sourceConnection.commit();
 
                     // Извлекаем новую порцию данных
                     operationsResult.close();
-                    operationsResult = workPoolService.getLastOperations(data.getRunner().getId(), fetchSize, offset);
+                    operationsResult = getWorkPoolService().getLastOperations(data.getRunner().getId(), getFetchSize(), offset);
 
                     LOG.info(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Обработано %s строк...", 
                             data.getRunner().getId(), data.getRunner().getDescription(), data.getId(), rowsCount));
@@ -394,13 +375,7 @@ public class GenericAlgorithm implements Strategy {
             getDestDataService().setRepServerName(data.getRunner().getSource().getPoolId());
             
             selectLastOperations(sourceConnection, 
-                    targetConnection, data, 
-                    getWorkPoolService(),
-                    getSourceDataService(),
-                    getDestDataService(),
-                    getFetchSize(),
-                    getBatchSize(),
-                    isStrict());
+                    targetConnection, data);
             
             sourceConnection.commit();
         } catch (SQLException e) {
