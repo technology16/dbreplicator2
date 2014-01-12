@@ -42,16 +42,7 @@ import ru.taximaxim.dbreplicator2.model.TableModel;
  * @author volodin_aa
  *
  */
-public class GenericDataService implements DataService {
-
-    private Connection connection;
-
-    /**
-     * @return the connection
-     */
-    protected Connection getConnection() {
-        return connection;
-    }
+public class GenericDataService extends DataServiceSkeleton implements DataService {
 
     /**
      * Кешированные запросы удаления данных в приемнике
@@ -80,7 +71,7 @@ public class GenericDataService implements DataService {
      * 
      */
     public GenericDataService(Connection connection) {
-        this.connection = connection;        
+        super(connection);        
     }
 
     /* (non-Javadoc)
@@ -90,7 +81,7 @@ public class GenericDataService implements DataService {
     public PreparedStatement getDeleteStatement(TableModel table) throws SQLException {
         PreparedStatement statement = getDeleteStatements().get(table);
         if (statement == null) {
-            statement = connection.prepareStatement(QueryConstructors
+            statement = getConnection().prepareStatement(QueryConstructors
                     .constructDeleteQuery(table.getName(),
                             new ArrayList<String>(getPriCols(table))));
             getDeleteStatements().put(table, statement);
@@ -138,7 +129,7 @@ public class GenericDataService implements DataService {
     public PreparedStatement getSelectStatement(TableModel table) throws SQLException {
         PreparedStatement statement = getSelectStatements().get(table);
         if (statement == null) {
-            statement = connection.prepareStatement(QueryConstructors
+            statement = getConnection().prepareStatement(QueryConstructors
                     .constructSelectQuery(table.getName(),
                             new ArrayList<String>(getAllCols(table)),
                                     new ArrayList<String>(getPriCols(table))));
@@ -156,7 +147,7 @@ public class GenericDataService implements DataService {
     public PreparedStatement getUpdateStatement(TableModel table) throws SQLException {
         PreparedStatement statement = getUpdateStatements().get(table);
         if (statement == null) {
-            statement = connection.prepareStatement(QueryConstructors
+            statement = getConnection().prepareStatement(QueryConstructors
                     .constructUpdateQuery(table.getName(),
                             new ArrayList<String>(getDataCols(table)),
                                     new ArrayList<String>(getPriCols(table))));
@@ -176,7 +167,7 @@ public class GenericDataService implements DataService {
         if (statement == null) {
             String insertQuery = QueryConstructors.constructInsertQuery(table.getName(), 
                     new ArrayList<String>(getAllCols(table)));
-            statement = connection.prepareStatement(insertQuery);
+            statement = getConnection().prepareStatement(insertQuery);
 
             getInsertStatements().put(table, statement);
         }
@@ -196,7 +187,7 @@ public class GenericDataService implements DataService {
             throws SQLException {
         Set<String> cols = priCols.get(table);
         if (cols == null) {
-            cols = JdbcMetadata.getPrimaryColumns(connection, table.getName());
+            cols = JdbcMetadata.getPrimaryColumns(getConnection(), table.getName());
             priCols.put(table, cols);
         }
 
@@ -215,7 +206,7 @@ public class GenericDataService implements DataService {
             throws SQLException {
         Set<String> cols = allCols.get(table);
         if (cols == null) {
-            cols = JdbcMetadata.getColumns(connection, table.getName());
+            cols = JdbcMetadata.getColumns(getConnection(), table.getName());
             
             // Удаляем игнорируемые колонки
             for (String ignoredCol: getIgnoredCols(table)) {
@@ -264,7 +255,7 @@ public class GenericDataService implements DataService {
     public Set<String> getIdentityCols(TableModel table) throws SQLException {
         Set<String> cols = identityCols.get(table);
         if (cols == null) {
-            cols = JdbcMetadata.getIdentityColumns(connection, table.getName());
+            cols = JdbcMetadata.getIdentityColumns(getConnection(), table.getName());
             identityCols.put(table, cols);
         }
 
