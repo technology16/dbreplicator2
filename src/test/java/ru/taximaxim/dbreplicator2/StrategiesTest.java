@@ -53,6 +53,7 @@ public class StrategiesTest {
     public static void tearDownAfterClass() throws Exception {
         sessionFactory.close();
         Core.sessionFactoryClose();
+        Core.statsServiceClose();
     }
     
     /**

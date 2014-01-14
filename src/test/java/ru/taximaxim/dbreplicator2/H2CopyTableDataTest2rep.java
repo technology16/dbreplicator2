@@ -85,6 +85,7 @@ public class H2CopyTableDataTest2rep {
             session.close();
         Core.connectionFactoryClose();
         Core.sessionFactoryClose();
+        Core.statsServiceClose();
     }
     
     /**

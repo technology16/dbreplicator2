@@ -100,7 +100,7 @@ public class GenericAlgorithm implements Strategy {
      * @return StatsService
      */
     protected StatsService getStatsService() {
-        return Core.getstatsService();
+        return Core.getStatsService();
     }
     
     /**

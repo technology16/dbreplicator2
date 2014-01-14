@@ -40,6 +40,7 @@ public class IgnoreColumnsTableModelTest {
         session.close();
         Core.sessionFactoryClose();
         Core.connectionFactoryClose();
+        Core.statsServiceClose();
     }
 
     @Before

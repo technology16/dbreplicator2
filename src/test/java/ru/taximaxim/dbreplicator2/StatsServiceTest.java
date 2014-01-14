@@ -45,7 +45,7 @@ public class StatsServiceTest {
         sessionFactory = Core.getSessionFactory();
         session = sessionFactory.openSession();
         connectionFactory = Core.getConnectionFactory();
-        statsService = Core.getstatsService();
+        statsService = Core.getStatsService();
         initialization();
     }
 
@@ -65,7 +65,7 @@ public class StatsServiceTest {
     //c_date, c_type, id_strategy, id_table, c_count
     
     @Test
-    public void testgetStat1() throws ClassNotFoundException, SQLException {
+    public void testGetStatByTypeTablePeriod() throws ClassNotFoundException, SQLException {
         //int type, String tableName,  Timestamp dateStart, Timestamp dateEnd
         try (
                 ResultSet result1 = statsService.getStat(0, "T_PLACE", dateStart, dateEnd);
@@ -89,7 +89,7 @@ public class StatsServiceTest {
     }
     
     @Test
-    public void testgetStat2() throws ClassNotFoundException, SQLException {
+    public void testgetStatByType() throws ClassNotFoundException, SQLException {
         //int type
         try (
                 ResultSet result1 = statsService.getStat(0);
@@ -107,7 +107,7 @@ public class StatsServiceTest {
     }
     
     @Test
-    public void testgetStat3() throws ClassNotFoundException, SQLException {
+    public void testgetStatByTypeTable() throws ClassNotFoundException, SQLException {
         //int type, String tableName
         try (
                 ResultSet result1 = statsService.getStat(0, "T_PLACE");
@@ -131,7 +131,7 @@ public class StatsServiceTest {
     }
     
     @Test
-    public void testgetStat4() throws ClassNotFoundException, SQLException {
+    public void testgetStatByTypePeriod() throws ClassNotFoundException, SQLException {
         //int type, Timestamp dateStart, Timestamp dateEnd
         try (
                 ResultSet result1 = statsService.getStat(0, dateStart, dateEnd);
@@ -150,7 +150,7 @@ public class StatsServiceTest {
     }
 
     @Test
-    public void testgetStat5() throws ClassNotFoundException, SQLException {
+    public void testgetStatByTypeTablePeriodStartMidde() throws ClassNotFoundException, SQLException {
         //int type, String tableName,  Timestamp dateStart, Timestamp dateEnd
         try (
                 ResultSet result1 = statsService.getStat(0, "T_PLACE", dateStart, dateMidde);
@@ -174,7 +174,7 @@ public class StatsServiceTest {
     }
     
     @Test
-    public void testgetStat6() throws ClassNotFoundException, SQLException {
+    public void testgetStatByTypeTablePeriodMiddeEnd() throws ClassNotFoundException, SQLException {
         //int type, String tableName,  Timestamp dateStart, Timestamp dateEnd
         try (
                 ResultSet result1 = statsService.getStat(0, "T_PLACE", dateMidde, dateEnd);

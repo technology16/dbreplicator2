@@ -59,6 +59,7 @@ public class TriggerH2Test {
         Core.connectionFactoryClose();
         sessionFactory.close();
         Core.sessionFactoryClose();
+        Core.statsServiceClose();
     }
 
     /**

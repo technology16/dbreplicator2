@@ -4,6 +4,7 @@ drop table if exists T_TABLE2;
 drop table if exists T_TABLE3;
 drop table if exists T_TABLE4;
 drop table if exists T_TABLE5;
+drop table if exists T_TAB;
 
 CREATE TABLE T_TAB (ID IDENTITY PRIMARY KEY, _value VARCHAR(250));
 INSERT INTO T_TAB (_value) VALUES('');

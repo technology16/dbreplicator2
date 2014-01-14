@@ -258,15 +258,15 @@ public final class Core {
     }
     
     /**
-     * Получаем сервис статситики
+     * Получаем сервис статистики
      * 
-     * @return сервис статситики
+     * @return сервис статистики
      */
-    public static synchronized StatsService getstatsService() {
+    public static synchronized StatsService getStatsService() {
         if (statsService == null) {
-            ApplicatonSettingsService aService = new ApplicatonSettingsService(sessionFactory);
+            ApplicatonSettingsService aService = new ApplicatonSettingsService(getSessionFactory());
             String baseConnName = aService.getValue("stats.dest").toString();
-            statsService = new StatsService(baseConnName);
+            statsService = new StatsService(getConnectionFactory(), baseConnName);
         }
 
         return statsService;

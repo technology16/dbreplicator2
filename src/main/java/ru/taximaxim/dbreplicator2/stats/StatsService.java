@@ -32,7 +32,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
-import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
  * @author mardanov_rm
@@ -41,9 +40,10 @@ import ru.taximaxim.dbreplicator2.utils.Core;
 public class StatsService {
     
     private String baseConnName = null;
-    private ConnectionFactory connectionsFactory = Core.getConnectionFactory();
+    private ConnectionFactory connectionsFactory;
     
-    public StatsService(String baseConnName) {
+    public StatsService(ConnectionFactory connectionsFactory, String baseConnName) {
+        this.connectionsFactory = connectionsFactory;
         this.baseConnName = baseConnName;
     }
     
