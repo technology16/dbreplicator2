@@ -44,7 +44,7 @@ public class Generic extends StrategySkeleton implements Strategy {
 
     @Override
     public void execute(Connection sourceConnection, Connection targetConnection,
-            StrategyModel data) throws StrategyException, SQLException {
+            StrategyModel data) throws StrategyException, SQLException, ClassNotFoundException {
         GenericAlgorithm strategy = new GenericAlgorithm(getFetchSize(data), 
                 getBatchSize(data), 
                 false, 

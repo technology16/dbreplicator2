@@ -26,7 +26,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import org.apache.log4j.Logger;
 
@@ -37,6 +39,9 @@ import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
 import ru.taximaxim.dbreplicator2.replica.strategies.replication.data.DataService;
 import ru.taximaxim.dbreplicator2.replica.strategies.replication.workpool.WorkPoolService;
+import ru.taximaxim.dbreplicator2.stats.StatsService;
+import ru.taximaxim.dbreplicator2.utils.Core;
+import ru.taximaxim.dbreplicator2.utils.Count;
 
 /**
  * Заготовка стратегии репликации
@@ -65,7 +70,9 @@ public class GenericAlgorithm implements Strategy {
     private DataService sourceDataService;
     
     private DataService destDataService;
-
+    
+    private Count count;
+    
     /**
      * 
      * @param fetchSize
@@ -82,8 +89,20 @@ public class GenericAlgorithm implements Strategy {
         this.workPoolService = workPoolService;
         this.sourceDataService = sourceDataService;
         this.destDataService = destDataService;
+        count = new Count();
     }
 
+    protected Count getCount() {
+        return count;
+    }
+    
+    /**
+     * @return StatsService
+     */
+    protected StatsService getStatsService() {
+        return Core.getstatsService();
+    }
+    
     /**
      * @return the fetchSize
      */
@@ -206,8 +225,10 @@ public class GenericAlgorithm implements Strategy {
             try {
                 replicateDeletion(operationsResult, table);
                 getWorkPoolService().clearWorkPoolData(operationsResult);
+                getCount().addSuccess(table.getName());
             } catch (SQLException e) {
                 // Поглощаем и логгируем ошибки удаления
+                getCount().addError(table.getName());
                 // Это ожидаемый результат
                 String rowDump = String.format(
                         "[ tableName = %s  [ operation = D  [ row = [ id = %s ] ] ] ]", 
@@ -244,6 +265,7 @@ public class GenericAlgorithm implements Strategy {
                     } catch (SQLException e) {
                         hasError = true;
                         // Поглощаем и логгируем ошибки обновления
+                        getCount().addError(table.getName());
                         // Это ожидаемый результат
                         String rowDump = String.format("[ tableName = %s  [ operation = %s  [ row = %s ] ] ]", 
                                 table, operationsResult.getString("c_operation"), 
@@ -267,13 +289,17 @@ public class GenericAlgorithm implements Strategy {
                     if (!hasError) {
                         if (updationCount > 0) {
                             getWorkPoolService().clearWorkPoolData(operationsResult);
+                            getCount().addSuccess(table.getName());
                         } else {
                             try {
                                 // и если такой записи нет, то пытаемся вставить
                                 replicateInsertion(table, sourceResult);
+                                getCount().addSuccess(table.getName());
+                                
                                 getWorkPoolService().clearWorkPoolData(operationsResult);
                             } catch (SQLException e) {
                                 // Поглощаем и логгируем ошибки вставки
+                                getCount().addError(table.getName());
                                 // Это ожидаемый результат
                                 String rowDump = String.format("[ tableName = %s  [ operation = %s  [ row = %s ] ] ]", 
                                         table, operationsResult.getString("c_operation"), 
@@ -312,9 +338,10 @@ public class GenericAlgorithm implements Strategy {
      * @param sourceDataService - сервис для работы с источником
      * @param destDataService   - сервис для работы с приемником
      * @throws SQLException
+     * @throws ClassNotFoundException 
      */
     protected void selectLastOperations(Connection sourceConnection, 
-            Connection targetConnection, StrategyModel data) throws SQLException {
+            Connection targetConnection, StrategyModel data) throws SQLException, ClassNotFoundException {
         // Задаем первоначальное смещение выборки равное 0.
         // При появлении ошибочных записей будем его увеличивать на 1.
         int offset = 0;
@@ -322,7 +349,7 @@ public class GenericAlgorithm implements Strategy {
         PreparedStatement deleteWorkPoolData = 
                 getWorkPoolService().getClearWorkPoolDataStatement();
         ResultSet operationsResult = 
-                getWorkPoolService().getLastOperations(data.getRunner().getId(), fetchSize, offset);
+                getWorkPoolService().getLastOperations(data.getRunner().getId(), getFetchSize(), offset);
         try {
             // Проходим по списку измененных записей
             for (int rowsCount = 1; operationsResult.next(); rowsCount++) {
@@ -345,6 +372,7 @@ public class GenericAlgorithm implements Strategy {
             }
         } finally {
             operationsResult.close();
+            writeStatСount(data.getId());
         }
         // Подтверждаем транзакцию
         deleteWorkPoolData.executeBatch();
@@ -352,12 +380,33 @@ public class GenericAlgorithm implements Strategy {
     }
 
     /**
+     * Запись счетчиков
+     * @param strategy
+     * @throws SQLException
+     * @throws ClassNotFoundException 
+     */
+    protected void writeStatСount(int strategy) throws SQLException, ClassNotFoundException{
+        Timestamp date = new Timestamp(new Date().getTime());
+        
+        for (String tableName : getCount().getSuccessTables()) {
+             getStatsService().writeStat(date, 1, strategy, tableName, 
+                  getCount().getSuccess(tableName));
+        }
+        
+        for (String tableName : getCount().getErrorTables()) {
+             getStatsService().writeStat(date, 0, strategy, tableName, 
+                 getCount().getError(tableName));
+        }
+    }
+    
+    /**
      * Точка входа в алгоритм репликации.
      * Здесь настраивается режим работы соединений к БД и вызывается функция
      * отбора операций selectLastOperations(...).
+     * @throws ClassNotFoundException 
      */
     public void execute(Connection sourceConnection, Connection targetConnection,
-            StrategyModel data) throws StrategyException, SQLException {
+            StrategyModel data) throws StrategyException, SQLException, ClassNotFoundException {
         Boolean lastAutoCommit = null;
         Boolean lastTargetAutoCommit = null;
         try {
@@ -374,8 +423,7 @@ public class GenericAlgorithm implements Strategy {
             getSourceDataService().setRepServerName(data.getRunner().getTarget().getPoolId());
             getDestDataService().setRepServerName(data.getRunner().getSource().getPoolId());
             
-            selectLastOperations(sourceConnection, 
-                    targetConnection, data);
+            selectLastOperations(sourceConnection, targetConnection, data);
             
             sourceConnection.commit();
         } catch (SQLException e) {

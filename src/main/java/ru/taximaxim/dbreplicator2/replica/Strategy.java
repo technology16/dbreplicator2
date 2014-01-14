@@ -45,8 +45,9 @@ public interface Strategy {
      * @param data
      *            Модель данных описывающая стратегию.
      * @throws SQLException 
+     * @throws ClassNotFoundException 
      */
     void execute(Connection sourceConnection, Connection targetConnection,
-            StrategyModel data) throws StrategyException, SQLException;
+            StrategyModel data) throws StrategyException, SQLException, ClassNotFoundException;
 
 }
