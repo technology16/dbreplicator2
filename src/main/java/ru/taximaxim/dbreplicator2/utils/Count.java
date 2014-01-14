@@ -44,10 +44,10 @@ public class Count {
      */
     public void addSuccess(String tableName) {
         Integer count = 1;
-        if(tablesSuccess.get(tableName) != null) {
-            count = tablesSuccess.get(tableName) + 1;
+        if(tablesSuccess.get(tableName.toUpperCase()) != null) {
+            count = tablesSuccess.get(tableName.toUpperCase()) + 1;
         }
-        tablesSuccess.put(tableName, count);
+        tablesSuccess.put(tableName.toUpperCase(), count);
     }
     
     /**
@@ -57,10 +57,10 @@ public class Count {
      */
     public void addError(String tableName){ 
         Integer count = 1;
-        if(tablesError.get(tableName) != null) {
-            count = tablesError.get(tableName) + 1;
+        if(tablesError.get(tableName.toUpperCase()) != null) {
+            count = tablesError.get(tableName.toUpperCase()) + 1;
         }
-        tablesError.put(tableName, count);
+        tablesError.put(tableName.toUpperCase(), count);
     }
     
     /**
@@ -76,7 +76,7 @@ public class Count {
      * @return
      */
     public int getSuccess(String tableName){
-        return tablesSuccess.get(tableName);
+        return tablesSuccess.get(tableName.toUpperCase());
     }
     
     /**
@@ -92,6 +92,6 @@ public class Count {
      * @return
      */
     public int getError(String tableName){
-        return tablesError.get(tableName);
+        return tablesError.get(tableName.toUpperCase());
     }
 }
