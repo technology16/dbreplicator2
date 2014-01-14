@@ -369,7 +369,7 @@ public class GenericAlgorithm implements Strategy {
             }
         } finally {
             operationsResult.close();
-            writeStatСount(data.getId());
+            writeStatCount(data.getId());
         }
         // Подтверждаем транзакцию
         deleteWorkPoolData.executeBatch();
@@ -382,7 +382,7 @@ public class GenericAlgorithm implements Strategy {
      * @throws SQLException
      * @throws ClassNotFoundException 
      */
-    protected void writeStatСount(int strategy) throws SQLException, ClassNotFoundException{
+    protected void writeStatCount(int strategy) throws SQLException, ClassNotFoundException{
         Timestamp date = new Timestamp(new Date().getTime());
         
         for (String tableName : getCount().getSuccessTables()) {

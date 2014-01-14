@@ -33,9 +33,9 @@ import java.util.Set;
  */
 public class Count {
     
-    Map<String,Integer> tablesSuccess = new HashMap<String,Integer>();
+    private Map<String,Integer> tablesSuccess = new HashMap<String,Integer>();
     
-    Map<String,Integer> tablesError = new HashMap<String,Integer>();
+    private Map<String,Integer> tablesError = new HashMap<String,Integer>();
     
     /**
      * Увеличение счетчика успешных операций на ед.
