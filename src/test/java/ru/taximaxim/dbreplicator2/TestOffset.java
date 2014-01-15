@@ -23,6 +23,8 @@
 
 package ru.taximaxim.dbreplicator2;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -39,7 +41,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
-import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.model.RunnerService;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
@@ -137,51 +138,38 @@ public class TestOffset {
         
         workerPg.run();
         Thread.sleep(500);
-//        workerPg.run();
-//        Thread.sleep(500);
-//        workerPg.run();
-//        Thread.sleep(500);
-//        workerPg.run();
-//        Thread.sleep(500);
-//        workerPg.run();
-//        Thread.sleep(500);
-//        workerPg.run();
-//        Thread.sleep(500);
-//        workerPg.run();
-//        Thread.sleep(500);
-//        workerPg.run();
-//        Thread.sleep(500);
-//        workerPg.run();
-//        Thread.sleep(500);
-//        workerPg.run();
-//        Thread.sleep(500);
-//        workerPg.run();
-//        Thread.sleep(500);
-//        workerPg.run();
-//        Thread.sleep(500);
-        
+        workerPg.run();
+        Thread.sleep(500);
+        workerPg.run();
+        Thread.sleep(500);
         
         // Выводим данные из rep2_superlog_table
         try (PreparedStatement select = 
-                conn.prepareStatement("SELECT * FROM rep2_workpool_data");
+                conn.prepareStatement("SELECT * FROM REP2_WORKPOOL_DATA");
+                ResultSet result = select.executeQuery();
         ) {
-            ResultSet result = select.executeQuery();
             List<String> cols = 
                     new ArrayList<String>(JdbcMetadata.getColumns(conn, "REP2_WORKPOOL_DATA"));
+            
             while (result.next()) {
-                LOG.info("rasfar: "+Jdbc.resultSetToString(result, cols));
+                LOG.info("================================");
+                for (String col : cols) {
+                    LOG.info(col + "=" + result.getString(col));
+                }
+                LOG.info("================================");
             }
         }
         
        // errorsCountWatchdogWorker.run();
         workerPg.run();
         Thread.sleep(500);
-        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table3");
-        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table3");
+        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table2");
+        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table2");
         Helper.AssertEquals(listSource, listDest);
 
-        listSource = Helper.InfoTest(conn, "t_table2");
-        listDest   = Helper.InfoTest(connDest, "t_table2");
-        Helper.AssertEquals(listSource, listDest);
+        listSource = Helper.InfoTest(conn, "t_table3");
+        listDest   = Helper.InfoTest(connDest, "t_table3");
+        assertTrue(String.format("Количество записей [%s == 8 и %s = 2]", listSource.size(), listDest.size()),
+                listSource.size() == 8 && listDest.size() == 2);
     }    
 }
