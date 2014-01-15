@@ -137,28 +137,29 @@ public class TestOffset {
         
         workerPg.run();
         Thread.sleep(500);
-        workerPg.run();
-        Thread.sleep(500);
-        workerPg.run();
-        Thread.sleep(500);
-        workerPg.run();
-        Thread.sleep(500);
-        workerPg.run();
-        Thread.sleep(500);
-        workerPg.run();
-        Thread.sleep(500);
-        workerPg.run();
-        Thread.sleep(500);
-        workerPg.run();
-        Thread.sleep(500);
-        workerPg.run();
-        Thread.sleep(500);
-        workerPg.run();
-        Thread.sleep(500);
-        workerPg.run();
-        Thread.sleep(500);
-        workerPg.run();
-        Thread.sleep(500);
+//        workerPg.run();
+//        Thread.sleep(500);
+//        workerPg.run();
+//        Thread.sleep(500);
+//        workerPg.run();
+//        Thread.sleep(500);
+//        workerPg.run();
+//        Thread.sleep(500);
+//        workerPg.run();
+//        Thread.sleep(500);
+//        workerPg.run();
+//        Thread.sleep(500);
+//        workerPg.run();
+//        Thread.sleep(500);
+//        workerPg.run();
+//        Thread.sleep(500);
+//        workerPg.run();
+//        Thread.sleep(500);
+//        workerPg.run();
+//        Thread.sleep(500);
+//        workerPg.run();
+//        Thread.sleep(500);
+        
         
         // Выводим данные из rep2_superlog_table
         try (PreparedStatement select = 
@@ -168,7 +169,7 @@ public class TestOffset {
             List<String> cols = 
                     new ArrayList<String>(JdbcMetadata.getColumns(conn, "REP2_WORKPOOL_DATA"));
             while (result.next()) {
-                LOG.info(Jdbc.resultSetToString(result, cols));
+                LOG.info("rasfar: "+Jdbc.resultSetToString(result, cols));
             }
         }
         
