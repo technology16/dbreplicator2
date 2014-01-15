@@ -57,12 +57,11 @@ public class StatsServiceTest {
         if(session!=null) {
             session.close();
         }
+        
         Core.connectionFactoryClose();
         Core.sessionFactoryClose();
         Core.statsServiceClose();
     }
-
-    //c_date, c_type, id_strategy, id_table, c_count
     
     @Test
     public void testGetStatByTypeTablePeriod() throws ClassNotFoundException, SQLException {
@@ -206,6 +205,9 @@ public class StatsServiceTest {
         String source = "source";
         Connection conn = connectionFactory.getConnection(source);
         Helper.executeSqlFromFile(conn, "importRep2.sql");
+        if(conn!=null) {
+            conn.close();
+        }
         
         dateStart = new Timestamp(new Date().getTime());
         Thread.sleep(500);
@@ -228,6 +230,7 @@ public class StatsServiceTest {
         statsService.writeStat(new Timestamp(new Date().getTime()), 0, 9, "T_HOUSE", 80);
         Thread.sleep(500);
         dateEnd = new Timestamp(new Date().getTime());
+        
     }
     
     public void assertTrueStatsRow1(ResultSet result, boolean row) throws SQLException {

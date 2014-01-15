@@ -35,118 +35,138 @@ import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 
 /**
  * @author mardanov_rm
- *
+ * 
  */
 public class StatsService {
-    
+
     private String baseConnName = null;
     private ConnectionFactory connectionsFactory;
-    
+
     public StatsService(ConnectionFactory connectionsFactory, String baseConnName) {
         this.connectionsFactory = connectionsFactory;
         this.baseConnName = baseConnName;
     }
-    
+
     /**
      * Метод для записи статистики в таблицу
      * 
-     * @param date - Дата записи
+     * @param date
+     *            - Дата записи
      * @param type
      * @param id_strategy
      * @param id_table
      * @param count
-     * @throws SQLException 
-     * @throws ClassNotFoundException 
+     * @throws SQLException
+     * @throws ClassNotFoundException
      */
-    public void writeStat(Timestamp date, int type, int strategyId, String tableName, int count) 
-           throws SQLException, ClassNotFoundException {
-        Connection baseConnection = connectionsFactory.getConnection(baseConnName);
-        PreparedStatement insertStatement = baseConnection.prepareStatement(
-            "insert into rep2_statistics (c_date, c_type, id_strategy, id_table, c_count)" +
-            " values (?, ?, ?, ?, ?)");
-        insertStatement.setTimestamp(1, date);
-        insertStatement.setInt(2, type);
-        insertStatement.setInt(3, strategyId);
-        insertStatement.setString(4, tableName);
-        insertStatement.setInt(5, count);
-        insertStatement.executeUpdate();
+    public void writeStat(Timestamp date, int type, int strategyId, String tableName,
+            int count) throws SQLException, ClassNotFoundException {
+        try (Connection baseConnection = connectionsFactory.getConnection(baseConnName);
+                PreparedStatement insertStatement = 
+                baseConnection.prepareStatement(
+                "insert into rep2_statistics (c_date, c_type, id_strategy, id_table, c_count)"
+                        + " values (?, ?, ?, ?, ?)");) {
+            insertStatement.setTimestamp(1, date);
+            insertStatement.setInt(2, type);
+            insertStatement.setInt(3, strategyId);
+            insertStatement.setString(4, tableName);
+            insertStatement.setInt(5, count);
+            insertStatement.executeUpdate();
+        }
     }
-    
+
     /**
      * Метод для получения статистики
      * 
-     * @param type - Если 0 Значит ошибка, если 1 Значит успешно реплицировалась. 
-     * @param tableName - Имя таблицы
-     * @param dateStart - Промежуток времени с будет выведен результат
-     * @param dateEnd - Промежуток времени по будет выведен результат
-     * @throws SQLException 
-     * @throws ClassNotFoundException 
+     * @param type
+     *            - Если 0 Значит ошибка, если 1 Значит успешно реплицировалась.
+     * @param tableName
+     *            - Имя таблицы
+     * @param dateStart
+     *            - Промежуток времени с будет выведен результат
+     * @param dateEnd
+     *            - Промежуток времени по будет выведен результат
+     * @throws SQLException
+     * @throws ClassNotFoundException
      */
-    public ResultSet getStat(int type, String tableName,  Timestamp dateStart, Timestamp dateEnd)
-            throws SQLException, ClassNotFoundException {
-        Connection baseConnection = connectionsFactory.getConnection(baseConnName);
-        PreparedStatement selectStatement = baseConnection.prepareStatement(
-            "SELECT * FROM rep2_statistics WHERE c_type = ? and id_table = ? and c_date >= ? and c_date <= ?", 
-             ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-        selectStatement.setInt(1, type);
-        selectStatement.setString(2, tableName);
-        selectStatement.setTimestamp(3, dateStart);
-        selectStatement.setTimestamp(4, dateEnd);
-        return selectStatement.executeQuery();
+    public ResultSet getStat(int type, String tableName, Timestamp dateStart,
+            Timestamp dateEnd) throws SQLException, ClassNotFoundException {
+        try (Connection baseConnection = connectionsFactory.getConnection(baseConnName);
+                PreparedStatement selectStatement
+                = baseConnection.prepareStatement(
+                  "SELECT * FROM rep2_statistics WHERE c_type = ? and id_table = ? and c_date >= ? and c_date <= ?",
+                  ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);) {
+            selectStatement.setInt(1, type);
+            selectStatement.setString(2, tableName);
+            selectStatement.setTimestamp(3, dateStart);
+            selectStatement.setTimestamp(4, dateEnd);
+            return selectStatement.executeQuery();
+        }
     }
-    
+
     /**
      * Метод для получения статистики
      * 
-     * @param type - Если 0 Значит ошибка, если 1 Значит успешно реплицировалась. 
-     * @throws SQLException 
-     * @throws ClassNotFoundException 
+     * @param type
+     *            - Если 0 Значит ошибка, если 1 Значит успешно реплицировалась.
+     * @throws SQLException
+     * @throws ClassNotFoundException
      */
     public ResultSet getStat(int type) throws SQLException, ClassNotFoundException {
-        Connection baseConnection = connectionsFactory.getConnection(baseConnName);
-        PreparedStatement selectStatement = baseConnection.prepareStatement(
-           "SELECT * FROM rep2_statistics WHERE c_type = ?", 
-           ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-        selectStatement.setInt(1, type);
-        return selectStatement.executeQuery();
+        try (Connection baseConnection = connectionsFactory.getConnection(baseConnName);
+            PreparedStatement selectStatement = baseConnection.prepareStatement(
+                    "SELECT * FROM rep2_statistics WHERE c_type = ?",
+                    ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);) {
+            selectStatement.setInt(1, type);
+            return selectStatement.executeQuery();
+        }
     }
-    
+
     /**
      * Метод для получения статистики
      * 
-     * @param type - Если 0 Значит ошибка, если 1 Значит успешно реплицировалась. 
-     * @param tableName - Имя таблицы
-     * @throws SQLException 
-     * @throws ClassNotFoundException 
+     * @param type
+     *            - Если 0 Значит ошибка, если 1 Значит успешно реплицировалась.
+     * @param tableName
+     *            - Имя таблицы
+     * @throws SQLException
+     * @throws ClassNotFoundException
      */
-    public ResultSet getStat(int type, String tableName) throws SQLException, ClassNotFoundException {
-        Connection baseConnection = connectionsFactory.getConnection(baseConnName);
-        PreparedStatement selectStatement = baseConnection.prepareStatement(
-            "SELECT * FROM rep2_statistics WHERE c_type = ? and id_table = ?", 
-            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-        selectStatement.setInt(1, type);
-        selectStatement.setString(2, tableName);
-        return selectStatement.executeQuery();
+    public ResultSet getStat(int type, String tableName) throws SQLException,
+            ClassNotFoundException {
+        try ( Connection baseConnection = connectionsFactory.getConnection(baseConnName);
+            PreparedStatement selectStatement = baseConnection.prepareStatement(
+                    "SELECT * FROM rep2_statistics WHERE c_type = ? and id_table = ?",
+                    ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);) {
+            selectStatement.setInt(1, type);
+            selectStatement.setString(2, tableName);
+            return selectStatement.executeQuery();
+        }
     }
-    
+
     /**
      * Метод для получения статистики
      * 
-     * @param type - Если 0 Значит ошибка, если 1 Значит успешно реплицировалась. 
-     * @param dateStart - Промежуток времени с будет выведен результат
-     * @param dateEnd - Промежуток времени по будет выведен результат
-     * @throws SQLException 
-     * @throws ClassNotFoundException 
+     * @param type
+     *            - Если 0 Значит ошибка, если 1 Значит успешно реплицировалась.
+     * @param dateStart
+     *            - Промежуток времени с будет выведен результат
+     * @param dateEnd
+     *            - Промежуток времени по будет выведен результат
+     * @throws SQLException
+     * @throws ClassNotFoundException
      */
     public ResultSet getStat(int type, Timestamp dateStart, Timestamp dateEnd)
             throws SQLException, ClassNotFoundException {
-        Connection baseConnection = connectionsFactory.getConnection(baseConnName);
-        PreparedStatement selectStatement = baseConnection.prepareStatement(
-            "SELECT * FROM rep2_statistics WHERE c_type = ? and c_date >= ? and c_date <= ?", 
-            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-        selectStatement.setInt(1, type);
-        selectStatement.setTimestamp(2, dateStart);
-        selectStatement.setTimestamp(3, dateEnd);
-        return selectStatement.executeQuery();
+        try ( Connection baseConnection = connectionsFactory.getConnection(baseConnName);
+            PreparedStatement selectStatement = baseConnection
+                    .prepareStatement(
+                            "SELECT * FROM rep2_statistics WHERE c_type = ? and c_date >= ? and c_date <= ?",
+                            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);) {
+            selectStatement.setInt(1, type);
+            selectStatement.setTimestamp(2, dateStart);
+            selectStatement.setTimestamp(3, dateEnd);
+            return selectStatement.executeQuery();
+        }
     }
 }
