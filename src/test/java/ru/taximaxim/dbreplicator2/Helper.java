@@ -55,10 +55,8 @@ public class Helper {
      * @param listDest
      */
     public static void AssertEquals(List<MyTablesType> listSource, List<MyTablesType> listDest){
-        if(listSource.size() != listDest.size()) {
-            LOG.error(String.format("Количество записей не равны [%s == %s]", listSource.size(), listDest.size()));
-        }
-        Assert.assertEquals(listSource.size(), listDest.size());
+        assertTrue(String.format("Количество записей не равны [%s == %s]", listSource.size(), listDest.size()),
+                listSource.size() == listDest.size());
         
         if(!listSource.equals(listDest)) {
             LOG.info("====================================================================");
