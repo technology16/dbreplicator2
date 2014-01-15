@@ -128,8 +128,8 @@ public class StatsService {
      */
     public ResultSet getStat(int type, String tableName) throws SQLException,
             ClassNotFoundException {
-        Connection baseConnection = connectionsFactory.getConnection(baseConnName);
-        PreparedStatement selectStatement = baseConnection.prepareStatement(
+        PreparedStatement selectStatement = 
+           connectionsFactory.getConnection(baseConnName).prepareStatement(
            "SELECT * FROM rep2_statistics WHERE c_type = ? and id_table = ?",
            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
         selectStatement.setInt(1, type);
