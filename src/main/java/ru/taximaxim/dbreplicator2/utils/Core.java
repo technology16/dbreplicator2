@@ -266,7 +266,7 @@ public final class Core {
         if (statsService == null) {
             ApplicatonSettingsService aService = new ApplicatonSettingsService(getSessionFactory());
             String baseConnName = aService.getValue("stats.dest").toString();
-            statsService = new StatsService(getConnectionFactory(), baseConnName);
+            statsService = new StatsService(baseConnName);
         }
 
         return statsService;

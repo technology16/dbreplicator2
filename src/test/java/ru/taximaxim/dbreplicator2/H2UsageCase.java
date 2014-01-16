@@ -47,6 +47,8 @@ public class H2UsageCase {
 
     private static Server server;
 
+    private static Connection conn; 
+    
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         Class.forName("org.h2.Driver");
@@ -58,6 +60,8 @@ public class H2UsageCase {
     @AfterClass
     public static void setUpAfterClass() throws Exception {
         server.stop();
+        if(conn!=null)
+            conn.close();
     }
 
     protected Connection getConnection() throws SQLException {
@@ -66,6 +70,6 @@ public class H2UsageCase {
 
     @Test
     public void testConnection() throws SQLException {
-        getConnection();
+        conn = getConnection();
     }
 }
