@@ -46,15 +46,19 @@ import org.junit.Assert;
  */
 
 public class Helper {
-    
+
+    // Задержка между циклами репликации
+    private static final int REPLICATION_DELAY = 500;
     protected static final Logger LOG = Logger.getLogger(Helper.class);
     
     /**
      * Сравнивание записи по листам
      * @param listSource
      * @param listDest
+     * @throws InterruptedException 
      */
-    public static void AssertEquals(List<MyTablesType> listSource, List<MyTablesType> listDest){
+    public static void AssertEquals(List<MyTablesType> listSource, List<MyTablesType> listDest) throws InterruptedException{
+        Thread.sleep(REPLICATION_DELAY);
         assertTrue(String.format("Количество записей не равны [%s == %s]", listSource.size(), listDest.size()),
                 listSource.size() == listDest.size());
         
@@ -114,8 +118,10 @@ public class Helper {
      * Сравнивание записи по листам
      * @param listSource
      * @param listDest
+     * @throws InterruptedException 
      */
-    public static void AssertEqualsNull(List<MyTablesType> listSource, List<MyTablesType> listDest){
+    public static void AssertEqualsNull(List<MyTablesType> listSource, List<MyTablesType> listDest) throws InterruptedException{
+        Thread.sleep(REPLICATION_DELAY);
         if(listSource.size() != listDest.size()) {
             LOG.error(String.format("Количество записей не равны [%s == %s]", listSource.size(), listDest.size()));
         }
@@ -203,8 +209,10 @@ public class Helper {
      * @param tableName - имя талицы
      * @return List<MyTablesType>
      * @throws SQLException
+     * @throws InterruptedException 
      */
-    public static List<MyTablesType> InfoTest(Connection conn, String tableName) throws SQLException{
+    public static List<MyTablesType> InfoTest(Connection conn, String tableName) throws SQLException, InterruptedException{
+        Thread.sleep(REPLICATION_DELAY);
         Statement stat = conn.createStatement();
         ResultSet rs = stat.executeQuery("select * from " + tableName + " order by id");
         List<MyTablesType> list = new ArrayList<MyTablesType>();
@@ -237,8 +245,10 @@ public class Helper {
      * @param tableName - имя таблицы
      * @param _int - поисково значение
      * @throws SQLException
+     * @throws InterruptedException 
      */
-    public static void InfoNull(Connection conn, String tableName, Integer _int) throws SQLException{
+    public static void InfoNull(Connection conn, String tableName, Integer _int) throws SQLException, InterruptedException{
+        Thread.sleep(REPLICATION_DELAY);
         Statement stat = conn.createStatement();
         ResultSet rs = stat.executeQuery("select * from " + tableName + " where _int = " + _int);
         while (rs.next()) {
@@ -298,8 +308,10 @@ public class Helper {
      * @param conn - Соединение
      * @param tableName - Имя таблицы
      * @throws SQLException
+     * @throws InterruptedException 
      */
-    public static void InfoSelect(Connection conn,  String tableName) throws SQLException{
+    public static void InfoSelect(Connection conn,  String tableName) throws SQLException, InterruptedException{
+        Thread.sleep(REPLICATION_DELAY);
         Statement statSource = conn.createStatement();
         ResultSet rsSource = statSource.executeQuery("select * from " + tableName);
         ResultSetMetaData rDataSource = rsSource.getMetaData();

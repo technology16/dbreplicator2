@@ -57,6 +57,9 @@ import ru.taximaxim.dbreplicator2.utils.Core;
  *
  */
 public class H2CopyTableDataTest2rep {
+    // Задержка между циклами репликации
+    private static final int REPLICATION_DELAY = 1500;
+    
     protected static final Logger LOG = Logger.getLogger(H2CopyTableDataTest.class);
     protected static SessionFactory sessionFactory;
     protected static Session session;
@@ -112,7 +115,6 @@ public class H2CopyTableDataTest2rep {
         Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
         
         workerRun();
-        Thread.sleep(1500);
         Helper.executeSqlFromFile(connDest,  "sql_foreign_key2.sql");
         workerRun2();
         
@@ -142,7 +144,7 @@ public class H2CopyTableDataTest2rep {
         
         errorsCountWatchdogWorker.run();
         workerRun();
-        Thread.sleep(500);
+        Thread.sleep(REPLICATION_DELAY);
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table2");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table2");
         Helper.AssertEquals(listSource, listDest);
@@ -185,7 +187,6 @@ public class H2CopyTableDataTest2rep {
         LOG.info("Проверка обновления");
         Helper.executeSqlFromFile(conn, "sql_update.sql");   
         workerRun();
-        Thread.sleep(1500);
         Helper.executeSqlFromFile(connDest,  "sql_update2.sql");     
         workerRun2();
         
@@ -243,7 +244,6 @@ public class H2CopyTableDataTest2rep {
         //Проверка удаления
         Helper.executeSqlFromFile(conn, "sql_delete.sql");   
         workerRun();
-        Thread.sleep(1500);
         Helper.executeSqlFromFile(connDest, "sql_delete.sql");    
         workerRun2();
         
@@ -301,7 +301,6 @@ public class H2CopyTableDataTest2rep {
         Helper.executeSqlFromFile(conn, "sql_insert.sql");   
         Helper.executeSqlFromFile(conn, "sql_update.sql");   
         workerRun();
-        Thread.sleep(1500);
         //Helper.executeSqlFromFile(connDest, "sql_insert.sql");   
         Helper.executeSqlFromFile(connDest, "sql_update2.sql");  
         workerRun2();
@@ -360,7 +359,6 @@ public class H2CopyTableDataTest2rep {
         Helper.executeSqlFromFile(conn, "sql_insert.sql");   
         Helper.executeSqlFromFile(conn, "sql_delete.sql");   
         workerRun();
-        Thread.sleep(1500);
         Helper.executeSqlFromFile(connDest, "sql_insert.sql");   
         Helper.executeSqlFromFile(connDest, "sql_delete.sql");   
         workerRun2();
@@ -440,7 +438,6 @@ public class H2CopyTableDataTest2rep {
       //Проверка вставки
         Helper.executeSqlFromFile(conn, "sql_insert.sql");
         workerRun();
-        Thread.sleep(1500);
         //Helper.executeSqlFromFile(connDest, "sql_insert.sql"); 
         workerRun2();
         
@@ -458,7 +455,7 @@ public class H2CopyTableDataTest2rep {
         
         workerRun();
         workerRun2();
-        
+
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
         Helper.AssertEquals(listSource, listDest);
@@ -490,13 +487,13 @@ public class H2CopyTableDataTest2rep {
     public void workerRun() throws IOException, SQLException, InterruptedException{
         worker.run();
         Helper.executeSqlFromSql(conn, "UPDATE T_TAB SET _value = ?", "dest");
-        Thread.sleep(500);
+        Thread.sleep(REPLICATION_DELAY);
     }
     
     public void workerRun2() throws IOException, SQLException, InterruptedException{
         worker2.run();
         Helper.executeSqlFromSql(connDest, "UPDATE T_TAB SET _value = ?", "source");
-        Thread.sleep(500);
+        Thread.sleep(REPLICATION_DELAY);
     }
     
     public void workerEnd() throws IOException, SQLException, InterruptedException{

@@ -59,7 +59,7 @@ public class H2CopyTableDataTest {
     protected static final Logger LOG = Logger.getLogger(H2CopyTableDataTest.class);
     
     // Задержка между циклами репликации
-    private static final int REPLICATION_DELAY = 1000;
+    private static final int REPLICATION_DELAY = 1500;
     
     protected static SessionFactory sessionFactory;
     protected static Session session;

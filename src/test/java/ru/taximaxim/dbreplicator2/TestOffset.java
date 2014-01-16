@@ -51,7 +51,8 @@ import ru.taximaxim.dbreplicator2.utils.Core;
  *
  */
 public class TestOffset {
-    
+    // Задержка между циклами репликации
+    private static final int REPLICATION_DELAY = 500;
     protected static final Logger LOG = Logger.getLogger(TestOffset.class);
     protected static SessionFactory sessionFactory;
     protected static Session session;
@@ -137,11 +138,11 @@ public class TestOffset {
         Helper.executeSqlFromFile(conn, "sql_foreign_key_error.sql");
         
         workerPg.run();
-        Thread.sleep(500);
+        Thread.sleep(REPLICATION_DELAY);
         workerPg.run();
-        Thread.sleep(500);
+        Thread.sleep(REPLICATION_DELAY);
         workerPg.run();
-        Thread.sleep(500);
+        Thread.sleep(REPLICATION_DELAY);
         
         // Выводим данные из rep2_superlog_table
         try (PreparedStatement select = 
@@ -162,7 +163,7 @@ public class TestOffset {
         
        // errorsCountWatchdogWorker.run();
         workerPg.run();
-        Thread.sleep(500);
+        Thread.sleep(REPLICATION_DELAY);
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table2");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table2");
         Helper.AssertEquals(listSource, listDest);

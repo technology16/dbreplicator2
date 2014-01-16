@@ -28,7 +28,8 @@ import ru.taximaxim.dbreplicator2.utils.Core;
  *
  */
 public class StatsServiceTest {
-    
+    // Задержка между циклами репликации
+    private static final int REPLICATION_DELAY = 500;
     protected static final Logger LOG = Logger.getLogger(StatsServiceTest.class);
     protected static SessionFactory sessionFactory;
     protected static Session session;
@@ -210,25 +211,25 @@ public class StatsServiceTest {
         }
         
         dateStart = new Timestamp(new Date().getTime());
-        Thread.sleep(500);
+        Thread.sleep(REPLICATION_DELAY);
         statsService.writeStat(new Timestamp(new Date().getTime()), 1, 2, "T_PLACE", 10);
-        Thread.sleep(500);
+        Thread.sleep(REPLICATION_DELAY);
         statsService.writeStat(new Timestamp(new Date().getTime()), 0, 3, "T_BASES", 20);
-        Thread.sleep(500);
+        Thread.sleep(REPLICATION_DELAY);
         statsService.writeStat(new Timestamp(new Date().getTime()), 1, 4, "T_HOUSE", 30);
-        Thread.sleep(500);
+        Thread.sleep(REPLICATION_DELAY);
         statsService.writeStat(new Timestamp(new Date().getTime()), 0, 5, "T_PLACE", 40);
-        Thread.sleep(500);
+        Thread.sleep(REPLICATION_DELAY);
         dateMidde = new Timestamp(new Date().getTime());
-        Thread.sleep(500);
+        Thread.sleep(REPLICATION_DELAY);
         statsService.writeStat(new Timestamp(new Date().getTime()), 1, 6, "T_HOUSE", 50);
-        Thread.sleep(500);
+        Thread.sleep(REPLICATION_DELAY);
         statsService.writeStat(new Timestamp(new Date().getTime()), 0, 7, "T_PLACE", 60);
-        Thread.sleep(500);
+        Thread.sleep(REPLICATION_DELAY);
         statsService.writeStat(new Timestamp(new Date().getTime()), 1, 8, "T_BASES", 70);
-        Thread.sleep(500);
+        Thread.sleep(REPLICATION_DELAY);
         statsService.writeStat(new Timestamp(new Date().getTime()), 0, 9, "T_HOUSE", 80);
-        Thread.sleep(500);
+        Thread.sleep(REPLICATION_DELAY);
         dateEnd = new Timestamp(new Date().getTime());
         
     }

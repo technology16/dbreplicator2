@@ -67,9 +67,10 @@ public class TriggerH2Test {
      * @throws SQLException
      * @throws ClassNotFoundException
      * @throws IOException
+     * @throws InterruptedException 
      */
     @Test
-    public void testTrigger() throws SQLException, ClassNotFoundException, IOException {
+    public void testTrigger() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
         
         String source = "source";
         Connection conn = connectionFactory.getConnection(source);
