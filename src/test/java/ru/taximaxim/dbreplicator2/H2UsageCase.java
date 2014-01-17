@@ -46,8 +46,6 @@ public class H2UsageCase {
     private static final String JDBC_PASSWORD = "";
 
     private static Server server;
-
-    private static Connection conn; 
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -60,8 +58,6 @@ public class H2UsageCase {
     @AfterClass
     public static void setUpAfterClass() throws Exception {
         server.stop();
-        if(conn!=null)
-            conn.close();
     }
 
     protected Connection getConnection() throws SQLException {
@@ -70,6 +66,6 @@ public class H2UsageCase {
 
     @Test
     public void testConnection() throws SQLException {
-        conn = getConnection();
+        getConnection();
     }
 }
