@@ -30,11 +30,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
- * Класс для ведения статистики 
+ * Класс для ведения статистики
  * 
  * @author mardanov_rm
  */
@@ -44,7 +48,9 @@ public class StatsService {
 
     /**
      * Конструктор - Сервис статистики
-     * @param baseConnName - имя подключения
+     * 
+     * @param baseConnName
+     *            - имя подключения
      */
     public StatsService(String baseConnName) {
         this.baseConnName = baseConnName;
@@ -64,8 +70,7 @@ public class StatsService {
      */
     public void writeStat(Timestamp date, int type, int strategyId, String tableName,
             int count) throws SQLException, ClassNotFoundException {
-        try (
-                Connection conn = Core.getConnectionFactory().getConnection(baseConnName);
+        try (Connection conn = Core.getConnectionFactory().getConnection(baseConnName);
                 PreparedStatement insertStatement = conn.prepareStatement(
                 "insert into rep2_statistics (c_date, c_type, id_strategy, id_table, c_count)"
                 + " values (?, ?, ?, ?, ?)");) {
@@ -79,6 +84,31 @@ public class StatsService {
     }
 
     /**
+     * Перевод tablesResultSetList в List<Map<String, Object>> для таблицы
+     * rep2_statistics
+     * 
+     * @param result
+     * @return
+     * @throws SQLException
+     */
+    public List<Map<String, Object>> convertResultSetToList(ResultSet result)
+            throws SQLException {
+        List<Map<String, Object>> tablesResultSetList = new ArrayList<Map<String, Object>>();
+        while (result.next()) {
+            Map<String, Object> tablesResultSet = new HashMap<String, Object>();
+            tablesResultSet.put("id_statistics", result.getInt("id_statistics"));
+            tablesResultSet.put("c_date", result.getTimestamp("c_date"));
+            tablesResultSet.put("c_type", result.getInt("c_type"));
+            tablesResultSet.put("id_strategy", result.getInt("id_strategy"));
+            tablesResultSet.put("id_table", result.getString("id_table"));
+            tablesResultSet.put("c_count", result.getInt("c_count"));
+
+            tablesResultSetList.add(tablesResultSet);
+        }
+        return tablesResultSetList;
+    }
+
+    /**
      * Метод для получения статистики
      * 
      * @param type
@@ -92,19 +122,23 @@ public class StatsService {
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    public ResultSet getStat(int type, String tableName, Timestamp dateStart,
-            Timestamp dateEnd) throws SQLException, ClassNotFoundException {
-        try(Connection conn = Core.getConnectionFactory().getConnection(baseConnName);) {
+    public List<Map<String, Object>> getStat(int type, String tableName,
+            Timestamp dateStart, Timestamp dateEnd) throws SQLException,
+            ClassNotFoundException {
+        try (Connection conn = Core.getConnectionFactory().getConnection(baseConnName);) {
             PreparedStatement selectStatement = conn.prepareStatement(
                 "SELECT * FROM rep2_statistics WHERE c_type = ? and id_table = ? and c_date >= ? and c_date <= ?",
                 ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-            
+
             selectStatement.setInt(1, type);
             selectStatement.setString(2, tableName);
             selectStatement.setTimestamp(3, dateStart);
             selectStatement.setTimestamp(4, dateEnd);
-            return selectStatement.executeQuery(); 
-       }
+            try (ResultSet result = selectStatement.executeQuery();) {
+                List<Map<String, Object>> tablesResultSetList = convertResultSetToList(result);
+                return tablesResultSetList;
+            }
+        }
     }
 
     /**
@@ -115,13 +149,17 @@ public class StatsService {
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    public ResultSet getStat(int type) throws SQLException, ClassNotFoundException {
-        try(Connection conn = Core.getConnectionFactory().getConnection(baseConnName);) {
+    public List<Map<String, Object>> getStat(int type) throws SQLException,
+            ClassNotFoundException {
+        try (Connection conn = Core.getConnectionFactory().getConnection(baseConnName);) {
             PreparedStatement selectStatement = conn.prepareStatement(
                 "SELECT * FROM rep2_statistics WHERE c_type = ?",
                 ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             selectStatement.setInt(1, type);
-            return selectStatement.executeQuery(); 
+            try (ResultSet result = selectStatement.executeQuery();) {
+                List<Map<String, Object>> tablesResultSetList = convertResultSetToList(result);
+                return tablesResultSetList;
+            }
         }
     }
 
@@ -135,16 +173,19 @@ public class StatsService {
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    public ResultSet getStat(int type, String tableName) throws SQLException,
-            ClassNotFoundException {
-        try(Connection conn = Core.getConnectionFactory().getConnection(baseConnName);) {
+    public List<Map<String, Object>> getStat(int type, String tableName)
+            throws SQLException, ClassNotFoundException {
+        try (Connection conn = Core.getConnectionFactory().getConnection(baseConnName);) {
             PreparedStatement selectStatement = conn.prepareStatement(
                "SELECT * FROM rep2_statistics WHERE c_type = ? and id_table = ?",
-               ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+                ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             selectStatement.setInt(1, type);
             selectStatement.setString(2, tableName);
 
-            return selectStatement.executeQuery();
+            try (ResultSet result = selectStatement.executeQuery();) {
+                List<Map<String, Object>> tablesResultSetList = convertResultSetToList(result);
+                return tablesResultSetList;
+            }
         }
     }
 
@@ -160,16 +201,19 @@ public class StatsService {
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    public ResultSet getStat(int type, Timestamp dateStart, Timestamp dateEnd)
-            throws SQLException, ClassNotFoundException {
-        try(Connection conn = Core.getConnectionFactory().getConnection(baseConnName);) {
+    public List<Map<String, Object>> getStat(int type, Timestamp dateStart,
+            Timestamp dateEnd) throws SQLException, ClassNotFoundException {
+        try (Connection conn = Core.getConnectionFactory().getConnection(baseConnName);) {
             PreparedStatement selectStatement = conn.prepareStatement(
-                "SELECT * FROM rep2_statistics WHERE c_type = ? and c_date >= ? and c_date <= ?",
-                ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+                 "SELECT * FROM rep2_statistics WHERE c_type = ? and c_date >= ? and c_date <= ?",
+                 ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             selectStatement.setInt(1, type);
             selectStatement.setTimestamp(2, dateStart);
             selectStatement.setTimestamp(3, dateEnd);
-            return selectStatement.executeQuery();
+            try (ResultSet result = selectStatement.executeQuery();) {
+                List<Map<String, Object>> tablesResultSetList = convertResultSetToList(result);
+                return tablesResultSetList;
+            }
         }
     }
 }

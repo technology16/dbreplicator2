@@ -7,10 +7,11 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
@@ -25,7 +26,7 @@ import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
  * @author mardanov_rm
- *
+ * 
  */
 public class StatsServiceTest {
     // Задержка между циклами репликации
@@ -38,6 +39,15 @@ public class StatsServiceTest {
     protected static Timestamp dateStart = null;
     protected static Timestamp dateEnd = null;
     protected static Timestamp dateMidde = null;
+
+    private static final String T_PLACE = "T_PLACE";
+    private static final String T_BASES = "T_BASES";
+    private static final String T_HOUSE = "T_HOUSE";
+    private static final String C_TYPE = "c_type";
+    private static final String ID_STRATEGY = "id_strategy";
+    private static final String ID_TABLE = "id_table";
+    private static final String C_COUNT = "c_count";
+    
     /**
      * @throws java.lang.Exception
      */
@@ -55,269 +65,277 @@ public class StatsServiceTest {
      */
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
-        if(session!=null) {
+        if (session != null) {
             session.close();
         }
-        
+
         Core.connectionFactoryClose();
         Core.sessionFactoryClose();
         Core.statsServiceClose();
     }
-    
+
     @Test
-    public void testGetStatByTypeTablePeriod() throws ClassNotFoundException, SQLException {
-        //int type, String tableName,  Timestamp dateStart, Timestamp dateEnd
-        try (
-                ResultSet result1 = statsService.getStat(0, "T_PLACE", dateStart, dateEnd);
-                ResultSet result2 = statsService.getStat(0, "T_BASES", dateStart, dateEnd);
-                ResultSet result3 = statsService.getStat(0, "T_HOUSE", dateStart, dateEnd);
-                
-                ResultSet result4 = statsService.getStat(1, "T_PLACE", dateStart, dateEnd);
-                ResultSet result5 = statsService.getStat(1, "T_BASES", dateStart, dateEnd);
-                ResultSet result6 = statsService.getStat(1, "T_HOUSE", dateStart, dateEnd);
-            ) {
-            
-            assertTrueStatsRow1(result4, false);            
-            assertTrueStatsRow2(result2, false);
-            assertTrueStatsRow3(result6, false);
-            assertTrueStatsRow4(result1, false);
-            assertTrueStatsRow5(result6, false);
-            assertTrueStatsRow6(result1, false);
-            assertTrueStatsRow7(result5, false);
-            assertTrueStatsRow8(result3, false);
-        } 
-    }
-    
-    @Test
-    public void testgetStatByType() throws ClassNotFoundException, SQLException {
-        //int type
-        try (
-                ResultSet result1 = statsService.getStat(0);
-                ResultSet result2 = statsService.getStat(1);
-            ) {
-            assertTrueStatsRow1(result2, false);            
-            assertTrueStatsRow2(result1, false);
-            assertTrueStatsRow3(result2, false);
-            assertTrueStatsRow4(result1, false);
-            assertTrueStatsRow5(result2, false);
-            assertTrueStatsRow6(result1, false);
-            assertTrueStatsRow7(result2, false);
-            assertTrueStatsRow8(result1, false);
-        }
-    }
-    
-    @Test
-    public void testgetStatByTypeTable() throws ClassNotFoundException, SQLException {
-        //int type, String tableName
-        try (
-                ResultSet result1 = statsService.getStat(0, "T_PLACE");
-                ResultSet result2 = statsService.getStat(0, "T_BASES");
-                ResultSet result3 = statsService.getStat(0, "T_HOUSE");
-                
-                ResultSet result4 = statsService.getStat(1, "T_PLACE");
-                ResultSet result5 = statsService.getStat(1, "T_BASES");
-                ResultSet result6 = statsService.getStat(1, "T_HOUSE");
-            ) {
-            
-            assertTrueStatsRow1(result4, false);            
-            assertTrueStatsRow2(result2, false);
-            assertTrueStatsRow3(result6, false);
-            assertTrueStatsRow4(result1, false);
-            assertTrueStatsRow5(result6, false);
-            assertTrueStatsRow6(result1, false);
-            assertTrueStatsRow7(result5, false);
-            assertTrueStatsRow8(result3, false);
-        } 
-    }
-    
-    @Test
-    public void testgetStatByTypePeriod() throws ClassNotFoundException, SQLException {
-        //int type, Timestamp dateStart, Timestamp dateEnd
-        try (
-                ResultSet result1 = statsService.getStat(0, dateStart, dateEnd);
-                ResultSet result2 = statsService.getStat(1, dateStart, dateEnd);
-            ) {
-            
-            assertTrueStatsRow1(result2, false);            
-            assertTrueStatsRow2(result1, false);
-            assertTrueStatsRow3(result2, false);
-            assertTrueStatsRow4(result1, false);
-            assertTrueStatsRow5(result2, false);
-            assertTrueStatsRow6(result1, false);
-            assertTrueStatsRow7(result2, false);
-            assertTrueStatsRow8(result1, false);
-        } 
+    public void testGetStatByTypeTablePeriod() throws ClassNotFoundException,
+            SQLException {
+        // int type, String tableName, Timestamp dateStart, Timestamp dateEnd
+        List<Map<String, Object>> result1 = statsService.getStat(0, T_PLACE, dateStart, dateEnd);
+        List<Map<String, Object>> result2 = statsService.getStat(0, T_BASES, dateStart, dateEnd);
+        List<Map<String, Object>> result3 = statsService.getStat(0, T_HOUSE, dateStart, dateEnd);
+
+        List<Map<String, Object>> result4 = statsService.getStat(1, T_PLACE, dateStart, dateEnd);
+        List<Map<String, Object>> result5 = statsService.getStat(1, T_BASES, dateStart, dateEnd);
+        List<Map<String, Object>> result6 = statsService.getStat(1, T_HOUSE, dateStart, dateEnd);
+
+        assertTrueStatsRow1(result4, false, 0);
+        assertTrueStatsRow2(result2, false, 0);
+        assertTrueStatsRow3(result6, false, 0);
+        assertTrueStatsRow4(result1, false, 0);
+        assertTrueStatsRow5(result6, false, 1);
+        assertTrueStatsRow6(result1, false, 1);
+        assertTrueStatsRow7(result5, false, 0);
+        assertTrueStatsRow8(result3, false, 0);
+
     }
 
     @Test
-    public void testgetStatByTypeTablePeriodStartMidde() throws ClassNotFoundException, SQLException {
-        //int type, String tableName,  Timestamp dateStart, Timestamp dateEnd
-        try (
-                ResultSet result1 = statsService.getStat(0, "T_PLACE", dateStart, dateMidde);
-                ResultSet result2 = statsService.getStat(0, "T_BASES", dateStart, dateMidde);
-                ResultSet result3 = statsService.getStat(0, "T_HOUSE", dateStart, dateMidde);
-                
-                ResultSet result4 = statsService.getStat(1, "T_PLACE", dateStart, dateMidde);
-                ResultSet result5 = statsService.getStat(1, "T_BASES", dateStart, dateMidde);
-                ResultSet result6 = statsService.getStat(1, "T_HOUSE", dateStart, dateMidde);
-            ) {
-            
-            assertTrueStatsRow1(result4, false);            
-            assertTrueStatsRow2(result2, false);
-            assertTrueStatsRow3(result6, false);
-            assertTrueStatsRow4(result1, false);
-            assertTrueStatsRow5(result6, true);
-            assertTrueStatsRow6(result1, true);
-            assertTrueStatsRow7(result5, true);
-            assertTrueStatsRow8(result3, true);
-        } 
+    public void testgetStatByType() throws ClassNotFoundException, SQLException {
+        // int type
+        List<Map<String, Object>> result1 = statsService.getStat(0);
+        List<Map<String, Object>> result2 = statsService.getStat(1);
+        assertTrueStatsRow1(result2, false, 0);
+        assertTrueStatsRow2(result1, false, 0);
+        assertTrueStatsRow3(result2, false, 1);
+        assertTrueStatsRow4(result1, false, 1);
+        assertTrueStatsRow5(result2, false, 2);
+        assertTrueStatsRow6(result1, false, 2);
+        assertTrueStatsRow7(result2, false, 3);
+        assertTrueStatsRow8(result1, false, 3);
+
     }
-    
+
     @Test
-    public void testgetStatByTypeTablePeriodMiddeEnd() throws ClassNotFoundException, SQLException {
-        //int type, String tableName,  Timestamp dateStart, Timestamp dateEnd
-        try (
-                ResultSet result1 = statsService.getStat(0, "T_PLACE", dateMidde, dateEnd);
-                ResultSet result2 = statsService.getStat(0, "T_BASES", dateMidde, dateEnd);
-                ResultSet result3 = statsService.getStat(0, "T_HOUSE", dateMidde, dateEnd);
-                
-                ResultSet result4 = statsService.getStat(1, "T_PLACE", dateMidde, dateEnd);
-                ResultSet result5 = statsService.getStat(1, "T_BASES", dateMidde, dateEnd);
-                ResultSet result6 = statsService.getStat(1, "T_HOUSE", dateMidde, dateEnd);
-            ) {
-            
-            assertTrueStatsRow1(result4, true);            
-            assertTrueStatsRow2(result2, true);
-            assertTrueStatsRow5(result6, false);
-            assertTrueStatsRow6(result1, false);
-            assertTrueStatsRow5(result6, true);
-            assertTrueStatsRow6(result1, true);
-            assertTrueStatsRow7(result5, false);
-            assertTrueStatsRow8(result3, false);
-        } 
+    public void testgetStatByTypeTable() throws ClassNotFoundException, SQLException {
+        // int type, String tableName
+        List<Map<String, Object>> result1 = statsService.getStat(0, T_PLACE);
+        List<Map<String, Object>> result2 = statsService.getStat(0, T_BASES);
+        List<Map<String, Object>> result3 = statsService.getStat(0, T_HOUSE);
+
+        List<Map<String, Object>> result4 = statsService.getStat(1, T_PLACE);
+        List<Map<String, Object>> result5 = statsService.getStat(1, T_BASES);
+        List<Map<String, Object>> result6 = statsService.getStat(1, T_HOUSE);
+
+        assertTrueStatsRow1(result4, false, 0);
+        assertTrueStatsRow2(result2, false, 0);
+        assertTrueStatsRow3(result6, false, 0);
+        assertTrueStatsRow4(result1, false, 0);
+        assertTrueStatsRow5(result6, false, 1);
+        assertTrueStatsRow6(result1, false, 1);
+        assertTrueStatsRow7(result5, false, 0);
+        assertTrueStatsRow8(result3, false, 0);
     }
-    
+
+    @Test
+    public void testgetStatByTypePeriod() throws ClassNotFoundException, SQLException {
+        // int type, Timestamp dateStart, Timestamp dateEnd
+        List<Map<String, Object>> result1 = statsService.getStat(0, dateStart, dateEnd);
+        List<Map<String, Object>> result2 = statsService.getStat(1, dateStart, dateEnd);
+
+        assertTrueStatsRow1(result2, false, 0);
+        assertTrueStatsRow2(result1, false, 0);
+        assertTrueStatsRow3(result2, false, 1);
+        assertTrueStatsRow4(result1, false, 1);
+        assertTrueStatsRow5(result2, false, 2);
+        assertTrueStatsRow6(result1, false, 2);
+        assertTrueStatsRow7(result2, false, 3);
+        assertTrueStatsRow8(result1, false, 3);
+    }
+
+    @Test
+    public void testgetStatByTypeTablePeriodStartMidde() throws ClassNotFoundException,
+            SQLException {
+        // int type, String tableName, Timestamp dateStart, Timestamp dateEnd
+        List<Map<String, Object>> result1 = statsService.getStat(0, T_PLACE, dateStart, dateMidde);
+        List<Map<String, Object>> result2 = statsService.getStat(0, T_BASES, dateStart, dateMidde);
+        List<Map<String, Object>> result3 = statsService.getStat(0, T_HOUSE, dateStart, dateMidde);
+
+        List<Map<String, Object>> result4 = statsService.getStat(1, T_PLACE, dateStart, dateMidde);
+        List<Map<String, Object>> result5 = statsService.getStat(1, T_BASES, dateStart, dateMidde);
+        List<Map<String, Object>> result6 = statsService.getStat(1, T_HOUSE, dateStart, dateMidde);
+        
+        assertTrueStatsRow1(result4, false, 0);
+        assertTrueStatsRow2(result2, false, 0);
+        assertTrueStatsRow3(result6, false, 0);
+        assertTrueStatsRow4(result1, false, 0);
+        assertTrueStatsRow5(result6, true, 1);
+        assertTrueStatsRow6(result1, true, 1);
+        assertTrueStatsRow7(result5, true, 0);
+        assertTrueStatsRow8(result3, true, 0);
+
+    }
+
+    @Test
+    public void testgetStatByTypeTablePeriodMiddeEnd() throws ClassNotFoundException,
+            SQLException {
+        // int type, String tableName, Timestamp dateStart, Timestamp dateEnd
+
+        List<Map<String, Object>> result1 = statsService.getStat(0, T_PLACE, dateMidde, dateEnd);
+        List<Map<String, Object>> result2 = statsService.getStat(0, T_BASES, dateMidde, dateEnd);
+        List<Map<String, Object>> result3 = statsService.getStat(0, T_HOUSE, dateMidde, dateEnd);
+
+        List<Map<String, Object>> result4 = statsService.getStat(1, T_PLACE, dateMidde, dateEnd);
+        List<Map<String, Object>> result5 = statsService.getStat(1, T_BASES, dateMidde, dateEnd);
+        List<Map<String, Object>> result6 = statsService.getStat(1, T_HOUSE, dateMidde, dateEnd);
+
+        assertTrueStatsRow1(result4, true, 0);
+        assertTrueStatsRow2(result2, true, 0);
+        assertTrueStatsRow5(result6, false, 0);
+        assertTrueStatsRow6(result1, false, 0);
+        assertTrueStatsRow5(result6, true, 1);
+        assertTrueStatsRow6(result1, true, 1);
+        assertTrueStatsRow7(result5, false, 0);
+        assertTrueStatsRow8(result3, false, 0);
+
+    }
+
     /**
      * Инициализация
-     * @throws InterruptedException 
+     * 
+     * @throws InterruptedException
      */
-    public static void initialization() throws ClassNotFoundException, SQLException, IOException, InterruptedException{
+    public static void initialization() throws ClassNotFoundException, SQLException,
+            IOException, InterruptedException {
         LOG.info("initialization");
         String source = "source";
         Connection conn = connectionFactory.getConnection(source);
         Helper.executeSqlFromFile(conn, "importRep2.sql");
-        if(conn!=null) {
+        if (conn != null) {
             conn.close();
         }
-        
+
         dateStart = new Timestamp(new Date().getTime());
         Thread.sleep(REPLICATION_DELAY);
-        statsService.writeStat(new Timestamp(new Date().getTime()), 1, 2, "T_PLACE", 10);
+        statsService.writeStat(new Timestamp(new Date().getTime()), 1, 2, T_PLACE, 10);
         Thread.sleep(REPLICATION_DELAY);
-        statsService.writeStat(new Timestamp(new Date().getTime()), 0, 3, "T_BASES", 20);
+        statsService.writeStat(new Timestamp(new Date().getTime()), 0, 3, T_BASES, 20);
         Thread.sleep(REPLICATION_DELAY);
-        statsService.writeStat(new Timestamp(new Date().getTime()), 1, 4, "T_HOUSE", 30);
+        statsService.writeStat(new Timestamp(new Date().getTime()), 1, 4, T_HOUSE, 30);
         Thread.sleep(REPLICATION_DELAY);
-        statsService.writeStat(new Timestamp(new Date().getTime()), 0, 5, "T_PLACE", 40);
+        statsService.writeStat(new Timestamp(new Date().getTime()), 0, 5, T_PLACE, 40);
         Thread.sleep(REPLICATION_DELAY);
         dateMidde = new Timestamp(new Date().getTime());
         Thread.sleep(REPLICATION_DELAY);
-        statsService.writeStat(new Timestamp(new Date().getTime()), 1, 6, "T_HOUSE", 50);
+        statsService.writeStat(new Timestamp(new Date().getTime()), 1, 6, T_HOUSE, 50);
         Thread.sleep(REPLICATION_DELAY);
-        statsService.writeStat(new Timestamp(new Date().getTime()), 0, 7, "T_PLACE", 60);
+        statsService.writeStat(new Timestamp(new Date().getTime()), 0, 7, T_PLACE, 60);
         Thread.sleep(REPLICATION_DELAY);
-        statsService.writeStat(new Timestamp(new Date().getTime()), 1, 8, "T_BASES", 70);
+        statsService.writeStat(new Timestamp(new Date().getTime()), 1, 8, T_BASES, 70);
         Thread.sleep(REPLICATION_DELAY);
-        statsService.writeStat(new Timestamp(new Date().getTime()), 0, 9, "T_HOUSE", 80);
+        statsService.writeStat(new Timestamp(new Date().getTime()), 0, 9, T_HOUSE, 80);
         Thread.sleep(REPLICATION_DELAY);
         dateEnd = new Timestamp(new Date().getTime());
-        
+
     }
-    
-    public void assertTrueStatsRow1(ResultSet result, boolean row) throws SQLException {
-        if(result.next()) {
-            assertTrue("Вставленные данные не совпадают", result.getInt("c_type") == 1);
-            assertTrue("Вставленные данные не совпадают", result.getInt("id_strategy") == 2);
-            assertTrue("Вставленные данные не совпадают", result.getString("id_table").equals("T_PLACE"));
-            assertTrue("Вставленные данные не совпадают", result.getInt("c_count") == 10);
-        } else {
+
+    public void assertTrueStatsRow1(List<Map<String, Object>> resultList, boolean row,
+            int index) throws SQLException {
+        try {
+            Map<String, Object> result = resultList.get(index);
+            assertTrue("Вставленные данные не совпадают", Integer.parseInt((result.get(C_TYPE).toString())) == 1);
+            assertTrue("Вставленные данные не совпадают", Integer.parseInt(result.get(ID_STRATEGY).toString()) == 2);
+            assertTrue("Вставленные данные не совпадают", result.get(ID_TABLE).toString().equals(T_PLACE));
+            assertTrue("Вставленные данные не совпадают", Integer.parseInt(result.get(C_COUNT).toString()) == 10);
+        } catch (IndexOutOfBoundsException e) {
             assertTrue("Отсутствует запись rep2_statistics id = 1", row);
         }
     }
-    
-    public void assertTrueStatsRow2(ResultSet result, boolean row) throws SQLException {
-        if(result.next()) {
-            assertTrue("Вставленные данные не совпадают", result.getInt("c_type") == 0);
-            assertTrue("Вставленные данные не совпадают", result.getInt("id_strategy") == 3);
-            assertTrue("Вставленные данные не совпадают", result.getString("id_table").equals("T_BASES"));
-            assertTrue("Вставленные данные не совпадают", result.getInt("c_count") == 20);
-        } else {
+
+    public void assertTrueStatsRow2(List<Map<String, Object>> resultList, boolean row,
+            int index) throws SQLException {
+        try {
+            Map<String, Object> result = resultList.get(index);
+            assertTrue("Вставленные данные не совпадают", Integer.parseInt((result.get(C_TYPE).toString())) == 0);
+            assertTrue("Вставленные данные не совпадают", Integer.parseInt(result.get(ID_STRATEGY).toString()) == 3);
+            assertTrue("Вставленные данные не совпадают", result.get(ID_TABLE).toString().equals(T_BASES));
+            assertTrue("Вставленные данные не совпадают", Integer.parseInt(result.get(C_COUNT).toString()) == 20);
+        } catch (IndexOutOfBoundsException e) {
             assertTrue("Отсутствует запись rep2_statistics id = 2", row);
         }
     }
-    
-    public void assertTrueStatsRow3(ResultSet result, boolean row) throws SQLException {
-        if(result.next()) {
-            assertTrue("Вставленные данные не совпадают", result.getInt("c_type") == 1);
-            assertTrue("Вставленные данные не совпадают", result.getInt("id_strategy") == 4);
-            assertTrue("Вставленные данные не совпадают", result.getString("id_table").equals("T_HOUSE"));
-            assertTrue("Вставленные данные не совпадают", result.getInt("c_count") == 30);
-        } else {
+
+    public void assertTrueStatsRow3(List<Map<String, Object>> resultList, boolean row,
+            int index) throws SQLException {
+        try {
+            Map<String, Object> result = resultList.get(index);
+            assertTrue("Вставленные данные не совпадают", Integer.parseInt((result.get(C_TYPE).toString())) == 1);
+            assertTrue("Вставленные данные не совпадают", Integer.parseInt(result.get(ID_STRATEGY).toString()) == 4);
+            assertTrue("Вставленные данные не совпадают", result.get(ID_TABLE).toString().equals(T_HOUSE));
+            assertTrue("Вставленные данные не совпадают", Integer.parseInt(result.get(C_COUNT).toString()) == 30);
+        } catch (IndexOutOfBoundsException e) {
             assertTrue("Отсутствует запись rep2_statistics id = 3", row);
         }
     }
-    
-    public void assertTrueStatsRow4(ResultSet result, boolean row) throws SQLException {
-        if(result.next()) {
-            assertTrue("Вставленные данные не совпадают", result.getInt("c_type") == 0);
-            assertTrue("Вставленные данные не совпадают", result.getInt("id_strategy") == 5);
-            assertTrue("Вставленные данные не совпадают", result.getString("id_table").equals("T_PLACE"));
-            assertTrue("Вставленные данные не совпадают", result.getInt("c_count") == 40);
-        } else {
+
+    public void assertTrueStatsRow4(List<Map<String, Object>> resultList, boolean row,
+            int index) throws SQLException {
+        try {
+            Map<String, Object> result = resultList.get(index);
+            assertTrue("Вставленные данные не совпадают", Integer.parseInt((result.get(C_TYPE).toString())) == 0);
+            assertTrue("Вставленные данные не совпадают", Integer.parseInt(result.get(ID_STRATEGY).toString()) == 5);
+            assertTrue("Вставленные данные не совпадают", result.get(ID_TABLE).toString().equals(T_PLACE));
+            assertTrue("Вставленные данные не совпадают", Integer.parseInt(result.get(C_COUNT).toString()) == 40);
+        } catch (IndexOutOfBoundsException e) {
             assertTrue("Отсутствует запись rep2_statistics id = 4", row);
         }
     }
-    
-    public void assertTrueStatsRow5(ResultSet result, boolean row) throws SQLException {
-        if(result.next()) {
-            assertTrue("Вставленные данные не совпадают", result.getInt("c_type") == 1);
-            assertTrue("Вставленные данные не совпадают", result.getInt("id_strategy") == 6);
-            assertTrue("Вставленные данные не совпадают", result.getString("id_table").equals("T_HOUSE"));
-            assertTrue("Вставленные данные не совпадают", result.getInt("c_count") == 50);
-        } else {
+
+    public void assertTrueStatsRow5(List<Map<String, Object>> resultList, boolean row,
+            int index) throws SQLException {
+        try {
+            Map<String, Object> result = resultList.get(index);
+            assertTrue("Вставленные данные не совпадают", Integer.parseInt((result.get(C_TYPE).toString())) == 1);
+            assertTrue("Вставленные данные не совпадают", Integer.parseInt(result.get(ID_STRATEGY).toString()) == 6);
+            assertTrue("Вставленные данные не совпадают", result.get(ID_TABLE).toString().equals(T_HOUSE));
+            assertTrue("Вставленные данные не совпадают", Integer.parseInt(result.get(C_COUNT).toString()) == 50);
+        } catch (IndexOutOfBoundsException e) {
             assertTrue("Отсутствует запись rep2_statistics id = 5", row);
         }
     }
-    
-    public void assertTrueStatsRow6(ResultSet result, boolean row) throws SQLException {
-        if(result.next()) {
-            assertTrue("Вставленные данные не совпадают", result.getInt("c_type") == 0);
-            assertTrue("Вставленные данные не совпадают", result.getInt("id_strategy") == 7);
-            assertTrue("Вставленные данные не совпадают", result.getString("id_table").equals("T_PLACE"));
-            assertTrue("Вставленные данные не совпадают", result.getInt("c_count") == 60);
-        } else {
+
+    public void assertTrueStatsRow6(List<Map<String, Object>> resultList, boolean row,
+            int index) throws SQLException {
+        try {
+            Map<String, Object> result = resultList.get(index);
+            assertTrue("Вставленные данные не совпадают", Integer.parseInt((result.get(C_TYPE).toString())) == 0);
+            assertTrue("Вставленные данные не совпадают", Integer.parseInt(result.get(ID_STRATEGY).toString()) == 7);
+            assertTrue("Вставленные данные не совпадают", result.get(ID_TABLE).toString().equals(T_PLACE));
+            assertTrue("Вставленные данные не совпадают", Integer.parseInt(result.get(C_COUNT).toString()) == 60);
+        } catch (IndexOutOfBoundsException e) {
             assertTrue("Отсутствует запись rep2_statistics id = 6", row);
         }
     }
-    
-    public void assertTrueStatsRow7(ResultSet result, boolean row) throws SQLException {
-        if(result.next()) {
-            assertTrue("Вставленные данные не совпадают", result.getInt("c_type") == 1);
-            assertTrue("Вставленные данные не совпадают", result.getInt("id_strategy") == 8);
-            assertTrue("Вставленные данные не совпадают", result.getString("id_table").equals("T_BASES"));
-            assertTrue("Вставленные данные не совпадают", result.getInt("c_count") == 70);
-        } else {
+
+    public void assertTrueStatsRow7(List<Map<String, Object>> resultList, boolean row,
+            int index) throws SQLException {
+        try {
+            Map<String, Object> result = resultList.get(index);
+            assertTrue("Вставленные данные не совпадают", Integer.parseInt((result.get(C_TYPE).toString())) == 1);
+            assertTrue("Вставленные данные не совпадают", Integer.parseInt(result.get(ID_STRATEGY).toString()) == 8);
+            assertTrue("Вставленные данные не совпадают", result.get(ID_TABLE) .toString().equals(T_BASES));
+            assertTrue("Вставленные данные не совпадают", Integer.parseInt(result.get(C_COUNT).toString()) == 70);
+        } catch (IndexOutOfBoundsException e) {
             assertTrue("Отсутствует запись rep2_statistics id = 7", row);
         }
     }
-    
-    public void assertTrueStatsRow8(ResultSet result, boolean row) throws SQLException {
-        if(result.next()) {
-            assertTrue("Вставленные данные не совпадают", result.getInt("c_type") == 0);
-            assertTrue("Вставленные данные не совпадают", result.getInt("id_strategy") == 9);
-            assertTrue("Вставленные данные не совпадают", result.getString("id_table").equals("T_HOUSE"));
-            assertTrue("Вставленные данные не совпадают", result.getInt("c_count") == 80);
-        } else {
+
+    public void assertTrueStatsRow8(List<Map<String, Object>> resultList, boolean row,
+            int index) throws SQLException {
+        try {
+            Map<String, Object> result = resultList.get(index);
+            assertTrue("Вставленные данные не совпадают", Integer.parseInt((result.get(C_TYPE).toString())) == 0);
+            assertTrue("Вставленные данные не совпадают", Integer.parseInt(result.get(ID_STRATEGY).toString()) == 9);
+            assertTrue("Вставленные данные не совпадают", result.get(ID_TABLE).toString().equals(T_HOUSE));
+            assertTrue("Вставленные данные не совпадают", Integer.parseInt(result.get(C_COUNT).toString()) == 80);
+        } catch (IndexOutOfBoundsException e) {
             assertTrue("Отсутствует запись rep2_statistics id = 8", row);
         }
     }
