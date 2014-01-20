@@ -38,19 +38,19 @@ public interface WorkPoolService {
     /**
      * value = "id_table"
      */
-    static final String ID_TABLE = "id_table";
+    String ID_TABLE = "id_table";
     /**
      * value = "id_foreign"
      */
-    static final String ID_FOREIGN = "id_foreign";
+    String ID_FOREIGN = "id_foreign";
     /**
      * value = "id_superlog"
      */
-    static final String ID_SUPERLOG = "id_superlog";
+    String ID_SUPERLOG = "id_superlog";
     /**
      * value = "id_runner"
      */
-    static final String ID_RUNNER = "id_runner";
+    String ID_RUNNER = "id_runner";
     
     /**
      * Получение подготовленного выражения для выборки последних операций
