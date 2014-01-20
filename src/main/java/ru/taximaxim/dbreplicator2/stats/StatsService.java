@@ -94,17 +94,16 @@ public class StatsService {
      */
     public ResultSet getStat(int type, String tableName, Timestamp dateStart,
             Timestamp dateEnd) throws SQLException, ClassNotFoundException {
-        try(Connection conn = Core.getConnectionFactory().getConnection(baseConnName);
+        try(Connection conn = Core.getConnectionFactory().getConnection(baseConnName);) {
             PreparedStatement selectStatement = conn.prepareStatement(
                 "SELECT * FROM rep2_statistics WHERE c_type = ? and id_table = ? and c_date >= ? and c_date <= ?",
-                ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);) {
+                ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             
             selectStatement.setInt(1, type);
             selectStatement.setString(2, tableName);
             selectStatement.setTimestamp(3, dateStart);
             selectStatement.setTimestamp(4, dateEnd);
-            ResultSet resultSet = selectStatement.executeQuery(); 
-           return resultSet;
+            return selectStatement.executeQuery(); 
        }
     }
 
@@ -117,14 +116,12 @@ public class StatsService {
      * @throws ClassNotFoundException
      */
     public ResultSet getStat(int type) throws SQLException, ClassNotFoundException {
-        try(Connection conn = Core.getConnectionFactory().getConnection(baseConnName);
+        try(Connection conn = Core.getConnectionFactory().getConnection(baseConnName);) {
             PreparedStatement selectStatement = conn.prepareStatement(
                 "SELECT * FROM rep2_statistics WHERE c_type = ?",
-                ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);) {
+                ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             selectStatement.setInt(1, type);
-
-            ResultSet resultSet = selectStatement.executeQuery(); 
-           return resultSet;
+            return selectStatement.executeQuery(); 
         }
     }
 
@@ -140,15 +137,14 @@ public class StatsService {
      */
     public ResultSet getStat(int type, String tableName) throws SQLException,
             ClassNotFoundException {
-        try(Connection conn = Core.getConnectionFactory().getConnection(baseConnName);
+        try(Connection conn = Core.getConnectionFactory().getConnection(baseConnName);) {
             PreparedStatement selectStatement = conn.prepareStatement(
                "SELECT * FROM rep2_statistics WHERE c_type = ? and id_table = ?",
-               ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);) {
+               ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             selectStatement.setInt(1, type);
             selectStatement.setString(2, tableName);
 
-            ResultSet resultSet = selectStatement.executeQuery(); 
-           return resultSet;
+            return selectStatement.executeQuery();
         }
     }
 
@@ -166,15 +162,14 @@ public class StatsService {
      */
     public ResultSet getStat(int type, Timestamp dateStart, Timestamp dateEnd)
             throws SQLException, ClassNotFoundException {
-        try(Connection conn = Core.getConnectionFactory().getConnection(baseConnName);
+        try(Connection conn = Core.getConnectionFactory().getConnection(baseConnName);) {
             PreparedStatement selectStatement = conn.prepareStatement(
                 "SELECT * FROM rep2_statistics WHERE c_type = ? and c_date >= ? and c_date <= ?",
-                ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);) {
+                ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             selectStatement.setInt(1, type);
             selectStatement.setTimestamp(2, dateStart);
             selectStatement.setTimestamp(3, dateEnd);
-            ResultSet resultSet = selectStatement.executeQuery(); 
-           return resultSet;
+            return selectStatement.executeQuery();
         }
     }
 }
