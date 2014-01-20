@@ -38,31 +38,31 @@ public interface Strategy {
     /**
      * values = "id_table"
      */
-    final String ID_TABLE = "id_table";
+    String ID_TABLE = "id_table";
     /**
      * values = "c_operation"
      */
-    final String C_OPERATION = "c_operation";
+    String C_OPERATION = "c_operation";
     /**
      * values = "id_foreign"
      */
-    final String ID_FOREIGN = "id_foreign";
+    String ID_FOREIGN = "id_foreign";
     /**
      * values = "id_superlog"
      */
-    final String ID_SUPERLOG = "id_superlog";
+    String ID_SUPERLOG = "id_superlog";
     /**
      * values = "id_pool"
      */
-    final String ID_POOL = "id_pool";
+    String ID_POOL = "id_pool";
     /**
      * values = "c_date"
      */
-    final String C_DATE = "c_date";
+    String C_DATE = "c_date";
     /**
      * values = "id_transaction"
      */
-    final String ID_TRANSACTION = "id_transaction";
+    String ID_TRANSACTION = "id_transaction";
     
     /**
      * Отрабатывает стратегию кода.
