@@ -114,10 +114,10 @@ public class GenericWorkPoolService implements WorkPoolService {
         // Очищаем данные о текущей записи из набора данных реплики
         PreparedStatement deleteWorkPoolData = 
                 getClearWorkPoolDataStatement();
-        deleteWorkPoolData.setInt(1, operationsResult.getInt("id_runner"));
-        deleteWorkPoolData.setLong(2, operationsResult.getLong("id_foreign"));
-        deleteWorkPoolData.setString(3, operationsResult.getString("id_table"));
-        deleteWorkPoolData.setLong(4, operationsResult.getLong("id_superlog"));
+        deleteWorkPoolData.setInt(1, operationsResult.getInt(ID_RUNNER));
+        deleteWorkPoolData.setLong(2, operationsResult.getLong(ID_FOREIGN));
+        deleteWorkPoolData.setString(3, operationsResult.getString(ID_TABLE));
+        deleteWorkPoolData.setLong(4, operationsResult.getLong(ID_SUPERLOG));
         deleteWorkPoolData.addBatch();
     }
 
@@ -144,9 +144,9 @@ public class GenericWorkPoolService implements WorkPoolService {
                 getConnection().prepareStatement("UPDATE rep2_workpool_data SET c_errors_count = c_errors_count + 1, c_last_error=?, c_last_error_date=? WHERE id_runner=? AND id_table=? AND id_foreign=?");
         incErrorsCount.setString(1, message + "\n" + writer.toString());
         incErrorsCount.setTimestamp(2, new Timestamp(new Date().getTime()));
-        incErrorsCount.setInt(3, operation.getInt("id_runner"));
-        incErrorsCount.setString(4, operation.getString("id_table"));
-        incErrorsCount.setLong(5, operation.getLong("id_foreign"));
+        incErrorsCount.setInt(3, operation.getInt(ID_RUNNER));
+        incErrorsCount.setString(4, operation.getString(ID_TABLE));
+        incErrorsCount.setLong(5, operation.getLong(ID_FOREIGN));
         incErrorsCount.executeUpdate();
     }
 }

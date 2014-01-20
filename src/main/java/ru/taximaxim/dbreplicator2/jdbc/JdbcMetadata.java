@@ -41,6 +41,11 @@ import java.util.Set;
  */
 public final class JdbcMetadata {
 
+    private static final String COLUMN_NAME = "COLUMN_NAME";
+    private static final String IS_AUTOINCREMENT = "IS_AUTOINCREMENT";
+    private static final String IS_NULLABLE = "IS_NULLABLE";
+    private static final String YES = "YES";
+    
     /**
      * Сиглетон
      */
@@ -66,7 +71,7 @@ public final class JdbcMetadata {
         
         try (ResultSet colsResultSet = metaData.getColumns(null, null, tableName, null);) {
             while (colsResultSet.next()) {
-                colsList.add(colsResultSet.getString("COLUMN_NAME").toUpperCase());
+                colsList.add(colsResultSet.getString(COLUMN_NAME).toUpperCase());
             }
         }
 
@@ -114,7 +119,7 @@ public final class JdbcMetadata {
         
         try (ResultSet primaryKeysResultSet = metaData.getPrimaryKeys(null, null, tableName);) {
             while (primaryKeysResultSet.next()) {
-                primaryKeyColsList.add(primaryKeysResultSet.getString("COLUMN_NAME").toUpperCase());
+                primaryKeyColsList.add(primaryKeysResultSet.getString(COLUMN_NAME).toUpperCase());
             }
         }
 
@@ -138,8 +143,8 @@ public final class JdbcMetadata {
         DatabaseMetaData metaData = connection.getMetaData();
         try (ResultSet colsResultSet = metaData.getColumns(null, null, tableName, null);) {
             while (colsResultSet.next()) {
-                if (colsResultSet.getString("IS_AUTOINCREMENT").equalsIgnoreCase("YES")) {
-                    colsList.add(colsResultSet.getString("COLUMN_NAME").toUpperCase());
+                if (colsResultSet.getString(IS_AUTOINCREMENT).equalsIgnoreCase(YES)) {
+                    colsList.add(colsResultSet.getString(COLUMN_NAME).toUpperCase());
                 }
             }
         }
@@ -165,8 +170,8 @@ public final class JdbcMetadata {
         DatabaseMetaData metaData = connection.getMetaData();
         try (ResultSet colsResultSet = metaData.getColumns(null, null, tableName, null);) {
             while (colsResultSet.next()) {
-                if (colsResultSet.getString("IS_NULLABLE").equalsIgnoreCase("YES")) {
-                    cols.add(colsResultSet.getString("COLUMN_NAME").toUpperCase());
+                if (colsResultSet.getString(IS_NULLABLE).equalsIgnoreCase(YES)) {
+                    cols.add(colsResultSet.getString(COLUMN_NAME).toUpperCase());
                 }
             }
         }

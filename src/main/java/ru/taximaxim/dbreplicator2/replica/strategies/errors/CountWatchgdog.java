@@ -48,7 +48,10 @@ import ru.taximaxim.dbreplicator2.replica.StrategyException;
 public class CountWatchgdog implements Strategy {
 
     private static final Logger LOG = Logger.getLogger(CountWatchgdog.class);
-
+    
+    private static final String MAX_ERRORS = "maxErrors";
+    private static final String PART_EMAIL = "partEmail";
+    private static final String COUNT = "count";
     /**
      * Конструктор по умолчанию
      */
@@ -60,13 +63,13 @@ public class CountWatchgdog implements Strategy {
             StrategyModel data) throws StrategyException, SQLException {
         
         int maxErrors = 0;
-        if(data.getParam("maxErrors")!=null) {
-            maxErrors = Integer.parseInt(data.getParam("maxErrors"));
+        if(data.getParam(MAX_ERRORS)!=null) {
+            maxErrors = Integer.parseInt(data.getParam(MAX_ERRORS));
         }
         
         int partEmail = 10;
-        if(data.getParam("partEmail")!=null) {
-            partEmail = Integer.parseInt(data.getParam("partEmail"));
+        if(data.getParam(PART_EMAIL)!=null) {
+            partEmail = Integer.parseInt(data.getParam(PART_EMAIL));
         }
         
         // Проверияем количество ошибочных итераций
@@ -89,7 +92,7 @@ public class CountWatchgdog implements Strategy {
             int rowCount = 0;
             try (ResultSet countResult = selectErrorsCount.executeQuery();) {
                 while (countResult.next()) {
-                  rowCount = countResult.getInt("count");
+                  rowCount = countResult.getInt(COUNT);
                 }
             }
             //Если нет ошибок то смысл в запуске данного кода бессмыслен 

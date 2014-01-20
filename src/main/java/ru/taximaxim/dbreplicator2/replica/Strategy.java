@@ -36,6 +36,35 @@ import ru.taximaxim.dbreplicator2.model.StrategyModel;
 public interface Strategy {
 
     /**
+     * values = "id_table"
+     */
+    static final String ID_TABLE = "id_table";
+    /**
+     * values = "c_operation"
+     */
+    static final String C_OPERATION = "c_operation";
+    /**
+     * values = "id_foreign"
+     */
+    static final String ID_FOREIGN = "id_foreign";
+    /**
+     * values = "id_superlog"
+     */
+    static final String ID_SUPERLOG = "id_superlog";
+    /**
+     * values = "id_pool"
+     */
+    static final String ID_POOL = "id_pool";
+    /**
+     * values = "c_date"
+     */
+    static final String C_DATE = "c_date";
+    /**
+     * values = "id_transaction"
+     */
+    static final String ID_TRANSACTION = "id_transaction";
+    
+    /**
      * Отрабатывает стратегию кода.
      * 
      * @param sourceConnection

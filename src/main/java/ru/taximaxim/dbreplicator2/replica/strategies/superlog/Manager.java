@@ -98,30 +98,30 @@ public class Manager implements Strategy {
                         // Проходим по списку слушателей текущей таблицы
                         for (TableModel table : sourcePool.getTables()) {
                             if (table.getName()
-                                    .equalsIgnoreCase(superLogResult.getString("id_table"))){
+                                    .equalsIgnoreCase(superLogResult.getString(ID_TABLE))){
                                 for (RunnerModel runner : table.getRunners()) {
-                                    if(!superLogResult.getString("id_pool").equals(runner.getTarget().getPoolId())) {
+                                    if(!superLogResult.getString(ID_POOL).equals(runner.getTarget().getPoolId())) {
                                         insertRunnerData.setInt(1,
                                                 runner.getId());
                                         insertRunnerData.setLong(2,
-                                                superLogResult.getLong("id_superlog"));
+                                                superLogResult.getLong(ID_SUPERLOG));
                                         insertRunnerData.setInt(3,
-                                                superLogResult.getInt("id_foreign"));
+                                                superLogResult.getInt(ID_FOREIGN));
                                         insertRunnerData.setString(4,
-                                                superLogResult.getString("id_table"));
+                                                superLogResult.getString(ID_TABLE));
                                         insertRunnerData.setString(5,
-                                                superLogResult.getString("c_operation"));
+                                                superLogResult.getString(C_OPERATION));
                                         insertRunnerData.setTimestamp(6,
-                                                superLogResult.getTimestamp("c_date"));
+                                                superLogResult.getTimestamp(C_DATE));
                                         insertRunnerData.setString(7,
-                                                superLogResult.getString("id_transaction"));
+                                                superLogResult.getString(ID_TRANSACTION));
                                         insertRunnerData.addBatch();
                                     }
                                 }
                             }
                         }
                         // Удаляем исходную запись
-                        deleteSuperLog.setLong(1, superLogResult.getLong("id_superlog"));
+                        deleteSuperLog.setLong(1, superLogResult.getLong(ID_SUPERLOG));
                         deleteSuperLog.addBatch();
                         
                         // Периодически сбрасываем батч в БД

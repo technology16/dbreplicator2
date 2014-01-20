@@ -94,13 +94,13 @@ public class FastManager implements Strategy {
                     selectSuperLog.setFetchSize(fetchSize);
                     try (ResultSet superLogResult = selectSuperLog.executeQuery();) {
                         List<String> cols = new ArrayList<String>();
-                        cols.add("id_superlog");
-                        cols.add("id_pool");
-                        cols.add("id_foreign");
-                        cols.add("id_table");
-                        cols.add("c_operation");
-                        cols.add("c_date");
-                        cols.add("id_transaction");
+                        cols.add(ID_SUPERLOG);
+                        cols.add(ID_POOL);
+                        cols.add(ID_FOREIGN);
+                        cols.add(ID_TABLE);
+                        cols.add(C_OPERATION);
+                        cols.add(C_DATE);
+                        cols.add(ID_TRANSACTION);
 
                         for (int rowsCount = 1; superLogResult.next(); rowsCount++) {
                             // Выводим данные из rep2_superlog_table
@@ -115,16 +115,16 @@ public class FastManager implements Strategy {
                                             + table.getTableId());
                                 }
                                 if (table.getName().equalsIgnoreCase(
-                                        superLogResult.getString("id_table"))) {
+                                        superLogResult.getString(ID_TABLE))) {
                                     for (RunnerModel runner : table.getRunners()) {
-                                        if(!superLogResult.getString("id_pool").equals(runner.getTarget().getPoolId())) {
+                                        if(!superLogResult.getString(ID_POOL).equals(runner.getTarget().getPoolId())) {
                                             insertRunnerData.setInt(1, runner.getId());
-                                            insertRunnerData.setLong(2, superLogResult.getLong("id_superlog"));
-                                            insertRunnerData.setInt(3, superLogResult.getInt("id_foreign"));
-                                            insertRunnerData.setString(4, superLogResult.getString("id_table"));
-                                            insertRunnerData.setString(5, superLogResult.getString("c_operation"));
-                                            insertRunnerData.setTimestamp(6, superLogResult.getTimestamp("c_date"));
-                                            insertRunnerData.setString(7, superLogResult .getString("id_transaction"));
+                                            insertRunnerData.setLong(2, superLogResult.getLong(ID_SUPERLOG));
+                                            insertRunnerData.setInt(3, superLogResult.getInt(ID_FOREIGN));
+                                            insertRunnerData.setString(4, superLogResult.getString(ID_TABLE));
+                                            insertRunnerData.setString(5, superLogResult.getString(C_OPERATION));
+                                            insertRunnerData.setTimestamp(6, superLogResult.getTimestamp(C_DATE));
+                                            insertRunnerData.setString(7, superLogResult .getString(ID_TRANSACTION));
                                             insertRunnerData.addBatch();
     
                                             // Выводим данные из rep2_superlog_table
@@ -138,7 +138,7 @@ public class FastManager implements Strategy {
                             }
                             // Удаляем исходную запись
                             deleteSuperLog.setLong(1,
-                                    superLogResult.getLong("id_superlog"));
+                                    superLogResult.getLong(ID_SUPERLOG));
                             deleteSuperLog.addBatch();
 
                             // Периодически сбрасываем батч в БД

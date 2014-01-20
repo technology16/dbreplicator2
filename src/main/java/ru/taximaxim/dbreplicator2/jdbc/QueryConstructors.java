@@ -35,6 +35,17 @@ import java.util.List;
  * 
  */
 public final class QueryConstructors {
+    
+    private static final String INSERT_INTO = "INSERT INTO ";
+    private static final String VALUES = ") VALUES (";
+    private static final String SELECT = "SELECT ";
+    private static final String FROM = " FROM ";
+    private static final String WHERE = " WHERE ";
+    private static final String AND = " AND ";
+    private static final String DELETE_FROM = "DELETE FROM ";
+    private static final String UPDATE = "UPDATE ";
+    private static final String SET = " SET ";
+    
     /**
      * Сиглетон
      */
@@ -123,9 +134,9 @@ public final class QueryConstructors {
      * @return строка запроса для вставки данных
      */
     public static String constructInsertQuery(String tableName, List<String> colsList) {
-        StringBuffer insertQuery = new StringBuffer().append("INSERT INTO ")
+        StringBuffer insertQuery = new StringBuffer().append(INSERT_INTO)
                 .append(tableName).append("(").append(listToString(colsList, ", "))
-                .append(") VALUES (").append(listToString(questionMarks(colsList), ", "))
+                .append(VALUES).append(listToString(questionMarks(colsList), ", "))
                 .append(")");
 
         return insertQuery.toString();
@@ -145,7 +156,7 @@ public final class QueryConstructors {
      */
     public static String constructInsertSelectQuery(String tableName,
             List<String> colsList) {
-        StringBuffer insertQuery = new StringBuffer().append("INSERT INTO ")
+        StringBuffer insertQuery = new StringBuffer().append(INSERT_INTO)
                 .append(tableName).append("(").append(listToString(colsList, ", "))
                 .append(") ").append(constructSelectQuery(questionMarks(colsList)));
 
@@ -160,7 +171,7 @@ public final class QueryConstructors {
      * @return строкf запроса на выборку данных
      */
     public static String constructSelectQuery(List<String> colsList) {
-        StringBuffer query = new StringBuffer().append("SELECT ").append(
+        StringBuffer query = new StringBuffer().append(SELECT).append(
                 listToString(colsList, ", "));
 
         return query.toString();
@@ -177,7 +188,7 @@ public final class QueryConstructors {
      */
     public static String constructSelectQuery(String tableName, List<String> colsList) {
         StringBuffer query = new StringBuffer(constructSelectQuery(colsList)).append(
-                " FROM ").append(tableName);
+                FROM).append(tableName);
 
         return query.toString();
     }
@@ -196,7 +207,7 @@ public final class QueryConstructors {
     public static String constructSelectQuery(String tableName, List<String> colsList,
             List<String> whereList) {
         StringBuffer query = new StringBuffer(constructSelectQuery(tableName, colsList))
-                .append(" WHERE ").append(listToString(whereList, " AND ", "=?"));
+                .append(WHERE).append(listToString(whereList, AND, "=?"));
 
         return query.toString();
     }
@@ -215,7 +226,7 @@ public final class QueryConstructors {
     public static String constructSelectQuery(String tableName, List<String> colsList,
             String where) {
         StringBuffer query = new StringBuffer(constructSelectQuery(tableName, colsList))
-                .append(" WHERE ").append(where);
+                .append(WHERE).append(where);
 
         return query.toString();
     }
@@ -230,8 +241,8 @@ public final class QueryConstructors {
      * @return
      */
     public static String constructDeleteQuery(String tableName, List<String> whereList) {
-        StringBuffer query = new StringBuffer().append("DELETE FROM ").append(tableName)
-                .append(" WHERE ").append(listToString(whereList, " AND ", "=?"));
+        StringBuffer query = new StringBuffer().append(DELETE_FROM).append(tableName)
+                .append(WHERE).append(listToString(whereList, AND, "=?"));
 
         return query.toString();
     }
@@ -249,9 +260,9 @@ public final class QueryConstructors {
      */
     public static String constructUpdateQuery(String tableName, List<String> colsList,
             List<String> whereList) {
-        StringBuffer insertQuery = new StringBuffer().append("UPDATE ").append(tableName)
-                .append(" SET ").append(listToString(colsList, ", ", "=?"))
-                .append(" WHERE ").append(listToString(whereList, " AND ", "=?"));
+        StringBuffer insertQuery = new StringBuffer().append(UPDATE).append(tableName)
+                .append(SET).append(listToString(colsList, ", ", "=?"))
+                .append(WHERE).append(listToString(whereList, AND, "=?"));
 
         return insertQuery.toString();
     }

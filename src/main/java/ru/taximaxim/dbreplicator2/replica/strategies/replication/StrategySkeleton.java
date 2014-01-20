@@ -31,14 +31,16 @@ import ru.taximaxim.dbreplicator2.model.StrategyModel;
  */
 public class StrategySkeleton {
 
+    private static final String FETCH_SIZE = "fetchSize";
+    private static final String BATCH_SIZE = "batchSize";
     /**
      * Размер выборки данных (строк)
      */
     private int fetchSize = 1000;
     
     protected int getFetchSize(StrategyModel data) {
-        if (data.getParam("fetchSize") != null) {
-            fetchSize = Integer.parseInt(data.getParam("fetchSize"));
+        if (data.getParam(FETCH_SIZE) != null) {
+            fetchSize = Integer.parseInt(data.getParam(FETCH_SIZE));
         }
         return fetchSize;
     }
@@ -49,8 +51,8 @@ public class StrategySkeleton {
     private int batchSize = 1000;
     
     protected int getBatchSize(StrategyModel data) {
-        if (data.getParam("batchSize") != null) {
-            batchSize = Integer.parseInt(data.getParam("batchSize"));
+        if (data.getParam(BATCH_SIZE) != null) {
+            batchSize = Integer.parseInt(data.getParam(BATCH_SIZE));
         }
         return batchSize;
     }
