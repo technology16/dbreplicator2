@@ -26,6 +26,7 @@ package ru.taximaxim.dbreplicator2.replica.strategies.replication.workpool;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 
 /**
  * ИНтерфейс для инкапсуляции работы стратегии с данными в очереди репликации.
@@ -35,18 +36,36 @@ import java.sql.SQLException;
  *
  */
 public interface WorkPoolService {
+
     /**
-     * value = "id_table"
+     * values = "id_table"
      */
     String ID_TABLE = "id_table";
     /**
-     * value = "id_foreign"
+     * values = "c_operation"
+     */
+    String C_OPERATION = "c_operation";
+    /**
+     * values = "id_foreign"
      */
     String ID_FOREIGN = "id_foreign";
     /**
-     * value = "id_superlog"
+     * values = "id_superlog"
      */
     String ID_SUPERLOG = "id_superlog";
+    /**
+     * values = "id_pool"
+     */
+    String ID_POOL = "id_pool";
+    /**
+     * values = "c_date"
+     */
+    String C_DATE = "c_date";
+    /**
+     * values = "id_transaction"
+     */
+    String ID_TRANSACTION = "id_transaction";
+
     /**
      * value = "id_runner"
      */
@@ -72,7 +91,22 @@ public interface WorkPoolService {
     
     void clearWorkPoolData(ResultSet operationsResult) throws SQLException;
     
-    void trackError(String message, SQLException e, ResultSet operation) 
-            throws SQLException;
+    void trackError(String message, SQLException e, ResultSet operation) throws SQLException;
+    
+    String getTable(ResultSet resultSet) throws SQLException;
+    
+    String getOperation(ResultSet resultSet) throws SQLException;
+    
+    Long getForeign(ResultSet resultSet) throws SQLException;
+    
+    int getRunner(ResultSet resultSet) throws SQLException;
+    
+    Long getSuperlog(ResultSet resultSet) throws SQLException;
+
+    String getPool(ResultSet resultSet) throws SQLException;
+    
+    Timestamp getDate(ResultSet resultSet) throws SQLException;
+    
+    String getTransaction(ResultSet resultSet) throws SQLException;
 
 }

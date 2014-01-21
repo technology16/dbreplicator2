@@ -204,7 +204,7 @@ public class GenericAlgorithm implements Strategy {
         // Если была операция удаления, то удаляем запись в приемнике
         PreparedStatement deleteDestStatement = 
                 getDestDataService().getDeleteStatement(table);
-        deleteDestStatement.setLong(1, operationsResult.getLong(ID_FOREIGN));
+        deleteDestStatement.setLong(1, getWorkPoolService().getForeign(operationsResult));
         return deleteDestStatement.executeUpdate();
     }
     
@@ -222,9 +222,9 @@ public class GenericAlgorithm implements Strategy {
     protected boolean replicateOperation(StrategyModel data, 
             ResultSet operationsResult) throws SQLException{
         TableModel table = data.getRunner().getSource()
-                .getTable(operationsResult.getString(ID_TABLE));
+                .getTable(getWorkPoolService().getTable(operationsResult));
         // Реплицируем данные
-        if (operationsResult.getString(C_OPERATION).equalsIgnoreCase("D")) {
+        if (getWorkPoolService().getOperation(operationsResult).equalsIgnoreCase("D")) {
             try {
                 replicateDeletion(operationsResult, table);
                 getWorkPoolService().clearWorkPoolData(operationsResult);
@@ -235,7 +235,7 @@ public class GenericAlgorithm implements Strategy {
                 // Это ожидаемый результат
                 String rowDump = String.format(
                         "[ tableName = %s  [ operation = D  [ row = [ id = %s ] ] ] ]", 
-                        table, String.valueOf(operationsResult.getLong(ID_FOREIGN)));
+                        table, String.valueOf(getWorkPoolService().getForeign(operationsResult)));
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при удалении записи: ", 
                             data.getRunner().getId(), data.getRunner().getDescription(), data.getId()) + rowDump, e);
@@ -253,7 +253,7 @@ public class GenericAlgorithm implements Strategy {
             // Извлекаем данные из исходной таблицы
             PreparedStatement selectSourceStatement = 
                     getSourceDataService().getSelectStatement(table);
-            selectSourceStatement.setLong(1, operationsResult.getLong(ID_FOREIGN));
+            selectSourceStatement.setLong(1, getWorkPoolService().getForeign(operationsResult));
             try (ResultSet sourceResult = selectSourceStatement.executeQuery();) {
                 // Проходим по списку измененных записей
                 if (sourceResult.next()) {
@@ -275,7 +275,7 @@ public class GenericAlgorithm implements Strategy {
                                 getCount().addError(table.getName());
                                 // Это ожидаемый результат
                                 String rowDump = String.format("[ tableName = %s  [ operation = %s  [ row = %s ] ] ]", 
-                                        table, operationsResult.getString(C_OPERATION), 
+                                        table, getWorkPoolService().getOperation(operationsResult), 
                                         Jdbc.resultSetToString(sourceResult, 
                                                 new ArrayList<String>(sourceDataService.getAllCols(table))));
                                 if (LOG.isDebugEnabled()) {
@@ -296,7 +296,7 @@ public class GenericAlgorithm implements Strategy {
                         getCount().addError(table.getName());
                         // Это ожидаемый результат
                         String rowDump = String.format("[ tableName = %s  [ operation = %s  [ row = %s ] ] ]", 
-                                table, operationsResult.getString(C_OPERATION), 
+                                table, getWorkPoolService().getOperation(operationsResult), 
                                 Jdbc.resultSetToString(sourceResult, 
                                         new ArrayList<String>(getSourceDataService().getAllCols(table))));
                         if (LOG.isDebugEnabled()) {

@@ -36,6 +36,7 @@ import ru.taximaxim.dbreplicator2.model.TableModel;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
+import ru.taximaxim.dbreplicator2.replica.strategies.replication.workpool.WorkPoolService;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
 
 /**
@@ -98,30 +99,30 @@ public class Manager implements Strategy {
                         // Проходим по списку слушателей текущей таблицы
                         for (TableModel table : sourcePool.getTables()) {
                             if (table.getName()
-                                    .equalsIgnoreCase(superLogResult.getString(ID_TABLE))){
+                                    .equalsIgnoreCase(superLogResult.getString(WorkPoolService.ID_TABLE))){
                                 for (RunnerModel runner : table.getRunners()) {
-                                    if(!superLogResult.getString(ID_POOL).equals(runner.getTarget().getPoolId())) {
+                                    if(!superLogResult.getString(WorkPoolService.ID_POOL).equals(runner.getTarget().getPoolId())) {
                                         insertRunnerData.setInt(1,
                                                 runner.getId());
                                         insertRunnerData.setLong(2,
-                                                superLogResult.getLong(ID_SUPERLOG));
+                                                superLogResult.getLong(WorkPoolService.ID_SUPERLOG));
                                         insertRunnerData.setInt(3,
-                                                superLogResult.getInt(ID_FOREIGN));
+                                                superLogResult.getInt(WorkPoolService.ID_FOREIGN));
                                         insertRunnerData.setString(4,
-                                                superLogResult.getString(ID_TABLE));
+                                                superLogResult.getString(WorkPoolService.ID_TABLE));
                                         insertRunnerData.setString(5,
-                                                superLogResult.getString(C_OPERATION));
+                                                superLogResult.getString(WorkPoolService.C_OPERATION));
                                         insertRunnerData.setTimestamp(6,
-                                                superLogResult.getTimestamp(C_DATE));
+                                                superLogResult.getTimestamp(WorkPoolService.C_DATE));
                                         insertRunnerData.setString(7,
-                                                superLogResult.getString(ID_TRANSACTION));
+                                                superLogResult.getString(WorkPoolService.ID_TRANSACTION));
                                         insertRunnerData.addBatch();
                                     }
                                 }
                             }
                         }
                         // Удаляем исходную запись
-                        deleteSuperLog.setLong(1, superLogResult.getLong(ID_SUPERLOG));
+                        deleteSuperLog.setLong(1, superLogResult.getLong(WorkPoolService.ID_SUPERLOG));
                         deleteSuperLog.addBatch();
                         
                         // Периодически сбрасываем батч в БД

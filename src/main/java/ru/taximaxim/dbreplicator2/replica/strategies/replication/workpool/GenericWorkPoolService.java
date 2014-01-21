@@ -114,10 +114,10 @@ public class GenericWorkPoolService implements WorkPoolService {
         // Очищаем данные о текущей записи из набора данных реплики
         PreparedStatement deleteWorkPoolData = 
                 getClearWorkPoolDataStatement();
-        deleteWorkPoolData.setInt(1, operationsResult.getInt(ID_RUNNER));
-        deleteWorkPoolData.setLong(2, operationsResult.getLong(ID_FOREIGN));
-        deleteWorkPoolData.setString(3, operationsResult.getString(ID_TABLE));
-        deleteWorkPoolData.setLong(4, operationsResult.getLong(ID_SUPERLOG));
+        deleteWorkPoolData.setInt(1, getRunner(operationsResult));
+        deleteWorkPoolData.setLong(2, getForeign(operationsResult));
+        deleteWorkPoolData.setString(3, getTable(operationsResult));
+        deleteWorkPoolData.setLong(4, getSuperlog(operationsResult));
         deleteWorkPoolData.addBatch();
     }
 
@@ -144,9 +144,49 @@ public class GenericWorkPoolService implements WorkPoolService {
                 getConnection().prepareStatement("UPDATE rep2_workpool_data SET c_errors_count = c_errors_count + 1, c_last_error=?, c_last_error_date=? WHERE id_runner=? AND id_table=? AND id_foreign=?");
         incErrorsCount.setString(1, message + "\n" + writer.toString());
         incErrorsCount.setTimestamp(2, new Timestamp(new Date().getTime()));
-        incErrorsCount.setInt(3, operation.getInt(ID_RUNNER));
-        incErrorsCount.setString(4, operation.getString(ID_TABLE));
-        incErrorsCount.setLong(5, operation.getLong(ID_FOREIGN));
+        incErrorsCount.setInt(3, getRunner(operation));
+        incErrorsCount.setString(4, getTable(operation));
+        incErrorsCount.setLong(5, getForeign(operation));
         incErrorsCount.executeUpdate();
+    }
+    
+    @Override
+    public String getTable(ResultSet resultSet) throws SQLException {
+        return resultSet.getString(ID_TABLE);
+    }
+    
+    @Override
+    public String getOperation(ResultSet resultSet) throws SQLException {
+        return resultSet.getString(C_OPERATION);
+    }
+    
+    @Override
+    public Long getForeign(ResultSet resultSet) throws SQLException {
+        return resultSet.getLong(ID_FOREIGN);
+    }
+    
+    @Override
+    public int getRunner(ResultSet resultSet) throws SQLException {
+        return resultSet.getInt(ID_RUNNER);
+    }
+    
+    @Override
+    public Long getSuperlog(ResultSet resultSet) throws SQLException {
+        return resultSet.getLong(ID_SUPERLOG);
+    }
+
+    @Override
+    public String getPool(ResultSet resultSet) throws SQLException {
+        return resultSet.getString(ID_POOL);
+    }
+    
+    @Override
+    public Timestamp getDate(ResultSet resultSet) throws SQLException {
+        return resultSet.getTimestamp(C_DATE);
+    }
+    
+    @Override
+    public String getTransaction(ResultSet resultSet) throws SQLException {
+        return resultSet.getString(ID_TRANSACTION);
     }
 }

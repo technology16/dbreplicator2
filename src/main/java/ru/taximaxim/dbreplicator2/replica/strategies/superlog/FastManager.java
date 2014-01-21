@@ -39,6 +39,7 @@ import ru.taximaxim.dbreplicator2.model.TableModel;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
+import ru.taximaxim.dbreplicator2.replica.strategies.replication.workpool.WorkPoolService;
 import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
@@ -94,13 +95,13 @@ public class FastManager implements Strategy {
                     selectSuperLog.setFetchSize(fetchSize);
                     try (ResultSet superLogResult = selectSuperLog.executeQuery();) {
                         List<String> cols = new ArrayList<String>();
-                        cols.add(ID_SUPERLOG);
-                        cols.add(ID_POOL);
-                        cols.add(ID_FOREIGN);
-                        cols.add(ID_TABLE);
-                        cols.add(C_OPERATION);
-                        cols.add(C_DATE);
-                        cols.add(ID_TRANSACTION);
+                        cols.add(WorkPoolService.ID_SUPERLOG);
+                        cols.add(WorkPoolService.ID_POOL);
+                        cols.add(WorkPoolService.ID_FOREIGN);
+                        cols.add(WorkPoolService.ID_TABLE);
+                        cols.add(WorkPoolService.C_OPERATION);
+                        cols.add(WorkPoolService.C_DATE);
+                        cols.add(WorkPoolService.ID_TRANSACTION);
 
                         for (int rowsCount = 1; superLogResult.next(); rowsCount++) {
                             // Выводим данные из rep2_superlog_table
@@ -115,16 +116,16 @@ public class FastManager implements Strategy {
                                             + table.getTableId());
                                 }
                                 if (table.getName().equalsIgnoreCase(
-                                        superLogResult.getString(ID_TABLE))) {
+                                        superLogResult.getString(WorkPoolService.ID_TABLE))) {
                                     for (RunnerModel runner : table.getRunners()) {
-                                        if(!superLogResult.getString(ID_POOL).equals(runner.getTarget().getPoolId())) {
+                                        if(!superLogResult.getString(WorkPoolService.ID_POOL).equals(runner.getTarget().getPoolId())) {
                                             insertRunnerData.setInt(1, runner.getId());
-                                            insertRunnerData.setLong(2, superLogResult.getLong(ID_SUPERLOG));
-                                            insertRunnerData.setInt(3, superLogResult.getInt(ID_FOREIGN));
-                                            insertRunnerData.setString(4, superLogResult.getString(ID_TABLE));
-                                            insertRunnerData.setString(5, superLogResult.getString(C_OPERATION));
-                                            insertRunnerData.setTimestamp(6, superLogResult.getTimestamp(C_DATE));
-                                            insertRunnerData.setString(7, superLogResult .getString(ID_TRANSACTION));
+                                            insertRunnerData.setLong(2, superLogResult.getLong(WorkPoolService.ID_SUPERLOG));
+                                            insertRunnerData.setInt(3, superLogResult.getInt(WorkPoolService.ID_FOREIGN));
+                                            insertRunnerData.setString(4, superLogResult.getString(WorkPoolService.ID_TABLE));
+                                            insertRunnerData.setString(5, superLogResult.getString(WorkPoolService.C_OPERATION));
+                                            insertRunnerData.setTimestamp(6, superLogResult.getTimestamp(WorkPoolService.C_DATE));
+                                            insertRunnerData.setString(7, superLogResult .getString(WorkPoolService.ID_TRANSACTION));
                                             insertRunnerData.addBatch();
     
                                             // Выводим данные из rep2_superlog_table
@@ -138,7 +139,7 @@ public class FastManager implements Strategy {
                             }
                             // Удаляем исходную запись
                             deleteSuperLog.setLong(1,
-                                    superLogResult.getLong(ID_SUPERLOG));
+                                    superLogResult.getLong(WorkPoolService.ID_SUPERLOG));
                             deleteSuperLog.addBatch();
 
                             // Периодически сбрасываем батч в БД
