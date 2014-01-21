@@ -83,30 +83,112 @@ public interface WorkPoolService {
      * Получение подготовленного выражения для выборки последних операций
      * 
      * @return
+     * 
      * @throws SQLException 
      */
     ResultSet getLastOperations(int runnerId, int fetchSize, int offset) throws SQLException;
     
+    /**
+     * Получение подготовленного запроса для удаления обработанных данных из рабочего набора
+     * 
+     * @return подготовленный запрос для удаления обработанных данных из рабочего набора
+     * 
+     * @throws SQLException
+     */
     PreparedStatement getClearWorkPoolDataStatement() throws SQLException;
     
+    /**
+     * Функция удаления обработанных данных из рабочего набора
+     * 
+     * @param operationsResult
+     * 
+     * @throws SQLException
+     */
     void clearWorkPoolData(ResultSet operationsResult) throws SQLException;
     
+    /**
+     * Функция записи информации об ошибке в рабочий набор
+     * 
+     * @param message  - сообщение
+     * @param e - ошибка
+     * @param operation - тип операции
+     * 
+     * @throws SQLException
+     */
     void trackError(String message, SQLException e, ResultSet operation) throws SQLException;
     
+    /**
+     * Получение имени текущей таблицы
+     * 
+     * @param resultSet - текущая запись в рабочем наборе
+     * 
+     * @return - имя таблицы
+     * 
+     * @throws SQLException
+     */
     String getTable(ResultSet resultSet) throws SQLException;
     
+    /**
+     * Получение имени текущей операции
+     * 
+     * @param resultSet
+     * @return
+     * @throws SQLException
+     */
     String getOperation(ResultSet resultSet) throws SQLException;
     
+    /**
+     * Получение идентификатора текущей записи
+     * 
+     * @param resultSet
+     * @return
+     * @throws SQLException
+     */
     Long getForeign(ResultSet resultSet) throws SQLException;
     
+    /**
+     * Получение идентификатора текущего раннера
+     * 
+     * @param resultSet
+     * @return
+     * @throws SQLException
+     */
     int getRunner(ResultSet resultSet) throws SQLException;
     
+    /**
+     * Получение идентификатора текущей операции
+     * 
+     * @param resultSet
+     * @return
+     * @throws SQLException
+     */
     Long getSuperlog(ResultSet resultSet) throws SQLException;
 
+    /**
+     * Получение идентификатора соединения текущей операции
+     * 
+     * @param resultSet
+     * @return
+     * @throws SQLException
+     */
     String getPool(ResultSet resultSet) throws SQLException;
     
+    /**
+     * Получение даты и времени текущей операции
+     * 
+     * @param resultSet
+     * @return
+     * @throws SQLException
+     */
     Timestamp getDate(ResultSet resultSet) throws SQLException;
     
+    /**
+     * Получение идентификатора транзакции текущей операции
+     * 
+     * @param resultSet
+     * @return
+     * @throws SQLException
+     */
     String getTransaction(ResultSet resultSet) throws SQLException;
 
 }

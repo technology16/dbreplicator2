@@ -353,6 +353,11 @@ public class BoneCPSettingsModel implements BoneCPSettings {
         return tables;
     }
 
+    /**
+     * Запись списка таблиц
+     * 
+     * @param tables
+     */
     public void setTables(List<TableModel> tables) {
         this.tables = tables;
     }
@@ -373,6 +378,9 @@ public class BoneCPSettingsModel implements BoneCPSettings {
         return runners;
     }
 
+    /**
+     * Сохранение списка обработчиков
+     */
     public void setRunners(List<RunnerModel> runners) {
         this.runners = runners;
     }
@@ -467,6 +475,12 @@ public class BoneCPSettingsModel implements BoneCPSettings {
 
     private Map<String, TableModel> tablesMap = null;
     
+    /**
+     * Получение списка таблиц БД
+     * 
+     * @param tableName
+     * @return
+     */
     public TableModel getTable(String tableName) {
         if (tablesMap == null) {
             tablesMap = new HashMap<String, TableModel>();

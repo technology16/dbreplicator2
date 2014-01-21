@@ -25,11 +25,18 @@ package ru.taximaxim.dbreplicator2.replica;
 
 public class StrategyException extends Exception {
 
+    /**
+     * Конструктор по умолчанию
+     */
     public StrategyException() {
         super();
     }
 
-    
+    /**
+     * Конструктор на основе исключения
+     * 
+     * @param e
+     */
     public StrategyException(Exception e) {
         super(e);
     }

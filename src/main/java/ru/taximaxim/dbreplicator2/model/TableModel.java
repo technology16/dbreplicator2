@@ -61,10 +61,20 @@ public class TableModel {
     @Column(name = "id_table")
     private Integer tableId;
 
+    /**
+     * Получение идентификатора таблицы
+     * 
+     * @return
+     */
     public Integer getTableId() {
         return tableId;
     }
 
+    /**
+     * Установка идентификатора таблицы
+     * 
+     * @param tableId
+     */
     public void setTableId(Integer tableId) {
         this.tableId = tableId;
     }
@@ -90,10 +100,20 @@ public class TableModel {
     @Column(name = "name")
     private String name;
 
+    /**
+     * Получение имени таблицы
+     * 
+     * @return
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Установка имени таблицы
+     * 
+     * @param name
+     */
     public void setName(String name) {
         this.name = name;
     }
@@ -108,6 +128,11 @@ public class TableModel {
     @Fetch(FetchMode.SELECT)
     private List<RunnerModel> runners;
     
+    /**
+     * Получение списка наблюдателей за таблицей
+     * 
+     * @return
+     */
     public List<RunnerModel> getRunners() {
         if (runners == null) {
             runners = new ArrayList<RunnerModel>();
@@ -115,6 +140,11 @@ public class TableModel {
         return this.runners;
     }
  
+    /**
+     * Установка наблюдателей за таблицей
+     * 
+     * @param runners
+     */
     public void setRunners(List<RunnerModel> runners) {
         this.runners = runners;
     }
