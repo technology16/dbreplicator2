@@ -295,24 +295,19 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
     }
 
     @Override
-    public void close() {
+    public void close() throws SQLException {
         close(deleteStatements);
         close(selectStatements);
         close(updateStatements);
         close(insertStatements);
     }
     
-    protected void close(Map<TableModel, PreparedStatement> sqlStatement) {
+    protected void close(Map<TableModel, PreparedStatement> sqlStatement) throws SQLException {
         for (PreparedStatement statement : sqlStatement.values()) {
             if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+                statement.close();
             }
         }
-        sqlStatement = new HashMap<TableModel, PreparedStatement>();
+        sqlStatement.clear();
     }
 }
