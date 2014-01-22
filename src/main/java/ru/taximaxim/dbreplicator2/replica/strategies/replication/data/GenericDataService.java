@@ -303,16 +303,32 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
         close(insertStatements);
     }
     
-    private void close(Map<TableModel, PreparedStatement> sqlStatement) {
+    /**
+     * Закрыть Map<TableModel, PreparedStatement>
+     * @param statement
+     * @throws SQLException
+     */
+    public void close(Map<TableModel, PreparedStatement> sqlStatement) {
         for (PreparedStatement statement : sqlStatement.values()) {
             if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    LOG.warn("Ошибка при попытке закрыть 'statement.close()': ", e);
-                }
+                close(statement);
             }
         }
         sqlStatement.clear();
     }
+    
+    /**
+     * Закрыть PreparedStatement
+     * @param statement
+     * @throws SQLException
+     */
+    public void close(PreparedStatement statement) {
+        if (statement != null) {
+            try {
+                statement.close();
+            } catch (SQLException e) {
+                LOG.warn("Ошибка при попытке закрыть 'statement.close()': ", e);
+            }
+        }
+    } 
 }

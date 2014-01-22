@@ -40,7 +40,7 @@ import org.apache.log4j.Logger;
  * @author volodin_aa
  *
  */
-public class GenericWorkPoolService implements WorkPoolService, AutoCloseable{
+public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
     private static final Logger LOG = Logger.getLogger(GenericWorkPoolService.class);
 
     private Connection connection;
@@ -209,7 +209,7 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable{
      * @param statement
      * @throws SQLException
      */
-    private void close(PreparedStatement statement) {
+    public void close(PreparedStatement statement) {
         if (statement != null) {
             try {
                 statement.close();
