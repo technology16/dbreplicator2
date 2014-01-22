@@ -33,12 +33,15 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
 
+import org.apache.log4j.Logger;
+
 
 /**
  * @author volodin_aa
  *
  */
 public class GenericWorkPoolService implements WorkPoolService, AutoCloseable{
+    private static final Logger LOG = Logger.getLogger(GenericWorkPoolService.class);
 
     private Connection connection;
     
@@ -195,7 +198,7 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable{
     }
 
     @Override
-    public void close() throws SQLException {
+    public void close() {
         close(clearWorkPoolDataStatement);
         close(lastOperationsStatement);
         close(incErrorsCount);
@@ -206,9 +209,13 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable{
      * @param statement
      * @throws SQLException
      */
-    protected void close(PreparedStatement statement) throws SQLException{
+    private void close(PreparedStatement statement) {
         if (statement != null) {
-            statement.close();
+            try {
+                statement.close();
+            } catch (SQLException e) {
+                LOG.warn("Ошибка при попытке закрыть 'statement.close()': ", e);
+            }
         }
     } 
 }

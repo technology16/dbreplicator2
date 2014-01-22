@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.jdbc.QueryConstructors;
@@ -43,7 +44,7 @@ import ru.taximaxim.dbreplicator2.model.TableModel;
  * 
  */
 public class GenericDataService extends DataServiceSkeleton implements DataService, AutoCloseable{
-
+    private static final Logger LOG = Logger.getLogger(GenericDataService.class);
     /**
      * Кешированные запросы удаления данных в приемнике
      */
@@ -295,17 +296,21 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
     }
 
     @Override
-    public void close() throws SQLException {
+    public void close() {
         close(deleteStatements);
         close(selectStatements);
         close(updateStatements);
         close(insertStatements);
     }
     
-    protected void close(Map<TableModel, PreparedStatement> sqlStatement) throws SQLException {
+    private void close(Map<TableModel, PreparedStatement> sqlStatement) {
         for (PreparedStatement statement : sqlStatement.values()) {
             if (statement != null) {
-                statement.close();
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+                    LOG.warn("Ошибка при попытке закрыть 'statement.close()': ", e);
+                }
             }
         }
         sqlStatement.clear();
