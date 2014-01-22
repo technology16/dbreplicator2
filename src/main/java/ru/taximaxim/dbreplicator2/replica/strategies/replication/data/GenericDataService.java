@@ -32,8 +32,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.jdbc.QueryConstructors;
 import ru.taximaxim.dbreplicator2.model.IgnoreColumnsTableModel;
@@ -43,8 +41,7 @@ import ru.taximaxim.dbreplicator2.model.TableModel;
  * @author volodin_aa
  * 
  */
-public class GenericDataService extends DataServiceSkeleton implements DataService, AutoCloseable{
-    private static final Logger LOG = Logger.getLogger(GenericDataService.class);
+public class GenericDataService extends DataServiceSkeleton implements DataService {
     /**
      * Кешированные запросы удаления данных в приемнике
      */
@@ -290,11 +287,10 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * 
      * @throws Exception
      */
-    public void setRepServerName(String repServerName)
-            throws SQLException {
-
+    public void setRepServerName(String repServerName) throws SQLException {
+        
     }
-
+    
     @Override
     public void close() {
         close(deleteStatements);
@@ -302,33 +298,4 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
         close(updateStatements);
         close(insertStatements);
     }
-    
-    /**
-     * Закрыть Map<TableModel, PreparedStatement>
-     * @param statement
-     * @throws SQLException
-     */
-    public void close(Map<TableModel, PreparedStatement> sqlStatement) {
-        for (PreparedStatement statement : sqlStatement.values()) {
-            if (statement != null) {
-                close(statement);
-            }
-        }
-        sqlStatement.clear();
-    }
-    
-    /**
-     * Закрыть PreparedStatement
-     * @param statement
-     * @throws SQLException
-     */
-    public void close(PreparedStatement statement) {
-        if (statement != null) {
-            try {
-                statement.close();
-            } catch (SQLException e) {
-                LOG.warn("Ошибка при попытке закрыть 'statement.close()': ", e);
-            }
-        }
-    } 
 }
