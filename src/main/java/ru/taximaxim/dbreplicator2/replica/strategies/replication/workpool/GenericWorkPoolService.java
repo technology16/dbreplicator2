@@ -38,7 +38,7 @@ import java.util.Date;
  * @author volodin_aa
  *
  */
-public class GenericWorkPoolService implements WorkPoolService {
+public class GenericWorkPoolService implements WorkPoolService, AutoCloseable{
 
     private Connection connection;
     
@@ -59,6 +59,8 @@ public class GenericWorkPoolService implements WorkPoolService {
     private PreparedStatement clearWorkPoolDataStatement;
 
     private PreparedStatement lastOperationsStatement;
+    
+    private PreparedStatement incErrorsCount;
 
     @Override
     public PreparedStatement getLastOperationsStatement() throws SQLException {
@@ -140,8 +142,10 @@ public class GenericWorkPoolService implements WorkPoolService {
         }
 
         // Увеличиваем счетчик ошибок на 1
-        PreparedStatement incErrorsCount = 
-                getConnection().prepareStatement("UPDATE rep2_workpool_data SET c_errors_count = c_errors_count + 1, c_last_error=?, c_last_error_date=? WHERE id_runner=? AND id_table=? AND id_foreign=?");
+        if(incErrorsCount==null) {
+            incErrorsCount = getConnection().prepareStatement(
+               "UPDATE rep2_workpool_data SET c_errors_count = c_errors_count + 1, c_last_error=?, c_last_error_date=? WHERE id_runner=? AND id_table=? AND id_foreign=?");
+        }
         incErrorsCount.setString(1, message + "\n" + writer.toString());
         incErrorsCount.setTimestamp(2, new Timestamp(new Date().getTime()));
         incErrorsCount.setInt(3, getRunner(operation));
@@ -189,4 +193,22 @@ public class GenericWorkPoolService implements WorkPoolService {
     public String getTransaction(ResultSet resultSet) throws SQLException {
         return resultSet.getString(ID_TRANSACTION);
     }
+
+    @Override
+    public void close() throws SQLException {
+        close(clearWorkPoolDataStatement);
+        close(lastOperationsStatement);
+        close(incErrorsCount);
+    }
+    
+    /**
+     * Закрыть PreparedStatement
+     * @param statement
+     * @throws SQLException
+     */
+    protected void close(PreparedStatement statement) throws SQLException{
+        if (statement != null) {
+            statement.close();
+        }
+    } 
 }

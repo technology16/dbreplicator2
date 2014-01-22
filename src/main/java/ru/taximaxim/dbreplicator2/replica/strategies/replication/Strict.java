@@ -45,11 +45,15 @@ public class Strict extends Generic implements Strategy {
     @Override
     public void execute(Connection sourceConnection, Connection targetConnection,
             StrategyModel data) throws StrategyException, SQLException, ClassNotFoundException {
-        GenericAlgorithm strategy = new GenericAlgorithm(1000, 1000, true, 
-                new GenericWorkPoolService(sourceConnection), 
-                new GenericDataService(sourceConnection), 
-                new GenericDataService(targetConnection));
-        strategy.execute(sourceConnection, targetConnection, data);
+        try (GenericWorkPoolService genericWorkPoolService = new GenericWorkPoolService(sourceConnection);
+                GenericDataService genericDataServiceSourceConnection = new GenericDataService(sourceConnection);
+                GenericDataService genericDataServiceTargetConnection = new GenericDataService(targetConnection);) {
+            GenericAlgorithm strategy = new GenericAlgorithm(1000, 1000, true, 
+                    genericWorkPoolService, 
+                    genericDataServiceSourceConnection, 
+                    genericDataServiceTargetConnection);
+            strategy.execute(sourceConnection, targetConnection, data);
+        }
     }
 
 }

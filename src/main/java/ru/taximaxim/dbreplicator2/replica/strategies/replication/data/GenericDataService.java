@@ -40,9 +40,9 @@ import ru.taximaxim.dbreplicator2.model.TableModel;
 
 /**
  * @author volodin_aa
- *
+ * 
  */
-public class GenericDataService extends DataServiceSkeleton implements DataService {
+public class GenericDataService extends DataServiceSkeleton implements DataService, AutoCloseable{
 
     /**
      * Кешированные запросы удаления данных в приемнике
@@ -293,5 +293,26 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
             throws SQLException {
 
     }
+
+    @Override
+    public void close() {
+        close(deleteStatements);
+        close(selectStatements);
+        close(updateStatements);
+        close(insertStatements);
+    }
     
+    protected void close(Map<TableModel, PreparedStatement> sqlStatement) {
+        for (PreparedStatement statement : sqlStatement.values()) {
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+        }
+        sqlStatement = new HashMap<TableModel, PreparedStatement>();
+    }
 }

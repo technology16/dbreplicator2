@@ -45,13 +45,17 @@ public class Generic extends StrategySkeleton implements Strategy {
     @Override
     public void execute(Connection sourceConnection, Connection targetConnection,
             StrategyModel data) throws StrategyException, SQLException, ClassNotFoundException {
-        GenericAlgorithm strategy = new GenericAlgorithm(getFetchSize(data), 
+        try (GenericWorkPoolService genericWorkPoolService = new GenericWorkPoolService(sourceConnection);
+             GenericDataService genericDataServiceSourceConnection = new GenericDataService(sourceConnection);
+             GenericDataService genericDataServiceTargetConnection = new GenericDataService(targetConnection);) {
+            GenericAlgorithm strategy = new GenericAlgorithm(getFetchSize(data), 
                 getBatchSize(data), 
                 false, 
-                new GenericWorkPoolService(sourceConnection), 
-                new GenericDataService(sourceConnection), 
-                new GenericDataService(targetConnection));
-        strategy.execute(sourceConnection, targetConnection, data);
+                genericWorkPoolService, 
+                genericDataServiceSourceConnection, 
+                genericDataServiceTargetConnection);
+            strategy.execute(sourceConnection, targetConnection, data);
+        }
     }
 
 }
