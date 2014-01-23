@@ -25,7 +25,7 @@ public class DataServiceSkeleton implements AutoCloseable {
 
 
     @Override
-    public void close() {
+    public void close() throws SQLException {
         
     }
     
@@ -34,13 +34,13 @@ public class DataServiceSkeleton implements AutoCloseable {
      * @param statement
      * @throws SQLException
      */
-    public void close(Map<?, PreparedStatement> sqlStatement) {
-        for (PreparedStatement statement : sqlStatement.values()) {
+    public void close(Map<?, PreparedStatement> sqlStatements) {
+        for (PreparedStatement statement : sqlStatements.values()) {
             if (statement != null) {
                 close(statement);
             }
         }
-        sqlStatement.clear();
+        sqlStatements.clear();
     }
     
     /**

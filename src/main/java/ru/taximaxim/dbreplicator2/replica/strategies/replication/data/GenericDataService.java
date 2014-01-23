@@ -292,7 +292,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
     }
     
     @Override
-    public void close() {
+    public void close() throws SQLException {
         close(deleteStatements);
         close(selectStatements);
         close(updateStatements);

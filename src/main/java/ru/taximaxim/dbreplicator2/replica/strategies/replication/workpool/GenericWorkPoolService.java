@@ -117,8 +117,7 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
      */
     public void clearWorkPoolData(ResultSet operationsResult) throws SQLException {
         // Очищаем данные о текущей записи из набора данных реплики
-        PreparedStatement deleteWorkPoolData = 
-                getClearWorkPoolDataStatement();
+        PreparedStatement deleteWorkPoolData = getClearWorkPoolDataStatement();
         deleteWorkPoolData.setInt(1, getRunner(operationsResult));
         deleteWorkPoolData.setLong(2, getForeign(operationsResult));
         deleteWorkPoolData.setString(3, getTable(operationsResult));
@@ -126,6 +125,15 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
         deleteWorkPoolData.addBatch();
     }
 
+    @Override
+    public PreparedStatement getIncErrorsCount() throws SQLException {
+        if(incErrorsCount==null) {
+            incErrorsCount = getConnection().prepareStatement(
+               "UPDATE rep2_workpool_data SET c_errors_count = c_errors_count + 1, c_last_error=?, c_last_error_date=? WHERE id_runner=? AND id_table=? AND id_foreign=?");
+        }
+        
+        return incErrorsCount;
+    }
     /**
      * Функция записи информации об ошибке
      * @throws SQLException 
@@ -145,16 +153,13 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
         }
 
         // Увеличиваем счетчик ошибок на 1
-        if(incErrorsCount==null) {
-            incErrorsCount = getConnection().prepareStatement(
-               "UPDATE rep2_workpool_data SET c_errors_count = c_errors_count + 1, c_last_error=?, c_last_error_date=? WHERE id_runner=? AND id_table=? AND id_foreign=?");
-        }
-        incErrorsCount.setString(1, message + "\n" + writer.toString());
-        incErrorsCount.setTimestamp(2, new Timestamp(new Date().getTime()));
-        incErrorsCount.setInt(3, getRunner(operation));
-        incErrorsCount.setString(4, getTable(operation));
-        incErrorsCount.setLong(5, getForeign(operation));
-        incErrorsCount.executeUpdate();
+        PreparedStatement statement = getIncErrorsCount();
+        statement.setString(1, message + "\n" + writer.toString());
+        statement.setTimestamp(2, new Timestamp(new Date().getTime()));
+        statement.setInt(3, getRunner(operation));
+        statement.setString(4, getTable(operation));
+        statement.setLong(5, getForeign(operation));
+        statement.executeUpdate();
     }
     
     @Override
@@ -198,7 +203,7 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
     }
 
     @Override
-    public void close() {
+    public void close() throws SQLException {
         close(clearWorkPoolDataStatement);
         close(lastOperationsStatement);
         close(incErrorsCount);
