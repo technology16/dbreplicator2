@@ -70,7 +70,7 @@ public class BoneCPConnectionsFactory implements ConnectionFactory {
     /*
      * (non-Javadoc)
      *
-     * @see ru.taximaxim.dbreplicator2.cf.ConnectionsFactory#
+     * @see ru.taximaxim.dbreplicator2.cf.ConnectionFactory#
      * getConnection(java.lang.String)
      */
     public Connection getConnection(String poolName) throws SQLException,
@@ -117,7 +117,7 @@ public class BoneCPConnectionsFactory implements ConnectionFactory {
      * (non-Javadoc)
      *
      * @see
-     * ru.taximaxim.dbreplicator2.cf.ConnectionsFactory#close
+     * ru.taximaxim.dbreplicator2.cf.ConnectionFactory#close
      * (java.lang.String)
      */
     public void close(String poolName) {
@@ -131,7 +131,7 @@ public class BoneCPConnectionsFactory implements ConnectionFactory {
      * (non-Javadoc)
      *
      * @see
-     * ru.taximaxim.dbreplicator2.cf.ConnectionsFactory#close()
+     * ru.taximaxim.dbreplicator2.cf.ConnectionFactory#close()
      */
     public void close() {
         synchronized (connectionPools) {
