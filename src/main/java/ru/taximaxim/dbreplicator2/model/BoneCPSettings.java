@@ -27,7 +27,6 @@ package ru.taximaxim.dbreplicator2.model;
 
 import java.util.List;
 
-
 /**
  * Интерфейс к настройкам подключения в BoneCP
  * 
@@ -111,8 +110,18 @@ public interface BoneCPSettings extends DataBaseSettings {
      */
     void setCloseConnectionWatchTimeoutInMs(long closeConnectionWatchTimeoutInMs);
     
+    /**
+     * Получение списка раннеров в которых источником является текущий пул соединений
+     * 
+     * @return список раннеров
+     */
     List<RunnerModel> getRunners();
     
+    /**
+     * Изменение списка раннеров в которых источником является текущий пул соединений
+     * 
+     * @param runners список раннеров
+     */
     void setRunners(List<RunnerModel> runners);
 
 }

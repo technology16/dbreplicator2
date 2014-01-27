@@ -31,6 +31,12 @@ import org.hibernate.criterion.Restrictions;
 
 import ru.taximaxim.dbreplicator2.utils.Utils;
 
+/**
+ * Класс сервиса работы с настройками раннеров
+ * 
+ * @author volodin_aa
+ *
+ */
 public class RunnerService {
 
     /**
@@ -55,7 +61,6 @@ public class RunnerService {
         try {
             return Utils.castList(RunnerModel.class,
                             session.createCriteria(RunnerModel.class, "runners")
-//                            .setFetchMode("runners", FetchMode.SELECT)
                             .list());
         } finally {
             session.close();

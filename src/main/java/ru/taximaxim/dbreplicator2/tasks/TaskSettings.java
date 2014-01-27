@@ -24,6 +24,12 @@ package ru.taximaxim.dbreplicator2.tasks;
 
 import ru.taximaxim.dbreplicator2.model.Runner;
 
+/**
+ * Интерфейс для работы с настройками задач
+ * 
+ * @author volodin_aa
+ *
+ */
 public interface TaskSettings {
 
     /**

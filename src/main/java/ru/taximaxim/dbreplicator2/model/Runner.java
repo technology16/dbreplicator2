@@ -24,7 +24,12 @@ package ru.taximaxim.dbreplicator2.model;
 
 import java.util.List;
 
-
+/**
+ * Интерфейс раннера
+ * 
+ * @author volodin_aa
+ *
+ */
 public interface Runner {
 
     /**

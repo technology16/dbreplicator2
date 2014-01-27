@@ -178,6 +178,8 @@ public class BoneCPSettingsModel implements BoneCPSettings {
     }
 
     /**
+     * Получение имени пула соединений
+     * 
      * @return the name
      */
     @Id
@@ -187,6 +189,8 @@ public class BoneCPSettingsModel implements BoneCPSettings {
     }
 
     /**
+     * Установка имени пула
+     * 
      * @param name
      *            the name to set
      */
@@ -195,6 +199,8 @@ public class BoneCPSettingsModel implements BoneCPSettings {
     }
 
     /**
+     * Получение дравера БД 
+     * 
      * @return the driver
      */
     @Column(name = "driver")
@@ -203,6 +209,8 @@ public class BoneCPSettingsModel implements BoneCPSettings {
     }
 
     /**
+     * Измение драйвера
+     * 
      * @param driver
      *            the driver to set
      */
@@ -343,6 +351,11 @@ public class BoneCPSettingsModel implements BoneCPSettings {
      */
     private List<TableModel> tables;
 
+    /**
+     * Получение списка таблиц в текущей БД
+     * 
+     * @return
+     */
     @Column
     @OneToMany(targetEntity=TableModel.class, mappedBy="pool", fetch=FetchType.EAGER)
     public List<TableModel> getTables() {
@@ -367,6 +380,9 @@ public class BoneCPSettingsModel implements BoneCPSettings {
      */
     private List<RunnerModel> runners;
 
+    /**
+     * Получение списка раннеров 
+     */
     @Column
     @OneToMany(targetEntity=RunnerModel.class, mappedBy="source", fetch=FetchType.EAGER)
     @Fetch(FetchMode.SELECT)

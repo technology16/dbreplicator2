@@ -33,6 +33,12 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.apache.log4j.Logger;
 
+/**
+ * Абстрактный класс парсера командной строки приложения
+ * 
+ * @author volodin_aa
+ *
+ */
 public abstract class AbstractCommandLineParser {
 
     private Options posixOptions = new Options();

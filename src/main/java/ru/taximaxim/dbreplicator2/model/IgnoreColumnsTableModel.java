@@ -31,6 +31,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+/**
+ * Персистентный класс игнорируемой колонки таблицы
+ * 
+ * @author volodin_aa
+ *
+ */
 @Entity
 @Table(name = "ignore_columns_table")
 public class IgnoreColumnsTableModel {
@@ -81,8 +87,6 @@ public class IgnoreColumnsTableModel {
         this.columnName = columnName;
     }
 
-    
-    
     /**
      * Игнорируемая колонка, принадлежащей таблицы
      */

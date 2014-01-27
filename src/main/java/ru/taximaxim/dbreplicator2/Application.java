@@ -153,6 +153,11 @@ public final class Application extends AbstractCommandLineParser {
         }
     }
     
+    /**
+     * Точка входа
+     * 
+     * @param args
+     */
     public static void main(String[] args) {
         new Application().parserCommandLine(args);
     }

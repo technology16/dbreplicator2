@@ -35,13 +35,23 @@ import ru.taximaxim.dbreplicator2.replica.StopChainProcesing;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
 import ru.taximaxim.dbreplicator2.utils.Core;
-
+/**
+ * Обработчик раннера
+ * 
+ * @author volodin_aa
+ *
+ */
 public class WorkerThread implements Runnable {
 
     private static final Logger LOG = Logger.getLogger(WorkerThread.class);
 
     private Runner runner;
 
+    /**
+     * Конструктор на основе настроек раннера
+     * 
+     * @param runner
+     */
     public WorkerThread(Runner runner) {
         this.runner = runner;
     }
