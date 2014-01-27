@@ -29,6 +29,8 @@ import ru.taximaxim.dbreplicator2.model.TaskSettings;
 import ru.taximaxim.dbreplicator2.model.TaskSettingsService;
 
 /**
+ * Пул задач по расписанию
+ * 
  * @author volodin_aa
  * 
  */
@@ -38,6 +40,11 @@ public class TasksPool {
 
     private TaskSettingsService taskSettingsService;
 
+    /**
+     * Конструктор на основе сервиса настроек задач по расписанию
+     * 
+     * @param taskSettingsService
+     */
     public TasksPool(TaskSettingsService taskSettingsService) {
         this.taskSettingsService = taskSettingsService;
     }

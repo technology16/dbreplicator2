@@ -41,6 +41,12 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
+/**
+ * Персистентная реализация интерфейс раннера
+ * 
+ * @author volodin_aa
+ *
+ */
 @Entity
 @Table(name = "runners")
 public class RunnerModel implements Runner {
@@ -134,6 +140,9 @@ public class RunnerModel implements Runner {
         return description;
     }
 
+    /**
+     * Получение списка стратегий раннера
+     */
     public List<StrategyModel> getStrategyModels() {
 
         if (strategyModels == null) {
@@ -143,22 +152,47 @@ public class RunnerModel implements Runner {
         return strategyModels;
     }
 
+    /**
+     * Установка списка стратегий раннера
+     * 
+     * @param strategyModels
+     */
     public void setStrategyModels(List<StrategyModel> strategyModels) {
         this.strategyModels = strategyModels;
     }
 
+    /**
+     * Изменение идентификатора раннера
+     * 
+     * @param id новый идентификатор
+     */
     public void setId(int id) {
         this.id = id;
     }
 
+    /**
+     * Изменение источника данных раннера
+     * 
+     * @param source источник
+     */
     public void setSource(BoneCPSettingsModel source) {
         this.source = source;
     }
 
+    /**
+     * Изменение приемника данных
+     * 
+     * @param target приемник
+     */
     public void setTarget(BoneCPSettingsModel target) {
         this.target = target;
     }
 
+    /**
+     * Изменение описания раннера
+     * 
+     * @param description описание
+     */
     public void setDescription(String description) {
         this.description = description;
     }
@@ -168,6 +202,9 @@ public class RunnerModel implements Runner {
         return className;
     }
 
+    /*
+     * Изменние имени класса стратегии 
+     */
     public void setClassName(String className) {
         this.className = className;
     }
@@ -179,6 +216,11 @@ public class RunnerModel implements Runner {
     @Fetch(FetchMode.SELECT)
     private List<TableModel> tables;
     
+    /**
+     * Получение списка списка обрабатываемых раннером таблиц
+     * 
+     * @return список таблиц
+     */
     public List<TableModel> getTables() {
         if (tables == null) {
             tables = new ArrayList<TableModel>();
@@ -186,7 +228,12 @@ public class RunnerModel implements Runner {
         return this.tables;
     }
  
-    public void setStocks(List<TableModel> tables) {
+    /**
+     * Изменнение списка обрабатываемых раннером таблиц
+     * 
+     * @param tables список таблиц
+     */
+    public void setTables(List<TableModel> tables) {
         this.tables = tables;
     }
 }

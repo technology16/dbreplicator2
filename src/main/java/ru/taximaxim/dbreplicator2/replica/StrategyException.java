@@ -23,6 +23,12 @@
 
 package ru.taximaxim.dbreplicator2.replica;
 
+/**
+ * Класс исключения стратегии. 
+ * 
+ * @author volodin_aa
+ *
+ */
 public class StrategyException extends Exception {
 
     /**

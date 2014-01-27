@@ -39,6 +39,12 @@ import javax.persistence.Table;
 
 import org.apache.log4j.Logger;
 
+/**
+ * Персистентный класс настроек стратегии
+ * 
+ * @author volodin_aa
+ *
+ */
 @Entity
 @Table(name = "strategies")
 public class StrategyModel {

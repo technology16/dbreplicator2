@@ -32,6 +32,12 @@ import org.hibernate.SessionFactory;
 
 import ru.taximaxim.dbreplicator2.utils.Utils;
 
+/**
+ * Сервис для работы с настройками задач по расписанию 
+ * 
+ * @author volodin_aa
+ *
+ */
 public class TaskSettingsService {
 
     /**

@@ -22,7 +22,12 @@
  */
 package ru.taximaxim.dbreplicator2.model;
 
-
+/**
+ * Интерфейс настроек задачи по расписанию
+ * 
+ * @author volodin_aa
+ *
+ */
 public interface TaskSettings {
 
     /**

@@ -34,6 +34,12 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+/**
+ * Заготовка класса для работы с реплицируемыми данными
+ * 
+ * @author volodin_aa
+ *
+ */
 public class DataServiceSkeleton implements AutoCloseable {
 
     private static final Logger LOG = Logger.getLogger(DataServiceSkeleton.class);

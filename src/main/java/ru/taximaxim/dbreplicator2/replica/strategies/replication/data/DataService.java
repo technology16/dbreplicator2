@@ -33,6 +33,12 @@ import java.util.Set;
 
 import ru.taximaxim.dbreplicator2.model.TableModel;
 
+/**
+ * Интерфейс для работы с реплицируемыми данными
+ * 
+ * @author volodin_aa
+ *
+ */
 public interface DataService {
 
     /**
