@@ -227,7 +227,6 @@ public class GenericAlgorithm implements Strategy {
         if (getWorkPoolService().getOperation(operationsResult).equalsIgnoreCase("D")) {
             try {
                 replicateDeletion(operationsResult, table);
-                getWorkPoolService().clearWorkPoolData(operationsResult);
                 getCount().addSuccess(table.getName());
             } catch (SQLException e) {
                 // Поглощаем и логгируем ошибки удаления
@@ -260,19 +259,12 @@ public class GenericAlgorithm implements Strategy {
                     // 0    - запись отсутствует в приемнике
                     // 1    - запись обновлена
                     try {
-                        if (replicateUpdation(table, sourceResult) > 0) {
-                            getWorkPoolService().clearWorkPoolData(operationsResult);
-                            getCount().addSuccess(table.getName());
-                        } else {
+                        if (replicateUpdation(table, sourceResult) < 1) {
                             try {
                                 // и если такой записи нет, то пытаемся вставить
                                 replicateInsertion(table, sourceResult);
-                                getCount().addSuccess(table.getName());
-                                
-                                getWorkPoolService().clearWorkPoolData(operationsResult);
                             } catch (SQLException e) {
                                 // Поглощаем и логгируем ошибки вставки
-                                getCount().addError(table.getName());
                                 // Это ожидаемый результат
                                 String rowDump = String.format("[ tableName = %s  [ operation = %s  [ row = %s ] ] ]", 
                                         table, getWorkPoolService().getOperation(operationsResult), 
@@ -345,8 +337,11 @@ public class GenericAlgorithm implements Strategy {
             // Проходим по списку измененных записей
             for (int rowsCount = 1; operationsResult.next(); rowsCount++) {
                 // Реплицируем операцию
-                
-                if (!replicateOperation(data, operationsResult)) {
+                if (replicateOperation(data, operationsResult)) {
+                    getCount().addSuccess(getWorkPoolService().getTable(operationsResult));
+                    getWorkPoolService().clearWorkPoolData(operationsResult);
+                } else {
+                    getCount().addError(getWorkPoolService().getTable(operationsResult));
                     if (isStrict()) {
                         break;
                     } else {
