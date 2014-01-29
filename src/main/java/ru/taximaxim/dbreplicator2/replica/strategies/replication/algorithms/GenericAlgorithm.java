@@ -241,6 +241,9 @@ public class GenericAlgorithm implements Strategy {
                         // Пробуем обновить запись
                         try {
                             replicateUpdation(table, sourceResult);
+                            getWorkPoolService().clearWorkPoolData(operationsResult);
+                            getCount().addSuccess(getWorkPoolService().getTable(operationsResult));
+                            
                             return true;
                         } catch (SQLException e) {
                             // Поглощаем и логгируем ошибки обновления
@@ -258,12 +261,17 @@ public class GenericAlgorithm implements Strategy {
                                 LOG.warn(message + " \n" + e.getMessage());
                             }
                             getWorkPoolService().trackError(message, e, operationsResult);
+                            getCount().addError(getWorkPoolService().getTable(operationsResult));
+
                             return false;
                         }
                     } else {
                         try {
                             // и если такой записи нет, то пытаемся вставить
                             replicateInsertion(table, sourceResult);
+                            getWorkPoolService().clearWorkPoolData(operationsResult);
+                            getCount().addSuccess(getWorkPoolService().getTable(operationsResult));
+                            
                             return true;
                         } catch (SQLException e) {
                             // Поглощаем и логгируем ошибки вставки
@@ -281,6 +289,8 @@ public class GenericAlgorithm implements Strategy {
                                 LOG.warn(message + " \n" + e.getMessage());
                             }
                             getWorkPoolService().trackError(message, e, operationsResult);
+                            getCount().addError(getWorkPoolService().getTable(operationsResult));
+
                             return false;
                         }
                     }
@@ -300,6 +310,8 @@ public class GenericAlgorithm implements Strategy {
                         LOG.warn(message + " \n" + e.getMessage());
                     }
                     getWorkPoolService().trackError(message, e, operationsResult);
+                    getCount().addError(getWorkPoolService().getTable(operationsResult));
+
                     return false;
                 }
             } else {
@@ -307,6 +319,9 @@ public class GenericAlgorithm implements Strategy {
                 // удалем ее в приемнике
                 try {
                     replicateDeletion(operationsResult, table);
+                    getWorkPoolService().clearWorkPoolData(operationsResult);
+                    getCount().addSuccess(getWorkPoolService().getTable(operationsResult));
+                    
                     return true;
                 } catch (SQLException e) {
                     // Поглощаем и логгируем ошибки удаления
@@ -323,6 +338,8 @@ public class GenericAlgorithm implements Strategy {
                         LOG.warn(message + " \n" + e.getMessage());
                     }
                     getWorkPoolService().trackError(message, e, operationsResult);
+                    getCount().addError(getWorkPoolService().getTable(operationsResult));
+                    
                     return false;
                 }
             }
@@ -341,6 +358,8 @@ public class GenericAlgorithm implements Strategy {
                 LOG.warn(message + " \n" + e.getMessage());
             }
             getWorkPoolService().trackError(message, e, operationsResult);
+            getCount().addError(getWorkPoolService().getTable(operationsResult));
+
             return false;
         }
     }
@@ -371,11 +390,7 @@ public class GenericAlgorithm implements Strategy {
             // Проходим по списку измененных записей
             for (int rowsCount = 1; operationsResult.next(); rowsCount++) {
                 // Реплицируем операцию
-                if (replicateOperation(data, operationsResult)) {
-                    getCount().addSuccess(getWorkPoolService().getTable(operationsResult));
-                    getWorkPoolService().clearWorkPoolData(operationsResult);
-                } else {
-                    getCount().addError(getWorkPoolService().getTable(operationsResult));
+                if (!replicateOperation(data, operationsResult)) {
                     if (isStrict()) {
                         break;
                     } else {
