@@ -108,6 +108,12 @@ insert into strategies (id, className, param, isEnabled, priority, id_runner) va
 partEmail=10', true, 100, 7);
 insert into strategies (id, className, param, isEnabled, priority, id_runner) values (10, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.CountWatchgdog', null, true, 100, 7);
 
+--Runner ReplicationTimeWatchgdog
+insert into runners (id_runner, source, target, description, class_name) values (10, 'source', 'source', 'ErrorsReplicationTimeWatchgdog', '');
+--Strategy  ReplicationTimeWatchgdog
+insert into strategies (id, className, param, isEnabled, priority, id_runner) values (11, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.ReplicationTimeWatchgdog', 'period=10
+partEmail=10', true, 100, 10);
+
 --Ignore Columns Table
 insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (1, 1, '_STRING');
 insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (2, 2, '_STRING');

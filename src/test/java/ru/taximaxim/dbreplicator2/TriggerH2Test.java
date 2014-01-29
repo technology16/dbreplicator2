@@ -56,10 +56,13 @@ public class TriggerH2Test {
     public static void tearDownAfterClass() throws Exception {
         session.close();
         connectionFactory.close();
-        Core.connectionFactoryClose();
         sessionFactory.close();
+        Core.connectionFactoryClose();
         Core.sessionFactoryClose();
         Core.statsServiceClose();
+        Core.tasksPoolClose();
+        Core.taskSettingsServiceClose(); 
+        Core.configurationClose();
     }
 
     /**

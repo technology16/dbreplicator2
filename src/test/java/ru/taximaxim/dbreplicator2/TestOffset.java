@@ -88,7 +88,10 @@ public class TestOffset {
             session.close();
         Core.connectionFactoryClose();
         Core.sessionFactoryClose();
+        Core.threadPoolClose();
         Core.statsServiceClose();
+        Core.tasksPoolClose();
+        Core.taskSettingsServiceClose(); 
         Core.configurationClose();
     }
 

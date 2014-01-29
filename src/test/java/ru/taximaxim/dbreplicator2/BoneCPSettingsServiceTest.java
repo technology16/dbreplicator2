@@ -39,6 +39,7 @@ import ru.taximaxim.dbreplicator2.model.BoneCPDataBaseSettingsStorage;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettings;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsModel;
+import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
  * Класс для тестирования пулов соединений
@@ -71,6 +72,12 @@ public class BoneCPSettingsServiceTest {
         if (sessionFactory != null) {
             sessionFactory.close();
         }
+        Core.connectionFactoryClose();
+        Core.sessionFactoryClose();
+        Core.statsServiceClose();
+        Core.tasksPoolClose();
+        Core.taskSettingsServiceClose(); 
+        Core.configurationClose();
     }
 
     /**
