@@ -103,13 +103,13 @@ public class SuperlogWatchgdog implements Strategy {
                     List<String> cols = new ArrayList<String>(JdbcMetadata.getColumns(resultSet));
                     int count = 0;
                     StringBuffer rowDumpEmail = new StringBuffer(String.format(
-                        "\n\nВ %s превышен лимит таймаута в супер логе в %s милисекунд!\n\n",
+                        "\n\nВ %s превышен лимит таймаута в superlog в %s миллисекунд!\n\n",
                         data.getRunner().getSource().getPoolId(), period));
                     while (resultSet.next() && (count < partEmail)) {
                         count++;
                         // при необходимости пишем ошибку в лог
                         String rowDump = String.format(
-                                "Ошибка настроек\nОшибка %s из %s \n[ tableName = REP2_SUPERLOG [ row = %s ] ]%s",
+                                "Ошибка настроек %s из %s \n[ tableName = REP2_SUPERLOG [ row = %s ] ]%s",
                                 count,
                                 rowCount,
                                 Jdbc.resultSetToString(resultSet, cols),
@@ -119,7 +119,7 @@ public class SuperlogWatchgdog implements Strategy {
                     } 
                     rowDumpEmail.append("Всего ");
                     rowDumpEmail.append(rowCount);
-                    rowDumpEmail.append(" ошибочных записей. Полный список ошибок не реплицируеммых записей доступен в таблице rep2_workpool_data.");
+                    rowDumpEmail.append(" ошибочных записей. Полный список ошибок доступен в таблице REP2_SUPERLOG.");
                     LOG.error(rowDumpEmail.toString());
                 }
             }
