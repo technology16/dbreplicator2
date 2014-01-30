@@ -24,9 +24,9 @@ import ru.taximaxim.dbreplicator2.utils.Core;
  * @author mardanov_rm
  *
  */
-public class TestSuperlogWatchgdog {
+public class SuperlogWatchgdogTest {
 
-protected static final Logger LOG = Logger.getLogger(TestSuperlogWatchgdog.class);
+protected static final Logger LOG = Logger.getLogger(SuperlogWatchgdogTest.class);
     
     // Задержка между циклами репликации
     private static final int REPLICATION_DELAY = 1500;
@@ -43,7 +43,6 @@ protected static final Logger LOG = Logger.getLogger(TestSuperlogWatchgdog.class
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        timeZone = TimeZone.getDefault();
         sessionFactory = Core.getSessionFactory();
         session = sessionFactory.openSession();
         connectionFactory = Core.getConnectionFactory();
@@ -52,7 +51,6 @@ protected static final Logger LOG = Logger.getLogger(TestSuperlogWatchgdog.class
 
     @AfterClass
     public static void setUpAfterClass() throws Exception {
-        TimeZone.setDefault(timeZone);
         if(conn!=null)
             conn.close();
         if(connDest!=null)
@@ -78,13 +76,11 @@ protected static final Logger LOG = Logger.getLogger(TestSuperlogWatchgdog.class
     @Test
     public void testInsert() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
       //Проверка вставки
-        TimeZone.setDefault(TimeZone.getTimeZone("GMT+0:00"));
         Helper.executeSqlFromFile(conn, "sql_insert_error_tab.sql");   
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
         errorsSuperlogWatchgdog.run();
-        
-        Thread.sleep(REPLICATION_DELAY);
+
         Helper.InfoSelect(conn,  "rep2_superlog");
         
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
