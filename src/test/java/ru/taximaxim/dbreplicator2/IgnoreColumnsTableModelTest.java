@@ -3,7 +3,6 @@ package ru.taximaxim.dbreplicator2;
 import static org.junit.Assert.assertEquals;
 
 import java.util.List;
-
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -37,9 +36,11 @@ public class IgnoreColumnsTableModelTest {
 
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
-        session.close();
+        if(session!=null)
+            session.close();
         Core.connectionFactoryClose();
         Core.sessionFactoryClose();
+        Core.threadPoolClose();
         Core.statsServiceClose();
         Core.tasksPoolClose();
         Core.taskSettingsServiceClose(); 

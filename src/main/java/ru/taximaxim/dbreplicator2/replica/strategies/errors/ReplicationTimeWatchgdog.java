@@ -31,8 +31,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.TimeZone;
-
 import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
@@ -51,7 +49,6 @@ public class ReplicationTimeWatchgdog implements Strategy {
     
     private static final String PERIOD = "period";
     private static final String PART_EMAIL = "partEmail";
-    private static final String TIME_ZONE = "timeZone";
     private static final String COUNT = "count";
     /**
      * Конструктор по умолчанию
@@ -63,12 +60,6 @@ public class ReplicationTimeWatchgdog implements Strategy {
     public void execute(Connection sourceConnection, Connection targetConnection,
             StrategyModel data) throws StrategyException, SQLException,
             ClassNotFoundException {
-        
-        if(data.getParam(TIME_ZONE)!=null) {
-            if(Boolean.parseBoolean(data.getParam(TIME_ZONE))) {
-                TimeZone.setDefault(TimeZone.getTimeZone("GMT+0:00"));
-            }
-        } 
         
         int period = 1800000;
         if(data.getParam(PERIOD)!=null) {

@@ -65,7 +65,7 @@ insert into strategies (id, className, param, isEnabled, priority, id_runner) va
 --Runner Table 4,5,6
 insert into runners (id_runner, source, target, description, class_name) values (6, 'source', 'dest', 'description', 'ru.taximaxim.dbreplicator2.replica.ReplicaRunner');
 --Strategy  Table 4,5,6
-insert into strategies (id, className, param, isEnabled, priority, id_runner) values (6, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Generic', null, true, 100, 6);
+insert into strategies (id, className, param, isEnabled, priority, id_runner) values (6, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Generic', null, false, 100, 6);
 
 -------
 
@@ -111,7 +111,7 @@ insert into strategies (id, className, param, isEnabled, priority, id_runner) va
 --Runner ReplicationTimeWatchgdog
 insert into runners (id_runner, source, target, description, class_name) values (10, 'source', 'source', 'ErrorsReplicationTimeWatchgdog', '');
 --Strategy  ReplicationTimeWatchgdog
-insert into strategies (id, className, param, isEnabled, priority, id_runner) values (11, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.ReplicationTimeWatchgdog', 'period=10
+insert into strategies (id, className, param, isEnabled, priority, id_runner) values (11, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.ReplicationTimeWatchgdog', 'period=0
 partEmail=10', true, 100, 10);
 
 --Ignore Columns Table

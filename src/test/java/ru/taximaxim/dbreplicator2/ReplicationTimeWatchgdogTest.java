@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.TimeZone;
-
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -25,9 +23,9 @@ import ru.taximaxim.dbreplicator2.utils.Core;
  * @author mardanov_rm
  *
  */
-public class TestReplicationTimeWatchgdog {
+public class ReplicationTimeWatchgdogTest {
 
-protected static final Logger LOG = Logger.getLogger(TestReplicationTimeWatchgdog.class);
+protected static final Logger LOG = Logger.getLogger(ReplicationTimeWatchgdogTest.class);
     
     // Задержка между циклами репликации
     private static final int REPLICATION_DELAY = 1500;
@@ -40,11 +38,9 @@ protected static final Logger LOG = Logger.getLogger(TestReplicationTimeWatchgdo
     protected static Runnable worker = null;
     protected static Runnable errorsCountWatchdogWorker = null;
     protected static Runnable errorsReplicationTimeWatchgdog = null;
-    protected static TimeZone timeZone;
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        timeZone = TimeZone.getDefault();
         sessionFactory = Core.getSessionFactory();
         session = sessionFactory.openSession();
         connectionFactory = Core.getConnectionFactory();
@@ -53,7 +49,6 @@ protected static final Logger LOG = Logger.getLogger(TestReplicationTimeWatchgdo
 
     @AfterClass
     public static void setUpAfterClass() throws Exception {
-        TimeZone.setDefault(timeZone);
         if(conn!=null)
             conn.close();
         if(connDest!=null)
@@ -89,7 +84,6 @@ protected static final Logger LOG = Logger.getLogger(TestReplicationTimeWatchgdo
     @Test
     public void testForeignKey() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
         //Проверка внешних ключей
-        TimeZone.setDefault(TimeZone.getTimeZone("GMT+0:00"));
         LOG.info("Проверка внешних ключей");
         Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
         Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
@@ -105,15 +99,17 @@ protected static final Logger LOG = Logger.getLogger(TestReplicationTimeWatchgdo
         Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
         Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
         Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
+        
         worker.run();
+        Thread.sleep(REPLICATION_DELAY*10);
+        
         errorsReplicationTimeWatchgdog.run();
-        Thread.sleep(REPLICATION_DELAY);
         errorsCountWatchdogWorker.run();
-        Thread.sleep(REPLICATION_DELAY);
-        //
+
         worker.run();
+        Thread.sleep(REPLICATION_DELAY*10);
         errorsReplicationTimeWatchgdog.run();
-        Thread.sleep(REPLICATION_DELAY);
+        
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table2");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table2");
         if(listSource.size() == listDest.size()) {
