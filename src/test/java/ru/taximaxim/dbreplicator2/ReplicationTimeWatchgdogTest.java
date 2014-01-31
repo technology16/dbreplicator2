@@ -6,7 +6,6 @@ package ru.taximaxim.dbreplicator2;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -87,6 +86,7 @@ protected static final Logger LOG = Logger.getLogger(ReplicationTimeWatchgdogTes
         //Проверка внешних ключей
         LOG.info("Проверка внешних ключей");
         Helper.executeSqlFromFile(conn, "sql_insert.sql");
+        Helper.executeSqlFromFile(conn, "sql_update.sql");
         
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
