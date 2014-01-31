@@ -50,10 +50,10 @@ import ru.taximaxim.dbreplicator2.utils.Core;
  * @author mardanov_rm
  *
  */
-public class TestOffset {
+public class OffsetTest {
     // Задержка между циклами репликации
     private static final int REPLICATION_DELAY = 500;
-    protected static final Logger LOG = Logger.getLogger(TestOffset.class);
+    protected static final Logger LOG = Logger.getLogger(OffsetTest.class);
     protected static SessionFactory sessionFactory;
     protected static Session session;
     protected static ConnectionFactory connectionFactory;
@@ -135,7 +135,7 @@ public class TestOffset {
      * @throws InterruptedException 
      */
     @Test
-    public void testForeignKey() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
+    public void testOffset() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
         //Проверка внешних ключей
         LOG.info("Проверка внешних ключей");
         Helper.executeSqlFromFile(conn, "sql_foreign_key_error.sql");
