@@ -50,7 +50,6 @@ public class SuperlogWatchgdog implements Strategy {
     private static final String PERIOD = "period";
     private static final String PART_EMAIL = "partEmail";
     private static final String COUNT = "count";
-    private static final String FETCH_SIZE = "fetchSize";
 
     /**
      * Конструктор по умолчанию
@@ -62,11 +61,6 @@ public class SuperlogWatchgdog implements Strategy {
     public void execute(Connection sourceConnection, Connection targetConnection,
             StrategyModel data) throws StrategyException, SQLException,
             ClassNotFoundException {
-
-        int fetchSize = 1000;
-        if (data.getParam(FETCH_SIZE) != null) {
-            fetchSize = Integer.parseInt(data.getParam(FETCH_SIZE));
-        }
         
         int period = 1800000;
         if (data.getParam(PERIOD) != null) {
@@ -83,11 +77,9 @@ public class SuperlogWatchgdog implements Strategy {
         int rowCount = 0;
 
         try (PreparedStatement selectErrorsCount = sourceConnection
-                .prepareStatement("SELECT count(*) as count FROM rep2_superlog where c_date <= ?",
-                        ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);) {
+                .prepareStatement("SELECT count(*) as count FROM rep2_superlog where c_date <= ?");) {
 
             selectErrorsCount.setTimestamp(1, date);
-            selectErrorsCount.setFetchSize(fetchSize);
             try (ResultSet countResult = selectErrorsCount.executeQuery();) {
                 if (countResult.next()) {
                     rowCount = countResult.getInt(COUNT);
@@ -100,7 +92,7 @@ public class SuperlogWatchgdog implements Strategy {
                     .prepareStatement("SELECT * FROM rep2_superlog where c_date <= ? ORDER BY id_superlog",
                             ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);) {
                 selectPreparedStatement.setTimestamp(1, date);
-                selectPreparedStatement.setFetchSize(fetchSize);
+                selectPreparedStatement.setFetchSize(partEmail);
 
                 try (ResultSet resultSet = selectPreparedStatement.executeQuery();) {
                     List<String> cols = new ArrayList<String>(
