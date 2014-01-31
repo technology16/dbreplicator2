@@ -84,7 +84,7 @@ public class ReplicationTimeWatchgdog implements Strategy {
                 "SELECT count(*) as count FROM rep2_workpool_data WHERE id_superlog IN " +
                 "(SELECT MAX(id_superlog) AS id_superlog FROM rep2_workpool_data WHERE " +
                 " c_date <= ? and c_errors_count = 0 " +
-                "GROUP BY id_foreign, id_table ORDER BY id_superlog)");) {
+                "GROUP BY id_foreign, id_table)");) {
 
             int rowCount = 0;
             selectErrorsCount.setTimestamp(1, date);

@@ -41,6 +41,7 @@ protected static final Logger LOG = Logger.getLogger(ReplicationTimeWatchgdogTes
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
+        Core.getConfiguration("src/test/resources/hibernateRepTimeWatch.cfg.xml");
         sessionFactory = Core.getSessionFactory();
         session = sessionFactory.openSession();
         connectionFactory = Core.getConnectionFactory();
@@ -82,47 +83,16 @@ protected static final Logger LOG = Logger.getLogger(ReplicationTimeWatchgdogTes
      */
     
     @Test
-    public void testForeignKey() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
+    public void testErrorsReplicationTimeWatchgdog() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
         //Проверка внешних ключей
         LOG.info("Проверка внешних ключей");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
+        Helper.executeSqlFromFile(conn, "sql_insert.sql");
         
         worker.run();
-        Thread.sleep(REPLICATION_DELAY*10);
+        Thread.sleep(REPLICATION_DELAY);
         
         errorsReplicationTimeWatchgdog.run();
         errorsCountWatchdogWorker.run();
-
-        worker.run();
-        Thread.sleep(REPLICATION_DELAY*10);
-        errorsReplicationTimeWatchgdog.run();
-        
-        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table2");
-        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table2");
-        if(listSource.size() == listDest.size()) {
-            for (int i = 0; i < listSource.size(); i++) {
-                long delta = listDest.get(i)._time.getTime() - listSource.get(i)._time.getTime();
-                LOG.info("Rasfar: "+delta);
-            }
-        }
-        Helper.AssertEquals(listSource, listDest);
-
-        listSource = Helper.InfoTest(conn, "t_table3");
-        listDest   = Helper.InfoTest(connDest, "t_table3");
-        Helper.AssertEquals(listSource, listDest);
     }
     
     /**
