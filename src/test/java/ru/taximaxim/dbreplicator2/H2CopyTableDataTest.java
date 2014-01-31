@@ -100,7 +100,7 @@ public class H2CopyTableDataTest {
      * @throws InterruptedException 
      */
     @Test
-    public void testTableDataTest() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
+    public void testRep2TablesClearing() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
 
         Helper.executeSqlFromFile(conn, "importSourceData.sql");
         worker.run();
