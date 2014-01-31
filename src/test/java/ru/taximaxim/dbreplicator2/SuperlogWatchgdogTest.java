@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.TimeZone;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
@@ -39,7 +38,6 @@ protected static final Logger LOG = Logger.getLogger(SuperlogWatchgdogTest.class
     protected static Runnable worker = null;
     protected static Runnable errorsCountWatchdogWorker = null;
     protected static Runnable errorsSuperlogWatchgdog = null;
-    protected static TimeZone timeZone;
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
