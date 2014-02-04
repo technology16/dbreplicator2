@@ -31,6 +31,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+
 import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
@@ -48,6 +49,7 @@ public class ReplicationTimeWatchgdog implements Strategy {
     private static final Logger LOG = Logger.getLogger(ReplicationTimeWatchgdog.class);
 
     private static final String PERIOD = "period";
+    private static final String RUNNER_IGNORE = "runnerIgnore";
     private static final String PART_EMAIL = "partEmail";
     private static final String COUNT = "count";
 
@@ -73,11 +75,19 @@ public class ReplicationTimeWatchgdog implements Strategy {
         if (data.getParam(PART_EMAIL) != null) {
             partEmail = Integer.parseInt(data.getParam(PART_EMAIL));
         }
-
+        
+        String runIgSql = "";
+        if (data.getParam(RUNNER_IGNORE) != null) {
+            runIgSql = String.format(" AND id_runner NOT IN (%s)", 
+                 data.getParam(RUNNER_IGNORE).toString().replace("-", ""));
+        }
+        LOG.error("Rasfar: "+runIgSql);
+        
         int rowCount = 0;
         try (PreparedStatement selectErrorsCount = sourceConnection
-                .prepareStatement(
-                        "SELECT count(*) as count FROM rep2_workpool_data WHERE c_date <= ? and c_errors_count = 0");) {
+              .prepareStatement(
+                "SELECT count(*) as count FROM rep2_workpool_data WHERE c_date <= ? and c_errors_count = 0"
+                      + runIgSql);) {
 
             selectErrorsCount.setTimestamp(1, date);
             try (ResultSet countResult = selectErrorsCount.executeQuery();) {
@@ -89,8 +99,8 @@ public class ReplicationTimeWatchgdog implements Strategy {
         // Если нет ошибок то смысл в запуске данного кода бессмыслен
         if (rowCount != 0) {
             try (PreparedStatement selectPreparedStatement = sourceConnection
-                    .prepareStatement(
-                            "SELECT * FROM rep2_workpool_data WHERE c_date <= ? and c_errors_count = 0 ORDER BY id_superlog",
+                  .prepareStatement(
+                    "SELECT * FROM rep2_workpool_data WHERE c_date <= ? and c_errors_count = 0 " + runIgSql+ " ORDER BY id_superlog",
                             ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);) {
 
                 selectPreparedStatement.setTimestamp(1, date);
