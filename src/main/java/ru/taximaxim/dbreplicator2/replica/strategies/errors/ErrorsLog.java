@@ -111,7 +111,8 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
      * @param id номер выражения
      * @throws SQLException
      */
-    private void setStatment(PreparedStatement statement, Integer runnerId, String tableId, Long foreignId, Integer id) throws SQLException{
+    private void setStatment(PreparedStatement statement, Integer runnerId, String tableId, Long foreignId, Integer parameterIndex) throws SQLException{
+        int id = parameterIndex;
         if(isNull(runnerId)) {
             statement.setNull(id++, Types.INTEGER);
         } else {
