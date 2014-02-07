@@ -317,12 +317,12 @@ public class Helper {
         ResultSetMetaData rDataSource = rsSource.getMetaData();
         int totalColumnSource = rDataSource.getColumnCount();
         while (rsSource.next()) {
-            String text = "";
+            String text = "|";
             for (int i = 1; i <= totalColumnSource; i++) {
-                text += rsSource.getObject(i).toString() + "\t";
+                text += rsSource.getObject(i) + "|";
             }
             LOG.info(text);
-            LOG.info("================================================================");
+           // LOG.info("================================================================");
         }
     }
     

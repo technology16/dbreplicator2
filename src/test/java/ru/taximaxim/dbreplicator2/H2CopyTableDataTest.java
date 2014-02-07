@@ -196,6 +196,7 @@ public class H2CopyTableDataTest {
         Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
         Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
         worker.run();
+        Helper.InfoSelect(conn, "rep2_errors_log");
         Thread.sleep(REPLICATION_DELAY);
         errorsCountWatchdogWorker.run();
         Thread.sleep(REPLICATION_DELAY);
@@ -208,6 +209,7 @@ public class H2CopyTableDataTest {
         listSource = Helper.InfoTest(conn, "t_table3");
         listDest   = Helper.InfoTest(connDest, "t_table3");
         Helper.AssertEquals(listSource, listDest);
+        Helper.InfoSelect(conn, "rep2_errors_log");
     }
     
     /**

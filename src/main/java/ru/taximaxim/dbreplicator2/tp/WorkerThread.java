@@ -34,6 +34,7 @@ import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.StopChainProcesing;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
+import ru.taximaxim.dbreplicator2.replica.strategies.errors.ErrorsLog;
 import ru.taximaxim.dbreplicator2.utils.Core;
 /**
  * Обработчик раннера
@@ -44,7 +45,7 @@ import ru.taximaxim.dbreplicator2.utils.Core;
 public class WorkerThread implements Runnable {
 
     private static final Logger LOG = Logger.getLogger(WorkerThread.class);
-
+    private ErrorsLog errorLog;
     private Runner runner;
 
     /**
@@ -67,9 +68,11 @@ public class WorkerThread implements Runnable {
         } catch (ClassNotFoundException e) {
             LOG.error(String.format("Ошибка при инициализации данных раннера [id_runner = %d, %s]", 
                     runner.getId(), runner.getDescription()), e);
+            errorLog.add(runner.getId(), null, null, e.getMessage());
         } catch (StrategyException e) {
             LOG.error(String.format("Ошибка при выполнении стратегии раннера [id_runner = %d, %s]", 
                     runner.getId(), runner.getDescription()), e);
+            errorLog.add(runner.getId(), null, null, e.getMessage());
         } catch (SQLException e) {
             LOG.error(String.format("Ошибка БД при выполнении стратегии раннера [id_runner = %d, %s]", 
                     runner.getId(), runner.getDescription()), e);
@@ -78,6 +81,7 @@ public class WorkerThread implements Runnable {
                 LOG.error("Подробности:", nextEx);
                 nextEx = nextEx.getNextException();
             }
+            errorLog.add(runner.getId(), null, null, e.getMessage());
         }
         
         LOG.debug(String.format("Завершение потока [%s] раннера [id_runner = %d, %s]",
@@ -106,7 +110,7 @@ public class WorkerThread implements Runnable {
              Connection targetConnection =
                 connectionsFactory.getConnection(runner.getTarget().getPoolId())
             ) {
-
+            errorLog = new ErrorsLog(sourceConnection);
             List<StrategyModel> strategies = runner.getStrategyModels();
 
             try {
@@ -119,10 +123,12 @@ public class WorkerThread implements Runnable {
                 LOG.warn(String.format("Запрошена принудительная остановка обработки цепочки стратегий раннера [id_runner = %d, %s].", 
                         runner.getId(), runner.getDescription()), e);
             }
-
+            errorLog.setStatus(runner.getId(), null, null, 1);
+            
         } catch (InstantiationException | IllegalAccessException e) {
             LOG.error(String.format("Ошибка при создании объекта-стратегии раннера [id_runner = %d, %s].", 
                     runner.getId(), runner.getDescription()), e);
+            errorLog.add(runner.getId(), null, null, e.getMessage());
         }
     }
 
