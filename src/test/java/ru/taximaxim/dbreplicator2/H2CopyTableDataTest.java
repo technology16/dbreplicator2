@@ -41,6 +41,7 @@ import org.junit.Test;
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 import ru.taximaxim.dbreplicator2.model.RunnerService;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
+import ru.taximaxim.dbreplicator2.replica.strategies.errors.ErrorsLog;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
 import ru.taximaxim.dbreplicator2.utils.Core;
 
@@ -160,6 +161,46 @@ public class H2CopyTableDataTest {
         Helper.InfoNull(connDest, "t_table5", 2);
     }
     
+    @Test
+    public void controlSumm() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
+        ErrorsLog errorLog = new ErrorsLog(conn);
+        String SQL_UPDATE = "UPDATE rep2_errors_log SET c_status = ? where ";
+        Integer i = 1;
+        String s = "tab";
+        Long l = (long) 5;
+        
+        int chechSumm = errorLog.getCheckSum (i, s, l);
+        String sql = errorLog.getNullSql (i, s, l);
+        LOG.info(String.format("chechSumm: [%s] sql: [%s %s]", chechSumm, SQL_UPDATE, sql));
+        
+        chechSumm = errorLog.getCheckSum (null, s, l);
+        sql = errorLog.getNullSql (null, s, l);
+        LOG.info(String.format("chechSumm: [%s] sql: [%s %s]", chechSumm, SQL_UPDATE, sql));
+        
+        chechSumm = errorLog.getCheckSum (i, null, l);
+        sql = errorLog.getNullSql (i, null, l);
+        LOG.info(String.format("chechSumm: [%s] sql: [%s %s]", chechSumm, SQL_UPDATE, sql));
+        
+        chechSumm = errorLog.getCheckSum (i, s, null);
+        sql = errorLog.getNullSql (i, s, null);
+        LOG.info(String.format("chechSumm: [%s] sql: [%s %s]", chechSumm, SQL_UPDATE, sql));
+        
+        chechSumm = errorLog.getCheckSum (null, null, l);
+        sql = errorLog.getNullSql (null, null, l);
+        LOG.info(String.format("chechSumm: [%s] sql: [%s %s]", chechSumm, SQL_UPDATE, sql));
+        
+        chechSumm = errorLog.getCheckSum (null, s, null);
+        sql = errorLog.getNullSql (null, s, null);
+        LOG.info(String.format("chechSumm: [%s] sql: [%s %s]", chechSumm, SQL_UPDATE, sql));
+        
+        chechSumm = errorLog.getCheckSum (i, null, null);
+        sql = errorLog.getNullSql (i, null, null);
+        LOG.info(String.format("chechSumm: [%s] sql: [%s %s]", chechSumm, SQL_UPDATE, sql));
+        
+        chechSumm = errorLog.getCheckSum (null, null, null);
+        sql = errorLog.getNullSql (null, null, null);
+        LOG.info(String.format("chechSumm: [%s] sql: [%s %s]", chechSumm, SQL_UPDATE, sql));
+    }
     /**
      * Проверка внешних ключей
      * вставка в главную таблицу  
