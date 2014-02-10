@@ -2,13 +2,14 @@ package ru.taximaxim.dbreplicator2.replica.strategies.errors;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Date;
 
 import org.apache.log4j.Logger;
+
+import ru.taximaxim.dbreplicator2.utils.Core;
 
 
 public class ErrorsLog implements ErrorsLogService, AutoCloseable{
@@ -18,10 +19,6 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
      * кусок sql запрос обновление статуса
      */
     private static final String SQL_UPDATE = "UPDATE rep2_errors_log SET c_status = ? where ";
-    /**
-     * подготовленый запрос выборки 
-     */
-    private PreparedStatement selectStatement;
     /**
      * подготовленый запрос вставки
      */
@@ -59,21 +56,29 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
      */
     private PreparedStatement updateStatementRunnerTableForeign;
     /**
+     * Имя подключения
+     */
+    private String baseConnName = null;
+    /**
      * Подключение
      */
-    private Connection connection;
-    
+    private Connection connection; 
     /**
      * Конструктор на основе соединения к БД 
      */
-    public ErrorsLog(Connection connection) {
-        this.connection = connection;
+    public ErrorsLog(String baseConnName) {
+        this.baseConnName = baseConnName;
     }
     
     /**
      * @return the connection
+     * @throws SQLException 
+     * @throws ClassNotFoundException 
      */
-    protected Connection getConnection() {
+    protected Connection getConnection() throws ClassNotFoundException, SQLException {
+        if(connection==null || connection.isClosed()) {
+            connection = Core.getConnectionFactory().getConnection(baseConnName);
+        }
         return connection;
     }
     
@@ -86,8 +91,10 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
             statement.setString(5, error);
             statement.execute(); 
         } catch (SQLException e) {
-            LOG.warn("Ошибка записи ошибки': ", e);
-        }       
+            LOG.warn("Ошибка SQLException записи ошибки': ", e);
+        } catch (ClassNotFoundException e) {
+            LOG.warn("Ошибка ClassNotFoundException записи ошибки': ", e);
+        }     
     }
     
     @Override
@@ -98,8 +105,10 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
             setStatment(statement, runnerId, tableId, foreignId, 2);
             statement.execute();
         } catch (SQLException e) {
-            LOG.warn("Ошибка исправления ошибки': ", e);
-        }     
+            LOG.warn("Ошибка SQLException исправления ошибки': ", e);
+        }  catch (ClassNotFoundException e) {
+            LOG.warn("Ошибка ClassNotFoundException исправления ошибки': ", e);
+        }       
     }
     
     /**
@@ -130,25 +139,12 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
         }
     }
     /**
-     * TODO
-     * @return
-     * @throws SQLException
-     */
-    public PreparedStatement getSelectStatement() throws SQLException {
-        if (selectStatement == null) {
-            selectStatement = 
-                getConnection().prepareStatement("SELECT * FROM rep2_errors_log where id_runner = ? and id_table = ? and id_foreign = ?",
-                        ResultSet.TYPE_FORWARD_ONLY,
-                        ResultSet.CONCUR_READ_ONLY);
-        }
-        return selectStatement;
-    }
-    /**
      * получение PreparedStatement sql pfghjc => Вставка
      * @return
      * @throws SQLException
+     * @throws ClassNotFoundException 
      */
-    public PreparedStatement getInsertStatement() throws SQLException {
+    public PreparedStatement getInsertStatement() throws SQLException, ClassNotFoundException {
         if (insertStatement == null) {
             insertStatement = 
                 getConnection().prepareStatement("INSERT INTO rep2_errors_log (id_runner, id_table, id_foreign, c_date, c_error, c_status) values (?, ?, ?, ?, ?, 0)");
@@ -254,8 +250,9 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
      * @param foreignId
      * @return
      * @throws SQLException
+     * @throws ClassNotFoundException 
      */
-    public PreparedStatement getUpdateStatement(Integer runnerId, String tableId, Long foreignId) throws SQLException {
+    public PreparedStatement getUpdateStatement(Integer runnerId, String tableId, Long foreignId) throws SQLException, ClassNotFoundException {
         switch (getCheckSum(runnerId, tableId, foreignId)) {
         case 0:
             if (updateStatement == null) {
@@ -313,7 +310,6 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
 
     @Override
     public void close() throws SQLException {
-        close(selectStatement);
         close(updateStatement);
         close(insertStatement);
         close(updateStatementRunner);
@@ -323,6 +319,7 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
         close(updateStatementRunnerForeign);
         close(updateStatementTableForeign);
         close(updateStatementRunnerTableForeign);
+        close(connection);
     }
     
     /**
@@ -339,5 +336,19 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
             }
         }
     } 
-
+    
+    /**
+     * Закрыть PreparedStatement
+     * @param statement
+     * @throws SQLException
+     */
+    public void close(Connection conn) {
+        if (conn != null) {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                LOG.warn("Ошибка при попытке закрыть 'connection.close()': ", e);
+            }
+        }
+    } 
 }

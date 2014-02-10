@@ -35,6 +35,8 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 
+import ru.taximaxim.dbreplicator2.utils.Core;
+
 
 /**
  * @author volodin_aa
@@ -123,6 +125,7 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
         deleteWorkPoolData.setString(3, getTable(operationsResult));
         deleteWorkPoolData.setLong(4, getSuperlog(operationsResult));
         deleteWorkPoolData.addBatch();
+        Core.getErrorsLog().setStatus(getRunner(operationsResult), getTable(operationsResult), getForeign(operationsResult), 1);
     }
 
     @Override
@@ -160,6 +163,7 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
         statement.setString(4, getTable(operation));
         statement.setLong(5, getForeign(operation));
         statement.executeUpdate();
+        Core.getErrorsLog().add(getRunner(operation), getTable(operation), getForeign(operation), message + "\n" + writer.toString());
     }
     
     @Override

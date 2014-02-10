@@ -41,7 +41,6 @@ import org.junit.Test;
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 import ru.taximaxim.dbreplicator2.model.RunnerService;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
-import ru.taximaxim.dbreplicator2.replica.strategies.errors.ErrorsLog;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
 import ru.taximaxim.dbreplicator2.utils.Core;
 
@@ -58,7 +57,6 @@ import ru.taximaxim.dbreplicator2.utils.Core;
  */
 public class H2CopyTableDataTest {
     protected static final Logger LOG = Logger.getLogger(H2CopyTableDataTest.class);
-    
     // Задержка между циклами репликации
     private static final int REPLICATION_DELAY = 1500;
     
@@ -163,43 +161,44 @@ public class H2CopyTableDataTest {
     
     @Test
     public void controlSumm() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
-        ErrorsLog errorLog = new ErrorsLog(conn);
         String SQL_UPDATE = "UPDATE rep2_errors_log SET c_status = ? where ";
         Integer i = 1;
         String s = "tab";
         Long l = (long) 5;
         
-        int chechSumm = errorLog.getCheckSum (i, s, l);
-        String sql = errorLog.getNullSql (i, s, l);
+        int chechSumm = Core.getErrorsLog().getCheckSum (i, s, l);
+        String sql = Core.getErrorsLog().getNullSql (i, s, l);
         LOG.info(String.format("chechSumm: [%s] sql: [%s %s]", chechSumm, SQL_UPDATE, sql));
         
-        chechSumm = errorLog.getCheckSum (null, s, l);
-        sql = errorLog.getNullSql (null, s, l);
+        chechSumm = Core.getErrorsLog().getCheckSum (null, s, l);
+        sql = Core.getErrorsLog().getNullSql (null, s, l);
         LOG.info(String.format("chechSumm: [%s] sql: [%s %s]", chechSumm, SQL_UPDATE, sql));
         
-        chechSumm = errorLog.getCheckSum (i, null, l);
-        sql = errorLog.getNullSql (i, null, l);
+        chechSumm = Core.getErrorsLog().getCheckSum (i, null, l);
+        sql = Core.getErrorsLog().getNullSql (i, null, l);
         LOG.info(String.format("chechSumm: [%s] sql: [%s %s]", chechSumm, SQL_UPDATE, sql));
         
-        chechSumm = errorLog.getCheckSum (i, s, null);
-        sql = errorLog.getNullSql (i, s, null);
+        chechSumm = Core.getErrorsLog().getCheckSum (i, s, null);
+        sql = Core.getErrorsLog().getNullSql (i, s, null);
         LOG.info(String.format("chechSumm: [%s] sql: [%s %s]", chechSumm, SQL_UPDATE, sql));
         
-        chechSumm = errorLog.getCheckSum (null, null, l);
-        sql = errorLog.getNullSql (null, null, l);
+        chechSumm = Core.getErrorsLog().getCheckSum (null, null, l);
+        sql = Core.getErrorsLog().getNullSql (null, null, l);
         LOG.info(String.format("chechSumm: [%s] sql: [%s %s]", chechSumm, SQL_UPDATE, sql));
         
-        chechSumm = errorLog.getCheckSum (null, s, null);
-        sql = errorLog.getNullSql (null, s, null);
+        chechSumm = Core.getErrorsLog().getCheckSum (null, s, null);
+        sql = Core.getErrorsLog().getNullSql (null, s, null);
         LOG.info(String.format("chechSumm: [%s] sql: [%s %s]", chechSumm, SQL_UPDATE, sql));
         
-        chechSumm = errorLog.getCheckSum (i, null, null);
-        sql = errorLog.getNullSql (i, null, null);
+        chechSumm = Core.getErrorsLog().getCheckSum (i, null, null);
+        sql = Core.getErrorsLog().getNullSql (i, null, null);
         LOG.info(String.format("chechSumm: [%s] sql: [%s %s]", chechSumm, SQL_UPDATE, sql));
         
-        chechSumm = errorLog.getCheckSum (null, null, null);
-        sql = errorLog.getNullSql (null, null, null);
+        chechSumm = Core.getErrorsLog().getCheckSum (null, null, null);
+        sql = Core.getErrorsLog().getNullSql (null, null, null);
         LOG.info(String.format("chechSumm: [%s] sql: [%s %s]", chechSumm, SQL_UPDATE, sql));
+        
+        Core.errorsLogClose();
     }
     /**
      * Проверка внешних ключей
@@ -237,8 +236,10 @@ public class H2CopyTableDataTest {
         Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
         Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
         worker.run();
-        Helper.InfoSelect(conn, "rep2_errors_log");
         Thread.sleep(REPLICATION_DELAY);
+        assertTrue(String.format("Количество записей не равны [%s == %s]", 14,
+          Helper.InfoCount(conn, "rep2_errors_log where c_status = 0")),
+           14 == Helper.InfoCount(conn, "rep2_errors_log where c_status = 0"));
         errorsCountWatchdogWorker.run();
         Thread.sleep(REPLICATION_DELAY);
         worker.run();
@@ -250,7 +251,9 @@ public class H2CopyTableDataTest {
         listSource = Helper.InfoTest(conn, "t_table3");
         listDest   = Helper.InfoTest(connDest, "t_table3");
         Helper.AssertEquals(listSource, listDest);
-        Helper.InfoSelect(conn, "rep2_errors_log");
+        assertTrue(String.format("Количество записей не равны [%s == %s]", 14, 
+               Helper.InfoCount(conn, "rep2_errors_log where c_status = 1")),
+               14 == Helper.InfoCount(conn, "rep2_errors_log where c_status = 1"));
     }
     
     /**
