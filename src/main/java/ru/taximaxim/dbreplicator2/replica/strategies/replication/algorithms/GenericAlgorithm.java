@@ -52,7 +52,8 @@ import ru.taximaxim.dbreplicator2.utils.Count;
 public class GenericAlgorithm implements Strategy {
 
     private static final Logger LOG = Logger.getLogger(GenericAlgorithm.class);
-
+    
+    private static final String NEW_LINE = " \n";
     /**
      * Размер выборки данных (строк)
      */
@@ -258,7 +259,7 @@ public class GenericAlgorithm implements Strategy {
                             if (LOG.isDebugEnabled()) {
                                 LOG.debug(message, e);
                             } else {
-                                LOG.warn(message + " \n" + e.getMessage());
+                                LOG.warn(message + NEW_LINE + e.getMessage());
                             }
                             getWorkPoolService().trackError(message, e, operationsResult);
                             getCount().addError(getWorkPoolService().getTable(operationsResult));
@@ -286,7 +287,7 @@ public class GenericAlgorithm implements Strategy {
                             if (LOG.isDebugEnabled()) {
                                 LOG.debug(message, e);
                             } else {
-                                LOG.warn(message + " \n" + e.getMessage());
+                                LOG.warn(message + NEW_LINE + e.getMessage());
                             }
                             getWorkPoolService().trackError(message, e, operationsResult);
                             getCount().addError(getWorkPoolService().getTable(operationsResult));
@@ -307,7 +308,7 @@ public class GenericAlgorithm implements Strategy {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug(message, e);
                     } else {
-                        LOG.warn(message + " \n" + e.getMessage());
+                        LOG.warn(message + NEW_LINE + e.getMessage());
                     }
                     getWorkPoolService().trackError(message, e, operationsResult);
                     getCount().addError(getWorkPoolService().getTable(operationsResult));
@@ -335,7 +336,7 @@ public class GenericAlgorithm implements Strategy {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug(message, e);
                     } else {
-                        LOG.warn(message + " \n" + e.getMessage());
+                        LOG.warn(message + NEW_LINE + e.getMessage());
                     }
                     getWorkPoolService().trackError(message, e, operationsResult);
                     getCount().addError(getWorkPoolService().getTable(operationsResult));
@@ -355,7 +356,7 @@ public class GenericAlgorithm implements Strategy {
             if (LOG.isDebugEnabled()) {
                 LOG.debug(message, e);
             } else {
-                LOG.warn(message + " \n" + e.getMessage());
+                LOG.warn(message + NEW_LINE + e.getMessage());
             }
             getWorkPoolService().trackError(message, e, operationsResult);
             getCount().addError(getWorkPoolService().getTable(operationsResult));
