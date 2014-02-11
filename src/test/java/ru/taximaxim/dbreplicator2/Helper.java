@@ -312,6 +312,7 @@ public class Helper {
      */
     public static void InfoSelect(Connection conn,  String tableName) throws SQLException, InterruptedException{
         Thread.sleep(REPLICATION_DELAY);
+        LOG.info("select * from " + tableName + "[count = " + InfoCount(conn,  tableName)+"]");
         Statement statSource = conn.createStatement();
         ResultSet rsSource = statSource.executeQuery("select * from " + tableName);
         ResultSetMetaData rDataSource = rsSource.getMetaData();
@@ -346,6 +347,19 @@ public class Helper {
      * @throws SQLException
      */
     protected static void executeSqlFromFile(Connection connection, String fileName) throws IOException, SQLException{
+        executeSqlFromFile(connection, fileName, 0);
+    }
+    
+    /**
+     * Выполнение скрипта из текстового файла
+     * 
+     * @param connection - соединение с целевой БД
+     * @param fileName - полное имя файла
+     * 
+     * @throws IOException
+     * @throws SQLException
+     */
+    protected static void executeSqlFromFile(Connection connection, String fileName, int id) throws IOException, SQLException{
         String curDir = new File("").getAbsolutePath() + "/src/test/resources/" + fileName;
         FileInputStream sqlFile = new FileInputStream(curDir);
         byte[] sqlBytes = new byte[sqlFile.available()];
@@ -354,7 +368,7 @@ public class Helper {
 
         String sqlText = new String(sqlBytes);
         
-        PreparedStatement statement = connection.prepareStatement(sqlText);
+        PreparedStatement statement = connection.prepareStatement(sqlText.replace("?", ""+id));
         statement.execute();
         
         String[] triggers = sqlText.split("<#CreateTrigger#>");

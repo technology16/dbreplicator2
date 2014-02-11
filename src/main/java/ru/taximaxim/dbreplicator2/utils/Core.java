@@ -23,7 +23,6 @@
 package ru.taximaxim.dbreplicator2.utils;
 
 import java.io.File;
-
 import org.apache.log4j.Logger;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -68,8 +67,6 @@ public final class Core {
     private static ThreadPool threadPool;
     
     private static StatsService statsService;
-    
-    private static ErrorsLog errorLog;
     
     /**
      * Получение настроек из файла
@@ -288,19 +285,10 @@ public final class Core {
      * @return сервис ErrorsLog
      */
     public static synchronized ErrorsLog getErrorsLog() {
-        if (errorLog == null) {
-            ApplicatonSettingsService aService = new ApplicatonSettingsService(getSessionFactory());
-            String baseConnName = aService.getValue("error.dest").toString();
-            errorLog = new ErrorsLog(baseConnName);
-        }
+        ApplicatonSettingsService aService = new ApplicatonSettingsService(getSessionFactory());
+        String baseConnName = aService.getValue("error.dest").toString();
+        ErrorsLog errorLog = new ErrorsLog(baseConnName);
 
         return errorLog;
-    }
-    
-    /**
-     * Закрываем сервис ErrorsLog
-     */
-    public static synchronized void errorsLogClose() {
-        errorLog = null;
     }
 }

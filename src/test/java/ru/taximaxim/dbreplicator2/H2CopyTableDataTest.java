@@ -36,11 +36,13 @@ import org.hibernate.SessionFactory;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 import ru.taximaxim.dbreplicator2.model.RunnerService;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
+import ru.taximaxim.dbreplicator2.replica.strategies.errors.ErrorsLog;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
 import ru.taximaxim.dbreplicator2.utils.Core;
 
@@ -68,12 +70,14 @@ public class H2CopyTableDataTest {
     protected static Runnable worker = null;
     protected static Runnable worker2 = null;
     protected static Runnable errorsCountWatchdogWorker = null;
+    protected static ErrorsLog errorsLog; 
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         sessionFactory = Core.getSessionFactory();
         session = sessionFactory.openSession();
         connectionFactory = Core.getConnectionFactory();
+        errorsLog = Core.getErrorsLog();
         initialization();
     }
 
@@ -88,6 +92,7 @@ public class H2CopyTableDataTest {
         Core.connectionFactoryClose();
         Core.sessionFactoryClose();
         Core.statsServiceClose();
+        errorsLog.close();
     }
     
 
@@ -142,7 +147,7 @@ public class H2CopyTableDataTest {
         Helper.executeSqlFromFile(conn, "sql_null.sql");   
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
-        
+        Helper.InfoSelect(conn, "rep2_errors_log");
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table4");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table4");
         
@@ -158,7 +163,6 @@ public class H2CopyTableDataTest {
         Helper.InfoNull(connDest, "t_table4", 1);
         Helper.InfoNull(connDest, "t_table5", 2);
     }
-    
     @Test
     public void controlSumm() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
         String SQL_UPDATE = "UPDATE rep2_errors_log SET c_status = ? where ";
@@ -166,39 +170,37 @@ public class H2CopyTableDataTest {
         String s = "tab";
         Long l = (long) 5;
         
-        int chechSumm = Core.getErrorsLog().getCheckSum (i, s, l);
-        String sql = Core.getErrorsLog().getNullSql (i, s, l);
+        int chechSumm = errorsLog.getCheckSum (i, s, l);
+        String sql = errorsLog.getNullSql (i, s, l);
         LOG.info(String.format("chechSumm: [%s] sql: [%s %s]", chechSumm, SQL_UPDATE, sql));
         
-        chechSumm = Core.getErrorsLog().getCheckSum (null, s, l);
-        sql = Core.getErrorsLog().getNullSql (null, s, l);
+        chechSumm = errorsLog.getCheckSum (null, s, l);
+        sql = errorsLog.getNullSql (null, s, l);
         LOG.info(String.format("chechSumm: [%s] sql: [%s %s]", chechSumm, SQL_UPDATE, sql));
         
-        chechSumm = Core.getErrorsLog().getCheckSum (i, null, l);
-        sql = Core.getErrorsLog().getNullSql (i, null, l);
+        chechSumm = errorsLog.getCheckSum (i, null, l);
+        sql = errorsLog.getNullSql (i, null, l);
         LOG.info(String.format("chechSumm: [%s] sql: [%s %s]", chechSumm, SQL_UPDATE, sql));
         
-        chechSumm = Core.getErrorsLog().getCheckSum (i, s, null);
-        sql = Core.getErrorsLog().getNullSql (i, s, null);
+        chechSumm = errorsLog.getCheckSum (i, s, null);
+        sql = errorsLog.getNullSql (i, s, null);
         LOG.info(String.format("chechSumm: [%s] sql: [%s %s]", chechSumm, SQL_UPDATE, sql));
         
-        chechSumm = Core.getErrorsLog().getCheckSum (null, null, l);
-        sql = Core.getErrorsLog().getNullSql (null, null, l);
+        chechSumm = errorsLog.getCheckSum (null, null, l);
+        sql = errorsLog.getNullSql (null, null, l);
         LOG.info(String.format("chechSumm: [%s] sql: [%s %s]", chechSumm, SQL_UPDATE, sql));
         
-        chechSumm = Core.getErrorsLog().getCheckSum (null, s, null);
-        sql = Core.getErrorsLog().getNullSql (null, s, null);
+        chechSumm = errorsLog.getCheckSum (null, s, null);
+        sql = errorsLog.getNullSql (null, s, null);
         LOG.info(String.format("chechSumm: [%s] sql: [%s %s]", chechSumm, SQL_UPDATE, sql));
         
-        chechSumm = Core.getErrorsLog().getCheckSum (i, null, null);
-        sql = Core.getErrorsLog().getNullSql (i, null, null);
+        chechSumm = errorsLog.getCheckSum (i, null, null);
+        sql = errorsLog.getNullSql (i, null, null);
         LOG.info(String.format("chechSumm: [%s] sql: [%s %s]", chechSumm, SQL_UPDATE, sql));
         
-        chechSumm = Core.getErrorsLog().getCheckSum (null, null, null);
-        sql = Core.getErrorsLog().getNullSql (null, null, null);
+        chechSumm = errorsLog.getCheckSum (null, null, null);
+        sql = errorsLog.getNullSql (null, null, null);
         LOG.info(String.format("chechSumm: [%s] sql: [%s %s]", chechSumm, SQL_UPDATE, sql));
-        
-        Core.errorsLogClose();
     }
     /**
      * Проверка внешних ключей
@@ -221,25 +223,24 @@ public class H2CopyTableDataTest {
     public void testForeignKey() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
         //Проверка внешних ключей
         LOG.info("Проверка внешних ключей");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 50);
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 51);
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 52);
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 53);
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 54);
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 55);
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 56);
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 57);
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 58);
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 59);
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 60);
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 61);
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 62);
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 63);
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
-        assertTrue(String.format("Количество записей не равны [%s == %s]", 14,
-          Helper.InfoCount(conn, "rep2_errors_log where c_status = 0")),
-           14 == Helper.InfoCount(conn, "rep2_errors_log where c_status = 0"));
+        int count = Helper.InfoCount(conn, "rep2_errors_log where c_status = 0");
+        assertTrue(String.format("Количество записей не равны [%s == %s]", 14, count),14 == count);
         errorsCountWatchdogWorker.run();
         Thread.sleep(REPLICATION_DELAY);
         worker.run();
@@ -251,9 +252,8 @@ public class H2CopyTableDataTest {
         listSource = Helper.InfoTest(conn, "t_table3");
         listDest   = Helper.InfoTest(connDest, "t_table3");
         Helper.AssertEquals(listSource, listDest);
-        assertTrue(String.format("Количество записей не равны [%s == %s]", 14, 
-               Helper.InfoCount(conn, "rep2_errors_log where c_status = 1")),
-               14 == Helper.InfoCount(conn, "rep2_errors_log where c_status = 1"));
+        count = Helper.InfoCount(conn, "rep2_errors_log where c_status = 1");
+        assertTrue(String.format("Количество записей не равны [%s == %s]", 14, count), 14 == count);
     }
     
     /**

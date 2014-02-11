@@ -76,7 +76,7 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
      * @throws ClassNotFoundException 
      */
     protected Connection getConnection() throws ClassNotFoundException, SQLException {
-        if(connection==null || connection.isClosed()) {
+        if(connection==null) {
             connection = Core.getConnectionFactory().getConnection(baseConnName);
         }
         return connection;
@@ -91,9 +91,9 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
             statement.setString(5, error);
             statement.execute(); 
         } catch (SQLException e) {
-            LOG.warn("Ошибка SQLException записи ошибки': ", e);
+            LOG.error("Ошибка SQLException записи ошибки': ", e);
         } catch (ClassNotFoundException e) {
-            LOG.warn("Ошибка ClassNotFoundException записи ошибки': ", e);
+            LOG.error("Ошибка ClassNotFoundException записи ошибки': ", e);
         }     
     }
     
@@ -105,9 +105,9 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
             setStatment(statement, runnerId, tableId, foreignId, 2);
             statement.execute();
         } catch (SQLException e) {
-            LOG.warn("Ошибка SQLException исправления ошибки': ", e);
+            LOG.error("Ошибка SQLException исправления ошибки': ", e);
         }  catch (ClassNotFoundException e) {
-            LOG.warn("Ошибка ClassNotFoundException исправления ошибки': ", e);
+            LOG.error("Ошибка ClassNotFoundException исправления ошибки': ", e);
         }       
     }
     
@@ -320,6 +320,7 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
         close(updateStatementTableForeign);
         close(updateStatementRunnerTableForeign);
         close(connection);
+        connection = null;
     }
     
     /**
@@ -343,7 +344,7 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
      * @throws SQLException
      */
     public void close(Connection conn) {
-        if (conn != null) {
+        if (conn!=null) {
             try {
                 conn.close();
             } catch (SQLException e) {
