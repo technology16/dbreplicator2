@@ -33,65 +33,48 @@ import java.util.Set;
  */
 public class Count {
     
-    private Map<String,Integer> tablesSuccess = new HashMap<String,Integer>();
-    
-    private Map<String,Integer> tablesError = new HashMap<String,Integer>();
-    
+    private Map<String,Integer> tablesCount = new HashMap<String,Integer>();
     /**
-     * Увеличение счетчика успешных операций на ед.
+     * Увеличение счетчика на ед.
      * 
      * @param tableName - имя таблицы
      */
-    public void addSuccess(String tableName) {
+    public void add(String tableName) {
         Integer count = 1;
-        if(tablesSuccess.get(tableName.toUpperCase()) != null) {
-            count = tablesSuccess.get(tableName.toUpperCase()) + 1;
+        if(tablesCount.get(tableName.toUpperCase()) != null) {
+            count = count + tablesCount.get(tableName.toUpperCase());
         }
-        tablesSuccess.put(tableName.toUpperCase(), count);
+        tablesCount.put(tableName.toUpperCase(), count);
     }
     
     /**
-     * Увеличение счетчика ошибочных операций на ед.
-     * 
-     * @param tableName - имя таблицы
+     * Получение таблиц
+     * @return
      */
-    public void addError(String tableName){ 
-        Integer count = 1;
-        if(tablesError.get(tableName.toUpperCase()) != null) {
-            count = tablesError.get(tableName.toUpperCase()) + 1;
-        }
-        tablesError.put(tableName.toUpperCase(), count);
+    public Set<String> getTables(){
+        return tablesCount.keySet();
     }
     
     /**
-     * Получение таблиц успешных операций
+     * Получение счетчика
      * @return
      */
-    public Set<String> getSuccessTables(){
-        return tablesSuccess.keySet();
+    public int getCount(String tableName){
+        return tablesCount.get(tableName.toUpperCase());
     }
     
     /**
-     * Получение счетчика успешных операций
-     * @return
+     * Очистка по одной таблице
+     * @param tableName
      */
-    public int getSuccess(String tableName){
-        return tablesSuccess.get(tableName.toUpperCase());
+    public void clear(String tableName){
+        tablesCount.remove(tableName.toUpperCase());
     }
     
     /**
-     * Получение таблиц ошибочных операций
-     * @return
+     * Очистка всех таблиц 
      */
-    public Set<String> getErrorTables(){
-        return tablesError.keySet();
-    }
-
-    /**
-     * Получение счетчика ошибочных операций
-     * @return
-     */
-    public int getError(String tableName){
-        return tablesError.get(tableName.toUpperCase());
+    public void clear(){
+        tablesCount.clear();
     }
 }
