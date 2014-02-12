@@ -420,9 +420,6 @@ public class GenericAlgorithm implements Strategy {
                     // Извлекаем новую порцию данных
                     operationsResult.close();
                     operationsResult = getWorkPoolService().getLastOperations(data.getRunner().getId(), getFetchSize(), offset);
-
-                    LOG.info(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Обработано %s строк...", 
-                            data.getRunner().getId(), data.getRunner().getDescription(), data.getId(), rowsCount));
                 }
             }
         } finally {
