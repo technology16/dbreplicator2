@@ -1,5 +1,8 @@
 package ru.taximaxim.dbreplicator2.replica.strategies.errors;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -322,7 +325,6 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
         close(connection);
         connection = null;
     }
-    
     /**
      * Закрыть PreparedStatement
      * @param statement
@@ -351,5 +353,50 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
                 LOG.warn("Ошибка при попытке закрыть 'connection.close()': ", e);
             }
         }
-    } 
+    }
+    
+    /**
+     * Получение ошибки
+     * @param e
+     * @return
+     */
+    public String getException(SQLException e){
+        Writer writer = new StringWriter();
+        PrintWriter printWriter = new PrintWriter(writer);
+        e.printStackTrace(printWriter);
+        
+        SQLException nextEx = e.getNextException();
+        while (nextEx!=null){
+            printWriter.println("Подробности: ");
+            nextEx.printStackTrace(printWriter);
+            nextEx = nextEx.getNextException();
+        }
+        return writer.toString();
+    }
+    
+    @Override
+    public String getException(Exception exception) {
+        StringWriter writer = new StringWriter();
+        PrintWriter printWriter = new PrintWriter( writer );
+        printWriter.println("Подробности: ");
+        exception.printStackTrace( printWriter );
+        printWriter.flush();
+        return writer.toString();
+    }
+    
+    @Override
+    public String getSQLException(SQLException exception) {
+        Writer writer = new StringWriter();
+        PrintWriter printWriter = new PrintWriter(writer);
+        exception.printStackTrace(printWriter);
+        
+        SQLException nextEx = exception.getNextException();
+        while (nextEx!=null){
+            printWriter.println("Подробности: ");
+            nextEx.printStackTrace(printWriter);
+            nextEx = nextEx.getNextException();
+        }
+        return writer.toString();
+    }
+    
 }
