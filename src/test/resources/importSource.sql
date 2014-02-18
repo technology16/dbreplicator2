@@ -5,6 +5,7 @@ drop table if exists T_TABLE3;
 drop table if exists T_TABLE4;
 drop table if exists T_TABLE5;
 drop table if exists T_TAB;
+drop table if exists T_TABLE6;
 
 CREATE TABLE T_TAB (ID IDENTITY PRIMARY KEY, _value VARCHAR(250));
 INSERT INTO T_TAB (_value) VALUES('');
@@ -18,5 +19,6 @@ ALTER TABLE T_TABLE3 ADD FOREIGN KEY (_int) REFERENCES T_TABLE2(ID);
 --
 CREATE TABLE T_TABLE4 (ID IDENTITY PRIMARY KEY, _int INT, _boolean BOOLEAN, _long BIGINT, _decimal DECIMAL, _double DOUBLE, _float REAL, _string VARCHAR(250), _byte BINARY, _date DATE, _time TIME, _timestamp TIMESTAMP);
 CREATE TABLE T_TABLE5 (ID IDENTITY PRIMARY KEY, _int INT, _boolean BOOLEAN, _long BIGINT, _decimal DECIMAL, _double DOUBLE, _float REAL, _string VARCHAR(250), _byte BINARY, _date DATE, _time TIME, _timestamp TIMESTAMP);
-
---<#CreateTrigger#>T_TABLE,T_TABLE1,T_TABLE2,T_TABLE3,T_TABLE4,T_TABLE5<#CreateTrigger#>
+--
+CREATE TABLE T_TABLE6 (ID IDENTITY PRIMARY KEY, _int INT, _boolean BOOLEAN, _long BIGINT, _decimal DECIMAL, _double DOUBLE, _float REAL, _string VARCHAR(250), _byte BINARY, _date DATE, _time TIME, _timestamp TIMESTAMP);
+--<#CreateTrigger#>T_TABLE,T_TABLE1,T_TABLE2,T_TABLE3,T_TABLE4,T_TABLE5,T_TABLE6<#CreateTrigger#>

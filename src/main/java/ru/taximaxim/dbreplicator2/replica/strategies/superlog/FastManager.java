@@ -127,7 +127,10 @@ public class FastManager implements Strategy {
                                             insertRunnerData.setTimestamp(6, superLogResult.getTimestamp(WorkPoolService.C_DATE));
                                             insertRunnerData.setString(7, superLogResult .getString(WorkPoolService.ID_TRANSACTION));
                                             insertRunnerData.addBatch();
-    
+
+                                            // Удаляем исходную запись
+                                            deleteSuperLog.setLong(1, superLogResult.getLong(WorkPoolService.ID_SUPERLOG));
+                                            deleteSuperLog.addBatch();
                                             // Выводим данные из rep2_superlog_table
                                             if (LOG.isDebugEnabled()) {
                                                 LOG.debug("INSERT");
@@ -137,10 +140,6 @@ public class FastManager implements Strategy {
                                 }
 
                             }
-                            // Удаляем исходную запись
-                            deleteSuperLog.setLong(1,
-                                    superLogResult.getLong(WorkPoolService.ID_SUPERLOG));
-                            deleteSuperLog.addBatch();
 
                             // Периодически сбрасываем батч в БД
                             if ((rowsCount % batchSize) == 0) {

@@ -108,6 +108,19 @@ insert into strategies (id, className, param, isEnabled, priority, id_runner) va
 partEmail=10', true, 100, 7);
 insert into strategies (id, className, param, isEnabled, priority, id_runner) values (10, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.CountWatchgdog', null, true, 100, 7);
 
+
+
+
+
+
+
+
+--Runner SuperlogWatchgdog
+insert into runners (id_runner, source, target, description, class_name) values (15, 'source', 'source', 'ErrorsSuperlogWatchgdog', '');
+--Strategy  SuperlogWatchgdog
+insert into strategies (id, className, param, isEnabled, priority, id_runner) values (15, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.SuperlogWatchgdog', 'period=1000
+partEmail=10', true, 100, 15);
+
 --Ignore Columns Table
 insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (1, 1, '_STRING');
 insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (2, 2, '_STRING');
