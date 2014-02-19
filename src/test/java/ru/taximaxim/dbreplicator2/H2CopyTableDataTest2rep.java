@@ -23,6 +23,8 @@
 
 package ru.taximaxim.dbreplicator2;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -171,6 +173,9 @@ public class H2CopyTableDataTest2rep {
         
         workerEnd();
         workerEnd2();
+        
+        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }    
     
     /**
@@ -228,6 +233,9 @@ public class H2CopyTableDataTest2rep {
         
         workerEnd();
         workerEnd2();
+        
+        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }
     
     /**
@@ -285,6 +293,9 @@ public class H2CopyTableDataTest2rep {
         
         workerEnd();
         workerEnd2();
+        
+        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }
     
     /**
@@ -343,6 +354,9 @@ public class H2CopyTableDataTest2rep {
         
         workerEnd();
         workerEnd2();
+        
+        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }
     
     /**
@@ -401,6 +415,9 @@ public class H2CopyTableDataTest2rep {
         
         workerEnd();
         workerEnd2();
+        
+        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }
     
     /**
@@ -481,7 +498,9 @@ public class H2CopyTableDataTest2rep {
         Helper.AssertEquals(listSource, listDest);
         
         workerEnd();
-        workerEnd2();
+        workerEnd2();        
+        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }
     
     public void workerRun() throws IOException, SQLException, InterruptedException{

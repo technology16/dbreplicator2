@@ -3,6 +3,8 @@
  */
 package ru.taximaxim.dbreplicator2;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -88,6 +90,9 @@ protected static final Logger LOG = Logger.getLogger(SuperlogWatchgdogTest.class
         listSource = Helper.InfoTest(conn, "t_table1");
         listDest   = Helper.InfoTest(connDest, "t_table1");
         Helper.AssertEquals(listSource, listDest);
+        
+        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        assertTrue(String.format("Количество записей не должно быть пустым [%s != 0]", count), 0 != count);
     }
     
     /**
