@@ -23,8 +23,6 @@
 
 package ru.taximaxim.dbreplicator2.replica.strategies.errors;
 
-import java.sql.SQLException;
-
 /**
  * @author mardanov_rm
  *
