@@ -27,7 +27,9 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -164,42 +166,111 @@ public class H2CopyTableDataTest {
     }
     @Test
     public void controlSumm() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
-        String SQL_UPDATE = "UPDATE rep2_errors_log SET c_status = ? where ";
         Integer i = 1;
         String s = "tab";
         Long l = (long) 5;
         
-        int chechSumm = errorsLog.getCheckSum (i, s, l);
-        String sql = errorsLog.getNullSql (i, s, l);
-        LOG.info(String.format("chechSumm: [%s] sql: [%s %s]", chechSumm, SQL_UPDATE, sql));
+        Statement stat = conn.createStatement();
         
-        chechSumm = errorsLog.getCheckSum (null, s, l);
-        sql = errorsLog.getNullSql (null, s, l);
-        LOG.info(String.format("chechSumm: [%s] sql: [%s %s]", chechSumm, SQL_UPDATE, sql));
+        errorsLog.add(i, s, l, "Error");
+        errorsLog.setStatus(i, s, l, 1);
+        ResultSet rs = stat.executeQuery("select * from rep2_errors_log where id_runner = 1 and id_table = 'tab' and id_foreign = 5 and c_status = 1");
+        if (rs.next()) {
+            assertTrue(String.format("id_runner [ %s != 1]", rs.getObject("id_runner")), rs.getObject("id_runner").equals(i));
+            assertTrue(String.format("id_table [ %s != tab]", rs.getObject("id_table")), rs.getObject("id_table").equals(s));
+            assertTrue(String.format("id_foreign [ %s != 5 ]", rs.getLong("id_foreign")), rs.getLong("id_foreign") == l);
+        } else {
+            assertTrue("нет записи id_runner = 1 and id_table = 'tab' and id_foreign = 5", false);
+        }
+        rs.close();
+
+        errorsLog.add(null, s, l, "Error");
+        errorsLog.setStatus(null, s, l, 1);
+        rs = stat.executeQuery("select * from rep2_errors_log where id_runner is null and id_table = 'tab' and id_foreign = 5 and c_status = 1");
+        if (rs.next()) {
+            assertTrue(String.format("id_runner != null", rs.getObject("id_runner")), rs.getObject("id_runner") == null);
+            assertTrue(String.format("id_table != tab", rs.getObject("id_table")), rs.getObject("id_table").equals(s));
+            assertTrue(String.format("id_foreign != 5", rs.getLong("id_foreign")), rs.getLong("id_foreign") == l);
+        } else {
+            assertTrue("нет записи id_runner = null and id_table = 'tab' and id_foreign = 5", false);
+        }
+        rs.close();
         
-        chechSumm = errorsLog.getCheckSum (i, null, l);
-        sql = errorsLog.getNullSql (i, null, l);
-        LOG.info(String.format("chechSumm: [%s] sql: [%s %s]", chechSumm, SQL_UPDATE, sql));
+        errorsLog.add(i, null, l, "Error");
+        errorsLog.setStatus(i, null, l, 1);
+        rs = stat.executeQuery("select * from rep2_errors_log where id_runner = 1 and id_table is null and id_foreign = 5 and c_status = 1");
+        if (rs.next()) {
+            assertTrue(String.format("id_runner != 1", rs.getObject("id_runner")), rs.getObject("id_runner").equals(i));
+            assertTrue(String.format("id_table != null", rs.getObject("id_table")), rs.getObject("id_table") == null);
+            assertTrue(String.format("id_foreign != 5", rs.getLong("id_foreign")), rs.getLong("id_foreign") == l);
+        } else {
+            assertTrue("нет записи id_runner = 1 and id_table = null and id_foreign = 5", false);
+        }
+        rs.close();
         
-        chechSumm = errorsLog.getCheckSum (i, s, null);
-        sql = errorsLog.getNullSql (i, s, null);
-        LOG.info(String.format("chechSumm: [%s] sql: [%s %s]", chechSumm, SQL_UPDATE, sql));
+        errorsLog.add(i, s, null, "Error");
+        errorsLog.setStatus(i, s, null, 1);
+        rs = stat.executeQuery("select * from rep2_errors_log where id_runner = 1 and id_table = 'tab' and id_foreign is null and c_status = 1");
+        if (rs.next()) {
+            assertTrue(String.format("id_runner != 1", rs.getObject("id_runner")), rs.getObject("id_runner").equals(i));
+            assertTrue(String.format("id_table != tab", rs.getObject("id_table")), rs.getObject("id_table").equals(s));
+            assertTrue(String.format("id_foreign != null", rs.getObject("id_foreign")), rs.getObject("id_foreign") == null);
+        } else {
+            assertTrue("нет записи id_runner = 1 and id_table = 'tab' and id_foreign = null", false);
+        }
+        rs.close();
         
-        chechSumm = errorsLog.getCheckSum (null, null, l);
-        sql = errorsLog.getNullSql (null, null, l);
-        LOG.info(String.format("chechSumm: [%s] sql: [%s %s]", chechSumm, SQL_UPDATE, sql));
+        errorsLog.add(null, null, l, "Error");
+        errorsLog.setStatus(null, null, l, 1);
+        rs = stat.executeQuery("select * from rep2_errors_log where id_runner is null and id_table is null and id_foreign = 5 and c_status = 1");
+        if (rs.next()) {
+            assertTrue(String.format("id_runner != null", rs.getObject("id_runner")), rs.getObject("id_runner") == null);
+            assertTrue(String.format("id_table != null", rs.getObject("id_table")), rs.getObject("id_table") == null);
+            assertTrue(String.format("id_foreign != 1", rs.getLong("id_foreign")), rs.getLong("id_foreign") == l);
+        } else {
+            assertTrue("нет записи id_runner = null and id_table = null and id_foreign = 5", false);
+        }
+        rs.close();
         
-        chechSumm = errorsLog.getCheckSum (null, s, null);
-        sql = errorsLog.getNullSql (null, s, null);
-        LOG.info(String.format("chechSumm: [%s] sql: [%s %s]", chechSumm, SQL_UPDATE, sql));
+        errorsLog.add(null, s, null, "Error");
+        errorsLog.setStatus(null, s, null, 1);
+        rs = stat.executeQuery("select * from rep2_errors_log where id_runner is null and id_table = 'tab' and id_foreign is null and c_status = 1");
+        if (rs.next()) {
+            assertTrue(String.format("id_runner != null", rs.getObject("id_runner")), rs.getObject("id_runner") == null);
+            assertTrue(String.format("id_table != tab", rs.getObject("id_table")), rs.getObject("id_table").equals(s));
+            assertTrue(String.format("id_foreign != null", rs.getObject("id_foreign")), rs.getObject("id_foreign") == null);
+        } else {
+            assertTrue("нет записи id_runner = null and id_table = 'tab' and id_foreign = null", false);
+        }
+        rs.close();
         
-        chechSumm = errorsLog.getCheckSum (i, null, null);
-        sql = errorsLog.getNullSql (i, null, null);
-        LOG.info(String.format("chechSumm: [%s] sql: [%s %s]", chechSumm, SQL_UPDATE, sql));
+        errorsLog.add(i, null, null, "Error");
+        errorsLog.setStatus(i, null, null, 1);
+        rs = stat.executeQuery("select * from rep2_errors_log where id_runner = 1 and id_table is null and id_foreign is null and c_status = 1");
+        if (rs.next()) {
+            assertTrue(String.format("id_runner != 1", rs.getObject("id_runner")), rs.getObject("id_runner").equals(i));
+            assertTrue(String.format("id_table != null", rs.getObject("id_table")), rs.getObject("id_table") == null);
+            assertTrue(String.format("id_foreign != null", rs.getObject("id_foreign")), rs.getObject("id_foreign") == null);
+        } else {
+            assertTrue("нет записи id_runner = 1 and id_table = null and id_foreign = null", false);
+        }
+        rs.close();
         
-        chechSumm = errorsLog.getCheckSum (null, null, null);
-        sql = errorsLog.getNullSql (null, null, null);
-        LOG.info(String.format("chechSumm: [%s] sql: [%s %s]", chechSumm, SQL_UPDATE, sql));
+        errorsLog.add(null, null, null, "Error");
+        errorsLog.setStatus(null, null, null, 1);
+        rs = stat.executeQuery("select * from rep2_errors_log where id_runner is null and id_table is null and id_foreign is null and c_status = 1");
+        if (rs.next()) {
+            assertTrue(String.format("id_runner != null", rs.getObject("id_runner")), rs.getObject("id_runner") == null);
+            assertTrue(String.format("id_table != null", rs.getObject("id_table")), rs.getObject("id_table") == null);
+            assertTrue(String.format("id_foreign != null", rs.getObject("id_foreign")), rs.getObject("id_foreign") == null);
+        } else {
+            assertTrue("нет записи id_runner = null and id_table = null and id_foreign = null", false);
+        }
+        rs.close();
+        Helper.InfoSelect(conn, "rep2_errors_log");
+        stat.execute("delete from rep2_errors_log");
+        stat.close();
+        
     }
     /**
      * Проверка внешних ключей
@@ -251,6 +322,7 @@ public class H2CopyTableDataTest {
         listSource = Helper.InfoTest(conn, "t_table3");
         listDest   = Helper.InfoTest(connDest, "t_table3");
         Helper.AssertEquals(listSource, listDest);
+        Thread.sleep(REPLICATION_DELAY);
         count = Helper.InfoCount(conn, "rep2_errors_log where c_status = 1");
         assertTrue(String.format("Количество записей не равны [%s == %s]", 14, count), 14 == count);
     }

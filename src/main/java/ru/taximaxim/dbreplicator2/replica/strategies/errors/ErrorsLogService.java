@@ -48,18 +48,4 @@ public interface ErrorsLogService {
      * @throws SQLException
      */
     void setStatus(Integer runnerId, String tableId, Long foreignId, Integer status);
-    
-    /**
-     * Получение ошибки
-     * @param e Exception
-     * @return
-     */
-    String getException(Exception e);
-    
-    /**
-     * Получение ошибки
-     * @param e SQLException
-     * @return
-     */
-    String getSQLException(SQLException exception);
 }

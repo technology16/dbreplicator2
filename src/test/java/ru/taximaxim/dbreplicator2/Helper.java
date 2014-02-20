@@ -325,6 +325,8 @@ public class Helper {
             LOG.info(text);
            // LOG.info("================================================================");
         }
+        rsSource.close();
+        statSource.close();
     }
     
     public static int InfoCount(Connection conn,  String tableName) throws SQLException{
@@ -334,6 +336,8 @@ public class Helper {
         while (rs.next()) {
             count = rs.getInt(1);
         }
+        rs.close();
+        stat.close();
         return count;
     }
     
@@ -378,6 +382,7 @@ public class Helper {
         }
         
         connection.commit();
+        statement.close();
     }
     
     protected static void executeSqlFromSql(Connection connection, String sql, String name) throws IOException, SQLException{

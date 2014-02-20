@@ -23,6 +23,9 @@
 
 package ru.taximaxim.dbreplicator2.tp;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -69,15 +72,15 @@ public class WorkerThread implements Runnable {
         } catch (ClassNotFoundException e) {
             getErrorsLog().add(runner.getId(), null, null, 
                String.format("Ошибка при инициализации данных раннера [id_runner = %d, %s]. [%s]", 
-                  runner.getId(), runner.getDescription(), getErrorsLog().getException(e)));
+                  runner.getId(), runner.getDescription(), getException(e)));
         } catch (StrategyException e) {
             getErrorsLog().add(runner.getId(), null, null, 
                String.format("Ошибка при выполнении стратегии раннера [id_runner = %d, %s]. [%s]", 
-                  runner.getId(), runner.getDescription(), getErrorsLog().getException(e)));
+                  runner.getId(), runner.getDescription(), getException(e)));
         } catch (SQLException e) {
             getErrorsLog().add(runner.getId(), null, null, 
                String.format("Ошибка БД при выполнении стратегии раннера [id_runner = %d, %s]. [%s]", 
-                  runner.getId(), runner.getDescription(), getErrorsLog().getSQLException(e)));
+                  runner.getId(), runner.getDescription(), getException(e)));
         }
         
         LOG.debug(String.format("Завершение потока [%s] раннера [id_runner = %d, %s]",
@@ -122,7 +125,7 @@ public class WorkerThread implements Runnable {
         } catch (InstantiationException | IllegalAccessException e) {
             getErrorsLog().add(runner.getId(), null, null, 
               String.format("Ошибка при создании объекта-стратегии раннера [id_runner = %d, %s]. [%s]", 
-                runner.getId(), runner.getDescription(), getErrorsLog().getException(e)));
+                runner.getId(), runner.getDescription(), getException(e)));
         }
     }
 
@@ -164,5 +167,32 @@ public class WorkerThread implements Runnable {
      */
     protected ErrorsLogService getErrorsLog() {
         return errorsLog;
+    }
+    /**
+     * Получение ошибки
+     */
+    protected String getException(SQLException e){
+        Writer writer = new StringWriter();
+        PrintWriter printWriter = new PrintWriter(writer);
+        e.printStackTrace(printWriter);
+        
+        SQLException nextEx = e.getNextException();
+        while (nextEx!=null){
+            printWriter.println("Подробности: ");
+            nextEx.printStackTrace(printWriter);
+            nextEx = nextEx.getNextException();
+        }
+        return writer.toString();
+    }
+    /**
+     * Получение ошибки
+     */
+    protected String getException(Exception exception) {
+        StringWriter writer = new StringWriter();
+        PrintWriter printWriter = new PrintWriter( writer );
+        printWriter.println("Подробности: ");
+        exception.printStackTrace( printWriter );
+        printWriter.flush();
+        return writer.toString();
     }
 }
