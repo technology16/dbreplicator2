@@ -98,32 +98,24 @@ public class Manager implements Strategy {
                         // Копируем записи
                         // Проходим по списку слушателей текущей таблицы
                         for (TableModel table : sourcePool.getTables()) {
-                            if (table.getName()
-                                    .equalsIgnoreCase(superLogResult.getString(WorkPoolService.ID_TABLE))){
+                            if (table.getName().equalsIgnoreCase(superLogResult.getString(WorkPoolService.ID_TABLE))){
                                 for (RunnerModel runner : table.getRunners()) {
                                     if(!superLogResult.getString(WorkPoolService.ID_POOL).equals(runner.getTarget().getPoolId())) {
-                                        insertRunnerData.setInt(1,
-                                                runner.getId());
-                                        insertRunnerData.setLong(2,
-                                                superLogResult.getLong(WorkPoolService.ID_SUPERLOG));
-                                        insertRunnerData.setInt(3,
-                                                superLogResult.getInt(WorkPoolService.ID_FOREIGN));
-                                        insertRunnerData.setString(4,
-                                                superLogResult.getString(WorkPoolService.ID_TABLE));
-                                        insertRunnerData.setString(5,
-                                                superLogResult.getString(WorkPoolService.C_OPERATION));
-                                        insertRunnerData.setTimestamp(6,
-                                                superLogResult.getTimestamp(WorkPoolService.C_DATE));
-                                        insertRunnerData.setString(7,
-                                                superLogResult.getString(WorkPoolService.ID_TRANSACTION));
+                                        insertRunnerData.setInt(1, runner.getId());
+                                        insertRunnerData.setLong(2, superLogResult.getLong(WorkPoolService.ID_SUPERLOG));
+                                        insertRunnerData.setInt(3, superLogResult.getInt(WorkPoolService.ID_FOREIGN));
+                                        insertRunnerData.setString(4, superLogResult.getString(WorkPoolService.ID_TABLE));
+                                        insertRunnerData.setString(5, superLogResult.getString(WorkPoolService.C_OPERATION));
+                                        insertRunnerData.setTimestamp(6, superLogResult.getTimestamp(WorkPoolService.C_DATE));
+                                        insertRunnerData.setString(7, superLogResult.getString(WorkPoolService.ID_TRANSACTION));
                                         insertRunnerData.addBatch();
                                     }
+                                    // Удаляем исходную запись
+                                    deleteSuperLog.setLong(1, superLogResult.getLong(WorkPoolService.ID_SUPERLOG));
+                                    deleteSuperLog.addBatch();
                                 }
                             }
                         }
-                        // Удаляем исходную запись
-                        deleteSuperLog.setLong(1, superLogResult.getLong(WorkPoolService.ID_SUPERLOG));
-                        deleteSuperLog.addBatch();
                         
                         // Периодически сбрасываем батч в БД
                         if ((rowsCount % batchSize) == 0) {

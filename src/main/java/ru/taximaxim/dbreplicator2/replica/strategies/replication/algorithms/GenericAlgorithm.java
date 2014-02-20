@@ -72,7 +72,8 @@ public class GenericAlgorithm implements Strategy {
 
     private DataService destDataService;
 
-    private Count count;
+    private Count countSuccess;
+    private Count countError;
 
     /**
      * 
@@ -90,13 +91,26 @@ public class GenericAlgorithm implements Strategy {
         this.workPoolService = workPoolService;
         this.sourceDataService = sourceDataService;
         this.destDataService = destDataService;
-        count = new Count();
+        countSuccess = new Count();
+        countError = new Count();
     }
 
-    protected Count getCount() {
-        return count;
+    /**
+     * Счетчик успешных операций
+     * @return
+     */
+    protected Count getCountSuccess() {
+        return countSuccess;
     }
-
+    
+    /**
+     * Счетчик ошибочных оперраций
+     * @return
+     */
+    protected Count getCountError() {
+        return countError;
+    }
+    
     /**
      * @return StatsService
      */
@@ -243,7 +257,7 @@ public class GenericAlgorithm implements Strategy {
                         try {
                             replicateUpdation(table, sourceResult);
                             getWorkPoolService().clearWorkPoolData(operationsResult);
-                            getCount().addSuccess(getWorkPoolService().getTable(operationsResult));
+                            getCountSuccess().add(getWorkPoolService().getTable(operationsResult));
                             
                             return true;
                         } catch (SQLException e) {
@@ -262,7 +276,7 @@ public class GenericAlgorithm implements Strategy {
                                 LOG.warn(message + NEW_LINE + e.getMessage());
                             }
                             getWorkPoolService().trackError(message, e, operationsResult);
-                            getCount().addError(getWorkPoolService().getTable(operationsResult));
+                            getCountError().add(getWorkPoolService().getTable(operationsResult));
 
                             return false;
                         }
@@ -271,7 +285,7 @@ public class GenericAlgorithm implements Strategy {
                             // и если такой записи нет, то пытаемся вставить
                             replicateInsertion(table, sourceResult);
                             getWorkPoolService().clearWorkPoolData(operationsResult);
-                            getCount().addSuccess(getWorkPoolService().getTable(operationsResult));
+                            getCountSuccess().add(getWorkPoolService().getTable(operationsResult));
                             
                             return true;
                         } catch (SQLException e) {
@@ -290,7 +304,7 @@ public class GenericAlgorithm implements Strategy {
                                 LOG.warn(message + NEW_LINE + e.getMessage());
                             }
                             getWorkPoolService().trackError(message, e, operationsResult);
-                            getCount().addError(getWorkPoolService().getTable(operationsResult));
+                            getCountError().add(getWorkPoolService().getTable(operationsResult));
 
                             return false;
                         }
@@ -311,7 +325,7 @@ public class GenericAlgorithm implements Strategy {
                         LOG.warn(message + NEW_LINE + e.getMessage());
                     }
                     getWorkPoolService().trackError(message, e, operationsResult);
-                    getCount().addError(getWorkPoolService().getTable(operationsResult));
+                    getCountError().add(getWorkPoolService().getTable(operationsResult));
 
                     return false;
                 }
@@ -321,7 +335,7 @@ public class GenericAlgorithm implements Strategy {
                 try {
                     replicateDeletion(operationsResult, table);
                     getWorkPoolService().clearWorkPoolData(operationsResult);
-                    getCount().addSuccess(getWorkPoolService().getTable(operationsResult));
+                    getCountSuccess().add(getWorkPoolService().getTable(operationsResult));
                     
                     return true;
                 } catch (SQLException e) {
@@ -339,7 +353,7 @@ public class GenericAlgorithm implements Strategy {
                         LOG.warn(message + NEW_LINE + e.getMessage());
                     }
                     getWorkPoolService().trackError(message, e, operationsResult);
-                    getCount().addError(getWorkPoolService().getTable(operationsResult));
+                    getCountError().add(getWorkPoolService().getTable(operationsResult));
                     
                     return false;
                 }
@@ -359,7 +373,7 @@ public class GenericAlgorithm implements Strategy {
                 LOG.warn(message + NEW_LINE + e.getMessage());
             }
             getWorkPoolService().trackError(message, e, operationsResult);
-            getCount().addError(getWorkPoolService().getTable(operationsResult));
+            getCountError().add(getWorkPoolService().getTable(operationsResult));
 
             return false;
         }
@@ -403,13 +417,10 @@ public class GenericAlgorithm implements Strategy {
                 if ((rowsCount % getBatchSize()) == 0) {
                     deleteWorkPoolData.executeBatch();
                     sourceConnection.commit();
-
+                    writeStatCount(data.getId());
                     // Извлекаем новую порцию данных
                     operationsResult.close();
                     operationsResult = getWorkPoolService().getLastOperations(data.getRunner().getId(), getFetchSize(), offset);
-
-                    LOG.info(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Обработано %s строк...", 
-                            data.getRunner().getId(), data.getRunner().getDescription(), data.getId(), rowsCount));
                 }
             }
         } finally {
@@ -430,15 +441,17 @@ public class GenericAlgorithm implements Strategy {
     protected void writeStatCount(int strategy) throws SQLException, ClassNotFoundException{
         Timestamp date = new Timestamp(new Date().getTime());
 
-        for (String tableName : getCount().getSuccessTables()) {
+        for (String tableName : getCountSuccess().getTables()) {
             getStatsService().writeStat(date, 1, strategy, tableName, 
-                    getCount().getSuccess(tableName));
+                    getCountSuccess().getCount(tableName));
         }
-
-        for (String tableName : getCount().getErrorTables()) {
+        getCountSuccess().clear();
+        
+        for (String tableName : getCountError().getTables()) {
             getStatsService().writeStat(date, 0, strategy, tableName, 
-                    getCount().getError(tableName));
+                    getCountError().getCount(tableName));
         }
+        getCountError().clear();
     }
 
     /**

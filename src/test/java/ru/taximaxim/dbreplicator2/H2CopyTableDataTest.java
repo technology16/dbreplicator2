@@ -132,6 +132,10 @@ public class H2CopyTableDataTest {
         LOG.info("=======Inception=======");
         Helper.InfoList(listDest);
         LOG.info(">======Inception======<");
+
+        
+        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }
     
     /**
@@ -163,6 +167,10 @@ public class H2CopyTableDataTest {
 
         Helper.InfoNull(connDest, "t_table4", 1);
         Helper.InfoNull(connDest, "t_table5", 2);
+        
+
+        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }
     @Test
     public void controlSumm() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
@@ -322,6 +330,7 @@ public class H2CopyTableDataTest {
         listSource = Helper.InfoTest(conn, "t_table3");
         listDest   = Helper.InfoTest(connDest, "t_table3");
         Helper.AssertEquals(listSource, listDest);
+
         Thread.sleep(REPLICATION_DELAY);
         count = Helper.InfoCount(conn, "rep2_errors_log where c_status = 1");
         assertTrue(String.format("Количество записей не равны [%s == %s]", 14, count), 14 == count);
@@ -347,6 +356,10 @@ public class H2CopyTableDataTest {
         listSource = Helper.InfoTest(conn, "t_table1");
         listDest   = Helper.InfoTest(connDest, "t_table1");
         Helper.AssertEquals(listSource, listDest);
+        
+
+        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }
     
     /**
@@ -371,6 +384,10 @@ public class H2CopyTableDataTest {
         listSource = Helper.InfoTest(conn, "t_table1");
         listDest   = Helper.InfoTest(connDest, "t_table1");
         Helper.AssertEquals(listSource, listDest);
+        
+
+        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }
     
     /**
@@ -395,6 +412,10 @@ public class H2CopyTableDataTest {
         listSource = Helper.InfoTest(conn, "t_table1");
         listDest   = Helper.InfoTest(connDest, "t_table1");
         Helper.AssertEquals(listSource, listDest);
+        
+
+        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }
     
     /**
@@ -419,6 +440,10 @@ public class H2CopyTableDataTest {
         listSource = Helper.InfoTest(conn, "t_table1");
         listDest   = Helper.InfoTest(connDest, "t_table1");
         Helper.AssertEquals(listSource, listDest);
+        
+
+        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }
     
     /**
@@ -443,6 +468,10 @@ public class H2CopyTableDataTest {
         listSource = Helper.InfoTest(conn, "t_table1");
         listDest   = Helper.InfoTest(connDest, "t_table1");
         Helper.AssertEquals(listSource, listDest);
+        
+
+        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }
     
     /**

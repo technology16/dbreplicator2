@@ -3,7 +3,8 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>ru.taximaxim.dbreplicator2</groupId>
 	<artifactId>dbreplicator2</artifactId>
-	<version>0.5.1.2442</version>
+
+	<version>0.6.1</version>
 
 	<dependencies>
 
