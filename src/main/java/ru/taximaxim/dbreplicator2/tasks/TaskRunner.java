@@ -28,7 +28,7 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
-import ru.taximaxim.dbreplicator2.replica.strategies.errors.ErrorsLog;
+import ru.taximaxim.dbreplicator2.el.ErrorsLog;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
 import ru.taximaxim.dbreplicator2.utils.Core;
 import ru.taximaxim.dbreplicator2.model.TaskSettings;

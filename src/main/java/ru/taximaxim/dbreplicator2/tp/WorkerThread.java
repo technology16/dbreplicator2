@@ -37,8 +37,8 @@ import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.StopChainProcesing;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
-import ru.taximaxim.dbreplicator2.replica.strategies.errors.ErrorsLog;
-import ru.taximaxim.dbreplicator2.replica.strategies.errors.ErrorsLogService;
+import ru.taximaxim.dbreplicator2.el.ErrorsLog;
+import ru.taximaxim.dbreplicator2.el.ErrorsLogService;
 import ru.taximaxim.dbreplicator2.utils.Core;
 /**
  * Обработчик раннера

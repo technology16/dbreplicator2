@@ -73,58 +73,54 @@ public class CountWatchgdog implements Strategy {
         }
         
         // Проверияем количество ошибочных итераций
-        try (PreparedStatement selectErrors = 
-                sourceConnection.prepareStatement(
-                        "SELECT * FROM rep2_workpool_data WHERE id_superlog IN " +
-                        "(SELECT MAX(id_superlog) FROM rep2_workpool_data AS last_data WHERE " +
-                        "c_errors_count>? GROUP BY id_runner, id_table, id_foreign)" +
-                        " ORDER BY c_errors_count desc");
-                
-                PreparedStatement selectErrorsCount = 
-                        sourceConnection.prepareStatement(
-                "SELECT count(*) as count FROM rep2_workpool_data WHERE id_superlog IN " +
+        int rowCount = 0;
+        try (PreparedStatement selectErrorsCount = sourceConnection.prepareStatement(
+                "SELECT count(*) as count FROM rep2_errors_log WHERE id_superlog IN " +
                 "(SELECT MAX(id_superlog) FROM rep2_workpool_data AS last_data WHERE " +
-                "c_errors_count>? GROUP BY id_runner, id_table, id_foreign)");
-                
-                ) {
-            
+                "c_errors_count>? GROUP BY id_runner, id_table, id_foreign)")) {
             selectErrorsCount.setInt(1, maxErrors);
-            int rowCount = 0;
             try (ResultSet countResult = selectErrorsCount.executeQuery();) {
                 while (countResult.next()) {
                   rowCount = countResult.getInt(COUNT);
                 }
             }
-            //Если нет ошибок то смысл в запуске данного кода бессмыслен 
-            if(rowCount != 0) {
-                selectErrors.setInt(1, maxErrors);
-                try (ResultSet errorsResult = selectErrors.executeQuery();) {
-                    List<String> cols =  
-                            new ArrayList<String>(JdbcMetadata.getColumns(errorsResult));
-                    int count = 0;
-                    StringBuffer rowDumpEmail = new StringBuffer(
-                            String.format("\n\nВ %s превышен лимит в %s ошибок!\n\n",
-                                    data.getRunner().getSource().getPoolId(),
-                                    maxErrors));
-                    while (errorsResult.next() && (count < partEmail)) {
-                        count++;
-                        // при необходимости пишем ошибку в лог
-                        String rowDump = String.format(
-                                "Ошибка %s из %s \n[ tableName = REP2_WORKPOOL_DATA [ row = %s ] ]%s",
-                                count,
-                                rowCount,
-                                Jdbc.resultSetToString(errorsResult, cols),
-                                "\n==========================================\n"
-                                );
-                        rowDumpEmail.append(rowDump);
-                    } 
-                    rowDumpEmail.append("Всего ");
-                    rowDumpEmail.append(rowCount);
-                    rowDumpEmail.append(" ошибочных записей. Полный список ошибок доступен в таблице rep2_workpool_data.");
-                    LOG.error(rowDumpEmail.toString());
+        }
+
+        //Если нет ошибок то смысл в запуске данного кода бессмыслен 
+        if(rowCount != 0) {
+            try (PreparedStatement selectErrors = sourceConnection.prepareStatement(
+                  "SELECT * FROM rep2_workpool_data WHERE id_superlog IN " +
+                  "(SELECT MAX(id_superlog) FROM rep2_workpool_data AS last_data WHERE " +
+                  "c_errors_count>? GROUP BY id_runner, id_table, id_foreign)" +
+                  " ORDER BY c_errors_count desc");) {
+                //Если нет ошибок то смысл в запуске данного кода бессмыслен 
+                if(rowCount != 0) {
+                    selectErrors.setInt(1, maxErrors);
+                    try (ResultSet errorsResult = selectErrors.executeQuery();) {
+                        List<String> cols = new ArrayList<String>(JdbcMetadata.getColumns(errorsResult));
+                        int count = 0;
+                        StringBuffer rowDumpEmail = new StringBuffer(
+                           String.format("\n\nВ %s превышен лимит в %s ошибок!\n\n",
+                               data.getRunner().getSource().getPoolId(), maxErrors));
+                        while (errorsResult.next() && (count < partEmail)) {
+                            count++;
+                            // при необходимости пишем ошибку в лог
+                            String rowDump = String.format(
+                                    "Ошибка %s из %s \n[ tableName = REP2_WORKPOOL_DATA [ row = %s ] ]%s",
+                                    count,
+                                    rowCount,
+                                    Jdbc.resultSetToString(errorsResult, cols),
+                                    "\n==========================================\n"
+                                    );
+                            rowDumpEmail.append(rowDump);
+                        } 
+                        rowDumpEmail.append("Всего ");
+                        rowDumpEmail.append(rowCount);
+                        rowDumpEmail.append(" ошибочных записей. Полный список ошибок доступен в таблице rep2_workpool_data.");
+                        LOG.error(rowDumpEmail.toString());
+                    }
                 }
             }
         }
     }
-
 }

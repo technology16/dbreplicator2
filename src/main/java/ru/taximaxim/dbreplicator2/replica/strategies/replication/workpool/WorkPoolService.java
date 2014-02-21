@@ -107,14 +107,6 @@ public interface WorkPoolService {
     void clearWorkPoolData(ResultSet operationsResult) throws SQLException;
     
     /**
-     * Получение подготовленного запроса для увеличения кол ва ошибок 
-     * 
-     * @return подготовленный запрос для увеличения кол ва ошибок 
-     * 
-     * @throws SQLException
-     */
-    PreparedStatement getIncErrorsCount() throws SQLException;
-    /**
      * Функция записи информации об ошибке в рабочий набор
      * 
      * @param message  - сообщение

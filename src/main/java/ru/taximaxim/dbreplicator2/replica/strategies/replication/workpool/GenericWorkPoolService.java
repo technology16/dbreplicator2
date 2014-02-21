@@ -31,11 +31,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.Date;
 
 import org.apache.log4j.Logger;
 
-import ru.taximaxim.dbreplicator2.replica.strategies.errors.ErrorsLogService;
+import ru.taximaxim.dbreplicator2.el.ErrorsLogService;
 
 
 /**
@@ -73,8 +72,6 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
     private PreparedStatement clearWorkPoolDataStatement;
 
     private PreparedStatement lastOperationsStatement;
-    
-    private PreparedStatement incErrorsCount;
 
     @Override
     public PreparedStatement getLastOperationsStatement() throws SQLException {
@@ -136,16 +133,7 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
         deleteWorkPoolData.addBatch();
         getErrorsLog().setStatus(getRunner(operationsResult), getTable(operationsResult), getForeign(operationsResult), 1);
     }
-
-    @Override
-    public PreparedStatement getIncErrorsCount() throws SQLException {
-        if(incErrorsCount==null) {
-            incErrorsCount = getConnection().prepareStatement(
-               "UPDATE rep2_workpool_data SET c_errors_count = c_errors_count + 1, c_last_error=?, c_last_error_date=? WHERE id_runner=? AND id_table=? AND id_foreign=?");
-        }
-        
-        return incErrorsCount;
-    }
+    
     /**
      * Функция записи информации об ошибке
      * @throws SQLException 
@@ -163,15 +151,6 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
             nextEx.printStackTrace(printWriter);
             nextEx = nextEx.getNextException();
         }
-
-        // Увеличиваем счетчик ошибок на 1
-        PreparedStatement statement = getIncErrorsCount();
-        statement.setString(1, message + "\n" + writer.toString());
-        statement.setTimestamp(2, new Timestamp(new Date().getTime()));
-        statement.setInt(3, getRunner(operation));
-        statement.setString(4, getTable(operation));
-        statement.setLong(5, getForeign(operation));
-        statement.executeUpdate();
         getErrorsLog().add(getRunner(operation), getTable(operation), getForeign(operation), message + "\n" + writer.toString());
     }
     
@@ -219,7 +198,6 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
     public void close() throws SQLException {
         close(clearWorkPoolDataStatement);
         close(lastOperationsStatement);
-        close(incErrorsCount);
     }
     
     /**
