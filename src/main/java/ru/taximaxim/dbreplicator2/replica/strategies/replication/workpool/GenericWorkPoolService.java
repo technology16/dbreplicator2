@@ -23,9 +23,6 @@
 
 package ru.taximaxim.dbreplicator2.replica.strategies.replication.workpool;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -140,18 +137,7 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
      */
     public void trackError(String message, SQLException e, ResultSet operation) 
             throws SQLException{
-        // Формируем сообщение об ошибке
-        Writer writer = new StringWriter();
-        PrintWriter printWriter = new PrintWriter(writer);
-        e.printStackTrace(printWriter);
-        
-        SQLException nextEx = e.getNextException();
-        while (nextEx!=null){
-            printWriter.println("Подробности: ");
-            nextEx.printStackTrace(printWriter);
-            nextEx = nextEx.getNextException();
-        }
-        getErrorsLog().add(getRunner(operation), getTable(operation), getForeign(operation), message + "\n" + writer.toString());
+        getErrorsLog().add(getRunner(operation), getTable(operation), getForeign(operation), message, e);
     }
     
     @Override

@@ -22,6 +22,9 @@
  */
 package ru.taximaxim.dbreplicator2.el;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -93,6 +96,31 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
             connection = Core.getConnectionFactory().getConnection(baseConnName);
         }
         return connection;
+    }
+    
+    @Override
+    public void add(Integer runnerId, String tableId, Long foreignId, String error, Exception e) {
+        StringWriter writer = new StringWriter();
+        PrintWriter printWriter = new PrintWriter( writer );
+        printWriter.println("Подробности: ");
+        e.printStackTrace( printWriter );
+        printWriter.flush();
+        add(runnerId, tableId, foreignId, error + "\n" + writer.toString());
+    }
+    
+    @Override
+    public void add(Integer runnerId, String tableId, Long foreignId, String error, SQLException e) {
+        Writer writer = new StringWriter();
+        PrintWriter printWriter = new PrintWriter(writer);
+        e.printStackTrace(printWriter);
+        
+        SQLException nextEx = e.getNextException();
+        while (nextEx!=null){
+            printWriter.println("Подробности: ");
+            nextEx.printStackTrace(printWriter);
+            nextEx = nextEx.getNextException();
+        }
+        add(runnerId, tableId, foreignId, error + "\n" + writer.toString());
     }
     
     @Override

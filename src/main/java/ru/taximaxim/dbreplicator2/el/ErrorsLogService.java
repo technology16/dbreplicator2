@@ -23,6 +23,8 @@
 
 package ru.taximaxim.dbreplicator2.el;
 
+import java.sql.SQLException;
+
 /**
  * @author mardanov_rm
  *
@@ -37,7 +39,24 @@ public interface ErrorsLogService {
      * @throws SQLException
      */
     void add(Integer runnerId, String tableId, Long foreignId, String error);
-
+    
+    /**
+     * Функция добавления записи в лог ошибок
+     * 
+     * ...
+     * 
+     * @throws SQLException
+     */
+    void add(Integer runnerId, String tableId, Long foreignId,  String error, SQLException e);
+    
+    /**
+     * Функция добавления записи в лог ошибок
+     * 
+     * ...
+     * 
+     * @throws SQLException
+     */
+    void add(Integer runnerId, String tableId, Long foreignId, String error, Exception e);
     /**
      * Функция установки статуса сообщений об ошибке
      * 
