@@ -110,7 +110,10 @@ public class BoneCPConnectionsFactory implements ConnectionFactory {
                 connectionPools.put(poolName, connectionPool);
             }
         }
-        return connectionPool.getConnection();
+        
+        synchronized (connectionPool) {
+            return connectionPool.getConnection();
+        }
     }
 
     /*

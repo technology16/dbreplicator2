@@ -112,6 +112,14 @@ public class WorkerThread implements Runnable {
             try {
                 for (StrategyModel strategyModel : strategies) {
                     if (strategyModel.isEnabled()) {
+                        LOG.info(String.format("runStrategy(%s, %s, %s);\n" +
+                                "sourceConnection = %s;\n" +
+                                "targetConnection = %s;\n", 
+                                runner.getSource().getPoolId(),
+                                runner.getTarget().getPoolId(),
+                                strategyModel.getId(),
+                                sourceConnection.toString(),
+                                targetConnection.toString()));
                         runStrategy(sourceConnection, targetConnection, strategyModel);
                     }
                 }
