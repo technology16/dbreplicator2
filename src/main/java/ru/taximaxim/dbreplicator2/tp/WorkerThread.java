@@ -79,7 +79,7 @@ public class WorkerThread implements Runnable {
                 nextEx = nextEx.getNextException();
             }
         }
-        
+
         LOG.debug(String.format("Завершение потока [%s] раннера [id_runner = %d, %s]",
                 Thread.currentThread().getName(), runner.getId(),
                 runner.getDescription()));
@@ -103,23 +103,25 @@ public class WorkerThread implements Runnable {
         // каждого.
         try (Connection sourceConnection =
                 connectionsFactory.getConnection(runner.getSource().getPoolId());
-             Connection targetConnection =
-                connectionsFactory.getConnection(runner.getTarget().getPoolId())
-            ) {
+                Connection targetConnection =
+                        connectionsFactory.getConnection(runner.getTarget().getPoolId())
+                ) {
 
             List<StrategyModel> strategies = runner.getStrategyModels();
 
             try {
                 for (StrategyModel strategyModel : strategies) {
                     if (strategyModel.isEnabled()) {
-                        LOG.info(String.format("runStrategy(%s, %s, %s);\n" +
-                                "sourceConnection = %s;\n" +
-                                "targetConnection = %s;\n", 
-                                runner.getSource().getPoolId(),
-                                runner.getTarget().getPoolId(),
-                                strategyModel.getId(),
-                                sourceConnection.toString(),
-                                targetConnection.toString()));
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug(String.format("runStrategy(%s, %s, %s);\n" +
+                                    "sourceConnection = %s;\n" +
+                                    "targetConnection = %s;", 
+                                    runner.getSource().getPoolId(),
+                                    runner.getTarget().getPoolId(),
+                                    strategyModel.getId(),
+                                    sourceConnection.hashCode(),
+                                    targetConnection.hashCode()));
+                        }
                         runStrategy(sourceConnection, targetConnection, strategyModel);
                     }
                 }
@@ -152,8 +154,8 @@ public class WorkerThread implements Runnable {
      */
     protected void runStrategy(Connection sourceConnection,
             Connection targetConnection, StrategyModel strategyModel)
-            throws ClassNotFoundException, InstantiationException,
-            IllegalAccessException, StrategyException, SQLException {
+                    throws ClassNotFoundException, InstantiationException,
+                    IllegalAccessException, StrategyException, SQLException {
 
         Class<?> clazz = Class.forName(strategyModel.getClassName());
         Strategy strategy = (Strategy) clazz.newInstance();
