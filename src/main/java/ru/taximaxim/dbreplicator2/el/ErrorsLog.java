@@ -69,6 +69,7 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
      * кешированный запрос обновления
      */
     private Map<Integer, PreparedStatement> statementsCashUpdate;
+    
     /**
      * @return the statementsCash
      */
@@ -101,9 +102,9 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
     @Override
     public void add(Integer runnerId, String tableId, Long foreignId, String error, Exception e) {
         StringWriter writer = new StringWriter();
-        PrintWriter printWriter = new PrintWriter( writer );
+        PrintWriter printWriter = new PrintWriter(writer);
         printWriter.println("Подробности: ");
-        e.printStackTrace( printWriter );
+        e.printStackTrace(printWriter);
         printWriter.flush();
         add(runnerId, tableId, foreignId, error + "\n" + writer.toString());
     }
@@ -112,6 +113,7 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
     public void add(Integer runnerId, String tableId, Long foreignId, String error, SQLException e) {
         Writer writer = new StringWriter();
         PrintWriter printWriter = new PrintWriter(writer);
+        printWriter.println("Подробности: ");
         e.printStackTrace(printWriter);
         
         SQLException nextEx = e.getNextException();
