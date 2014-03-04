@@ -80,7 +80,14 @@ public class CountWatchgdog extends StrategySkeleton implements Strategy {
         // Проверияем количество ошибочных итераций
         int rowCount = 0;
         try (PreparedStatement selectErrorsCount = sourceConnection
-                .prepareStatement("SELECT count(*) as count FROM rep2_errors_log WHERE c_status = 0")) {
+                .prepareStatement("SELECT COUNT(*) as count " +
+                		"FROM (" +
+                		"SELECT COUNT(*) AS errors_count " +
+                		"FROM public.rep2_errors_log " +
+                		"WHERE c_status = 0 " +
+                		"GROUP BY id_runner, id_table, id_foreign) AS t1 " +
+                		"WHERE errors_count > ?")) {
+            selectErrorsCount.setInt(1, maxErrors);
             try (ResultSet countResult = selectErrorsCount.executeQuery();) {
                 while (countResult.next()) {
                     rowCount = countResult.getInt(COUNT);
