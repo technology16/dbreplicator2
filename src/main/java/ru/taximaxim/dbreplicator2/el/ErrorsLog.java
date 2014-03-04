@@ -38,24 +38,28 @@ import org.apache.log4j.Logger;
 import ru.taximaxim.dbreplicator2.utils.Core;
 
 public class ErrorsLog implements ErrorsLogService, AutoCloseable{
-    
+
     private static final Logger LOG = Logger.getLogger(ErrorsLog.class);
-    /**
-     * подготовленый запрос вставки
-     */
-    private PreparedStatement insertStatement;
+
     /**
      * Имя подключения
      */
     private String baseConnName = null;
+
     /**
      * Подключение
      */
     private Connection connection; 
+
+    /**
+     * кешированный запрос обновления
+     */
+    private Map<String, PreparedStatement> statementsCache;
+
     /**
      * Запрос на изменение
      */
-    private static final String[] UPDATE_QUERYS =  {
+    private static final String[] UPDATE_QUERIES =  {
             "UPDATE rep2_errors_log SET c_status = ? where id_runner = ? and id_table = ? and id_foreign = ?",
             "UPDATE rep2_errors_log SET c_status = ? where id_runner is ? and id_table = ? and id_foreign = ?",
             "UPDATE rep2_errors_log SET c_status = ? where id_runner = ? and id_table is ? and id_foreign = ?",
@@ -65,19 +69,36 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
             "UPDATE rep2_errors_log SET c_status = ? where id_runner = ? and id_table is ? and id_foreign is ?",
             "UPDATE rep2_errors_log SET c_status = ? where id_runner is ? and id_table is ? and id_foreign is ?"
      };
-    /**
-     * кешированный запрос обновления
-     */
-    private Map<Integer, PreparedStatement> statementsCashUpdate;
     
     /**
      * @return the statementsCash
      */
-    protected synchronized Map<Integer, PreparedStatement> getStatementsCash() {
-        if (statementsCashUpdate == null) {
-            statementsCashUpdate = new HashMap<Integer, PreparedStatement>();
+    synchronized protected Map<String, PreparedStatement> getStatementsCache() {
+        if (statementsCache == null) {
+            statementsCache = new HashMap<String, PreparedStatement>();
         }
-        return statementsCashUpdate;
+
+        return statementsCache;
+    }
+
+    /**
+     * Получение выражения на основе текста запроса.
+     * Выражения кешируются.
+     * 
+     * @param query
+     * @return
+     * @throws ClassNotFoundException
+     * @throws SQLException
+     */
+    private PreparedStatement getStatement(String query) 
+            throws ClassNotFoundException, SQLException {
+        PreparedStatement statement = getStatementsCache().get(query); 
+        if (statement == null) {
+            statement = getConnection().prepareStatement(query);
+            getStatementsCache().put(query, statement);
+        }
+
+        return statement;
     }
 
     /**
@@ -86,7 +107,7 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
     public ErrorsLog(String baseConnName) {
         this.baseConnName = baseConnName;
     }
-    
+
     /**
      * @return the connection
      * @throws SQLException 
@@ -98,7 +119,7 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
         }
         return connection;
     }
-    
+
     @Override
     public void add(Integer runnerId, String tableId, Long foreignId, String error, Exception e) {
         StringWriter writer = new StringWriter();
@@ -108,14 +129,14 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
         printWriter.flush();
         add(runnerId, tableId, foreignId, error + "\n" + writer.toString());
     }
-    
+
     @Override
     public void add(Integer runnerId, String tableId, Long foreignId, String error, SQLException e) {
         Writer writer = new StringWriter();
         PrintWriter printWriter = new PrintWriter(writer);
         printWriter.println("Подробности: ");
         e.printStackTrace(printWriter);
-        
+
         SQLException nextEx = e.getNextException();
         while (nextEx!=null){
             printWriter.println("Подробности: ");
@@ -124,11 +145,12 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
         }
         add(runnerId, tableId, foreignId, error + "\n" + writer.toString());
     }
-    
+
     @Override
     public void add(Integer runnerId, String tableId, Long foreignId, String error) {
         try {
-            PreparedStatement statement = getInsertStatement();
+            PreparedStatement statement = 
+                    getStatement("INSERT INTO rep2_errors_log (id_runner, id_table, id_foreign, c_date, c_error, c_status) values (?, ?, ?, ?, ?, 0)");
             statement.setObject(1, runnerId);
             statement.setObject(2, tableId);
             statement.setObject(3, foreignId);
@@ -140,6 +162,40 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
         } catch (ClassNotFoundException e) {
             LOG.error("Ошибка ClassNotFoundException записи ошибки': ", e);
         }     
+    }
+    
+    /**
+     * Получение маски NULL параметров
+     * @param runnerId
+     * @param tableId
+     * @param foreignId
+     * @return
+     */
+    private Integer getMask(Integer runnerId, String tableId, Long foreignId) {
+        Integer mask = 0;
+        if(runnerId==null) {
+            mask += 1;
+        }
+        if(tableId==null) {
+            mask += 2;
+        }
+        if(foreignId==null) {
+            mask += 4;
+        }
+        return mask;
+    }
+    
+    /**
+     * Прлучение PreparedStatement sql-update от контрольной суммы
+     * @param runnerId
+     * @param tableId
+     * @param foreignId
+     * @return
+     * @throws SQLException
+     * @throws ClassNotFoundException 
+     */
+    private PreparedStatement getUpdateStatement(Integer runnerId, String tableId, Long foreignId) throws SQLException, ClassNotFoundException {
+        return getStatement(UPDATE_QUERIES[getMask(runnerId, tableId, foreignId)]);
     }
     
     @Override
@@ -157,64 +213,17 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
             LOG.error("Ошибка ClassNotFoundException исправления ошибки': ", e);
         }       
     }
-    /**
-     * получение PreparedStatement sql запрос => Вставка
-     * @return
-     * @throws SQLException
-     * @throws ClassNotFoundException 
-     */
-    private PreparedStatement getInsertStatement() throws SQLException, ClassNotFoundException {
-        if (insertStatement == null) {
-            insertStatement = 
-                getConnection().prepareStatement("INSERT INTO rep2_errors_log (id_runner, id_table, id_foreign, c_date, c_error, c_status) values (?, ?, ?, ?, ?, 0)");
-        }
-        return insertStatement;
-    }
     
-    /**
-     * Прлучение PreparedStatement sql-update от контрольной суммы
-     * @param runnerId
-     * @param tableId
-     * @param foreignId
-     * @return
-     * @throws SQLException
-     * @throws ClassNotFoundException 
-     */
-    private PreparedStatement getUpdateStatement(Integer runnerId, String tableId, Long foreignId) throws SQLException, ClassNotFoundException {
-        int checkSum = getCheckSum(runnerId, tableId, foreignId);
-        if(getStatementsCash().get(checkSum) == null) {
-            getStatementsCash().put(checkSum, getConnection().prepareStatement(UPDATE_QUERYS[checkSum]));
-        }
-        return getStatementsCash().get(checkSum);
-    }
-    
-    /**
-     * Получение контрольной суммы
-     * @param runnerId
-     * @param tableId
-     * @param foreignId
-     * @return
-     */
-    private int getCheckSum (Integer runnerId, String tableId, Long foreignId) {
-        int checkSum = 0;
-        if(runnerId==null) {
-            checkSum += 1;
-        }
-        if(tableId==null) {
-            checkSum += 2;
-        }
-        if(foreignId==null) {
-            checkSum += 4;
-        }
-        return checkSum;
-    }
-
     @Override
     public void close() throws SQLException {
-        close(statementsCashUpdate);
-        close(insertStatement);
+        for (PreparedStatement statement: getStatementsCache().values()) {
+            close(statement);
+        }
+        getStatementsCache().clear();
+
         close(connection);
     }
+    
     /**
      * Закрыть PreparedStatement
      * @param statement
@@ -229,17 +238,7 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
             }
         }
     }
-    /**
-     * Закрытие statementsCash
-     * @param mapStatements
-     */
-    private void close(Map<Integer, PreparedStatement> mapStatements) {
-        if(mapStatements != null) {
-            for (PreparedStatement statement : mapStatements.values()) {
-                close(statement);
-            }
-        }
-    }
+    
     /**
      * Закрыть PreparedStatement
      * @param statement
