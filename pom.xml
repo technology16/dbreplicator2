@@ -4,7 +4,7 @@
 	<groupId>ru.taximaxim.dbreplicator2</groupId>
 	<artifactId>dbreplicator2</artifactId>
 
-	<version>0.6.1.2442c</version>
+	<version>0.7.0</version>
 
 	<dependencies>
 
