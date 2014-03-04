@@ -112,12 +112,13 @@ public class H2CopyTableDataTest2rep {
      */
     @Test
     public void testForeignKey() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
+        Thread.sleep(REPLICATION_DELAY);
         //Проверка внешних ключей
         LOG.info("Проверка внешних ключей");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 20);
         
         workerRun();
-        Helper.executeSqlFromFile(connDest,  "sql_foreign_key2.sql");
+        Helper.executeSqlFromFile(connDest,  "sql_foreign_key2.sql", 20);
         workerRun2();
         
         workerRun();
@@ -146,6 +147,7 @@ public class H2CopyTableDataTest2rep {
         
         errorsCountWatchdogWorker.run();
         workerRun();
+        Thread.sleep(REPLICATION_DELAY);
         Thread.sleep(REPLICATION_DELAY);
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table2");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table2");

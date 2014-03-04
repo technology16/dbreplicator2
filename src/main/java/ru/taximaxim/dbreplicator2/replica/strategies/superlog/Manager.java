@@ -86,7 +86,7 @@ public class Manager implements Strategy {
             // Переносим данные
             try (
                     PreparedStatement insertRunnerData = 
-                            targetConnection.prepareStatement("INSERT INTO rep2_workpool_data (id_runner, id_superlog, id_foreign, id_table, c_operation, c_date, id_transaction, c_errors_count) VALUES (?, ?, ?, ?, ?, ?, ?, 0)");
+                            targetConnection.prepareStatement("INSERT INTO rep2_workpool_data (id_runner, id_superlog, id_foreign, id_table, c_operation, c_date, id_transaction) VALUES (?, ?, ?, ?, ?, ?, ?)");
                     PreparedStatement deleteSuperLog = 
                             targetConnection.prepareStatement("DELETE FROM rep2_superlog WHERE id_superlog=?");
                     PreparedStatement selectSuperLog = 

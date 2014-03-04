@@ -28,7 +28,9 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
+import ru.taximaxim.dbreplicator2.el.ErrorsLog;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
+import ru.taximaxim.dbreplicator2.utils.Core;
 import ru.taximaxim.dbreplicator2.model.TaskSettings;
 
 /**
@@ -81,8 +83,8 @@ public class TaskRunner implements Runnable {
             long startTime = new Date().getTime();
             boolean isSuccess = false;
             
-            try {
-                workerThread.processCommand();
+            try (ErrorsLog errorsLog = Core.getErrorsLog();){
+                workerThread.processCommand(errorsLog);
                 isSuccess = true;
             } catch (ClassNotFoundException e) {
                 LOG.error(

@@ -23,7 +23,6 @@
 package ru.taximaxim.dbreplicator2.utils;
 
 import java.io.File;
-
 import org.apache.log4j.Logger;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -35,6 +34,7 @@ import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 import ru.taximaxim.dbreplicator2.model.ApplicatonSettingsService;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
 import ru.taximaxim.dbreplicator2.model.TaskSettingsService;
+import ru.taximaxim.dbreplicator2.el.ErrorsLog;
 import ru.taximaxim.dbreplicator2.stats.StatsService;
 import ru.taximaxim.dbreplicator2.tasks.TasksPool;
 import ru.taximaxim.dbreplicator2.tp.ThreadPool;
@@ -67,7 +67,7 @@ public final class Core {
     private static ThreadPool threadPool;
     
     private static StatsService statsService;
-
+    
     /**
      * Получение настроек из файла
      * 
@@ -278,5 +278,17 @@ public final class Core {
     public static synchronized void statsServiceClose() {
         statsService = null;
     }
+    
+    /**
+     * Получаем сервис ErrorsLog
+     * 
+     * @return сервис ErrorsLog
+     */
+    public static synchronized ErrorsLog getErrorsLog() {
+        ApplicatonSettingsService aService = new ApplicatonSettingsService(getSessionFactory());
+        String baseConnName = aService.getValue("error.dest").toString();
+        ErrorsLog errorLog = new ErrorsLog(baseConnName, getConnectionFactory());
 
+        return errorLog;
+    }
 }

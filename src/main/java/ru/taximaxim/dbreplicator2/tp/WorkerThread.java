@@ -34,6 +34,7 @@ import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.StopChainProcesing;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
+import ru.taximaxim.dbreplicator2.el.ErrorsLog;
 import ru.taximaxim.dbreplicator2.utils.Core;
 /**
  * Обработчик раннера
@@ -44,7 +45,6 @@ import ru.taximaxim.dbreplicator2.utils.Core;
 public class WorkerThread implements Runnable {
 
     private static final Logger LOG = Logger.getLogger(WorkerThread.class);
-
     private Runner runner;
 
     /**
@@ -62,24 +62,24 @@ public class WorkerThread implements Runnable {
                 Thread.currentThread().getName(), runner.getId(),
                 runner.getDescription()));
 
-        try {
-            processCommand();
-        } catch (ClassNotFoundException e) {
-            LOG.error(String.format("Ошибка при инициализации данных раннера [id_runner = %d, %s]", 
-                    runner.getId(), runner.getDescription()), e);
-        } catch (StrategyException e) {
-            LOG.error(String.format("Ошибка при выполнении стратегии раннера [id_runner = %d, %s]", 
-                    runner.getId(), runner.getDescription()), e);
-        } catch (SQLException e) {
-            LOG.error(String.format("Ошибка БД при выполнении стратегии раннера [id_runner = %d, %s]", 
-                    runner.getId(), runner.getDescription()), e);
-            SQLException nextEx = e.getNextException();
-            while (nextEx!=null){
-                LOG.error("Подробности:", nextEx);
-                nextEx = nextEx.getNextException();
+        try (ErrorsLog errorsLog = Core.getErrorsLog();){
+            try {
+                processCommand(errorsLog);
+            } catch (ClassNotFoundException e) {
+                errorsLog.add(runner.getId(), null, null, 
+                        String.format("Ошибка при инициализации данных раннера [id_runner = %d, %s]", 
+                                runner.getId(), runner.getDescription()), e);
+            } catch (StrategyException e) {
+                errorsLog.add(runner.getId(), null, null, 
+                        String.format("Ошибка при выполнении стратегии раннера [id_runner = %d, %s]", 
+                                runner.getId(), runner.getDescription()), e);
+            } catch (SQLException e) {
+                errorsLog.add(runner.getId(), null, null, 
+                        String.format("Ошибка БД при выполнении стратегии раннера [id_runner = %d, %s]", 
+                                runner.getId(), runner.getDescription()), e);
             }
         }
-
+        
         LOG.debug(String.format("Завершение потока [%s] раннера [id_runner = %d, %s]",
                 Thread.currentThread().getName(), runner.getId(),
                 runner.getDescription()));
@@ -95,7 +95,7 @@ public class WorkerThread implements Runnable {
      * @throws ClassNotFoundException 
      * @throws StrategyException 
      */
-    public void processCommand() throws ClassNotFoundException, SQLException, StrategyException {
+    public void processCommand(ErrorsLog errorsLog) throws ClassNotFoundException, SQLException, StrategyException {
 
         ConnectionFactory connectionsFactory = Core.getConnectionFactory();
 
@@ -106,7 +106,6 @@ public class WorkerThread implements Runnable {
                 Connection targetConnection =
                         connectionsFactory.getConnection(runner.getTarget().getPoolId())
                 ) {
-
             List<StrategyModel> strategies = runner.getStrategyModels();
 
             try {
@@ -131,8 +130,9 @@ public class WorkerThread implements Runnable {
             }
 
         } catch (InstantiationException | IllegalAccessException e) {
-            LOG.error(String.format("Ошибка при создании объекта-стратегии раннера [id_runner = %d, %s].", 
-                    runner.getId(), runner.getDescription()), e);
+            errorsLog.add(runner.getId(), null, null, 
+                    String.format("Ошибка при создании объекта-стратегии раннера [id_runner = %d, %s]. [%s]", 
+                            runner.getId(), runner.getDescription(), e));
         }
     }
 

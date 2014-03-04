@@ -23,17 +23,15 @@
 
 package ru.taximaxim.dbreplicator2.replica.strategies.replication.workpool;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.Date;
 
 import org.apache.log4j.Logger;
+
+import ru.taximaxim.dbreplicator2.el.ErrorsLogService;
 
 
 /**
@@ -44,12 +42,21 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
     private static final Logger LOG = Logger.getLogger(GenericWorkPoolService.class);
 
     private Connection connection;
+    private ErrorsLogService errorsLog;
     
+    /**
+     * @return the errorsLog
+     */
+    protected ErrorsLogService getErrorsLog() {
+        return errorsLog;
+    }
+
     /**
      * Конструктор на основе соединения к БД 
      */
-    public GenericWorkPoolService(Connection connection) {
+    public GenericWorkPoolService(Connection connection, ErrorsLogService errorsLog) {
         this.connection = connection;
+        this.errorsLog = errorsLog;
     }
     
     /**
@@ -62,8 +69,6 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
     private PreparedStatement clearWorkPoolDataStatement;
 
     private PreparedStatement lastOperationsStatement;
-    
-    private PreparedStatement incErrorsCount;
 
     @Override
     public PreparedStatement getLastOperationsStatement() throws SQLException {
@@ -123,43 +128,16 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
         deleteWorkPoolData.setString(3, getTable(operationsResult));
         deleteWorkPoolData.setLong(4, getSuperlog(operationsResult));
         deleteWorkPoolData.addBatch();
+        getErrorsLog().setStatus(getRunner(operationsResult), getTable(operationsResult), getForeign(operationsResult), 1);
     }
-
-    @Override
-    public PreparedStatement getIncErrorsCount() throws SQLException {
-        if(incErrorsCount==null) {
-            incErrorsCount = getConnection().prepareStatement(
-               "UPDATE rep2_workpool_data SET c_errors_count = c_errors_count + 1, c_last_error=?, c_last_error_date=? WHERE id_runner=? AND id_table=? AND id_foreign=?");
-        }
-        
-        return incErrorsCount;
-    }
+    
     /**
      * Функция записи информации об ошибке
      * @throws SQLException 
      */
     public void trackError(String message, SQLException e, ResultSet operation) 
             throws SQLException{
-        // Формируем сообщение об ошибке
-        Writer writer = new StringWriter();
-        PrintWriter printWriter = new PrintWriter(writer);
-        e.printStackTrace(printWriter);
-        
-        SQLException nextEx = e.getNextException();
-        while (nextEx!=null){
-            printWriter.println("Подробности: ");
-            nextEx.printStackTrace(printWriter);
-            nextEx = nextEx.getNextException();
-        }
-
-        // Увеличиваем счетчик ошибок на 1
-        PreparedStatement statement = getIncErrorsCount();
-        statement.setString(1, message + "\n" + writer.toString());
-        statement.setTimestamp(2, new Timestamp(new Date().getTime()));
-        statement.setInt(3, getRunner(operation));
-        statement.setString(4, getTable(operation));
-        statement.setLong(5, getForeign(operation));
-        statement.executeUpdate();
+        getErrorsLog().add(getRunner(operation), getTable(operation), getForeign(operation), message, e);
     }
     
     @Override
@@ -206,7 +184,6 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
     public void close() throws SQLException {
         close(clearWorkPoolDataStatement);
         close(lastOperationsStatement);
-        close(incErrorsCount);
     }
     
     /**
