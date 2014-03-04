@@ -287,7 +287,7 @@ public final class Core {
     public static synchronized ErrorsLog getErrorsLog() {
         ApplicatonSettingsService aService = new ApplicatonSettingsService(getSessionFactory());
         String baseConnName = aService.getValue("error.dest").toString();
-        ErrorsLog errorLog = new ErrorsLog(baseConnName);
+        ErrorsLog errorLog = new ErrorsLog(baseConnName, getConnectionFactory());
 
         return errorLog;
     }

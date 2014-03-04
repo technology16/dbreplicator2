@@ -35,7 +35,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import ru.taximaxim.dbreplicator2.utils.Core;
+import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 
 public class ErrorsLog implements ErrorsLogService, AutoCloseable{
 
@@ -45,6 +45,15 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
      * Имя подключения
      */
     private String baseConnName = null;
+    
+    private ConnectionFactory connectionFactory;
+
+    /**
+     * @return the connectionFactory
+     */
+    protected ConnectionFactory getConnectionFactory() {
+        return connectionFactory;
+    }
 
     /**
      * Подключение
@@ -73,7 +82,7 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
     /**
      * @return the statementsCash
      */
-    synchronized protected Map<String, PreparedStatement> getStatementsCache() {
+    protected synchronized Map<String, PreparedStatement> getStatementsCache() {
         if (statementsCache == null) {
             statementsCache = new HashMap<String, PreparedStatement>();
         }
@@ -104,8 +113,9 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
     /**
      * Конструктор на основе соединения к БД 
      */
-    public ErrorsLog(String baseConnName) {
+    public ErrorsLog(String baseConnName, ConnectionFactory connectionFactory) {
         this.baseConnName = baseConnName;
+        this.connectionFactory = connectionFactory;
     }
 
     /**
@@ -115,7 +125,7 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
      */
     protected Connection getConnection() throws ClassNotFoundException, SQLException {
         if(connection==null) {
-            connection = Core.getConnectionFactory().getConnection(baseConnName);
+            connection = getConnectionFactory().getConnection(baseConnName);
         }
         return connection;
     }
