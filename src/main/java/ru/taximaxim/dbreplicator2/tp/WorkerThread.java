@@ -124,11 +124,11 @@ public class WorkerThread implements Runnable {
                         runStrategy(sourceConnection, targetConnection, strategyModel);
                     }
                 }
+                errorsLog.setStatus(runner.getId(), null, null, 1);
             } catch (StopChainProcesing e) {
                 LOG.warn(String.format("Запрошена принудительная остановка обработки цепочки стратегий раннера [id_runner = %d, %s].", 
                         runner.getId(), runner.getDescription()), e);
             }
-
         } catch (InstantiationException | IllegalAccessException e) {
             errorsLog.add(runner.getId(), null, null, 
                     String.format("Ошибка при создании объекта-стратегии раннера [id_runner = %d, %s]. [%s]", 
