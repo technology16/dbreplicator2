@@ -90,8 +90,8 @@ public class TaskRunner implements Runnable {
                 LOG.error(
                         String.format("Ошибка при создании объекта-стратегии раннера задачи [id_task = %d, %s]", 
                                 taskSettings.getTaskId(),
-                                taskSettings.getDescription(), 
-                                e));
+                                taskSettings.getDescription()), 
+                                e);
             } catch (ClassNotFoundException e) {
                 LOG.error(
                         String.format("Ошибка инициализации при выполнении задачи [id_task = %d, %s]",

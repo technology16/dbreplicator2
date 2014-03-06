@@ -51,7 +51,9 @@ public class Strict extends Generic implements Strategy {
                 GenericWorkPoolService genericWorkPoolService = new GenericWorkPoolService(sourceConnection, errorsLog);
                 GenericDataService genericDataServiceSourceConnection = new GenericDataService(sourceConnection);
                 GenericDataService genericDataServiceTargetConnection = new GenericDataService(targetConnection);) {
-            GenericAlgorithm strategy = new GenericAlgorithm(1000, 1000, true, 
+            GenericAlgorithm strategy = new GenericAlgorithm(getFetchSize(data), 
+                    getBatchSize(data), 
+                    true, 
                     genericWorkPoolService, 
                     genericDataServiceSourceConnection, 
                     genericDataServiceTargetConnection);
