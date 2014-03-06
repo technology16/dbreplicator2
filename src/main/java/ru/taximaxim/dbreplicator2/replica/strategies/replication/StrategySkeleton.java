@@ -33,10 +33,12 @@ public class StrategySkeleton {
 
     private static final String FETCH_SIZE = "fetchSize";
     private static final String BATCH_SIZE = "batchSize";
+    private static final int DEFAULT_FETCH_SIZE = 1000;
+    private static final int DEFAULT_BATCH_SIZE = 1000;
     /**
      * Размер выборки данных (строк)
      */
-    private int fetchSize = 1000;
+    private int fetchSize = DEFAULT_FETCH_SIZE;
     
     protected int getFetchSize(StrategyModel data) {
         if (data.getParam(FETCH_SIZE) != null) {
@@ -48,7 +50,7 @@ public class StrategySkeleton {
     /**
      * Размер сбрасываемых в БД данных (строк)
      */
-    private int batchSize = 1000;
+    private int batchSize = DEFAULT_BATCH_SIZE;
     
     protected int getBatchSize(StrategyModel data) {
         if (data.getParam(BATCH_SIZE) != null) {
