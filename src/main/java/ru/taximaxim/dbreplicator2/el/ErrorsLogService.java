@@ -64,5 +64,5 @@ public interface ErrorsLogService {
      * 
      * @throws SQLException
      */
-    void setStatus(Integer runnerId, String tableId, Long foreignId, Integer status);
+    void setStatus(Integer runnerId, String tableId, Long foreignId, int status);
 }

@@ -64,20 +64,6 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
      * кешированный запрос обновления
      */
     private Map<String, PreparedStatement> statementsCache;
-
-    /**
-     * Запрос на изменение
-     */
-    private static final String[] UPDATE_QUERIES =  {
-            "UPDATE rep2_errors_log SET c_status = ? where c_status <> ? and id_runner = ? and id_table = ? and id_foreign = ?",
-            "UPDATE rep2_errors_log SET c_status = ? where c_status <> ? and id_runner is ? and id_table = ? and id_foreign = ?",
-            "UPDATE rep2_errors_log SET c_status = ? where c_status <> ? and id_runner = ? and id_table is ? and id_foreign = ?",
-            "UPDATE rep2_errors_log SET c_status = ? where c_status <> ? and id_runner is ? and id_table is ? and id_foreign = ?",
-            "UPDATE rep2_errors_log SET c_status = ? where c_status <> ? and id_runner = ? and id_table = ? and id_foreign is ?",
-            "UPDATE rep2_errors_log SET c_status = ? where c_status <> ? and id_runner is ? and id_table = ? and id_foreign is ?",
-            "UPDATE rep2_errors_log SET c_status = ? where c_status <> ? and id_runner = ? and id_table is ? and id_foreign is ?",
-            "UPDATE rep2_errors_log SET c_status = ? where c_status <> ? and id_runner is ? and id_table is ? and id_foreign is ?"
-     };
     
     /**
      * @return the statementsCash
@@ -174,54 +160,50 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
         }     
     }
     
-    /**
-     * Получение маски NULL параметров
-     * @param runnerId
-     * @param tableId
-     * @param foreignId
-     * @return
-     */
-    private Integer getMask(Integer runnerId, String tableId, Long foreignId) {
-        Integer mask = 0;
-        if(runnerId==null) {
-            mask += 1;
-        }
-        if(tableId==null) {
-            mask += 2;
-        }
-        if(foreignId==null) {
-            mask += 4;
-        }
-        return mask;
-    }
-    
-    /**
-     * Прлучение PreparedStatement sql-update от контрольной суммы
-     * @param runnerId
-     * @param tableId
-     * @param foreignId
-     * @return
-     * @throws SQLException
-     * @throws ClassNotFoundException 
-     */
-    private PreparedStatement getUpdateStatement(Integer runnerId, String tableId, Long foreignId) throws SQLException, ClassNotFoundException {
-        return getStatement(UPDATE_QUERIES[getMask(runnerId, tableId, foreignId)]);
+    protected int addIsNull(StringBuffer query, Object value) {
+        if (value == null) {
+            query.append(" IS NULL");
+            return 0;
+        } else {
+            query.append("=?");
+            return 1;
+        }   
     }
     
     @Override
-    public void setStatus(Integer runnerId, String tableId, Long foreignId, Integer status) {
+    public void setStatus(Integer runnerId, String tableId, Long foreignId, int status) {
+        StringBuffer updateQuery = new StringBuffer("UPDATE rep2_errors_log SET c_status = ? WHERE c_status<> ?  AND id_runner");
         try {
-            PreparedStatement statement = getUpdateStatement(runnerId, tableId, foreignId);
+            int runnerIdPos = addIsNull(updateQuery, runnerId);
+            
+            updateQuery.append(" AND id_table");
+            int tableIdPos = addIsNull(updateQuery, tableId);
+            
+            updateQuery.append(" AND id_foreign");
+            int foreignIdPos = addIsNull(updateQuery, foreignId);
+
+            PreparedStatement statement = getStatement(updateQuery.toString());
+            
             statement.setInt(1, status);
             statement.setInt(2, status);
-            statement.setObject(3, runnerId);
-            statement.setObject(4, tableId);
-            statement.setObject(5, foreignId);
+            
+            if (runnerIdPos != 0) {
+                statement.setInt(2 + runnerIdPos, runnerId);
+            }
+            
+            if (tableIdPos != 0) {
+                statement.setString(2 + runnerIdPos + tableIdPos, tableId);
+            }
+            
+            if (foreignIdPos != 0) {
+                statement.setLong(2 + runnerIdPos + tableIdPos + foreignIdPos, foreignId);
+            }
+
             statement.execute();
         } catch (SQLException e) {
-            LOG.error("Ошибка SQLException исправления ошибки': ", e);
+            LOG.error("Ошибка SQLException при установки статуса ошибки: ", e);
         }  catch (ClassNotFoundException e) {
-            LOG.error("Ошибка ClassNotFoundException исправления ошибки': ", e);
+            LOG.error("Ошибка ClassNotFoundException при установки статуса ошибки: ", e);
         }       
     }
     
