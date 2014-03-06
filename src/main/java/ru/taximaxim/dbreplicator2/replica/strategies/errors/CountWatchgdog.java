@@ -81,12 +81,12 @@ public class CountWatchgdog extends StrategySkeleton implements Strategy {
         int rowCount = 0;
         try (PreparedStatement selectErrorsCount = sourceConnection
                 .prepareStatement("SELECT COUNT(*) as count " +
-                		"FROM (" +
-                		"SELECT COUNT(*) AS errors_count " +
-                		"FROM public.rep2_errors_log " +
-                		"WHERE c_status = 0 " +
-                		"GROUP BY id_runner, id_table, id_foreign) AS t1 " +
-                		"WHERE errors_count > ?")) {
+                        "FROM (" +
+                        "SELECT COUNT(*) AS errors_count " +
+                        "FROM public.rep2_errors_log " +
+                        "WHERE c_status = 0 " +
+                        "GROUP BY id_runner, id_table, id_foreign) AS t1 " +
+                        "WHERE errors_count > ?")) {
             selectErrorsCount.setInt(1, maxErrors);
             try (ResultSet countResult = selectErrorsCount.executeQuery();) {
                 while (countResult.next()) {
@@ -106,7 +106,7 @@ public class CountWatchgdog extends StrategySkeleton implements Strategy {
 
                 selectErrors.setInt(1, maxErrors);
                 selectErrors.setFetchSize(getFetchSize(data));
-                
+
                 try (ResultSet errorsResult = selectErrors.executeQuery();) {
                     List<String> cols = new ArrayList<String>(JdbcMetadata.getColumns(errorsResult));
                     int count = 0;
