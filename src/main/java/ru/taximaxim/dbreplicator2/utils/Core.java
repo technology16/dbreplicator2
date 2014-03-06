@@ -265,7 +265,7 @@ public final class Core {
     public static synchronized StatsService getStatsService() {
         if (statsService == null) {
             ApplicatonSettingsService aService = new ApplicatonSettingsService(getSessionFactory());
-            String baseConnName = aService.getValue("stats.dest").toString();
+            String baseConnName = aService.getValue("stats.dest");
             statsService = new StatsService(baseConnName);
         }
 
@@ -286,7 +286,7 @@ public final class Core {
      */
     public static synchronized ErrorsLog getErrorsLog() {
         ApplicatonSettingsService aService = new ApplicatonSettingsService(getSessionFactory());
-        String baseConnName = aService.getValue("error.dest").toString();
+        String baseConnName = aService.getValue("error.dest");
         ErrorsLog errorLog = new ErrorsLog(baseConnName, getConnectionFactory());
 
         return errorLog;

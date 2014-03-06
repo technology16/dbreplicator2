@@ -69,14 +69,14 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
      * Запрос на изменение
      */
     private static final String[] UPDATE_QUERIES =  {
-            "UPDATE rep2_errors_log SET c_status = ? where c_status = ? and id_runner = ? and id_table = ? and id_foreign = ?",
-            "UPDATE rep2_errors_log SET c_status = ? where c_status = ? and id_runner is ? and id_table = ? and id_foreign = ?",
-            "UPDATE rep2_errors_log SET c_status = ? where c_status = ? and id_runner = ? and id_table is ? and id_foreign = ?",
-            "UPDATE rep2_errors_log SET c_status = ? where c_status = ? and id_runner is ? and id_table is ? and id_foreign = ?",
-            "UPDATE rep2_errors_log SET c_status = ? where c_status = ? and id_runner = ? and id_table = ? and id_foreign is ?",
-            "UPDATE rep2_errors_log SET c_status = ? where c_status = ? and id_runner is ? and id_table = ? and id_foreign is ?",
-            "UPDATE rep2_errors_log SET c_status = ? where c_status = ? and id_runner = ? and id_table is ? and id_foreign is ?",
-            "UPDATE rep2_errors_log SET c_status = ? where c_status = ? and id_runner is ? and id_table is ? and id_foreign is ?"
+            "UPDATE rep2_errors_log SET c_status = ? where c_status <> ? and id_runner = ? and id_table = ? and id_foreign = ?",
+            "UPDATE rep2_errors_log SET c_status = ? where c_status <> ? and id_runner is ? and id_table = ? and id_foreign = ?",
+            "UPDATE rep2_errors_log SET c_status = ? where c_status <> ? and id_runner = ? and id_table is ? and id_foreign = ?",
+            "UPDATE rep2_errors_log SET c_status = ? where c_status <> ? and id_runner is ? and id_table is ? and id_foreign = ?",
+            "UPDATE rep2_errors_log SET c_status = ? where c_status <> ? and id_runner = ? and id_table = ? and id_foreign is ?",
+            "UPDATE rep2_errors_log SET c_status = ? where c_status <> ? and id_runner is ? and id_table = ? and id_foreign is ?",
+            "UPDATE rep2_errors_log SET c_status = ? where c_status <> ? and id_runner = ? and id_table is ? and id_foreign is ?",
+            "UPDATE rep2_errors_log SET c_status = ? where c_status <> ? and id_runner is ? and id_table is ? and id_foreign is ?"
      };
     
     /**
@@ -213,7 +213,7 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
         try {
             PreparedStatement statement = getUpdateStatement(runnerId, tableId, foreignId);
             statement.setInt(1, status);
-            statement.setInt(2, 0);
+            statement.setInt(2, status);
             statement.setObject(3, runnerId);
             statement.setObject(4, tableId);
             statement.setObject(5, foreignId);

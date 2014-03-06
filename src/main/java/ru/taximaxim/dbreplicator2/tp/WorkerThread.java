@@ -64,7 +64,12 @@ public class WorkerThread implements Runnable {
 
         try (ErrorsLog errorsLog = Core.getErrorsLog();){
             try {
-                processCommand(errorsLog);
+                processCommand();
+                errorsLog.setStatus(runner.getId(), null, null, 1);
+            } catch (InstantiationException | IllegalAccessException e) {
+                errorsLog.add(runner.getId(), null, null, 
+                        String.format("Ошибка при создании объекта-стратегии раннера [id_runner = %d, %s]. [%s]", 
+                                runner.getId(), runner.getDescription(), e));
             } catch (ClassNotFoundException e) {
                 errorsLog.add(runner.getId(), null, null, 
                         String.format("Ошибка при инициализации данных раннера [id_runner = %d, %s]", 
@@ -94,8 +99,12 @@ public class WorkerThread implements Runnable {
      * @throws SQLException 
      * @throws ClassNotFoundException 
      * @throws StrategyException 
+     * @throws IllegalAccessException 
+     * @throws InstantiationException 
      */
-    public void processCommand(ErrorsLog errorsLog) throws ClassNotFoundException, SQLException, StrategyException {
+    public void processCommand() 
+            throws ClassNotFoundException, SQLException, StrategyException, 
+            InstantiationException, IllegalAccessException {
 
         ConnectionFactory connectionsFactory = Core.getConnectionFactory();
 
@@ -124,15 +133,10 @@ public class WorkerThread implements Runnable {
                         runStrategy(sourceConnection, targetConnection, strategyModel);
                     }
                 }
-                errorsLog.setStatus(runner.getId(), null, null, 1);
             } catch (StopChainProcesing e) {
                 LOG.warn(String.format("Запрошена принудительная остановка обработки цепочки стратегий раннера [id_runner = %d, %s].", 
                         runner.getId(), runner.getDescription()), e);
             }
-        } catch (InstantiationException | IllegalAccessException e) {
-            errorsLog.add(runner.getId(), null, null, 
-                    String.format("Ошибка при создании объекта-стратегии раннера [id_runner = %d, %s]. [%s]", 
-                            runner.getId(), runner.getDescription(), e));
         }
     }
 
