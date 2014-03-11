@@ -34,6 +34,7 @@ import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.StopChainProcesing;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
+import ru.taximaxim.dbreplicator2.el.DefaultUncaughtExceptionHandler;
 import ru.taximaxim.dbreplicator2.el.ErrorsLog;
 import ru.taximaxim.dbreplicator2.utils.Core;
 /**
@@ -58,6 +59,9 @@ public class WorkerThread implements Runnable {
 
     @Override
     public void run() {
+        Thread.currentThread().setUncaughtExceptionHandler(
+                new DefaultUncaughtExceptionHandler(runner.getId()));
+        
         LOG.debug(String.format("Запуск потока [%s] раннера [id_runner = %d, %s]...",
                 Thread.currentThread().getName(), runner.getId(),
                 runner.getDescription()));

@@ -13,7 +13,7 @@ insert into bone_cp_settings (id_pool, driver, url, user, pass, min_connections_
 --application_settings
 insert into application_settings (key, value) values ('tp.threads', '10');
 insert into application_settings (key, value) values ('stats.dest', 'stats');
-insert into application_settings (key, value) values ('error.dest', 'error');
+insert into application_settings (key, value) values ('error.dest', 'error123');
 
 
 --Tables
@@ -48,7 +48,7 @@ key2=''value2''', true, 100, 2);
 --Runner Table 1
 insert into runners (id_runner, source, target, description, class_name) values (3, 'source', 'dest', 'description', 'ru.taximaxim.dbreplicator2.replica.ReplicaRunner');
 --Strategy  Table 1
-insert into strategies (id, className, param, isEnabled, priority, id_runner) values (3, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Generic', null, true, 100, 3);
+insert into strategies (id, className, param, isEnabled, priority, id_runner) values (3, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Generic123', null, true, 100, 3);
 
 -------
 

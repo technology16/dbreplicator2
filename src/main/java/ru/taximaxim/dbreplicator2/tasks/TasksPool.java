@@ -25,6 +25,7 @@ package ru.taximaxim.dbreplicator2.tasks;
 import java.util.HashMap;
 import java.util.Map;
 
+import ru.taximaxim.dbreplicator2.el.DefaultUncaughtExceptionHandler;
 import ru.taximaxim.dbreplicator2.model.TaskSettings;
 import ru.taximaxim.dbreplicator2.model.TaskSettingsService;
 
@@ -59,6 +60,8 @@ public class TasksPool {
             if (task.getEnabled()) {
                 TaskRunner taskRunner = new TaskRunner(task);
                 Thread thread = new Thread(taskRunner);
+                thread.setUncaughtExceptionHandler(
+                        new DefaultUncaughtExceptionHandler(task.getRunner().getId()));
                 thread.start();
                 taskThreads.put(taskRunner, thread);
             }

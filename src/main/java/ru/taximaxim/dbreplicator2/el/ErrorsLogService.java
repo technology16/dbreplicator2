@@ -56,7 +56,7 @@ public interface ErrorsLogService {
      * 
      * @throws SQLException
      */
-    void add(Integer runnerId, String tableId, Long foreignId, String error, Exception e);
+    void add(Integer runnerId, String tableId, Long foreignId, String error, Throwable e);
     /**
      * Функция установки статуса сообщений об ошибке
      * 

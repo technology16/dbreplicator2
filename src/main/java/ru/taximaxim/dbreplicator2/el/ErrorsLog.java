@@ -117,7 +117,7 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
     }
 
     @Override
-    public void add(Integer runnerId, String tableId, Long foreignId, String error, Exception e) {
+    public void add(Integer runnerId, String tableId, Long foreignId, String error, Throwable e) {
         StringWriter writer = new StringWriter();
         PrintWriter printWriter = new PrintWriter(writer);
         printWriter.println("Подробности: ");
@@ -153,10 +153,8 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
             statement.setTimestamp(4, new Timestamp(new Date().getTime()));
             statement.setString(5, error);
             statement.execute(); 
-        } catch (SQLException e) {
-            LOG.error("Ошибка SQLException записи ошибки': ", e);
-        } catch (ClassNotFoundException e) {
-            LOG.error("Ошибка ClassNotFoundException записи ошибки': ", e);
+        } catch (Throwable e) {
+            LOG.error("Ошибка записи ошибки:\n" + error + "\n", e);
         }     
     }
     
@@ -200,10 +198,8 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
             }
 
             statement.execute();
-        } catch (SQLException e) {
-            LOG.error("Ошибка SQLException при установки статуса ошибки: ", e);
-        }  catch (ClassNotFoundException e) {
-            LOG.error("Ошибка ClassNotFoundException при установки статуса ошибки: ", e);
+        } catch (Throwable e) {
+            LOG.error("Ошибка при установки статуса ошибки: ", e);
         }       
     }
     
