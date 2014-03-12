@@ -307,7 +307,7 @@ public class H2CopyTableDataTest2rep {
      * @throws IOException
      * @throws InterruptedException 
      */
-    @Test//error//TODO
+    @Test
     public void testInsertUpdate() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
       //Проверка вставки и обновления
         LOG.info("Проверка вставки и обновления");
