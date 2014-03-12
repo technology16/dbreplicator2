@@ -27,9 +27,11 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -41,6 +43,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
+import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
+import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
+import ru.taximaxim.dbreplicator2.model.RunnerModel;
 import ru.taximaxim.dbreplicator2.model.RunnerService;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.el.ErrorsLog;
@@ -492,6 +497,46 @@ public class H2CopyTableDataTest {
         assertTrue("В раннере 1 отсутствует стратегия 1!", hasStrategy);
     }
     
+    protected void checkErrorInRunner(int runnerId) throws SQLException {
+        // Проверяем запись об ошибке в логе
+        try (PreparedStatement selectError = conn.prepareStatement("SELECT * FROM rep2_errors_log WHERE id_runner=" + runnerId);
+                ResultSet errorResult = selectError.executeQuery();) {
+            assertTrue("В логе ошибок отсутствует запись об ошибке " + runnerId + " раннера!", errorResult.next());
+            LOG.info(Jdbc.resultSetToString(errorResult, 
+                    new ArrayList<String>(JdbcMetadata.getColumns(errorResult))));
+        }
+    }
+    
+    /**
+     * Проверка перехвата неожиданного завершения потока задачи
+     * @throws InterruptedException 
+     * @throws SQLException 
+     */
+    @Test
+    public void exceptionInTaskTest() throws InterruptedException, SQLException{
+        // Запускаем задачи
+        Core.getTasksPool().start();
+        Thread.sleep(REPLICATION_DELAY);
+        
+        checkErrorInRunner(16);
+    }
+    
+    /**
+     * Проверка перехвата неожиданного завершения потока пула потоков
+     * @throws InterruptedException 
+     * @throws SQLException 
+     */
+    @Test
+    public void exceptionInThreadPoolTest() throws InterruptedException, SQLException{
+        // Запускаем задачи
+        RunnerService runnerService = new RunnerService(sessionFactory);
+
+        Core.getThreadPool().start(runnerService.getRunner(17));
+        Thread.sleep(REPLICATION_DELAY);
+        
+        checkErrorInRunner(17);
+    }
+    
     /**
      * Инициализация
      */
@@ -513,4 +558,6 @@ public class H2CopyTableDataTest {
         worker = new WorkerThread(runnerService.getRunner(1));
         errorsCountWatchdogWorker = new WorkerThread(runnerService.getRunner(7));
     }
+    
+    
 }
