@@ -24,6 +24,8 @@ package ru.taximaxim.dbreplicator2.el;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 
+import org.apache.log4j.Logger;
+
 import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
@@ -34,6 +36,8 @@ import ru.taximaxim.dbreplicator2.utils.Core;
  */
 public class DefaultUncaughtExceptionHandler implements UncaughtExceptionHandler {
 
+    private static final Logger LOG = Logger.getLogger(DefaultUncaughtExceptionHandler.class);
+    
     /**
      * Идентификатор раннера 
      */
@@ -68,6 +72,15 @@ public class DefaultUncaughtExceptionHandler implements UncaughtExceptionHandler
      */
     @Override
     public void uncaughtException(Thread t, Throwable e) {
+        // Сразу пишем в лог
+        try {
+            LOG.fatal("Непредвиденная ошибка потока: ", e);
+        } catch (Throwable internal) {
+            // Записываем ошибку записи в лог
+            try (ErrorsLog errorsLog = Core.getErrorsLog()) {
+                errorsLog.add(getRunnerId(), null, null, "Ошибка при записи в лог: ", internal);
+            }
+        }
         // В случае непредвиденной остановки потока пишем в лог сообщение об ошибке
         try (ErrorsLog errorsLog = Core.getErrorsLog()) {
             errorsLog.add(getRunnerId(), null, null, "Непредвиденная ошибка потока: ", e);
