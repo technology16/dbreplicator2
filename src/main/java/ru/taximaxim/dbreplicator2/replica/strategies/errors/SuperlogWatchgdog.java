@@ -46,7 +46,10 @@ import ru.taximaxim.dbreplicator2.replica.StrategyException;
 public class SuperlogWatchgdog implements Strategy {
 
     private static final Logger LOG = Logger.getLogger(SuperlogWatchgdog.class);
-
+    
+    private static final int DEFAULT_PERIOD = 1800000;
+    private static final int DEFAULT_PART_EMAIL = 10;
+    
     private static final String PERIOD = "period";
     private static final String PART_EMAIL = "partEmail";
     private static final String COUNT = "count";
@@ -62,14 +65,14 @@ public class SuperlogWatchgdog implements Strategy {
             StrategyModel data) throws StrategyException, SQLException,
             ClassNotFoundException {
         
-        int period = 1800000;
+        int period = DEFAULT_PERIOD;
         if (data.getParam(PERIOD) != null) {
             period = Integer.parseInt(data.getParam(PERIOD));
         }
 
         Timestamp date = new Timestamp(Calendar.getInstance().getTimeInMillis() - period);
 
-        int partEmail = 10;
+        int partEmail = DEFAULT_PART_EMAIL;
         if (data.getParam(PART_EMAIL) != null) {
             partEmail = Integer.parseInt(data.getParam(PART_EMAIL));
         }

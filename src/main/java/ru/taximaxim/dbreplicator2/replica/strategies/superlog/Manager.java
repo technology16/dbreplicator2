@@ -50,14 +50,24 @@ public class Manager implements Strategy {
     private static final Logger LOG = Logger.getLogger(Manager.class);
 
     /**
+     * Размер выборки по умолчанию
+     */
+    private static final int DEFAULT_FETCH_SIZE = 1000;
+
+    /**
+     * Размер сбрасываемых данных в БД по умолчанию
+     */
+    private static final int DEFAULT_BATCH_SIZE = 1000;
+    
+    /**
      * Размер выборки данных (строк)
      */
-    private int fetchSize = 1000;
+    private int fetchSize = DEFAULT_FETCH_SIZE;
     
     /**
      * Размер сбрасываемых в БД данных (строк)
      */
-    private int batchSize = 1000;
+    private int batchSize = DEFAULT_BATCH_SIZE;
 
     /**
      * Конструктор по умолчанию
