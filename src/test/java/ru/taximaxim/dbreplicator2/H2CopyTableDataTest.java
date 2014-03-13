@@ -100,7 +100,6 @@ public class H2CopyTableDataTest {
         errorsLog.close();
     }
     
-
     /**
      * Проверка Супер логов
      * @throws SQLException
@@ -350,7 +349,7 @@ public class H2CopyTableDataTest {
     @Test
     public void testInsert() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
       //Проверка вставки
-        Helper.executeSqlFromFile(conn, "sql_insert.sql");   
+        Helper.executeSqlFromFile(conn, "sql_insert.sql");  
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");

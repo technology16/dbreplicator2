@@ -23,14 +23,12 @@
 
 package ru.taximaxim.dbreplicator2;
 
+
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -41,46 +39,46 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
-import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.model.RunnerService;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
 import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
- * @author mardanov_rm
+ * Тест репликации данных между базами H2-H2. 
+ * 
+ * Данный тест использует асинхронный менеджер записей супер лог таблицы, 
+ * поэтому после каждого цикла репликации вызывается инструкция 
+ * Thread.sleep(REPLICATION_DELAY); Тест может некорректно работать на медленных 
+ * машинах, при необходимости подгонять величину задержки вручную!
+ * 
+ * @author volodin_aa
  *
  */
-public class OffsetTest {
+public class IntegrityReplicatedDataTest {
+    protected static final Logger LOG = Logger.getLogger(IntegrityReplicatedDataTest.class);
+    
     // Задержка между циклами репликации
-    private static final int REPLICATION_DELAY = 500;
-    protected static final Logger LOG = Logger.getLogger(OffsetTest.class);
+    private static final int REPLICATION_DELAY = 1500;
+    
     protected static SessionFactory sessionFactory;
     protected static Session session;
     protected static ConnectionFactory connectionFactory;
     protected static Connection conn = null;
     protected static Connection connDest = null;
-    protected static Runnable workerPg = null;
-    protected static Runnable workerMs = null;
+    protected static Runnable worker = null;
     protected static Runnable errorsCountWatchdogWorker = null;
-
-    /**
-     * @throws java.lang.Exception
-     */
+    protected static Runnable errorsIntegrityReplicatedData = null;
+    
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        Core.configurationClose();
-        Core.getConfiguration("src/test/resources/hibernateOffset.cfg.xml");
         sessionFactory = Core.getSessionFactory();
         session = sessionFactory.openSession();
         connectionFactory = Core.getConnectionFactory();
         initialization();
     }
 
-    /**
-     * @throws java.lang.Exception
-     */
     @AfterClass
-    public static void tearDownAfterClass() throws Exception {
+    public static void setUpAfterClass() throws Exception {
         if(conn!=null)
             conn.close();
         if(connDest!=null)
@@ -90,9 +88,42 @@ public class OffsetTest {
         Core.connectionFactoryClose();
         Core.sessionFactoryClose();
         Core.statsServiceClose();
-        Core.configurationClose();
     }
+    
+    /**
+     * Проверка вставки 
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     * @throws IOException
+     * @throws InterruptedException 
+     */
+    @Test
+    public void testInsert() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
+      //Проверка вставки
+        Helper.executeSqlFromFile(conn, "sql_insert.sql");
+        worker.run();
+        Helper.executeSqlFromFile(conn, "sql_update.sql"); 
+        worker.run();
+        Thread.sleep(REPLICATION_DELAY);
+        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
+        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
+        Helper.AssertEquals(listSource, listDest);
 
+        listSource = Helper.InfoTest(conn, "t_table1");
+        listDest   = Helper.InfoTest(connDest, "t_table1");
+        Helper.AssertEquals(listSource, listDest);
+        Thread.sleep(REPLICATION_DELAY);
+        //Helper.executeSqlFromFile(connDest, "sql_insert.sql"); 
+        Helper.executeSqlFromFile(connDest, "sql_update.sql"); 
+        Helper.executeSqlFromFile(connDest, "sql_delete.sql"); 
+        Helper.InfoSelect(conn, "rep2_workpool_data");
+        
+        errorsIntegrityReplicatedData.run();
+        int count_rep2_workpool_data = Helper.InfoCount(conn, "rep2_workpool_data");
+        assertTrue(String.format("Должны быть ошибки [%s!=0]", count_rep2_workpool_data), count_rep2_workpool_data!= 0);
+        Helper.InfoSelect(conn, "rep2_workpool_data");
+    }
+    
     /**
      * Инициализация
      */
@@ -102,7 +133,7 @@ public class OffsetTest {
         conn = connectionFactory.getConnection(source);
         
         Helper.executeSqlFromFile(conn, "importRep2.sql");
-        Helper.executeSqlFromFile(conn, "importSourceOffset.sql");
+        Helper.executeSqlFromFile(conn, "importSource.sql");
         
         String dest = "dest";
         connDest = connectionFactory.getConnection(dest);
@@ -111,67 +142,8 @@ public class OffsetTest {
         
         RunnerService runnerService = new RunnerService(sessionFactory);
 
-        workerPg = new WorkerThread(runnerService.getRunner(1));
+        worker = new WorkerThread(runnerService.getRunner(1));
         errorsCountWatchdogWorker = new WorkerThread(runnerService.getRunner(7));
+        errorsIntegrityReplicatedData = new WorkerThread(runnerService.getRunner(15));
     }
-    
-    /**
-     * Проверка внешних ключей
-     * вставка в главную таблицу  
-     * вставка таблицу подчиненную
-     * изменение главной таблицы
-     * 
-     * репликация
-     * 
-     * вставка таблицу подчиненную
-     * изменение главной таблицы
-     * 
-     * 
-     * @throws SQLException
-     * @throws ClassNotFoundException
-     * @throws IOException
-     * @throws InterruptedException 
-     */
-    @Test
-    public void testOffset() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
-        //Проверка внешних ключей
-        LOG.info("Проверка внешних ключей");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key_error.sql");
-        
-        workerPg.run();
-        Thread.sleep(REPLICATION_DELAY);
-        workerPg.run();
-        Thread.sleep(REPLICATION_DELAY);
-        workerPg.run();
-        Thread.sleep(REPLICATION_DELAY);
-        
-        // Выводим данные из rep2_superlog_table
-        try (PreparedStatement select = 
-                conn.prepareStatement("SELECT * FROM REP2_WORKPOOL_DATA");
-                ResultSet result = select.executeQuery();
-        ) {
-            List<String> cols = 
-                    new ArrayList<String>(JdbcMetadata.getColumns(conn, "REP2_WORKPOOL_DATA"));
-            
-            while (result.next()) {
-                LOG.info("================================");
-                for (String col : cols) {
-                    LOG.info(col + "=" + result.getString(col));
-                }
-                LOG.info("================================");
-            }
-        }
-        
-       // errorsCountWatchdogWorker.run();
-        workerPg.run();
-        Thread.sleep(REPLICATION_DELAY);
-        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table2");
-        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table2");
-        Helper.AssertEquals(listSource, listDest);
-
-        listSource = Helper.InfoTest(conn, "t_table3");
-        listDest   = Helper.InfoTest(connDest, "t_table3");
-        assertTrue(String.format("Количество записей [%s == 8 и %s = 2]", listSource.size(), listDest.size()),
-                listSource.size() == 8 && listDest.size() == 2);
-    }    
 }

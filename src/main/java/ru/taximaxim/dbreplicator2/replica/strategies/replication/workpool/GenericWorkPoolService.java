@@ -74,7 +74,7 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
     public PreparedStatement getLastOperationsStatement() throws SQLException {
         if (lastOperationsStatement == null) {
             lastOperationsStatement = 
-                getConnection().prepareStatement("SELECT * FROM rep2_workpool_data WHERE id_superlog IN (SELECT MAX(id_superlog) AS id_superlog FROM rep2_workpool_data WHERE id_runner=? GROUP BY id_foreign, id_table ORDER BY id_superlog LIMIT ? OFFSET ?) ORDER BY id_superlog ",
+                getConnection().prepareStatement("SELECT * FROM rep2_workpool_data WHERE id_runner=? AND id_superlog IN (SELECT MAX(id_superlog) AS id_superlog FROM rep2_workpool_data WHERE id_runner=? GROUP BY id_foreign, id_table ORDER BY id_superlog LIMIT ? OFFSET ?) ORDER BY id_superlog ",
                         ResultSet.TYPE_FORWARD_ONLY,
                         ResultSet.CONCUR_READ_ONLY);
         }
@@ -91,14 +91,15 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
         PreparedStatement statement = getLastOperationsStatement();
         
         statement.setInt(1, runnerId);
+        statement.setInt(2, runnerId);
         // Извлекаем частями равными fetchSize 
         statement.setFetchSize(fetchSize);
         
         // По задаче #2327
         // Задаем первоначальное смещение выборки равное 0.
         // При появлении ошибочных записей будем его увеличивать на 1.
-        statement.setInt(2, fetchSize);
-        statement.setInt(3, offset);
+        statement.setInt(3, fetchSize);
+        statement.setInt(4, offset);
         
         return statement.executeQuery();
     }
