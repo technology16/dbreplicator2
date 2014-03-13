@@ -479,9 +479,7 @@ public class GenericAlgorithm implements Strategy {
             getDestDataService().setRepServerName(data.getRunner().getSource().getPoolId());
 
             selectLastOperations(sourceConnection, targetConnection, data);
-
-            sourceConnection.commit();
-        } catch (SQLException e) {
+        } catch (Throwable e) {
             sourceConnection.rollback();
             throw e;
         } finally {    

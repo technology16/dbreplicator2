@@ -164,8 +164,8 @@ public class FastManager implements Strategy {
                         targetConnection.commit();
                     }
                 }
-            } catch (SQLException e) {
-                // Откатываемся
+            } catch (Throwable e) {
+                // В любом случае
                 targetConnection.rollback();
                 // Пробрасываем ошибку на уровень выше
                 throw e;
@@ -177,27 +177,28 @@ public class FastManager implements Strategy {
                 }
             }
         } catch (InterruptedException e) {
+            LOG.warn("Работа потока прервана.", e);
             throw new StrategyException(e);
-        } finally {
-            try {
-                if (lastAutoCommit != null) {
-                    sourceConnection.setAutoCommit(lastAutoCommit);
-                }
-            } catch (SQLException e) {
-                // Ошибка может возникнуть если во время операции упало
-                // соединение к БД
-                LOG.warn("Ошибка при возврате автокомита в исходное состояние.", e);
+        }
+        
+        try {
+            if (lastAutoCommit != null) {
+                sourceConnection.setAutoCommit(lastAutoCommit);
             }
+        } catch (SQLException e) {
+            // Ошибка может возникнуть если во время операции упало
+            // соединение к БД
+            LOG.warn("Ошибка при возврате автокомита в исходное состояние.", e);
+        }
 
-            try {
-                if (lastTargetAutoCommit != null) {
-                    targetConnection.setAutoCommit(lastTargetAutoCommit);
-                }
-            } catch (SQLException sqlException) {
-                // Ошибка может возникнуть если во время операции упало
-                // соединение к БД
-                LOG.warn("Ошибка при возврате автокомита в исходное состояние.", sqlException);
+        try {
+            if (lastTargetAutoCommit != null) {
+                targetConnection.setAutoCommit(lastTargetAutoCommit);
             }
+        } catch (SQLException sqlException) {
+            // Ошибка может возникнуть если во время операции упало
+            // соединение к БД
+            LOG.warn("Ошибка при возврате автокомита в исходное состояние.", sqlException);
         }
     }
 
