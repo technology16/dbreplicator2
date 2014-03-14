@@ -54,15 +54,19 @@ public class GenericAlgorithm implements Strategy {
     private static final Logger LOG = Logger.getLogger(GenericAlgorithm.class);
     
     private static final String NEW_LINE = " \n";
+    
+    private static final int DEFAULT_FETCH_SIZE = 1000;
+    private static final int DEFAULT_BATCH_SIZE = 1000;
+    
     /**
      * Размер выборки данных (строк)
      */
-    private int fetchSize = 1000;
+    private int fetchSize = DEFAULT_FETCH_SIZE;
 
     /**
      * Размер сбрасываемых в БД данных (строк)
      */
-    private int batchSize = 1000;
+    private int batchSize = DEFAULT_BATCH_SIZE;
 
     private boolean isStrict = false;
 

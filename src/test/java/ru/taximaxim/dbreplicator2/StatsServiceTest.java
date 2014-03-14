@@ -68,10 +68,12 @@ public class StatsServiceTest {
         if (session != null) {
             session.close();
         }
-
         Core.connectionFactoryClose();
         Core.sessionFactoryClose();
         Core.statsServiceClose();
+        Core.tasksPoolClose();
+        Core.taskSettingsServiceClose(); 
+        Core.configurationClose();
     }
 
     @Test

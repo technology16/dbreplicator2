@@ -96,7 +96,11 @@ public class H2CopyTableDataTest {
             session.close();
         Core.connectionFactoryClose();
         Core.sessionFactoryClose();
+        Core.threadPoolClose();
         Core.statsServiceClose();
+        Core.tasksPoolClose();
+        Core.taskSettingsServiceClose(); 
+        Core.configurationClose();
         errorsLog.close();
     }
     

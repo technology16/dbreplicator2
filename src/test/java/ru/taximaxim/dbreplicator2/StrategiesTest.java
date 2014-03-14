@@ -52,8 +52,12 @@ public class StrategiesTest {
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
         sessionFactory.close();
+        Core.connectionFactoryClose();
         Core.sessionFactoryClose();
         Core.statsServiceClose();
+        Core.tasksPoolClose();
+        Core.taskSettingsServiceClose(); 
+        Core.configurationClose();
     }
     
     /**

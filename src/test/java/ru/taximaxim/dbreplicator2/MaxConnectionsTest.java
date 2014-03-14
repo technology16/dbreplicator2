@@ -37,6 +37,7 @@ import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 import ru.taximaxim.dbreplicator2.model.BoneCPDataBaseSettingsStorage;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsModel;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
+import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
  * Класс для тестирования пулов соединений
@@ -87,6 +88,12 @@ public class MaxConnectionsTest extends TestCase {
         if (sessionFactory != null) {
             sessionFactory.close();
         }
+        Core.connectionFactoryClose();
+        Core.sessionFactoryClose();
+        Core.statsServiceClose();
+        Core.tasksPoolClose();
+        Core.taskSettingsServiceClose(); 
+        Core.configurationClose();
     }
 
     /**

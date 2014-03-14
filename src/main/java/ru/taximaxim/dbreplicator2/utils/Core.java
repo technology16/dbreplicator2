@@ -253,8 +253,10 @@ public final class Core {
      * @throws InterruptedException 
      */
     public static synchronized void threadPoolClose() throws InterruptedException {
-        threadPool.shutdownThreadPool();
-        threadPool = null;
+        if(threadPool != null) {
+            threadPool.shutdownThreadPool();
+            threadPool = null;
+        }
     }
     
     /**

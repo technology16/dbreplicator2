@@ -82,6 +82,7 @@ public class H2CopyTableDataTest2rep {
 
     @AfterClass
     public static void setUpAfterClass() throws Exception {
+        Core.threadPoolClose();
         if(conn!=null)
             conn.close();
         if(connDest!=null)
@@ -91,6 +92,9 @@ public class H2CopyTableDataTest2rep {
         Core.connectionFactoryClose();
         Core.sessionFactoryClose();
         Core.statsServiceClose();
+        Core.tasksPoolClose();
+        Core.taskSettingsServiceClose(); 
+        Core.configurationClose();
     }
     
     /**
@@ -200,15 +204,6 @@ public class H2CopyTableDataTest2rep {
         workerRun();
         workerRun2();
         
-        workerRun();
-        workerRun2();
-        
-        workerRun();
-        workerRun2();
-        
-        workerRun();
-        workerRun2();
-        
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
         Helper.AssertEquals(listSource, listDest);
@@ -255,15 +250,6 @@ public class H2CopyTableDataTest2rep {
         Helper.executeSqlFromFile(conn, "sql_delete.sql");   
         workerRun();
         Helper.executeSqlFromFile(connDest, "sql_delete.sql");    
-        workerRun2();
-        
-        workerRun();
-        workerRun2();
-        
-        workerRun();
-        workerRun2();
-        
-        workerRun();
         workerRun2();
         
         workerRun();
@@ -321,15 +307,6 @@ public class H2CopyTableDataTest2rep {
         workerRun();
         workerRun2();
         
-        workerRun();
-        workerRun2();
-        
-        workerRun();
-        workerRun2();
-        
-        workerRun();
-        workerRun2();
-        
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
         Helper.AssertEquals(listSource, listDest);
@@ -377,15 +354,6 @@ public class H2CopyTableDataTest2rep {
         workerRun();
         Helper.executeSqlFromFile(connDest, "sql_insert.sql");   
         Helper.executeSqlFromFile(connDest, "sql_delete.sql");   
-        workerRun2();
-        
-        workerRun();
-        workerRun2();
-        
-        workerRun();
-        workerRun2();
-        
-        workerRun();
         workerRun2();
         
         workerRun();
@@ -462,15 +430,6 @@ public class H2CopyTableDataTest2rep {
         
        // Helper.executeSqlFromSql(conn, "UPDATE T_TAB SET _value = ?", "source");
        // Helper.executeSqlFromSql(conn, "UPDATE T_TAB SET _value = ?", "dest");
-        
-        workerRun();
-        workerRun2();
-        
-        workerRun();
-        workerRun2();
-        
-        workerRun();
-        workerRun2();
         
         workerRun();
         workerRun2();
