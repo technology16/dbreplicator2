@@ -92,35 +92,36 @@ public class ReplicationTimeWatchgdog implements Strategy {
                 partEmail = Integer.parseInt(data.getParam(PART_EMAIL));
             }
             
-            String runIgSql = "";
+            StringBuffer runIgSql = new StringBuffer();
             if (data.getParam(RUNNERS) != null) {
-                String runnerIgnore = "";
-                String runnerAktiv = "";
+                StringBuffer runnerIgnore = new StringBuffer();
+                StringBuffer runnerAktiv = new StringBuffer();
                 StringTokenizer totoken = new StringTokenizer(data.getParam(RUNNERS).toString(), ",");
                 while (totoken.hasMoreTokens()) {
                     String str = totoken.nextToken();
                     if(Integer.parseInt(str) < 0) {
-                        runnerIgnore += str + ",";
+                        runnerIgnore.append(str).append(",");
                     } else {
-                        runnerAktiv += str + ",";
+                        runnerAktiv.append(str).append(",");
                     }
                 }
-                if(!runnerIgnore.isEmpty()) {
-                    runIgSql += String.format(" AND id_runner NOT IN (%s)", 
-                            removeLastChar(runnerIgnore).replace("-", ""));
+                if(runnerIgnore.length()>0) {
+                    runIgSql.append(String.format(" AND id_runner NOT IN (%s)", 
+                            removeLastChar(runnerIgnore.toString()).replace("-", "")));
                 }
-                if(!runnerAktiv.isEmpty()){
-                    runIgSql += String.format(" AND id_runner IN (%s)", 
-                            removeLastChar(runnerAktiv));
+                if(runnerAktiv.length()>0){
+                    runIgSql.append(String.format(" AND id_runner IN (%s)", 
+                            removeLastChar(runnerAktiv.toString())));
                 }
                
             }
             
             int rowCount = 0;
-            try (PreparedStatement selectErrorsCount = sourceConnection
-                  .prepareStatement(
+            String selectErrorsCountQuery = 
                     "SELECT count(*) as count FROM rep2_workpool_data WHERE c_date <= ?"
-                          + runIgSql);) {
+                    + runIgSql;
+            try (PreparedStatement selectErrorsCount = 
+                    sourceConnection.prepareStatement(selectErrorsCountQuery);) {
     
                 selectErrorsCount.setTimestamp(1, date);
                 try (ResultSet countResult = selectErrorsCount.executeQuery();) {
@@ -131,11 +132,11 @@ public class ReplicationTimeWatchgdog implements Strategy {
             }
             // Если нет ошибок то смысл в запуске данного кода бессмыслен
             if (rowCount != 0) {
+                String selectQuery = 
+                        "SELECT * FROM rep2_workpool_data WHERE c_date <= ? " + runIgSql + " ORDER BY id_superlog";
                 try (PreparedStatement selectPreparedStatement = sourceConnection
-                      .prepareStatement(
-                        "SELECT * FROM rep2_workpool_data WHERE c_date <= ? " + runIgSql+ " ORDER BY id_superlog",
+                      .prepareStatement(selectQuery,
                                 ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);) {
-    
                     selectPreparedStatement.setTimestamp(1, date);
                     selectPreparedStatement.setFetchSize(partEmail);
                     try (ResultSet resultSet = selectPreparedStatement.executeQuery();) {
