@@ -102,13 +102,11 @@ public class ReplicationTimeWatchgdog implements Strategy {
                         runnerAktiv += str + ",";
                     }
                 }
-                if(runnerIgnore != "") {
-                    runnerIgnore.substring(0, runnerIgnore.length()-1);
+                if(!runnerIgnore.isEmpty()) {
                     runIgSql += String.format(" AND id_runner NOT IN (%s)", 
                             removeLastChar(runnerIgnore).replace("-", ""));
                 }
-                if(runnerAktiv != ""){
-                    runnerAktiv.substring(runnerAktiv.length()-1);
+                if(!runnerAktiv.isEmpty()){
                     runIgSql += String.format(" AND id_runner IN (%s)", 
                             removeLastChar(runnerAktiv));
                 }
