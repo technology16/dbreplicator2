@@ -49,6 +49,9 @@ public class ReplicationTimeWatchgdog implements Strategy {
 
     private static final Logger LOG = Logger.getLogger(ReplicationTimeWatchgdog.class);
 
+    private static final int DEFAULT_PERIOD = 1800000; 
+    private static final int DEFAULT_PART_EMAIL = 10; 
+    
     private static final String PERIOD = "period";
     private static final String RUNNERS = "runners";
     private static final String PART_EMAIL = "partEmail";
@@ -77,14 +80,14 @@ public class ReplicationTimeWatchgdog implements Strategy {
             StrategyModel data) throws StrategyException, SQLException,
             ClassNotFoundException {
         try {
-            int period = 1800000;
+            int period = DEFAULT_PERIOD;
             if (data.getParam(PERIOD) != null) {
                 period = Integer.parseInt(data.getParam(PERIOD));
             }
     
             Timestamp date = new Timestamp(Calendar.getInstance().getTimeInMillis() - period);
     
-            int partEmail = 10;
+            int partEmail = DEFAULT_PART_EMAIL;
             if (data.getParam(PART_EMAIL) != null) {
                 partEmail = Integer.parseInt(data.getParam(PART_EMAIL));
             }
