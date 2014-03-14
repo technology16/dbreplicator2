@@ -12,8 +12,8 @@ insert into bone_cp_settings (id_pool, driver, url, user, pass, min_connections_
 
 --application_settings
 insert into application_settings (key, value) values ('tp.threads', '10');
-insert into application_settings (key, value) values ('stats.dest', 'stats');
-insert into application_settings (key, value) values ('error.dest', 'error');
+insert into application_settings (key, value) values ('stats.dest', 'source');
+insert into application_settings (key, value) values ('error.dest', 'source');
 
 
 --Tables
@@ -117,6 +117,12 @@ insert into strategies (id, id_runner, className, param, isEnabled, priority) va
 --Runner null
 insert into runners (id_runner, source, target, description, class_name) values (25, 'source', 'dest', 'Null', 'ru.taximaxim.dbreplicator2.replica.ReplicaRunner');
 -------
+--Runner IntegrityReplicatedData
+insert into runners (id_runner, source, target, description, class_name) values (18, 'source', 'dest', 'ErrorsIntegrityReplicatedData', '');
+--Strategy  IntegrityReplicatedData
+insert into strategies (id, id_runner, className, param, isEnabled, priority) values (18, 18, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.IntegrityReplicatedData', 'period=0
+idRunner=25', true, 100);
+
 
 --Runner tables
 --insert into table_observers (id_runner, id_table) values (25, 1);
@@ -158,9 +164,3 @@ insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name
 
 -- Задача с ошибочной стратегией
 insert into tasks (id_task, id_runner, enabled, success_interval, fail_interval, description) values (16, 16, true, 10000, 300000, 'ru.taximaxim.dbreplicator2.utils.OutOfMemoryErrorStrategy');
-
---Runner IntegrityReplicatedData
-insert into runners (id_runner, source, target, description, class_name) values (15, 'source', 'dest', 'ErrorsIntegrityReplicatedData', '');
---Strategy  IntegrityReplicatedData
-insert into strategies (id, className, param, isEnabled, priority, id_runner) values (15, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.IntegrityReplicatedData', 'partEmail=10
-idRunner=25', true, 100, 15);

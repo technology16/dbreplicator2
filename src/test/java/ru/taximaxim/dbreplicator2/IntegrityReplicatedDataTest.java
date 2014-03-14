@@ -28,6 +28,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -71,6 +72,8 @@ public class IntegrityReplicatedDataTest {
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
+        Core.configurationClose();
+        Core.getConfiguration("src/test/resources/hibernateIntegrityReplicatedData.cfg.xml");
         sessionFactory = Core.getSessionFactory();
         session = sessionFactory.openSession();
         connectionFactory = Core.getConnectionFactory();
@@ -85,6 +88,7 @@ public class IntegrityReplicatedDataTest {
             connDest.close();
         if(session!=null)
             session.close();
+        Core.configurationClose();
         Core.connectionFactoryClose();
         Core.sessionFactoryClose();
         Core.statsServiceClose();
@@ -116,12 +120,37 @@ public class IntegrityReplicatedDataTest {
         //Helper.executeSqlFromFile(connDest, "sql_insert.sql"); 
         Helper.executeSqlFromFile(connDest, "sql_update.sql"); 
         Helper.executeSqlFromFile(connDest, "sql_delete.sql"); 
-        Helper.InfoSelect(conn, "rep2_workpool_data");
+        //Helper.InfoSelect(conn, "rep2_workpool_data");
+        int count_rep2_errors_log = Helper.InfoCount(conn, "rep2_errors_log");
+        assertTrue(String.format("rep2_errors_log чистый [%s==0]", count_rep2_errors_log), count_rep2_errors_log== 0);
         
         errorsIntegrityReplicatedData.run();
+        Thread.sleep(REPLICATION_DELAY);
         int count_rep2_workpool_data = Helper.InfoCount(conn, "rep2_workpool_data");
         assertTrue(String.format("Должны быть ошибки [%s!=0]", count_rep2_workpool_data), count_rep2_workpool_data!= 0);
-        Helper.InfoSelect(conn, "rep2_workpool_data");
+        
+        count_rep2_errors_log = Helper.InfoCount(conn, "rep2_errors_log where c_status = 0");
+        assertTrue(String.format("Должны быть ошибки rep2_errors_log [%s!=0]", count_rep2_errors_log), count_rep2_errors_log!= 0);
+
+        Helper.executeSqlFromFile(conn, "sql_delete.sql");     
+        worker.run();
+        Helper.executeSqlFromFile(conn, "sql_update.sql"); 
+        worker.run();
+        Thread.sleep(REPLICATION_DELAY);
+        
+        PreparedStatement statement = conn.prepareStatement("INSERT INTO T_TABLE1 (id, _int, _boolean, _long, _decimal, _double, _float, _string, _byte, _date, _time, _timestamp) select  id_foreign, 2, true, 5968326496, 99.65, 5.62, 79.6, 'rasfar', 0, now(), now(), now() from rep2_workpool_data where id_table='T_TABLE1' and c_operation = 'D'");
+        statement.execute();
+        statement.close();
+        worker.run();
+        Thread.sleep(REPLICATION_DELAY);
+        
+        errorsIntegrityReplicatedData.run();
+        Thread.sleep(REPLICATION_DELAY);
+        
+        count_rep2_errors_log = Helper.InfoCount(conn, "rep2_errors_log where c_status = 0"); 
+        assertTrue(String.format("Должны быть ошибки исправлены rep2_errors_log [%s==0]", count_rep2_errors_log), count_rep2_errors_log == 0);
+        
+        Helper.InfoSelect(conn, "rep2_errors_log");
     }
     
     /**
@@ -144,6 +173,6 @@ public class IntegrityReplicatedDataTest {
 
         worker = new WorkerThread(runnerService.getRunner(1));
         errorsCountWatchdogWorker = new WorkerThread(runnerService.getRunner(7));
-        errorsIntegrityReplicatedData = new WorkerThread(runnerService.getRunner(15));
+        errorsIntegrityReplicatedData = new WorkerThread(runnerService.getRunner(16));
     }
 }

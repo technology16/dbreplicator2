@@ -12,8 +12,8 @@ insert into bone_cp_settings (id_pool, driver, url, user, pass, min_connections_
 
 --application_settings
 insert into application_settings (key, value) values ('tp.threads', '10');
-insert into application_settings (key, value) values ('stats.dest', 'stats');
-insert into application_settings (key, value) values ('error.dest', 'error');
+insert into application_settings (key, value) values ('stats.dest', 'source');
+insert into application_settings (key, value) values ('error.dest', 'source');
 
 
 --Tables
@@ -156,7 +156,7 @@ insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name
 insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (13, 13, '_STRING');
 
 --Runner IntegrityReplicatedData
-insert into runners (id_runner, source, target, description, class_name) values (15, 'source', 'dest', 'ErrorsIntegrityReplicatedData', '');
+insert into runners (id_runner, source, target, description, class_name) values (16, 'source', 'dest', 'ErrorsIntegrityReplicatedData', '');
 --Strategy  IntegrityReplicatedData
-insert into strategies (id, className, param, isEnabled, priority, id_runner) values (15, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.IntegrityReplicatedData', 'partEmail=10
-idRunner=25', true, 100, 15);
+insert into strategies (id, id_runner, className, param, isEnabled, priority) values (16, 16, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.IntegrityReplicatedData', 'period=0
+idRunner=25', true, 100);

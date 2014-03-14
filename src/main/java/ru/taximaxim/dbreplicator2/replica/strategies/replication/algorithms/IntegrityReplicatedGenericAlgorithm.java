@@ -54,10 +54,7 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
     private GenericDataTypeService sourceDataService;
     private GenericDataTypeService destDataService;
     
-    private static Integer partEmail;
     private static Integer idRunner;
-    private static int countPart;
-    private static StringBuffer rowDumpEmail;
     
     public IntegrityReplicatedGenericAlgorithm(int fetchSize, int batchSize,
             boolean isStrict, WorkPoolService workPoolService,
@@ -99,43 +96,6 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
         }
         return pri;
     }
-    
-    /**
-     * Обнуление списка
-     * @param data
-     * @return
-     */
-    protected StringBuffer getStringBuffer(StrategyModel data){
-        return new StringBuffer(
-                    String.format("Ошибка в целостности реплицированных данных [%s => %s]\n",
-                            data.getRunner().getSource().getPoolId(),
-                            data.getRunner().getTarget().getPoolId()));
-    }
-    
-    /**
-     * Подготовка строки для лога
-     * @param rowDumpEmail
-     * @param partEmail
-     * @return
-     */
-    protected String createInfoLog(StringBuffer rowDumpEmail, int partEmail) {
-        return  rowDumpEmail.toString().replace("###", String.valueOf(partEmail));
-    }
-    
-    /**
-     * получение кол-во часте для отправки сообщений
-     * @param data
-     * @return
-     */
-    protected int getPartEmail(StrategyModel data) {
-        if (partEmail==null) {
-            partEmail = 10;
-            if(data.getParam(PART_EMAIL)!=null) {
-                partEmail = Integer.parseInt(data.getParam(PART_EMAIL));
-            }
-        }
-        return partEmail;
-    }
 
     /**
      * Получение раннера
@@ -172,8 +132,6 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
         ResultSet operationsResult = 
                 getWorkPoolService().getLastOperations(getRunner(data), getFetchSize(), offset);
         try {
-            countPart = 1;
-            rowDumpEmail = getStringBuffer(data);
             // Проходим по списку измененных записей
             for (int rowsCount = 1; operationsResult.next(); rowsCount++) {
                 // Реплицируем операцию
@@ -197,9 +155,6 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
                     LOG.info(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Обработано %s строк...", 
                             data.getRunner().getId(), data.getRunner().getDescription(), data.getId(), rowsCount));
                 }
-            }
-            if(countPart != 1) {
-                LOG.error(createInfoLog(rowDumpEmail, (countPart-1)));
             }
         } finally {
             operationsResult.close();
@@ -229,53 +184,35 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
         try (ResultSet sourceResult = selectSourceStatement.executeQuery();) {
             while(sourceResult.next()) {
                 String prikey = setOptions(colmSourcePri, selectTargetStatement, sourceResult);
-                try (ResultSet targetResult = selectTargetStatement.executeQuery();) {
-                    if(countPart > getPartEmail(data)) {
-                        countPart = 1;
-                        LOG.error(createInfoLog(rowDumpEmail, getPartEmail(data)));
-                        rowDumpEmail = getStringBuffer(data);
-                    }
+                String strRowError = String.format("Ошибка в целостности реплицированных данных [%s => %s]\n",
+                        data.getRunner().getSource().getPoolId(),
+                        data.getRunner().getTarget().getPoolId());
+                
+                try (ResultSet targetResult = selectTargetStatement.executeQuery();) {            
                     if(targetResult.next()) {
-                        StringBuffer rowDumpHead = new StringBuffer(String.format(
-                            "Ошибка (%s из ###) в table: %s, данные не равны в row [%s] values: ",
-                            countPart,
-                            table.getName(),
-                            prikey));
-                            
+                        StringBuffer rowDumpHead = new StringBuffer(strRowError);
+                        rowDumpHead.append(String.format("Ошибка в table: %s, данные не равны в row [%s] values: ", table.getName(), prikey));
                         boolean errorRows = false;
                         for (String colsName : colsSource.keySet()) {
                             if(!JdbcMetadata.isEquals(sourceResult, targetResult, colsName, colsSource.get(colsName))) {
-                                String rowDump = String.format(
-                                        "[ col %s => [%s != %s] ] ",
-                                        colsName,
-                                        sourceResult.getObject(colsName),
-                                        targetResult.getObject(colsName));
+                                String rowDump = String.format("[ col %s => [%s != %s] ] ",  colsName, sourceResult.getObject(colsName), targetResult.getObject(colsName));
                                 rowDumpHead.append(rowDump);
                                 errorRows = true;
                              }
                         }
                         if(errorRows) {
-                            countPart++;
                             result = false;
-                            rowDumpHead.append("\n==========================================\n");
-                            rowDumpEmail.append(rowDumpHead.toString());
-                            if(countPart > getPartEmail(data)) {
-                                countPart = 1;
-                                LOG.error(createInfoLog(rowDumpEmail, getPartEmail(data)));
-                                rowDumpEmail = getStringBuffer(data);
-                            }
+                            getWorkPoolService().trackError(rowDumpHead.toString(), new SQLException(), operationsResult);
+ 
                         } else {
                             getWorkPoolService().clearWorkPoolData(operationsResult);
                         }
                     } else {
                         String rowDump = String.format(
-                            "Ошибка (%s из ###) в table: %s, отсутствует запись row = [%s] %s",
-                            countPart,
+                            "Ошибка в table: %s, отсутствует запись row = [%s]",
                             table.getName(),
-                            Jdbc.resultSetToString(sourceResult, new ArrayList<String>(colsSource.keySet())),
-                            "\n==========================================\n");
-                        rowDumpEmail.append(rowDump);
-                        countPart++;
+                            Jdbc.resultSetToString(sourceResult, new ArrayList<String>(colsSource.keySet())));
+                        getWorkPoolService().trackError(rowDump, new SQLException(), operationsResult);
                         result = false;
                     }
                 }

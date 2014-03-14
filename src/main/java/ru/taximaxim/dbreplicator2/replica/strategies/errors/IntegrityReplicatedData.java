@@ -35,7 +35,7 @@ import ru.taximaxim.dbreplicator2.replica.StrategyException;
 import ru.taximaxim.dbreplicator2.replica.strategies.replication.StrategySkeleton;
 import ru.taximaxim.dbreplicator2.replica.strategies.replication.algorithms.IntegrityReplicatedGenericAlgorithm;
 import ru.taximaxim.dbreplicator2.replica.strategies.replication.data.GenericDataTypeService;
-import ru.taximaxim.dbreplicator2.replica.strategies.replication.workpool.GenericWorkPoolService;
+import ru.taximaxim.dbreplicator2.replica.strategies.replication.workpool.DelayGenericWorkPoolService;
 import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
@@ -43,6 +43,7 @@ import ru.taximaxim.dbreplicator2.utils.Core;
  */
 public class IntegrityReplicatedData extends StrategySkeleton implements Strategy {
     public static final Logger LOG = Logger.getLogger(IntegrityReplicatedData.class);
+    private static final String PERIOD = "period";
     
     /**
      * Конструктор по умолчанию
@@ -55,13 +56,18 @@ public class IntegrityReplicatedData extends StrategySkeleton implements Strateg
             throws StrategyException, SQLException, ClassNotFoundException {
         
         try (ErrorsLog errorsLog = Core.getErrorsLog();
-                GenericWorkPoolService genericWorkPoolService = new GenericWorkPoolService(sourceConnection, errorsLog);
+                DelayGenericWorkPoolService workPoolService = new DelayGenericWorkPoolService(sourceConnection, errorsLog);
                 GenericDataTypeService genericDataServiceSourceConnection = new GenericDataTypeService(sourceConnection);
                 GenericDataTypeService genericDataServiceTargetConnection = new GenericDataTypeService(targetConnection);) {
+
+            if (data.getParam(PERIOD) != null) {
+                workPoolService.setPeriod(Integer.parseInt(data.getParam(PERIOD)));
+            }
+           
             IntegrityReplicatedGenericAlgorithm strategy = new IntegrityReplicatedGenericAlgorithm(getFetchSize(data), 
                    getBatchSize(data), 
                    false, 
-                   genericWorkPoolService, 
+                   workPoolService, 
                    genericDataServiceSourceConnection, 
                    genericDataServiceTargetConnection);
                strategy.execute(sourceConnection, targetConnection, data);
