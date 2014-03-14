@@ -43,6 +43,16 @@ import ru.taximaxim.dbreplicator2.utils.Core;
  * @author mardanov_rm
  */
 public class StatsService {
+    
+    /**
+     * Успешно реплицированные записи 
+     */
+    public static final int TYPE_SUCCESS = 1; 
+    
+    /**
+     * Ошибочные записи
+     */
+    public static final int TYPE_ERROR = 0; 
 
     private String baseConnName = null;
 

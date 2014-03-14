@@ -446,13 +446,13 @@ public class GenericAlgorithm implements Strategy {
         Timestamp date = new Timestamp(new Date().getTime());
 
         for (String tableName : getCountSuccess().getTables()) {
-            getStatsService().writeStat(date, 1, strategy, tableName, 
+            getStatsService().writeStat(date, StatsService.TYPE_SUCCESS, strategy, tableName, 
                     getCountSuccess().getCount(tableName));
         }
         getCountSuccess().clear();
         
         for (String tableName : getCountError().getTables()) {
-            getStatsService().writeStat(date, 0, strategy, tableName, 
+            getStatsService().writeStat(date, StatsService.TYPE_ERROR, strategy, tableName, 
                     getCountError().getCount(tableName));
         }
         getCountError().clear();

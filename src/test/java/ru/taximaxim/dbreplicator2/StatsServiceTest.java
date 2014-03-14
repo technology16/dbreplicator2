@@ -80,13 +80,19 @@ public class StatsServiceTest {
     public void testGetStatByTypeTablePeriod() throws ClassNotFoundException,
             SQLException {
         // int type, String tableName, Timestamp dateStart, Timestamp dateEnd
-        List<Map<String, Object>> result1 = statsService.getStat(0, T_PLACE, dateStart, dateEnd);
-        List<Map<String, Object>> result2 = statsService.getStat(0, T_BASES, dateStart, dateEnd);
-        List<Map<String, Object>> result3 = statsService.getStat(0, T_HOUSE, dateStart, dateEnd);
+        List<Map<String, Object>> result1 = 
+                statsService.getStat(StatsService.TYPE_ERROR, T_PLACE, dateStart, dateEnd);
+        List<Map<String, Object>> result2 = 
+                statsService.getStat(StatsService.TYPE_ERROR, T_BASES, dateStart, dateEnd);
+        List<Map<String, Object>> result3 = 
+                statsService.getStat(StatsService.TYPE_ERROR, T_HOUSE, dateStart, dateEnd);
 
-        List<Map<String, Object>> result4 = statsService.getStat(1, T_PLACE, dateStart, dateEnd);
-        List<Map<String, Object>> result5 = statsService.getStat(1, T_BASES, dateStart, dateEnd);
-        List<Map<String, Object>> result6 = statsService.getStat(1, T_HOUSE, dateStart, dateEnd);
+        List<Map<String, Object>> result4 = 
+                statsService.getStat(StatsService.TYPE_SUCCESS, T_PLACE, dateStart, dateEnd);
+        List<Map<String, Object>> result5 = 
+                statsService.getStat(StatsService.TYPE_SUCCESS, T_BASES, dateStart, dateEnd);
+        List<Map<String, Object>> result6 = 
+                statsService.getStat(StatsService.TYPE_SUCCESS, T_HOUSE, dateStart, dateEnd);
 
         assertTrueStatsRow1(result4, false, 0);
         assertTrueStatsRow2(result2, false, 0);
@@ -102,8 +108,10 @@ public class StatsServiceTest {
     @Test
     public void testgetStatByType() throws ClassNotFoundException, SQLException {
         // int type
-        List<Map<String, Object>> result1 = statsService.getStat(0);
-        List<Map<String, Object>> result2 = statsService.getStat(1);
+        List<Map<String, Object>> result1 = 
+                statsService.getStat(StatsService.TYPE_ERROR);
+        List<Map<String, Object>> result2 = 
+                statsService.getStat(StatsService.TYPE_SUCCESS);
         assertTrueStatsRow1(result2, false, 0);
         assertTrueStatsRow2(result1, false, 0);
         assertTrueStatsRow3(result2, false, 1);
@@ -118,13 +126,19 @@ public class StatsServiceTest {
     @Test
     public void testgetStatByTypeTable() throws ClassNotFoundException, SQLException {
         // int type, String tableName
-        List<Map<String, Object>> result1 = statsService.getStat(0, T_PLACE);
-        List<Map<String, Object>> result2 = statsService.getStat(0, T_BASES);
-        List<Map<String, Object>> result3 = statsService.getStat(0, T_HOUSE);
+        List<Map<String, Object>> result1 = 
+                statsService.getStat(StatsService.TYPE_ERROR, T_PLACE);
+        List<Map<String, Object>> result2 = 
+                statsService.getStat(StatsService.TYPE_ERROR, T_BASES);
+        List<Map<String, Object>> result3 = 
+                statsService.getStat(StatsService.TYPE_ERROR, T_HOUSE);
 
-        List<Map<String, Object>> result4 = statsService.getStat(1, T_PLACE);
-        List<Map<String, Object>> result5 = statsService.getStat(1, T_BASES);
-        List<Map<String, Object>> result6 = statsService.getStat(1, T_HOUSE);
+        List<Map<String, Object>> result4 = 
+                statsService.getStat(StatsService.TYPE_SUCCESS, T_PLACE);
+        List<Map<String, Object>> result5 = 
+                statsService.getStat(StatsService.TYPE_SUCCESS, T_BASES);
+        List<Map<String, Object>> result6 = 
+                statsService.getStat(StatsService.TYPE_SUCCESS, T_HOUSE);
 
         assertTrueStatsRow1(result4, false, 0);
         assertTrueStatsRow2(result2, false, 0);
@@ -139,8 +153,10 @@ public class StatsServiceTest {
     @Test
     public void testgetStatByTypePeriod() throws ClassNotFoundException, SQLException {
         // int type, Timestamp dateStart, Timestamp dateEnd
-        List<Map<String, Object>> result1 = statsService.getStat(0, dateStart, dateEnd);
-        List<Map<String, Object>> result2 = statsService.getStat(1, dateStart, dateEnd);
+        List<Map<String, Object>> result1 = 
+                statsService.getStat(StatsService.TYPE_ERROR, dateStart, dateEnd);
+        List<Map<String, Object>> result2 = 
+                statsService.getStat(StatsService.TYPE_SUCCESS, dateStart, dateEnd);
 
         assertTrueStatsRow1(result2, false, 0);
         assertTrueStatsRow2(result1, false, 0);
@@ -156,13 +172,18 @@ public class StatsServiceTest {
     public void testgetStatByTypeTablePeriodStartMidde() throws ClassNotFoundException,
             SQLException {
         // int type, String tableName, Timestamp dateStart, Timestamp dateEnd
-        List<Map<String, Object>> result1 = statsService.getStat(0, T_PLACE, dateStart, dateMidde);
-        List<Map<String, Object>> result2 = statsService.getStat(0, T_BASES, dateStart, dateMidde);
-        List<Map<String, Object>> result3 = statsService.getStat(0, T_HOUSE, dateStart, dateMidde);
+        List<Map<String, Object>> result1 = 
+                statsService.getStat(StatsService.TYPE_ERROR, T_PLACE, dateStart, dateMidde);
+        List<Map<String, Object>> result2 = 
+                statsService.getStat(StatsService.TYPE_ERROR, T_BASES, dateStart, dateMidde);
+        List<Map<String, Object>> result3 = statsService.getStat(StatsService.TYPE_ERROR, T_HOUSE, dateStart, dateMidde);
 
-        List<Map<String, Object>> result4 = statsService.getStat(1, T_PLACE, dateStart, dateMidde);
-        List<Map<String, Object>> result5 = statsService.getStat(1, T_BASES, dateStart, dateMidde);
-        List<Map<String, Object>> result6 = statsService.getStat(1, T_HOUSE, dateStart, dateMidde);
+        List<Map<String, Object>> result4 = 
+                statsService.getStat(StatsService.TYPE_SUCCESS, T_PLACE, dateStart, dateMidde);
+        List<Map<String, Object>> result5 = 
+                statsService.getStat(StatsService.TYPE_SUCCESS, T_BASES, dateStart, dateMidde);
+        List<Map<String, Object>> result6 = 
+                statsService.getStat(StatsService.TYPE_SUCCESS, T_HOUSE, dateStart, dateMidde);
         
         assertTrueStatsRow1(result4, false, 0);
         assertTrueStatsRow2(result2, false, 0);
@@ -180,13 +201,19 @@ public class StatsServiceTest {
             SQLException {
         // int type, String tableName, Timestamp dateStart, Timestamp dateEnd
 
-        List<Map<String, Object>> result1 = statsService.getStat(0, T_PLACE, dateMidde, dateEnd);
-        List<Map<String, Object>> result2 = statsService.getStat(0, T_BASES, dateMidde, dateEnd);
-        List<Map<String, Object>> result3 = statsService.getStat(0, T_HOUSE, dateMidde, dateEnd);
+        List<Map<String, Object>> result1 = 
+                statsService.getStat(StatsService.TYPE_ERROR, T_PLACE, dateMidde, dateEnd);
+        List<Map<String, Object>> result2 = 
+                statsService.getStat(StatsService.TYPE_ERROR, T_BASES, dateMidde, dateEnd);
+        List<Map<String, Object>> result3 = 
+                statsService.getStat(StatsService.TYPE_ERROR, T_HOUSE, dateMidde, dateEnd);
 
-        List<Map<String, Object>> result4 = statsService.getStat(1, T_PLACE, dateMidde, dateEnd);
-        List<Map<String, Object>> result5 = statsService.getStat(1, T_BASES, dateMidde, dateEnd);
-        List<Map<String, Object>> result6 = statsService.getStat(1, T_HOUSE, dateMidde, dateEnd);
+        List<Map<String, Object>> result4 = 
+                statsService.getStat(StatsService.TYPE_SUCCESS, T_PLACE, dateMidde, dateEnd);
+        List<Map<String, Object>> result5 = 
+                statsService.getStat(StatsService.TYPE_SUCCESS, T_BASES, dateMidde, dateEnd);
+        List<Map<String, Object>> result6 = 
+                statsService.getStat(StatsService.TYPE_SUCCESS, T_HOUSE, dateMidde, dateEnd);
 
         assertTrueStatsRow1(result4, true, 0);
         assertTrueStatsRow2(result2, true, 0);
@@ -216,23 +243,23 @@ public class StatsServiceTest {
 
         dateStart = new Timestamp(new Date().getTime());
         Thread.sleep(REPLICATION_DELAY);
-        statsService.writeStat(new Timestamp(new Date().getTime()), 1, 2, T_PLACE, 10);
+        statsService.writeStat(new Timestamp(new Date().getTime()), StatsService.TYPE_SUCCESS, 2, T_PLACE, 10);
         Thread.sleep(REPLICATION_DELAY);
-        statsService.writeStat(new Timestamp(new Date().getTime()), 0, 3, T_BASES, 20);
+        statsService.writeStat(new Timestamp(new Date().getTime()), StatsService.TYPE_ERROR, 3, T_BASES, 20);
         Thread.sleep(REPLICATION_DELAY);
-        statsService.writeStat(new Timestamp(new Date().getTime()), 1, 4, T_HOUSE, 30);
+        statsService.writeStat(new Timestamp(new Date().getTime()), StatsService.TYPE_SUCCESS, 4, T_HOUSE, 30);
         Thread.sleep(REPLICATION_DELAY);
-        statsService.writeStat(new Timestamp(new Date().getTime()), 0, 5, T_PLACE, 40);
+        statsService.writeStat(new Timestamp(new Date().getTime()), StatsService.TYPE_ERROR, 5, T_PLACE, 40);
         Thread.sleep(REPLICATION_DELAY);
         dateMidde = new Timestamp(new Date().getTime());
         Thread.sleep(REPLICATION_DELAY);
-        statsService.writeStat(new Timestamp(new Date().getTime()), 1, 6, T_HOUSE, 50);
+        statsService.writeStat(new Timestamp(new Date().getTime()), StatsService.TYPE_SUCCESS, 6, T_HOUSE, 50);
         Thread.sleep(REPLICATION_DELAY);
-        statsService.writeStat(new Timestamp(new Date().getTime()), 0, 7, T_PLACE, 60);
+        statsService.writeStat(new Timestamp(new Date().getTime()), StatsService.TYPE_ERROR, 7, T_PLACE, 60);
         Thread.sleep(REPLICATION_DELAY);
-        statsService.writeStat(new Timestamp(new Date().getTime()), 1, 8, T_BASES, 70);
+        statsService.writeStat(new Timestamp(new Date().getTime()), StatsService.TYPE_SUCCESS, 8, T_BASES, 70);
         Thread.sleep(REPLICATION_DELAY);
-        statsService.writeStat(new Timestamp(new Date().getTime()), 0, 9, T_HOUSE, 80);
+        statsService.writeStat(new Timestamp(new Date().getTime()), StatsService.TYPE_ERROR, 9, T_HOUSE, 80);
         Thread.sleep(REPLICATION_DELAY);
         dateEnd = new Timestamp(new Date().getTime());
 
