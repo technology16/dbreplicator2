@@ -10,7 +10,7 @@ insert into bone_cp_settings (id_pool, driver, url, user, pass, min_connections_
 --application_settings
 insert into application_settings (key, value) values ('tp.threads', '10');
 insert into application_settings (key, value) values ('stats.dest', 'source');
-
+insert into application_settings (key, value) values ('error.dest', 'source');
 
 --Tables
 insert into tables (id_table, id_pool, name) values (1, 'source', 'T_TABLE');
@@ -44,14 +44,14 @@ key2=''value2''', true, 100, 2);
 --Runner Table 1
 insert into runners (id_runner, source, target, description, class_name) values (3, 'source', 'dest', 'description', 'ru.taximaxim.dbreplicator2.replica.ReplicaRunner');
 --Strategy  Table 1
-insert into strategies (id, className, param, isEnabled, priority, id_runner) values (3, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Generic', null, false, 100, 3);
+insert into strategies (id, className, param, isEnabled, priority, id_runner) values (3, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Generic', null, true, 100, 3);
 
 -------
 
 --Runner Table 2
 insert into runners (id_runner, source, target, description, class_name) values (4, 'source', 'dest', 'description', 'ru.taximaxim.dbreplicator2.replica.ReplicaRunner');
 --Strategy  Table 2
-insert into strategies (id, className, param, isEnabled, priority, id_runner) values (4, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Generic', null, false, 100, 4);
+insert into strategies (id, className, param, isEnabled, priority, id_runner) values (4, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Generic', null, true, 100, 4);
 
 -------
 
@@ -111,9 +111,23 @@ insert into strategies (id, className, param, isEnabled, priority, id_runner) va
 --Runner ReplicationTimeWatchgdog
 insert into runners (id_runner, source, target, description, class_name) values (10, 'source', 'source', 'ErrorsReplicationTimeWatchgdog', '');
 --Strategy  ReplicationTimeWatchgdog
-insert into strategies (id, className, param, isEnabled, priority, id_runner) values (11, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.ReplicationTimeWatchgdog', 'period=0
+insert into strategies (id, id_runner, className, param, isEnabled, priority) values (11, 10, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.ReplicationTimeWatchgdog', 'period=0
 partEmail=10
-runners=1,2,-3,-4,-5,-8,a,-b', true, 100, 10);
+runners=1,2,-3,-4,-5,-8,a,-b', true, 100);
+insert into strategies (id, id_runner, className, param, isEnabled, priority) values (12, 10, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.ReplicationTimeWatchgdog', 'period=0
+partEmail=10
+runners=3,4', true, 100);
+insert into strategies (id, id_runner, className, param, isEnabled, priority) values (13, 10, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.ReplicationTimeWatchgdog', 'period=0
+partEmail=10
+runners=-5,-6,-8,-9', true, 100);
+insert into strategies (id, id_runner, className, param, isEnabled, priority) values (14, 10, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.ReplicationTimeWatchgdog', 'period=0
+partEmail=10
+runners=5', true, 100);
+insert into strategies (id, id_runner, className, param, isEnabled, priority) values (15, 10, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.ReplicationTimeWatchgdog', 'period=0
+partEmail=10
+runners=', true, 100);
+insert into strategies (id, id_runner, className, param, isEnabled, priority) values (16, 10, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.ReplicationTimeWatchgdog', 'period=0
+partEmail=10', true, 100);
 
 --Ignore Columns Table
 insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (1, 1, '_STRING');

@@ -57,7 +57,12 @@ public class ApplicatonSettingsService {
     public String getValue (String key) {
         Session session = sessionFactory.openSession();
         try {
-            return ((ApplicatonSettingsModel) session.get(ApplicatonSettingsModel.class, key)).getValue();
+            ApplicatonSettingsModel value = 
+                    (ApplicatonSettingsModel) session.get(ApplicatonSettingsModel.class, key);
+            if (value != null) {
+                return value.getValue();
+            }
+            return null;
         } finally {
             session.close();
         }

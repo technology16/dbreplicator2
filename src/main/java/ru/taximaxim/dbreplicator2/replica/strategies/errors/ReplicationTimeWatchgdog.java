@@ -118,7 +118,7 @@ public class ReplicationTimeWatchgdog implements Strategy {
             int rowCount = 0;
             try (PreparedStatement selectErrorsCount = sourceConnection
                   .prepareStatement(
-                    "SELECT count(*) as count FROM rep2_workpool_data WHERE c_date <= ? and c_errors_count = 0"
+                    "SELECT count(*) as count FROM rep2_workpool_data WHERE c_date <= ?"
                           + runIgSql);) {
     
                 selectErrorsCount.setTimestamp(1, date);
@@ -132,7 +132,7 @@ public class ReplicationTimeWatchgdog implements Strategy {
             if (rowCount != 0) {
                 try (PreparedStatement selectPreparedStatement = sourceConnection
                       .prepareStatement(
-                        "SELECT * FROM rep2_workpool_data WHERE c_date <= ? and c_errors_count = 0 " + runIgSql+ " ORDER BY id_superlog",
+                        "SELECT * FROM rep2_workpool_data WHERE c_date <= ? " + runIgSql+ " ORDER BY id_superlog",
                                 ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);) {
     
                     selectPreparedStatement.setTimestamp(1, date);

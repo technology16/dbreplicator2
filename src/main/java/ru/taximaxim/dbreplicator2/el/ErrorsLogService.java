@@ -21,42 +21,48 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ru.taximaxim.dbreplicator2.replica.strategies.replication;
+package ru.taximaxim.dbreplicator2.el;
 
-import ru.taximaxim.dbreplicator2.model.StrategyModel;
+import java.sql.SQLException;
 
 /**
- * @author volodin_aa
+ * @author mardanov_rm
  *
  */
-public class StrategySkeleton {
-
-    private static final String FETCH_SIZE = "fetchSize";
-    private static final String BATCH_SIZE = "batchSize";
-    private static final int DEFAULT_FETCH_SIZE = 1000;
-    private static final int DEFAULT_BATCH_SIZE = 1000;
-    /**
-     * Размер выборки данных (строк)
-     */
-    private int fetchSize = DEFAULT_FETCH_SIZE;
+public interface ErrorsLogService {
     
-    protected int getFetchSize(StrategyModel data) {
-        if (data.getParam(FETCH_SIZE) != null) {
-            fetchSize = Integer.parseInt(data.getParam(FETCH_SIZE));
-        }
-        return fetchSize;
-    }
-
     /**
-     * Размер сбрасываемых в БД данных (строк)
+     * Функция добавления записи в лог ошибок
+     * 
+     * ...
+     * 
+     * @throws SQLException
      */
-    private int batchSize = DEFAULT_BATCH_SIZE;
+    void add(Integer runnerId, String tableId, Long foreignId, String error);
     
-    protected int getBatchSize(StrategyModel data) {
-        if (data.getParam(BATCH_SIZE) != null) {
-            batchSize = Integer.parseInt(data.getParam(BATCH_SIZE));
-        }
-        return batchSize;
-    }
-
+    /**
+     * Функция добавления записи в лог ошибок
+     * 
+     * ...
+     * 
+     * @throws SQLException
+     */
+    void add(Integer runnerId, String tableId, Long foreignId,  String error, SQLException e);
+    
+    /**
+     * Функция добавления записи в лог ошибок
+     * 
+     * ...
+     * 
+     * @throws SQLException
+     */
+    void add(Integer runnerId, String tableId, Long foreignId, String error, Throwable e);
+    /**
+     * Функция установки статуса сообщений об ошибке
+     * 
+     * ...
+     * 
+     * @throws SQLException
+     */
+    void setStatus(Integer runnerId, String tableId, Long foreignId, int status);
 }

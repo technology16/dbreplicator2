@@ -27,7 +27,11 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -39,8 +43,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
+import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
+import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.model.RunnerService;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
+import ru.taximaxim.dbreplicator2.el.ErrorsLog;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
 import ru.taximaxim.dbreplicator2.utils.Core;
 
@@ -57,7 +64,6 @@ import ru.taximaxim.dbreplicator2.utils.Core;
  */
 public class H2CopyTableDataTest {
     protected static final Logger LOG = Logger.getLogger(H2CopyTableDataTest.class);
-    
     // Задержка между циклами репликации
     private static final int REPLICATION_DELAY = 1500;
     
@@ -69,12 +75,14 @@ public class H2CopyTableDataTest {
     protected static Runnable worker = null;
     protected static Runnable worker2 = null;
     protected static Runnable errorsCountWatchdogWorker = null;
+    protected static ErrorsLog errorsLog; 
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         sessionFactory = Core.getSessionFactory();
         session = sessionFactory.openSession();
         connectionFactory = Core.getConnectionFactory();
+        errorsLog = Core.getErrorsLog();
         initialization();
     }
 
@@ -93,6 +101,7 @@ public class H2CopyTableDataTest {
         Core.tasksPoolClose();
         Core.taskSettingsServiceClose(); 
         Core.configurationClose();
+        errorsLog.close();
     }
     
 
@@ -131,6 +140,10 @@ public class H2CopyTableDataTest {
         LOG.info("=======Inception=======");
         Helper.InfoList(listDest);
         LOG.info(">======Inception======<");
+
+        
+        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }
     
     /**
@@ -147,7 +160,7 @@ public class H2CopyTableDataTest {
         Helper.executeSqlFromFile(conn, "sql_null.sql");   
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
-        
+        Helper.InfoSelect(conn, "rep2_errors_log");
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table4");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table4");
         
@@ -162,8 +175,119 @@ public class H2CopyTableDataTest {
 
         Helper.InfoNull(connDest, "t_table4", 1);
         Helper.InfoNull(connDest, "t_table5", 2);
+        
+
+        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }
-    
+    @Test
+    public void controlSumm() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
+        Integer i = 1;
+        String s = "tab";
+        Long l = (long) 5;
+        
+        Statement stat = conn.createStatement();
+        
+        errorsLog.add(i, s, l, "Error");
+        errorsLog.setStatus(i, s, l, 1);
+        ResultSet rs = stat.executeQuery("select * from rep2_errors_log where id_runner = 1 and id_table = 'tab' and id_foreign = 5 and c_status = 1");
+        if (rs.next()) {
+            assertTrue(String.format("id_runner [ %s != 1]", rs.getObject("id_runner")), rs.getObject("id_runner").equals(i));
+            assertTrue(String.format("id_table [ %s != tab]", rs.getObject("id_table")), rs.getObject("id_table").equals(s));
+            assertTrue(String.format("id_foreign [ %s != 5 ]", rs.getLong("id_foreign")), rs.getLong("id_foreign") == l);
+        } else {
+            assertTrue("нет записи id_runner = 1 and id_table = 'tab' and id_foreign = 5", false);
+        }
+        rs.close();
+
+        errorsLog.add(null, s, l, "Error");
+        errorsLog.setStatus(null, s, l, 1);
+        rs = stat.executeQuery("select * from rep2_errors_log where id_runner is null and id_table = 'tab' and id_foreign = 5 and c_status = 1");
+        if (rs.next()) {
+            assertTrue(String.format("id_runner != null", rs.getObject("id_runner")), rs.getObject("id_runner") == null);
+            assertTrue(String.format("id_table != tab", rs.getObject("id_table")), rs.getObject("id_table").equals(s));
+            assertTrue(String.format("id_foreign != 5", rs.getLong("id_foreign")), rs.getLong("id_foreign") == l);
+        } else {
+            assertTrue("нет записи id_runner = null and id_table = 'tab' and id_foreign = 5", false);
+        }
+        rs.close();
+        
+        errorsLog.add(i, null, l, "Error");
+        errorsLog.setStatus(i, null, l, 1);
+        rs = stat.executeQuery("select * from rep2_errors_log where id_runner = 1 and id_table is null and id_foreign = 5 and c_status = 1");
+        if (rs.next()) {
+            assertTrue(String.format("id_runner != 1", rs.getObject("id_runner")), rs.getObject("id_runner").equals(i));
+            assertTrue(String.format("id_table != null", rs.getObject("id_table")), rs.getObject("id_table") == null);
+            assertTrue(String.format("id_foreign != 5", rs.getLong("id_foreign")), rs.getLong("id_foreign") == l);
+        } else {
+            assertTrue("нет записи id_runner = 1 and id_table = null and id_foreign = 5", false);
+        }
+        rs.close();
+        
+        errorsLog.add(i, s, null, "Error");
+        errorsLog.setStatus(i, s, null, 1);
+        rs = stat.executeQuery("select * from rep2_errors_log where id_runner = 1 and id_table = 'tab' and id_foreign is null and c_status = 1");
+        if (rs.next()) {
+            assertTrue(String.format("id_runner != 1", rs.getObject("id_runner")), rs.getObject("id_runner").equals(i));
+            assertTrue(String.format("id_table != tab", rs.getObject("id_table")), rs.getObject("id_table").equals(s));
+            assertTrue(String.format("id_foreign != null", rs.getObject("id_foreign")), rs.getObject("id_foreign") == null);
+        } else {
+            assertTrue("нет записи id_runner = 1 and id_table = 'tab' and id_foreign = null", false);
+        }
+        rs.close();
+        
+        errorsLog.add(null, null, l, "Error");
+        errorsLog.setStatus(null, null, l, 1);
+        rs = stat.executeQuery("select * from rep2_errors_log where id_runner is null and id_table is null and id_foreign = 5 and c_status = 1");
+        if (rs.next()) {
+            assertTrue(String.format("id_runner != null", rs.getObject("id_runner")), rs.getObject("id_runner") == null);
+            assertTrue(String.format("id_table != null", rs.getObject("id_table")), rs.getObject("id_table") == null);
+            assertTrue(String.format("id_foreign != 1", rs.getLong("id_foreign")), rs.getLong("id_foreign") == l);
+        } else {
+            assertTrue("нет записи id_runner = null and id_table = null and id_foreign = 5", false);
+        }
+        rs.close();
+        
+        errorsLog.add(null, s, null, "Error");
+        errorsLog.setStatus(null, s, null, 1);
+        rs = stat.executeQuery("select * from rep2_errors_log where id_runner is null and id_table = 'tab' and id_foreign is null and c_status = 1");
+        if (rs.next()) {
+            assertTrue(String.format("id_runner != null", rs.getObject("id_runner")), rs.getObject("id_runner") == null);
+            assertTrue(String.format("id_table != tab", rs.getObject("id_table")), rs.getObject("id_table").equals(s));
+            assertTrue(String.format("id_foreign != null", rs.getObject("id_foreign")), rs.getObject("id_foreign") == null);
+        } else {
+            assertTrue("нет записи id_runner = null and id_table = 'tab' and id_foreign = null", false);
+        }
+        rs.close();
+        
+        errorsLog.add(i, null, null, "Error");
+        errorsLog.setStatus(i, null, null, 1);
+        rs = stat.executeQuery("select * from rep2_errors_log where id_runner = 1 and id_table is null and id_foreign is null and c_status = 1");
+        if (rs.next()) {
+            assertTrue(String.format("id_runner != 1", rs.getObject("id_runner")), rs.getObject("id_runner").equals(i));
+            assertTrue(String.format("id_table != null", rs.getObject("id_table")), rs.getObject("id_table") == null);
+            assertTrue(String.format("id_foreign != null", rs.getObject("id_foreign")), rs.getObject("id_foreign") == null);
+        } else {
+            assertTrue("нет записи id_runner = 1 and id_table = null and id_foreign = null", false);
+        }
+        rs.close();
+        
+        errorsLog.add(null, null, null, "Error");
+        errorsLog.setStatus(null, null, null, 1);
+        rs = stat.executeQuery("select * from rep2_errors_log where id_runner is null and id_table is null and id_foreign is null and c_status = 1");
+        if (rs.next()) {
+            assertTrue(String.format("id_runner != null", rs.getObject("id_runner")), rs.getObject("id_runner") == null);
+            assertTrue(String.format("id_table != null", rs.getObject("id_table")), rs.getObject("id_table") == null);
+            assertTrue(String.format("id_foreign != null", rs.getObject("id_foreign")), rs.getObject("id_foreign") == null);
+        } else {
+            assertTrue("нет записи id_runner = null and id_table = null and id_foreign = null", false);
+        }
+        rs.close();
+        Helper.InfoSelect(conn, "rep2_errors_log");
+        stat.execute("delete from rep2_errors_log");
+        stat.close();
+        
+    }
     /**
      * Проверка внешних ключей
      * вставка в главную таблицу  
@@ -185,22 +309,24 @@ public class H2CopyTableDataTest {
     public void testForeignKey() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
         //Проверка внешних ключей
         LOG.info("Проверка внешних ключей");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 50);
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 51);
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 52);
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 53);
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 54);
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 55);
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 56);
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 57);
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 58);
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 59);
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 60);
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 61);
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 62);
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 63);
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
+        int count = Helper.InfoCount(conn, "rep2_errors_log where c_status = 0");
+        assertTrue(String.format("Количество записей не равны [%s == %s]", 14, count),14 == count);
         errorsCountWatchdogWorker.run();
         Thread.sleep(REPLICATION_DELAY);
         worker.run();
@@ -212,6 +338,10 @@ public class H2CopyTableDataTest {
         listSource = Helper.InfoTest(conn, "t_table3");
         listDest   = Helper.InfoTest(connDest, "t_table3");
         Helper.AssertEquals(listSource, listDest);
+
+        Thread.sleep(REPLICATION_DELAY);
+        count = Helper.InfoCount(conn, "rep2_errors_log where c_status = 1");
+        assertTrue(String.format("Количество записей не равны [%s == %s]", 14, count), 14 == count);
     }
     
     /**
@@ -234,6 +364,10 @@ public class H2CopyTableDataTest {
         listSource = Helper.InfoTest(conn, "t_table1");
         listDest   = Helper.InfoTest(connDest, "t_table1");
         Helper.AssertEquals(listSource, listDest);
+        
+
+        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }
     
     /**
@@ -258,6 +392,10 @@ public class H2CopyTableDataTest {
         listSource = Helper.InfoTest(conn, "t_table1");
         listDest   = Helper.InfoTest(connDest, "t_table1");
         Helper.AssertEquals(listSource, listDest);
+        
+
+        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }
     
     /**
@@ -282,6 +420,10 @@ public class H2CopyTableDataTest {
         listSource = Helper.InfoTest(conn, "t_table1");
         listDest   = Helper.InfoTest(connDest, "t_table1");
         Helper.AssertEquals(listSource, listDest);
+        
+
+        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }
     
     /**
@@ -306,6 +448,10 @@ public class H2CopyTableDataTest {
         listSource = Helper.InfoTest(conn, "t_table1");
         listDest   = Helper.InfoTest(connDest, "t_table1");
         Helper.AssertEquals(listSource, listDest);
+        
+
+        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }
     
     /**
@@ -330,6 +476,10 @@ public class H2CopyTableDataTest {
         listSource = Helper.InfoTest(conn, "t_table1");
         listDest   = Helper.InfoTest(connDest, "t_table1");
         Helper.AssertEquals(listSource, listDest);
+        
+
+        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }
     
     /**
@@ -348,6 +498,46 @@ public class H2CopyTableDataTest {
             }
         }
         assertTrue("В раннере 1 отсутствует стратегия 1!", hasStrategy);
+    }
+    
+    protected void checkErrorInRunner(int runnerId) throws SQLException {
+        // Проверяем запись об ошибке в логе
+        try (PreparedStatement selectError = conn.prepareStatement("SELECT * FROM rep2_errors_log WHERE id_runner=" + runnerId);
+                ResultSet errorResult = selectError.executeQuery();) {
+            assertTrue("В логе ошибок отсутствует запись об ошибке " + runnerId + " раннера!", errorResult.next());
+            LOG.info(Jdbc.resultSetToString(errorResult, 
+                    new ArrayList<String>(JdbcMetadata.getColumns(errorResult))));
+        }
+    }
+    
+    /**
+     * Проверка перехвата неожиданного завершения потока задачи
+     * @throws InterruptedException 
+     * @throws SQLException 
+     */
+    @Test
+    public void exceptionInTaskTest() throws InterruptedException, SQLException{
+        // Запускаем задачи
+        Core.getTasksPool().start();
+        Thread.sleep(REPLICATION_DELAY);
+        
+        checkErrorInRunner(16);
+    }
+    
+    /**
+     * Проверка перехвата неожиданного завершения потока пула потоков
+     * @throws InterruptedException 
+     * @throws SQLException 
+     */
+    @Test
+    public void exceptionInThreadPoolTest() throws InterruptedException, SQLException{
+        // Запускаем задачи
+        RunnerService runnerService = new RunnerService(sessionFactory);
+
+        Core.getThreadPool().start(runnerService.getRunner(17));
+        Thread.sleep(REPLICATION_DELAY);
+        
+        checkErrorInRunner(17);
     }
     
     /**
@@ -371,4 +561,6 @@ public class H2CopyTableDataTest {
         worker = new WorkerThread(runnerService.getRunner(1));
         errorsCountWatchdogWorker = new WorkerThread(runnerService.getRunner(7));
     }
+    
+    
 }

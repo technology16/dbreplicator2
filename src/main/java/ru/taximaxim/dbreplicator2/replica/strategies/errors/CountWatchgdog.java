@@ -37,21 +37,26 @@ import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
+import ru.taximaxim.dbreplicator2.replica.strategies.replication.StrategySkeleton;
 
 /**
- * Класс стратегии репликации данных из источника в приемник
- * Записи реплицируются в порядке последних операций над ними.
+ * Класс стратегии репликации данных из источника в приемник Записи
+ * реплицируются в порядке последних операций над ними.
  * 
  * @author volodin_aa
  * 
  */
-public class CountWatchgdog implements Strategy {
+public class CountWatchgdog extends StrategySkeleton implements Strategy {
 
     private static final Logger LOG = Logger.getLogger(CountWatchgdog.class);
+
+    private static final int DEFAULT_MAX_ERRORS = 0;
+    private static final int DEFAULT_PART_EMAIL = 10;
     
     private static final String MAX_ERRORS = "maxErrors";
     private static final String PART_EMAIL = "partEmail";
     private static final String COUNT = "count";
+
     /**
      * Конструктор по умолчанию
      */
@@ -61,70 +66,69 @@ public class CountWatchgdog implements Strategy {
     @Override
     public void execute(Connection sourceConnection, Connection targetConnection,
             StrategyModel data) throws StrategyException, SQLException {
-        
-        int maxErrors = 0;
-        if(data.getParam(MAX_ERRORS)!=null) {
+
+        int maxErrors = DEFAULT_MAX_ERRORS;
+        if (data.getParam(MAX_ERRORS) != null) {
             maxErrors = Integer.parseInt(data.getParam(MAX_ERRORS));
         }
-        
-        int partEmail = 10;
-        if(data.getParam(PART_EMAIL)!=null) {
+
+        int partEmail = DEFAULT_PART_EMAIL;
+        if (data.getParam(PART_EMAIL) != null) {
             partEmail = Integer.parseInt(data.getParam(PART_EMAIL));
         }
-        
+
         // Проверияем количество ошибочных итераций
-        try (PreparedStatement selectErrors = 
-                sourceConnection.prepareStatement(
-                        "SELECT * FROM rep2_workpool_data WHERE id_superlog IN " +
-                        "(SELECT MAX(id_superlog) FROM rep2_workpool_data AS last_data WHERE " +
-                        "c_errors_count>? GROUP BY id_runner, id_table, id_foreign)" +
-                        " ORDER BY c_errors_count desc");
-                
-                PreparedStatement selectErrorsCount = 
-                        sourceConnection.prepareStatement(
-                "SELECT count(*) as count FROM rep2_workpool_data WHERE id_superlog IN " +
-                "(SELECT MAX(id_superlog) FROM rep2_workpool_data AS last_data WHERE " +
-                "c_errors_count>? GROUP BY id_runner, id_table, id_foreign)");
-                
-                ) {
-            
+        int rowCount = 0;
+        try (PreparedStatement selectErrorsCount = sourceConnection
+                .prepareStatement("SELECT COUNT(*) as count " +
+                        "FROM (" +
+                        "SELECT COUNT(*) AS errors_count " +
+                        "FROM public.rep2_errors_log " +
+                        "WHERE c_status = 0 " +
+                        "GROUP BY id_runner, id_table, id_foreign) AS t1 " +
+                        "WHERE errors_count > ?")) {
             selectErrorsCount.setInt(1, maxErrors);
-            int rowCount = 0;
             try (ResultSet countResult = selectErrorsCount.executeQuery();) {
                 while (countResult.next()) {
-                  rowCount = countResult.getInt(COUNT);
+                    rowCount = countResult.getInt(COUNT);
                 }
             }
-            //Если нет ошибок то смысл в запуске данного кода бессмыслен 
-            if(rowCount != 0) {
+        }
+
+        // Если нет ошибок то смысл в запуске данного кода бессмыслен
+        if (rowCount != 0) {
+            try (PreparedStatement selectErrors = sourceConnection.prepareStatement(
+                  "SELECT t1.id_runner, t1.id_table, t1.id_foreign, t1.max_id_errors_log, t1.count, c_error, c_date FROM ( "
+                  + "SELECT id_runner, id_table, id_foreign, MAX(id_errors_log) AS max_id_errors_log, COUNT(*) AS count "
+                  + "FROM public.rep2_errors_log WHERE c_status = 0 GROUP BY id_runner, id_table, id_foreign) as t1 "
+                  + "LEFT JOIN rep2_errors_log ON t1.max_id_errors_log=rep2_errors_log.id_errors_log "
+                  + "WHERE count > ? ORDER BY max_id_errors_log")) {
+
                 selectErrors.setInt(1, maxErrors);
+                selectErrors.setFetchSize(getFetchSize(data));
+
                 try (ResultSet errorsResult = selectErrors.executeQuery();) {
-                    List<String> cols =  
-                            new ArrayList<String>(JdbcMetadata.getColumns(errorsResult));
+                    List<String> cols = new ArrayList<String>(JdbcMetadata.getColumns(errorsResult));
                     int count = 0;
-                    StringBuffer rowDumpEmail = new StringBuffer(
-                            String.format("\n\nВ %s превышен лимит в %s ошибок!\n\n",
-                                    data.getRunner().getSource().getPoolId(),
-                                    maxErrors));
+                    StringBuffer rowDumpEmail = new StringBuffer(String.format(
+                            "\n\nВ %s превышен лимит в %s ошибок!\n\n", data.getRunner()
+                            .getSource().getPoolId(), maxErrors));
                     while (errorsResult.next() && (count < partEmail)) {
                         count++;
                         // при необходимости пишем ошибку в лог
-                        String rowDump = String.format(
-                                "Ошибка %s из %s \n[ tableName = REP2_WORKPOOL_DATA [ row = %s ] ]%s",
-                                count,
-                                rowCount,
-                                Jdbc.resultSetToString(errorsResult, cols),
-                                "\n==========================================\n"
-                                );
+                        String rowDump = String.format("Ошибка %s из %s \n[ tableName = REP2_ERRORS_LOG [ row = %s ] ]%s",
+                            count, rowCount,
+                            Jdbc.resultSetToString(errorsResult, cols),
+                            "\n==========================================\n");
                         rowDumpEmail.append(rowDump);
-                    } 
+                    }
                     rowDumpEmail.append("Всего ");
                     rowDumpEmail.append(rowCount);
-                    rowDumpEmail.append(" ошибочных записей. Полный список ошибок доступен в таблице rep2_workpool_data.");
+                    rowDumpEmail
+                            .append(" ошибочных записей. Полный список ошибок доступен в таблице REP2_ERRORS_LOG.");
                     LOG.error(rowDumpEmail.toString());
                 }
             }
         }
     }
-
 }

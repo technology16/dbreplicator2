@@ -2,7 +2,6 @@
 --application_settings
 insert into application_settings (key, value) values ('tp.threads', '10');
 insert into application_settings (key, value) values ('stats.dest', 'source');
-insert into application_settings (key, value) values ('error.dest', 'source');
 
 --Connection source
 insert into bone_cp_settings (id_pool, driver, url, user, pass, min_connections_per_partition, max_connections_per_partition, partition_count, connection_timeout_in_ms, close_connection_watch_timeout_in_ms ) values ('source', 'org.h2.Driver', 'jdbc:h2:mem://localhost/~/source', 'sa', '', 1, 100, 1, 10000, 0);

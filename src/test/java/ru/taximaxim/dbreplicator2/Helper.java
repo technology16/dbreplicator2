@@ -312,18 +312,21 @@ public class Helper {
      */
     public static void InfoSelect(Connection conn,  String tableName) throws SQLException, InterruptedException{
         Thread.sleep(REPLICATION_DELAY);
+        LOG.info("select * from " + tableName + "[count = " + InfoCount(conn,  tableName)+"]");
         Statement statSource = conn.createStatement();
         ResultSet rsSource = statSource.executeQuery("select * from " + tableName);
         ResultSetMetaData rDataSource = rsSource.getMetaData();
         int totalColumnSource = rDataSource.getColumnCount();
         while (rsSource.next()) {
-            String text = "";
+            String text = "|";
             for (int i = 1; i <= totalColumnSource; i++) {
-                text += rsSource.getObject(i).toString() + "\t";
+                text += rsSource.getObject(i) + "|";
             }
             LOG.info(text);
-            LOG.info("================================================================");
+           // LOG.info("================================================================");
         }
+        rsSource.close();
+        statSource.close();
     }
     
     public static int InfoCount(Connection conn,  String tableName) throws SQLException{
@@ -333,6 +336,8 @@ public class Helper {
         while (rs.next()) {
             count = rs.getInt(1);
         }
+        rs.close();
+        stat.close();
         return count;
     }
     
@@ -346,6 +351,19 @@ public class Helper {
      * @throws SQLException
      */
     protected static void executeSqlFromFile(Connection connection, String fileName) throws IOException, SQLException{
+        executeSqlFromFile(connection, fileName, 0);
+    }
+    
+    /**
+     * Выполнение скрипта из текстового файла
+     * 
+     * @param connection - соединение с целевой БД
+     * @param fileName - полное имя файла
+     * 
+     * @throws IOException
+     * @throws SQLException
+     */
+    protected static void executeSqlFromFile(Connection connection, String fileName, int id) throws IOException, SQLException{
         String curDir = new File("").getAbsolutePath() + "/src/test/resources/" + fileName;
         FileInputStream sqlFile = new FileInputStream(curDir);
         byte[] sqlBytes = new byte[sqlFile.available()];
@@ -354,7 +372,7 @@ public class Helper {
 
         String sqlText = new String(sqlBytes);
         
-        PreparedStatement statement = connection.prepareStatement(sqlText);
+        PreparedStatement statement = connection.prepareStatement(sqlText.replace("?", ""+id));
         statement.execute();
         
         String[] triggers = sqlText.split("<#CreateTrigger#>");
@@ -364,6 +382,7 @@ public class Helper {
         }
         
         connection.commit();
+        statement.close();
     }
     
     protected static void executeSqlFromSql(Connection connection, String sql, String name) throws IOException, SQLException{

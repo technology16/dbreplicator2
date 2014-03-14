@@ -23,6 +23,8 @@
 
 package ru.taximaxim.dbreplicator2;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -114,12 +116,19 @@ public class H2CopyTableDataTest2rep {
      */
     @Test
     public void testForeignKey() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
+        Thread.sleep(REPLICATION_DELAY);
         //Проверка внешних ключей
         LOG.info("Проверка внешних ключей");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql");
+        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 20);
         
         workerRun();
-        Helper.executeSqlFromFile(connDest,  "sql_foreign_key2.sql");
+        Helper.executeSqlFromFile(connDest,  "sql_foreign_key2.sql", 20);
+        workerRun2();
+        
+        workerRun();
+        workerRun2();
+        
+        workerRun();
         workerRun2();
         
         workerRun();
@@ -142,6 +151,7 @@ public class H2CopyTableDataTest2rep {
         
         errorsCountWatchdogWorker.run();
         workerRun();
+        Thread.sleep(REPLICATION_DELAY);
         Thread.sleep(REPLICATION_DELAY);
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table2");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table2");
@@ -169,6 +179,9 @@ public class H2CopyTableDataTest2rep {
         
         workerEnd();
         workerEnd2();
+        
+        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }    
     
     /**
@@ -217,6 +230,9 @@ public class H2CopyTableDataTest2rep {
         
         workerEnd();
         workerEnd2();
+        
+        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }
     
     /**
@@ -265,6 +281,9 @@ public class H2CopyTableDataTest2rep {
         
         workerEnd();
         workerEnd2();
+        
+        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }
     
     /**
@@ -274,7 +293,7 @@ public class H2CopyTableDataTest2rep {
      * @throws IOException
      * @throws InterruptedException 
      */
-    @Test//error//TODO
+    @Test
     public void testInsertUpdate() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
       //Проверка вставки и обновления
         LOG.info("Проверка вставки и обновления");
@@ -314,6 +333,9 @@ public class H2CopyTableDataTest2rep {
         
         workerEnd();
         workerEnd2();
+        
+        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }
     
     /**
@@ -363,6 +385,9 @@ public class H2CopyTableDataTest2rep {
         
         workerEnd();
         workerEnd2();
+        
+        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }
     
     /**
@@ -434,7 +459,9 @@ public class H2CopyTableDataTest2rep {
         Helper.AssertEquals(listSource, listDest);
         
         workerEnd();
-        workerEnd2();
+        workerEnd2();        
+        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }
     
     public void workerRun() throws IOException, SQLException, InterruptedException{

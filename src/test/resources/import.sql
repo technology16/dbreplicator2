@@ -5,11 +5,15 @@
 insert into bone_cp_settings (id_pool, driver, url, user, pass, min_connections_per_partition, max_connections_per_partition, partition_count, connection_timeout_in_ms, close_connection_watch_timeout_in_ms ) values ('source', 'org.h2.Driver', 'jdbc:h2:mem://localhost/~/source', 'sa', '', 1, 100, 1, 10000, 0);
 --Connection dest
 insert into bone_cp_settings (id_pool, driver, url, user, pass, min_connections_per_partition, max_connections_per_partition, partition_count, connection_timeout_in_ms, close_connection_watch_timeout_in_ms ) values ('dest', 'org.h2.Driver', 'jdbc:h2:mem://localhost/~/dest', 'sa', '', 1, 100, 1, 10000, 0);
-
+--Connection stats
+insert into bone_cp_settings (id_pool, driver, url, user, pass, min_connections_per_partition, max_connections_per_partition, partition_count, connection_timeout_in_ms, close_connection_watch_timeout_in_ms ) values ('stats', 'org.h2.Driver', 'jdbc:h2:mem://localhost/~/source', 'sa', '', 1, 100, 1, 10000, 0);
+--Connection error
+insert into bone_cp_settings (id_pool, driver, url, user, pass, min_connections_per_partition, max_connections_per_partition, partition_count, connection_timeout_in_ms, close_connection_watch_timeout_in_ms ) values ('error', 'org.h2.Driver', 'jdbc:h2:mem://localhost/~/source', 'sa', '', 1, 100, 1, 10000, 0);
 
 --application_settings
 insert into application_settings (key, value) values ('tp.threads', '10');
-insert into application_settings (key, value) values ('stats.dest', 'source');
+insert into application_settings (key, value) values ('stats.dest', 'stats');
+insert into application_settings (key, value) values ('error.dest', 'error');
 
 
 --Tables
@@ -85,7 +89,26 @@ insert into runners (id_runner, source, target, description, class_name) values 
 --Strategy  Table 9,10,11,12,13
 insert into strategies (id, className, param, isEnabled, priority, id_runner) values (9, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Generic', null, true, 100, 9);
 
--------
+--Runner CountWatchgdog
+insert into runners (id_runner, source, target, description, class_name) values (7, 'source', 'source', 'ErrorsCountWatchgdogStrategy', '');
+--Strategy  CountWatchgdog
+insert into strategies (id, className, param, isEnabled, priority, id_runner) values (7, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.CountWatchgdog', 'maxErrors=0
+partEmail=10', true, 100, 7);
+insert into strategies (id, className, param, isEnabled, priority, id_runner) values (10, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.CountWatchgdog', null, true, 100, 7);
+
+--Runner SuperlogWatchgdog
+insert into runners (id_runner, source, target, description, class_name) values (15, 'source', 'source', 'ErrorsSuperlogWatchgdog', '');
+--Strategy  SuperlogWatchgdog
+insert into strategies (id, className, param, isEnabled, priority, id_runner) values (15, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.SuperlogWatchgdog', 'period=1000
+partEmail=10', true, 100, 15);
+
+-- Раннер стратегии проверки логирования необработанных исключений в задаче
+insert into runners (id_runner, source, target, description, class_name) values (16, 'source', 'dest', 'OutOfMemoryErrorStrategy runner', 'ru.taximaxim.dbreplicator2.replica.ReplicaRunner');
+insert into strategies (id, id_runner, className, param, isEnabled, priority) values (16, 16, 'ru.taximaxim.dbreplicator2.utils.OutOfMemoryErrorStrategy', null, true, 100);
+
+-- Раннер стратегии проверки логирования необработанных исключений в пуле потоков
+insert into runners (id_runner, source, target, description, class_name) values (17, 'source', 'dest', 'OutOfMemoryErrorStrategy runner', 'ru.taximaxim.dbreplicator2.replica.ReplicaRunner');
+insert into strategies (id, id_runner, className, param, isEnabled, priority) values (17, 17, 'ru.taximaxim.dbreplicator2.utils.OutOfMemoryErrorStrategy', null, true, 100);
 
 --Runner tables
 insert into table_observers (id_runner, id_table) values (3, 1);
@@ -100,13 +123,6 @@ insert into table_observers (id_runner, id_table) values (9, 10);
 insert into table_observers (id_runner, id_table) values (9, 11);
 insert into table_observers (id_runner, id_table) values (9, 12);
 insert into table_observers (id_runner, id_table) values (9, 13);
-
---Runner CountWatchgdog
-insert into runners (id_runner, source, target, description, class_name) values (7, 'source', 'source', 'ErrorsCountWatchgdogStrategy', '');
---Strategy  CountWatchgdog
-insert into strategies (id, className, param, isEnabled, priority, id_runner) values (7, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.CountWatchgdog', 'maxErrors=0
-partEmail=10', true, 100, 7);
-insert into strategies (id, className, param, isEnabled, priority, id_runner) values (10, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.CountWatchgdog', null, true, 100, 7);
 
 --Runner ReplicationTimeWatchgdog
 insert into runners (id_runner, source, target, description, class_name) values (10, 'source', 'source', 'ErrorsReplicationTimeWatchgdog', '');
@@ -128,3 +144,7 @@ insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name
 insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (11, 11, '_STRING');
 insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (12, 12, '_STRING');
 insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (13, 13, '_STRING');
+
+-- Задача с ошибочной стратегией
+insert into tasks (id_task, id_runner, enabled, success_interval, fail_interval, description) values (16, 16, true, 10000, 300000, 'ru.taximaxim.dbreplicator2.utils.OutOfMemoryErrorStrategy');
+

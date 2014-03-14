@@ -34,6 +34,8 @@ import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.StopChainProcesing;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
+import ru.taximaxim.dbreplicator2.el.DefaultUncaughtExceptionHandler;
+import ru.taximaxim.dbreplicator2.el.ErrorsLog;
 import ru.taximaxim.dbreplicator2.utils.Core;
 /**
  * Обработчик раннера
@@ -44,7 +46,6 @@ import ru.taximaxim.dbreplicator2.utils.Core;
 public class WorkerThread implements Runnable {
 
     private static final Logger LOG = Logger.getLogger(WorkerThread.class);
-
     private Runner runner;
 
     /**
@@ -58,25 +59,33 @@ public class WorkerThread implements Runnable {
 
     @Override
     public void run() {
+        Thread.currentThread().setUncaughtExceptionHandler(
+                new DefaultUncaughtExceptionHandler(runner.getId()));
+        
         LOG.debug(String.format("Запуск потока [%s] раннера [id_runner = %d, %s]...",
                 Thread.currentThread().getName(), runner.getId(),
                 runner.getDescription()));
 
-        try {
-            processCommand();
-        } catch (ClassNotFoundException e) {
-            LOG.error(String.format("Ошибка при инициализации данных раннера [id_runner = %d, %s]", 
-                    runner.getId(), runner.getDescription()), e);
-        } catch (StrategyException e) {
-            LOG.error(String.format("Ошибка при выполнении стратегии раннера [id_runner = %d, %s]", 
-                    runner.getId(), runner.getDescription()), e);
-        } catch (SQLException e) {
-            LOG.error(String.format("Ошибка БД при выполнении стратегии раннера [id_runner = %d, %s]", 
-                    runner.getId(), runner.getDescription()), e);
-            SQLException nextEx = e.getNextException();
-            while (nextEx!=null){
-                LOG.error("Подробности:", nextEx);
-                nextEx = nextEx.getNextException();
+        try (ErrorsLog errorsLog = Core.getErrorsLog();){
+            try {
+                processCommand();
+                errorsLog.setStatus(runner.getId(), null, null, 1);
+            } catch (InstantiationException | IllegalAccessException e) {
+                errorsLog.add(runner.getId(), null, null, 
+                        String.format("Ошибка при создании объекта-стратегии раннера [id_runner = %d, %s]. [%s]", 
+                                runner.getId(), runner.getDescription(), e));
+            } catch (ClassNotFoundException e) {
+                errorsLog.add(runner.getId(), null, null, 
+                        String.format("Ошибка при инициализации данных раннера [id_runner = %d, %s]", 
+                                runner.getId(), runner.getDescription()), e);
+            } catch (StrategyException e) {
+                errorsLog.add(runner.getId(), null, null, 
+                        String.format("Ошибка при выполнении стратегии раннера [id_runner = %d, %s]", 
+                                runner.getId(), runner.getDescription()), e);
+            } catch (SQLException e) {
+                errorsLog.add(runner.getId(), null, null, 
+                        String.format("Ошибка БД при выполнении стратегии раннера [id_runner = %d, %s]", 
+                                runner.getId(), runner.getDescription()), e);
             }
         }
         
@@ -94,8 +103,12 @@ public class WorkerThread implements Runnable {
      * @throws SQLException 
      * @throws ClassNotFoundException 
      * @throws StrategyException 
+     * @throws IllegalAccessException 
+     * @throws InstantiationException 
      */
-    public void processCommand() throws ClassNotFoundException, SQLException, StrategyException {
+    public void processCommand() 
+            throws ClassNotFoundException, SQLException, StrategyException, 
+            InstantiationException, IllegalAccessException {
 
         ConnectionFactory connectionsFactory = Core.getConnectionFactory();
 
@@ -103,15 +116,24 @@ public class WorkerThread implements Runnable {
         // каждого.
         try (Connection sourceConnection =
                 connectionsFactory.getConnection(runner.getSource().getPoolId());
-             Connection targetConnection =
-                connectionsFactory.getConnection(runner.getTarget().getPoolId())
-            ) {
-
+                Connection targetConnection =
+                        connectionsFactory.getConnection(runner.getTarget().getPoolId())
+                ) {
             List<StrategyModel> strategies = runner.getStrategyModels();
 
             try {
                 for (StrategyModel strategyModel : strategies) {
                     if (strategyModel.isEnabled()) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug(String.format("runStrategy(%s, %s, %s);\n" +
+                                    "sourceConnection = %s;\n" +
+                                    "targetConnection = %s;", 
+                                    runner.getSource().getPoolId(),
+                                    runner.getTarget().getPoolId(),
+                                    strategyModel.getId(),
+                                    sourceConnection.hashCode(),
+                                    targetConnection.hashCode()));
+                        }
                         runStrategy(sourceConnection, targetConnection, strategyModel);
                     }
                 }
@@ -119,10 +141,6 @@ public class WorkerThread implements Runnable {
                 LOG.warn(String.format("Запрошена принудительная остановка обработки цепочки стратегий раннера [id_runner = %d, %s].", 
                         runner.getId(), runner.getDescription()), e);
             }
-
-        } catch (InstantiationException | IllegalAccessException e) {
-            LOG.error(String.format("Ошибка при создании объекта-стратегии раннера [id_runner = %d, %s].", 
-                    runner.getId(), runner.getDescription()), e);
         }
     }
 
@@ -144,8 +162,8 @@ public class WorkerThread implements Runnable {
      */
     protected void runStrategy(Connection sourceConnection,
             Connection targetConnection, StrategyModel strategyModel)
-            throws ClassNotFoundException, InstantiationException,
-            IllegalAccessException, StrategyException, SQLException {
+                    throws ClassNotFoundException, InstantiationException,
+                    IllegalAccessException, StrategyException, SQLException {
 
         Class<?> clazz = Class.forName(strategyModel.getClassName());
         Strategy strategy = (Strategy) clazz.newInstance();

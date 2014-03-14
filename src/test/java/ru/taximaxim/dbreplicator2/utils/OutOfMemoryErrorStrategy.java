@@ -21,42 +21,34 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ru.taximaxim.dbreplicator2.replica.strategies.replication;
+package ru.taximaxim.dbreplicator2.utils;
+
+import java.sql.Connection;
+import java.util.ArrayList;
 
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
+import ru.taximaxim.dbreplicator2.replica.Strategy;
+import ru.taximaxim.dbreplicator2.replica.StrategyException;
 
 /**
+ * Класс который генерирует необрабатываемое исключение
+ * 
  * @author volodin_aa
- *
+ * 
  */
-public class StrategySkeleton {
+public class OutOfMemoryErrorStrategy implements Strategy {
 
-    private static final String FETCH_SIZE = "fetchSize";
-    private static final String BATCH_SIZE = "batchSize";
-    private static final int DEFAULT_FETCH_SIZE = 1000;
-    private static final int DEFAULT_BATCH_SIZE = 1000;
     /**
-     * Размер выборки данных (строк)
+     * Конструктор по умолчанию
      */
-    private int fetchSize = DEFAULT_FETCH_SIZE;
-    
-    protected int getFetchSize(StrategyModel data) {
-        if (data.getParam(FETCH_SIZE) != null) {
-            fetchSize = Integer.parseInt(data.getParam(FETCH_SIZE));
-        }
-        return fetchSize;
+    public OutOfMemoryErrorStrategy() {
     }
 
-    /**
-     * Размер сбрасываемых в БД данных (строк)
-     */
-    private int batchSize = DEFAULT_BATCH_SIZE;
-    
-    protected int getBatchSize(StrategyModel data) {
-        if (data.getParam(BATCH_SIZE) != null) {
-            batchSize = Integer.parseInt(data.getParam(BATCH_SIZE));
-        }
-        return batchSize;
+    @Override
+    public void execute(Connection sourceConnection, Connection targetConnection,
+            StrategyModel data) throws StrategyException {
+        // Пробуем выделить очень много памяти
+        new ArrayList<String>(Integer.MAX_VALUE);
     }
 
 }
