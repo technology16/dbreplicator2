@@ -40,21 +40,19 @@ import ru.taximaxim.dbreplicator2.el.ErrorsLogService;
 public class DelayGenericWorkPoolService extends GenericWorkPoolService implements WorkPoolService, AutoCloseable {
 
     private PreparedStatement lastOperationsStatement;
-    private int period = 300000; 
+    
+    private int period; 
+
+    private PreparedStatement clearWorkPoolDataStatement;
+    
     /**
      * Конструктор
      * @param connection
      * @param errorsLog
      */
-    public DelayGenericWorkPoolService(Connection connection, ErrorsLogService errorsLog) {
+    public DelayGenericWorkPoolService(Connection connection, 
+            ErrorsLogService errorsLog, int period) {
         super(connection, errorsLog);
-    }
-
-    /**
-     * Установка периода
-     * @param period
-     */
-    public void setPeriod(int period) {
         this.period = period;
     }
     
@@ -62,7 +60,7 @@ public class DelayGenericWorkPoolService extends GenericWorkPoolService implemen
      * Получение периода
      * @return
      */
-    public int getPeriod() {
+    private int getPeriod() {
         return period;
     }
     
@@ -70,7 +68,7 @@ public class DelayGenericWorkPoolService extends GenericWorkPoolService implemen
     public PreparedStatement getLastOperationsStatement() throws SQLException {
         if (lastOperationsStatement == null) {
             lastOperationsStatement = 
-                getConnection().prepareStatement("SELECT * FROM rep2_workpool_data WHERE id_runner=? AND id_superlog IN (SELECT MAX(id_superlog) AS id_superlog FROM rep2_workpool_data WHERE id_runner=? and c_date<=? GROUP BY id_foreign, id_table ORDER BY id_superlog LIMIT ? OFFSET ?) ORDER BY id_superlog ",
+                getConnection().prepareStatement("SELECT DISTINCT id_runner, id_foreign, id_table AS id_superlog FROM rep2_workpool_data WHERE id_runner=? and c_date<=? LIMIT ? OFFSET ?",
                         ResultSet.TYPE_FORWARD_ONLY,
                         ResultSet.CONCUR_READ_ONLY);
         }
@@ -87,22 +85,46 @@ public class DelayGenericWorkPoolService extends GenericWorkPoolService implemen
         PreparedStatement statement = getLastOperationsStatement();
         
         statement.setInt(1, runnerId);
-        statement.setInt(2, runnerId);
         
         Timestamp date = new Timestamp(Calendar.getInstance().getTimeInMillis() - getPeriod());
-        statement.setTimestamp(3, date);
+        statement.setTimestamp(2, date);
+        
         // Извлекаем частями равными fetchSize 
         statement.setFetchSize(fetchSize);
         
         // По задаче #2327
         // Задаем первоначальное смещение выборки равное 0.
         // При появлении ошибочных записей будем его увеличивать на 1.
-        statement.setInt(4, fetchSize);
-        statement.setInt(5, offset);
+        statement.setInt(3, fetchSize);
+        statement.setInt(4, offset);
         
         return statement.executeQuery();
     }  
+
+    @Override
+    public PreparedStatement getClearWorkPoolDataStatement() throws SQLException {
+        if (clearWorkPoolDataStatement == null) {
+            clearWorkPoolDataStatement = 
+                    getConnection().prepareStatement("DELETE FROM rep2_workpool_data WHERE id_runner=? AND id_foreign=? AND id_table=?");
+        }
+        
+        return clearWorkPoolDataStatement;
+    }
     
+    /* (non-Javadoc)
+     * @see ru.taximaxim.dbreplicator2.replica.strategies.replication.workpool.GenericWorkPoolService#clearWorkPoolData(java.sql.ResultSet)
+     */
+    @Override
+    public void clearWorkPoolData(ResultSet operationsResult) throws SQLException {
+        // Очищаем данные о текущей записи из набора данных реплики
+        PreparedStatement deleteWorkPoolData = getClearWorkPoolDataStatement();
+        deleteWorkPoolData.setInt(1, getRunner(operationsResult));
+        deleteWorkPoolData.setLong(2, getForeign(operationsResult));
+        deleteWorkPoolData.setString(3, getTable(operationsResult));
+        deleteWorkPoolData.addBatch();
+        getErrorsLog().setStatus(getRunner(operationsResult), getTable(operationsResult), getForeign(operationsResult), 1);
+    }
+
     @Override
     public void close() throws SQLException {
         close(lastOperationsStatement);

@@ -121,6 +121,7 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
      * @throws SQLException
      * @throws ClassNotFoundException 
      */
+    @Override
     protected void selectLastOperations(Connection sourceConnection, 
             Connection targetConnection, StrategyModel data) throws SQLException, ClassNotFoundException {
         // Задаем первоначальное смещение выборки равное 0.
