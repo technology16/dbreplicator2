@@ -77,25 +77,6 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
     protected GenericDataTypeService getDestDataService() {
         return destDataService;
     }
-    
-    /**
-     * Установка опций
-     * @param cols
-     * @param statement
-     * @param resultSet
-     * @return
-     * @throws SQLException
-     */
-    protected String setOptions(Map<String, Integer> cols, PreparedStatement statement, ResultSet resultSet) throws SQLException {
-        int parameterIndex = 1;
-        String pri = "";
-        for (String colsName : cols.keySet()) {
-            JdbcMetadata.setOptionStatementPrimaryColumns(statement, 
-                resultSet, cols.get(colsName), parameterIndex++, colsName);
-            pri += String.format("%s = [%s]", colsName, resultSet.getObject(colsName));
-        }
-        return pri;
-    }
 
     /**
      * Получение раннера
@@ -173,9 +154,6 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
         boolean result = true;
         TableModel table = data.getRunner().getSource().getTable(getWorkPoolService().getTable(operationsResult));
         
-        Map<String, Integer> colmSourcePri = new HashMap<String, Integer>(getSourceDataService().getPriColsTypes(table));
-        Map<String, Integer> colsSource = new HashMap<String, Integer>(getSourceDataService().getAllColsTypes(table));
-        
         // Извлекаем данные из исходной таблицы
         PreparedStatement selectSourceStatement = getSourceDataService().getSelectStatement(table);
         selectSourceStatement.setLong(1, getWorkPoolService().getForeign(operationsResult));
@@ -183,48 +161,49 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
         PreparedStatement selectTargetStatement = getDestDataService().getSelectStatement(table);
         
         try (ResultSet sourceResult = selectSourceStatement.executeQuery();) {
+            StringBuffer rowDumpHead = new StringBuffer(String.format("Ошибка в целостности реплицированных данных [%s => %s]\n",
+                    data.getRunner().getSource().getPoolId(),
+                    data.getRunner().getTarget().getPoolId()));
+            Map<String, Integer> colsSource = new HashMap<String, Integer>(getSourceDataService().getAllColsTypes(table));
             if(sourceResult.next()) {
-                String prikey = setOptions(colmSourcePri, selectTargetStatement, sourceResult);
-                String strRowError = String.format("Ошибка в целостности реплицированных данных [%s => %s]\n",
-                        data.getRunner().getSource().getPoolId(),
-                        data.getRunner().getTarget().getPoolId());
+                selectTargetStatement.setLong(1, getWorkPoolService().getForeign(operationsResult));
                 
                 try (ResultSet targetResult = selectTargetStatement.executeQuery();) {            
                     if(targetResult.next()) {
-                        StringBuffer rowDumpHead = new StringBuffer(strRowError);
-                        rowDumpHead.append(String.format("Ошибка в table: %s, данные не равны в row [%s] values: ", table.getName(), prikey));
                         boolean errorRows = false;
                         for (String colsName : colsSource.keySet()) {
                             if(!JdbcMetadata.isEquals(sourceResult, targetResult, colsName, colsSource.get(colsName))) {
-                                String rowDump = String.format("[ col %s => [%s != %s] ] ",  colsName, sourceResult.getObject(colsName), targetResult.getObject(colsName));
+                                String rowDump = String.format("[ поле %s => [%s != %s] ] ",  colsName, sourceResult.getObject(colsName), targetResult.getObject(colsName));
                                 rowDumpHead.append(rowDump);
                                 errorRows = true;
                              }
                         }
                         if(errorRows) {
                             result = false;
+                            rowDumpHead.insert(0, String.format("Ошибка в таблице %s, данные не равны в строке [id=%s]: ", table.getName()));
                             getWorkPoolService().trackError(rowDumpHead.toString(), new SQLException(), operationsResult);
  
                         } else {
                             getWorkPoolService().clearWorkPoolData(operationsResult);
                         }
                     } else {
-                        String rowDump = String.format(
-                            "Ошибка в table: %s, отсутствует запись в приемнике row = [%s]",
+                        rowDumpHead.append(String.format(
+                            "Ошибка в таблице %s, отсутствует запись приемнике [id=%s]",
                             table.getName(),
-                            Jdbc.resultSetToString(sourceResult, new ArrayList<String>(colsSource.keySet())));
-                        getWorkPoolService().trackError(rowDump, new SQLException(), operationsResult);
+                            Jdbc.resultSetToString(sourceResult, new ArrayList<String>(colsSource.keySet()))));
+                        getWorkPoolService().trackError(rowDumpHead.toString(), new SQLException(), operationsResult);
                         result = false;
                     }
                 }
             } else {
+                selectTargetStatement.setLong(1, getWorkPoolService().getForeign(operationsResult));
                 try (ResultSet targetResult = selectTargetStatement.executeQuery();) {            
                     if(targetResult.next()) {
-                        String rowDump = String.format(
-                                "Ошибка в table: %s, отсутствует запись в источнике row = [%s]",
+                        rowDumpHead.append(String.format(
+                                "Ошибка в таблице %s, присутствует удаленная запись приемнике [id=%s]",
                                 table.getName(),
-                                Jdbc.resultSetToString(sourceResult, new ArrayList<String>(colsSource.keySet())));
-                            getWorkPoolService().trackError(rowDump, new SQLException(), operationsResult);
+                                Jdbc.resultSetToString(sourceResult, new ArrayList<String>(colsSource.keySet()))));
+                            getWorkPoolService().trackError(rowDumpHead.toString(), new SQLException(), operationsResult);
                             result = false;
                     } else {
                         getWorkPoolService().clearWorkPoolData(operationsResult);
