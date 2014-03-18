@@ -13,14 +13,14 @@ insert into tables (id_table, id_pool, name) values (1, 'source', 'T_TABLE2');
 insert into tables (id_table, id_pool, name) values (2, 'source', 'T_TABLE3');
 
 --Runners Super Log
-insert into runners (id_runner, source, target, description, class_name) values (1, 'source', 'source', 'description', 'ru.taximaxim.dbreplicator2.replica.SuperlogRunner');
+insert into runners (id_runner, source, target, description) values (1, 'source', 'source', 'SuperlogRunner');
 --Strategies Add Super Log
 insert into strategies (id, className, param, isEnabled, priority, id_runner) values (1, 'ru.taximaxim.dbreplicator2.replica.strategies.superlog.FastManager', null, true, 100, 1);
 
 -------
 
 --Runner Table 1,2
-insert into runners (id_runner, source, target, description, class_name) values (2, 'source', 'dest', 'description', 'ru.taximaxim.dbreplicator2.replica.ReplicaRunner');
+insert into runners (id_runner, source, target, description) values (2, 'source', 'dest', 'ReplicaRunner');
 --Strategy  Table 1,2
 insert into strategies (id, className, param, isEnabled, priority, id_runner) values (2, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Generic', 'fetchSize=1
 batchSize=1', true, 100, 2);
@@ -32,7 +32,7 @@ insert into table_observers (id_runner, id_table) values (2, 1);
 insert into table_observers (id_runner, id_table) values (2, 2);
 
 --Runner CountWatchgdog
-insert into runners (id_runner, source, target, description, class_name) values (7, 'source', 'source', 'ErrorsCountWatchgdogStrategy', '');
+insert into runners (id_runner, source, target, description) values (7, 'source', 'source', 'ErrorsCountWatchgdogStrategy');
 --Strategy  CountWatchgdog
 insert into strategies (id, className, param, isEnabled, priority, id_runner) values (7, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.CountWatchgdog', 'maxErrors=0
 partEmail=10', true, 100, 7);

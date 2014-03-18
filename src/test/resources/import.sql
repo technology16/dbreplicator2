@@ -31,13 +31,13 @@ insert into tables (id_table, id_pool, name) values (12, 'dest', 'T_TABLE4');
 insert into tables (id_table, id_pool, name) values (13, 'dest', 'T_TABLE5');
 
 --Runners Super Log
-insert into runners (id_runner, source, target, description, class_name) values (1, 'source', 'source', 'description', 'ru.taximaxim.dbreplicator2.replica.SuperlogRunner');
+insert into runners (id_runner, source, target, description) values (1, 'source', 'source', 'FastManager');
 --Strategies Add Super Log
 insert into strategies (id, className, param, isEnabled, priority, id_runner) values (1, 'ru.taximaxim.dbreplicator2.replica.strategies.superlog.FastManager', 'key1=value1
 key2=''value2''', true, 100, 1);
 
 --Runners Super Log 2
-insert into runners (id_runner, source, target, description, class_name) values (2, 'dest', 'dest', 'description', 'ru.taximaxim.dbreplicator2.replica.SuperlogRunner');
+insert into runners (id_runner, source, target, description) values (2, 'dest', 'dest', 'FastManager');
 --Strategies Add Super Log 2
 insert into strategies (id, className, param, isEnabled, priority, id_runner) values (2, 'ru.taximaxim.dbreplicator2.replica.strategies.superlog.FastManager', 'key1=value1
 key2=''value2''', true, 100, 2);
@@ -46,28 +46,28 @@ key2=''value2''', true, 100, 2);
 --Runners Task
 
 --Runner Table 1
-insert into runners (id_runner, source, target, description, class_name) values (3, 'source', 'dest', 'description', 'ru.taximaxim.dbreplicator2.replica.ReplicaRunner');
+insert into runners (id_runner, source, target, description) values (3, 'source', 'dest', 'Generic');
 --Strategy  Table 1
 insert into strategies (id, className, param, isEnabled, priority, id_runner) values (3, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Generic', null, true, 100, 3);
 
 -------
 
 --Runner Table 2
-insert into runners (id_runner, source, target, description, class_name) values (4, 'source', 'dest', 'description', 'ru.taximaxim.dbreplicator2.replica.ReplicaRunner');
+insert into runners (id_runner, source, target, description) values (4, 'source', 'dest', 'Generic');
 --Strategy  Table 2
 insert into strategies (id, className, param, isEnabled, priority, id_runner) values (4, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Generic', null, true, 100, 4);
 
 -------
 
 --Runner Table 3
-insert into runners (id_runner, source, target, description, class_name) values (5, 'source', 'dest', 'description', 'ru.taximaxim.dbreplicator2.replica.ReplicaRunner');
+insert into runners (id_runner, source, target, description) values (5, 'source', 'dest', 'Generic');
 --Strategy  Table 3
 insert into strategies (id, className, param, isEnabled, priority, id_runner) values (5, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Generic', null, true, 100, 5);
 
 -------
 
 --Runner Table 4,5,6
-insert into runners (id_runner, source, target, description, class_name) values (6, 'source', 'dest', 'description', 'ru.taximaxim.dbreplicator2.replica.ReplicaRunner');
+insert into runners (id_runner, source, target, description) values (6, 'source', 'dest', 'Generic');
 --Strategy  Table 4,5,6
 insert into strategies (id, className, param, isEnabled, priority, id_runner) values (6, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Generic', null, true, 100, 6);
 
@@ -76,7 +76,7 @@ insert into strategies (id, className, param, isEnabled, priority, id_runner) va
 --Runners Task
 
 --Runner Table 8
-insert into runners (id_runner, source, target, description, class_name) values (8, 'dest', 'source', 'description', 'ru.taximaxim.dbreplicator2.replica.ReplicaRunner');
+insert into runners (id_runner, source, target, description) values (8, 'dest', 'source', 'Generic');
 --Strategy  Table 8
 insert into strategies (id, className, param, isEnabled, priority, id_runner) values (8, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Generic', null, true, 100, 8);
 
@@ -85,29 +85,29 @@ insert into strategies (id, className, param, isEnabled, priority, id_runner) va
 --Runners Task
 
 --Runner Table 9,10,11,12,13
-insert into runners (id_runner, source, target, description, class_name) values (9, 'dest', 'source', 'description', 'ru.taximaxim.dbreplicator2.replica.ReplicaRunner');
+insert into runners (id_runner, source, target, description) values (9, 'dest', 'source', 'Generic');
 --Strategy  Table 9,10,11,12,13
 insert into strategies (id, className, param, isEnabled, priority, id_runner) values (9, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Generic', null, true, 100, 9);
 
 --Runner CountWatchgdog
-insert into runners (id_runner, source, target, description, class_name) values (7, 'source', 'source', 'ErrorsCountWatchgdogStrategy', '');
+insert into runners (id_runner, source, target, description) values (7, 'source', 'source', 'ErrorsCountWatchgdogStrategy');
 --Strategy  CountWatchgdog
 insert into strategies (id, className, param, isEnabled, priority, id_runner) values (7, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.CountWatchgdog', 'maxErrors=0
 partEmail=10', true, 100, 7);
 insert into strategies (id, className, param, isEnabled, priority, id_runner) values (10, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.CountWatchgdog', null, true, 100, 7);
 
 --Runner SuperlogWatchgdog
-insert into runners (id_runner, source, target, description, class_name) values (15, 'source', 'source', 'ErrorsSuperlogWatchgdog', '');
+insert into runners (id_runner, source, target, description) values (15, 'source', 'source', 'ErrorsSuperlogWatchgdog');
 --Strategy  SuperlogWatchgdog
 insert into strategies (id, className, param, isEnabled, priority, id_runner) values (15, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.SuperlogWatchgdog', 'period=1000
 partEmail=10', true, 100, 15);
 
 -- Раннер стратегии проверки логирования необработанных исключений в задаче
-insert into runners (id_runner, source, target, description, class_name) values (16, 'source', 'dest', 'OutOfMemoryErrorStrategy runner', 'ru.taximaxim.dbreplicator2.replica.ReplicaRunner');
+insert into runners (id_runner, source, target, description) values (16, 'source', 'dest', 'OutOfMemoryErrorStrategy runner');
 insert into strategies (id, id_runner, className, param, isEnabled, priority) values (16, 16, 'ru.taximaxim.dbreplicator2.utils.OutOfMemoryErrorStrategy', null, true, 100);
 
 -- Раннер стратегии проверки логирования необработанных исключений в пуле потоков
-insert into runners (id_runner, source, target, description, class_name) values (17, 'source', 'dest', 'OutOfMemoryErrorStrategy runner', 'ru.taximaxim.dbreplicator2.replica.ReplicaRunner');
+insert into runners (id_runner, source, target, description) values (17, 'source', 'dest', 'OutOfMemoryErrorStrategy runner');
 insert into strategies (id, id_runner, className, param, isEnabled, priority) values (17, 17, 'ru.taximaxim.dbreplicator2.utils.OutOfMemoryErrorStrategy', null, true, 100);
 
 --Runner tables
@@ -125,7 +125,7 @@ insert into table_observers (id_runner, id_table) values (9, 12);
 insert into table_observers (id_runner, id_table) values (9, 13);
 
 --Runner ReplicationTimeWatchgdog
-insert into runners (id_runner, source, target, description, class_name) values (10, 'source', 'source', 'ErrorsReplicationTimeWatchgdog', '');
+insert into runners (id_runner, source, target, description) values (10, 'source', 'source', 'ErrorsReplicationTimeWatchgdog');
 --Strategy  ReplicationTimeWatchgdog
 insert into strategies (id, className, param, isEnabled, priority, id_runner) values (11, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.ReplicationTimeWatchgdog', 'period=0
 partEmail=10', true, 100, 10);
