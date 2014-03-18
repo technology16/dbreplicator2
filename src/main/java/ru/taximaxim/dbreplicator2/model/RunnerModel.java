@@ -92,12 +92,6 @@ public class RunnerModel implements Runner {
     private String description;
 
     /**
-     * Имя класса
-     */
-    @Column(name = "class_name")
-    private String className;
-
-    /**
      * Список стратегий, которые необхоимо выполнить потоку
      */
     @OneToMany(mappedBy = "runner", fetch = FetchType.EAGER)
@@ -195,18 +189,6 @@ public class RunnerModel implements Runner {
      */
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    @Override
-    public String getClassName() {
-        return className;
-    }
-
-    /*
-     * Изменние имени класса стратегии 
-     */
-    public void setClassName(String className) {
-        this.className = className;
     }
     
     /**
