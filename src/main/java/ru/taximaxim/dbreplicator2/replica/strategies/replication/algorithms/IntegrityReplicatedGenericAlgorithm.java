@@ -210,7 +210,7 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
                         }
                     } else {
                         String rowDump = String.format(
-                            "Ошибка в table: %s, отсутствует запись row = [%s]",
+                            "Ошибка в table: %s, отсутствует запись в приемнике row = [%s]",
                             table.getName(),
                             Jdbc.resultSetToString(sourceResult, new ArrayList<String>(colsSource.keySet())));
                         getWorkPoolService().trackError(rowDump, new SQLException(), operationsResult);
@@ -218,7 +218,18 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
                     }
                 }
             } else {
-                getWorkPoolService().clearWorkPoolData(operationsResult);
+                try (ResultSet targetResult = selectTargetStatement.executeQuery();) {            
+                    if(targetResult.next()) {
+                        String rowDump = String.format(
+                                "Ошибка в table: %s, отсутствует запись в источнике row = [%s]",
+                                table.getName(),
+                                Jdbc.resultSetToString(sourceResult, new ArrayList<String>(colsSource.keySet())));
+                            getWorkPoolService().trackError(rowDump, new SQLException(), operationsResult);
+                            result = false;
+                    } else {
+                        getWorkPoolService().clearWorkPoolData(operationsResult);
+                    }
+                }
             }
         }
         return result;
