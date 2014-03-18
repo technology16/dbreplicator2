@@ -60,7 +60,7 @@ public class DelayGenericWorkPoolService extends GenericWorkPoolService implemen
      * Получение периода
      * @return
      */
-    private int getPeriod() {
+    public int getPeriod() {
         return period;
     }
     
@@ -68,7 +68,7 @@ public class DelayGenericWorkPoolService extends GenericWorkPoolService implemen
     public PreparedStatement getLastOperationsStatement() throws SQLException {
         if (lastOperationsStatement == null) {
             lastOperationsStatement = 
-                getConnection().prepareStatement("SELECT DISTINCT id_runner, id_foreign, id_table AS id_superlog FROM rep2_workpool_data WHERE id_runner=? and c_date<=? LIMIT ? OFFSET ?",
+                getConnection().prepareStatement("SELECT DISTINCT id_runner, id_foreign, id_table FROM rep2_workpool_data WHERE id_runner=? and c_date<=? LIMIT ? OFFSET ?",
                         ResultSet.TYPE_FORWARD_ONLY,
                         ResultSet.CONCUR_READ_ONLY);
         }

@@ -183,7 +183,7 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
         PreparedStatement selectTargetStatement = getDestDataService().getSelectStatement(table);
         
         try (ResultSet sourceResult = selectSourceStatement.executeQuery();) {
-            while(sourceResult.next()) {
+            if(sourceResult.next()) {
                 String prikey = setOptions(colmSourcePri, selectTargetStatement, sourceResult);
                 String strRowError = String.format("Ошибка в целостности реплицированных данных [%s => %s]\n",
                         data.getRunner().getSource().getPoolId(),
@@ -217,6 +217,8 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
                         result = false;
                     }
                 }
+            } else {
+                getWorkPoolService().clearWorkPoolData(operationsResult);
             }
         }
         return result;
