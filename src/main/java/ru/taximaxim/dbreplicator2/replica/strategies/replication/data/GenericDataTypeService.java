@@ -25,14 +25,11 @@ package ru.taximaxim.dbreplicator2.replica.strategies.replication.data;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
-import ru.taximaxim.dbreplicator2.jdbc.QueryConstructors;
 import ru.taximaxim.dbreplicator2.model.TableModel;
 
 /**
@@ -45,10 +42,9 @@ public class GenericDataTypeService extends GenericDataService implements DataSe
      */
     private Map<TableModel, PreparedStatement> selectStatementsAll = new HashMap<TableModel, PreparedStatement>();    
     private Map<TableModel, Map<String, Integer>> allColsTypes = new HashMap<TableModel, Map<String, Integer>>();
-    private Map<TableModel, Map<String, Integer>> priColsTypes = new HashMap<TableModel, Map<String, Integer>>();
     
     /**
-     * 
+     * Конструктор на основе подключения к БД
      */
     public GenericDataTypeService(Connection connection) {
         super(connection);        
@@ -62,41 +58,9 @@ public class GenericDataTypeService extends GenericDataService implements DataSe
     protected Map<TableModel, PreparedStatement> getSelectStatementsAll() {
         return selectStatementsAll;
     }
-    
-    /* (non-Javadoc)
-     * @see ru.taximaxim.dbreplicator2.replica.DataService2#getSelectStatement(ru.taximaxim.dbreplicator2.model.TableModel)
-     */
-    
-    public PreparedStatement getSelectStatement(TableModel table) throws SQLException {
-        PreparedStatement statement = getSelectStatements().get(table);
-        if (statement == null) {
-            statement = getConnection().prepareStatement(QueryConstructors
-                    .constructSelectQuery(table.getName(),
-                    new ArrayList<String>(getAllCols(table)),
-                    new ArrayList<String>(getPriCols(table))));
-            getSelectStatements().put(table, statement);
-        }
-        return statement;
-    }
-    
-    /* (non-Javadoc)
-     * @see ru.taximaxim.dbreplicator2.replica.DataService2#getSelectStatementAll(ru.taximaxim.dbreplicator2.model.TableModel)
-     */
-    public PreparedStatement getSelectStatementAll(TableModel table) throws SQLException {
-        PreparedStatement statement = getSelectStatementsAll().get(table);
-        if (statement == null) {
-            statement = getConnection().prepareStatement(QueryConstructors.
-                constructSelectQuery(table.getName(),
-                new ArrayList<String>(getAllCols(table)), null, 
-                new ArrayList<String>(getPriCols(table))),
-                ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-            getSelectStatementsAll().put(table, statement);
-        }
-        return statement;
-    }
 
     /**
-     * Кешированное получение списка всех колонок
+     * Кешированное получение списка типов всех колонок
      * 
      * @param connection
      * @param table.getName()
@@ -112,24 +76,6 @@ public class GenericDataTypeService extends GenericDataService implements DataSe
                 colsTypes.remove(ignoredCol.toUpperCase());
             }
             allColsTypes.put(table, colsTypes);
-        }
-        return colsTypes;
-    }
-    
-    /**
-     * Кешированное получение списка ключевых колонок
-     * 
-     * @param connection
-     * @param table.getName()
-     * @return
-     * @throws SQLException
-     */
-    public Map<String, Integer> getPriColsTypes(TableModel table)
-            throws SQLException {
-        Map<String, Integer> colsTypes = priColsTypes.get(table);
-        if (colsTypes == null) {
-            colsTypes = JdbcMetadata.getPrimaryColumnsTypes(getConnection(), table.getName());
-            priColsTypes.put(table, colsTypes);
         }
         return colsTypes;
     }
