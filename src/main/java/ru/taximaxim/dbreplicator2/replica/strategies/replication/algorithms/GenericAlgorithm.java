@@ -270,7 +270,7 @@ public class GenericAlgorithm implements Strategy {
                                     data.getRunner().getId(), 
                                     data.getRunner().getDescription(), 
                                     data.getId(), 
-                                    table, 
+                                    table.getName(), 
                                     getWorkPoolService().getOperation(operationsResult), 
                                     Jdbc.resultSetToString(sourceResult, 
                                             new ArrayList<String>(getSourceDataService().getAllCols(table)))); 
@@ -298,7 +298,7 @@ public class GenericAlgorithm implements Strategy {
                                     data.getRunner().getId(), 
                                     data.getRunner().getDescription(), 
                                     data.getId(), 
-                                    table, 
+                                    table.getName(), 
                                     getWorkPoolService().getOperation(operationsResult), 
                                     Jdbc.resultSetToString(sourceResult, 
                                             new ArrayList<String>(getSourceDataService().getAllCols(table)))); 
@@ -319,7 +319,7 @@ public class GenericAlgorithm implements Strategy {
                             data.getRunner().getId(), 
                             data.getRunner().getDescription(), 
                             data.getId(), 
-                            table, 
+                            table.getName(), 
                             getWorkPoolService().getOperation(operationsResult), 
                             Jdbc.resultSetToString(sourceResult, 
                                     new ArrayList<String>(getSourceDataService().getAllCols(table)))); 
@@ -348,7 +348,7 @@ public class GenericAlgorithm implements Strategy {
                             data.getRunner().getId(), 
                             data.getRunner().getDescription(), 
                             data.getId(), 
-                            table, 
+                            table.getName(), 
                             getWorkPoolService().getOperation(operationsResult), 
                             String.valueOf(getWorkPoolService().getForeign(operationsResult))); 
                     if (LOG.isDebugEnabled()) {
@@ -368,7 +368,7 @@ public class GenericAlgorithm implements Strategy {
                     data.getRunner().getId(), 
                     data.getRunner().getDescription(), 
                     data.getId(), 
-                    table, 
+                    table.getName(), 
                     getWorkPoolService().getOperation(operationsResult), 
                     String.valueOf(getWorkPoolService().getForeign(operationsResult))); 
             if (LOG.isDebugEnabled()) {
