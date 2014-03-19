@@ -37,6 +37,12 @@ import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 
+/**
+ * Класс реализации механизма логирования ошибок
+ * 
+ * @author volodin_aa
+ *
+ */
 public class ErrorsLog implements ErrorsLogService, AutoCloseable{
 
     private static final Logger LOG = Logger.getLogger(ErrorsLog.class);

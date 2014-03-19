@@ -70,8 +70,7 @@ public class IntegrityReplicatedData extends StrategySkeleton implements Strateg
             IntegrityReplicatedGenericAlgorithm strategy = 
                     new IntegrityReplicatedGenericAlgorithm(
                             getFetchSize(data), 
-                            getBatchSize(data), 
-                            false, 
+                            getBatchSize(data),
                             workPoolService, 
                             genericDataServiceSourceConnection, 
                             genericDataServiceTargetConnection);

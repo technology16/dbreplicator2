@@ -57,10 +57,20 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
     
     private static Integer idRunner;
     
-    public IntegrityReplicatedGenericAlgorithm(int fetchSize, int batchSize,
-            boolean isStrict, WorkPoolService workPoolService,
+    /**
+     * Конструктор по умолчанию
+     * 
+     * @param fetchSize - размер выборки за раз данных
+     * @param batchSize - размер сохраняемых за раз данных
+     * @param isStrict
+     * @param workPoolService
+     * @param sourceDataService
+     * @param destDataService
+     */
+    public IntegrityReplicatedGenericAlgorithm(int fetchSize, int batchSize, 
+            WorkPoolService workPoolService,
             GenericDataTypeService sourceDataService, GenericDataTypeService destDataService) {
-        super(fetchSize, batchSize,  isStrict, workPoolService, sourceDataService, destDataService);
+        super(fetchSize, batchSize,  false, workPoolService, sourceDataService, destDataService);
         this.sourceDataService = sourceDataService;
         this.destDataService = destDataService;
     }
@@ -119,11 +129,7 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
             for (int rowsCount = 1; operationsResult.next(); rowsCount++) {
                 // Реплицируем операцию
                 if (!replicateOperation(data, operationsResult)) {
-                    if (isStrict()) {
-                        break;
-                    } else {
-                        offset++;
-                    }
+                    offset++;
                 }
 
                 // Периодически сбрасываем батч в БД
