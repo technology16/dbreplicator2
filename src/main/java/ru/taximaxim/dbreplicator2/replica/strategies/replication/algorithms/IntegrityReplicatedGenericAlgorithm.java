@@ -28,6 +28,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -165,6 +166,7 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
                     data.getRunner().getSource().getPoolId(),
                     data.getRunner().getTarget().getPoolId()));
             Map<String, Integer> colsSource = new HashMap<String, Integer>(getSourceDataService().getAllColsTypes(table));
+            List<String> priCols = new ArrayList<String>(getSourceDataService().getPriCols(table));
             if(sourceResult.next()) {
                 selectTargetStatement.setLong(1, getWorkPoolService().getForeign(operationsResult));
                 
@@ -180,7 +182,9 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
                         }
                         if(errorRows) {
                             result = false;
-                            rowDumpHead.insert(0, String.format("Ошибка в таблице %s, данные не равны в строке [id=%s]: ", table.getName()));
+                            rowDumpHead.insert(0, String.format("Ошибка в таблице %s, данные не равны в строке %s: ", 
+                                    table.getName(),
+                                    Jdbc.resultSetToString(sourceResult, priCols)));
                             getWorkPoolService().trackError(rowDumpHead.toString(), new SQLException(), operationsResult);
  
                         } else {
@@ -188,9 +192,9 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
                         }
                     } else {
                         rowDumpHead.append(String.format(
-                            "Ошибка в таблице %s, отсутствует запись приемнике [id=%s]",
+                            "Ошибка в таблице %s, отсутствует запись приемнике %s",
                             table.getName(),
-                            Jdbc.resultSetToString(sourceResult, new ArrayList<String>(colsSource.keySet()))));
+                            Jdbc.resultSetToString(sourceResult, priCols)));
                         getWorkPoolService().trackError(rowDumpHead.toString(), new SQLException(), operationsResult);
                         result = false;
                     }
@@ -200,9 +204,9 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
                 try (ResultSet targetResult = selectTargetStatement.executeQuery();) {            
                     if(targetResult.next()) {
                         rowDumpHead.append(String.format(
-                                "Ошибка в таблице %s, присутствует удаленная запись приемнике [id=%s]",
+                                "Ошибка в таблице %s, присутствует удаленная запись приемнике %s",
                                 table.getName(),
-                                Jdbc.resultSetToString(sourceResult, new ArrayList<String>(colsSource.keySet()))));
+                                Jdbc.resultSetToString(targetResult, priCols)));
                             getWorkPoolService().trackError(rowDumpHead.toString(), new SQLException(), operationsResult);
                             result = false;
                     } else {
