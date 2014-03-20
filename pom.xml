@@ -3,10 +3,9 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>ru.taximaxim.dbreplicator2</groupId>
 	<artifactId>dbreplicator2</artifactId>
-	<version>0.9.3</version>
+	<version>0.10.0</version>
 
 	<dependencies>
-
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -22,7 +21,6 @@
 			<artifactId>commons-cli</artifactId>
 			<version>1.2</version>
 		</dependency>
-
 		<dependency>
 			<groupId>com.jolbox</groupId>
 			<artifactId>bonecp</artifactId>
@@ -33,13 +31,11 @@
 			<artifactId>h2</artifactId>
 			<version>1.3.173</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
 			<version>4.2.6.Final</version>
 		</dependency>
-
 	</dependencies>
 
 	<build>
