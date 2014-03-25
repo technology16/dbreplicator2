@@ -44,6 +44,9 @@ public class FastManager extends GeneiricManager implements Strategy {
 
     private static final Logger LOG = Logger.getLogger(FastManager.class);
 
+    /**
+     * Конструктор по умолчанию
+     */
     public FastManager() {
         super();
     }

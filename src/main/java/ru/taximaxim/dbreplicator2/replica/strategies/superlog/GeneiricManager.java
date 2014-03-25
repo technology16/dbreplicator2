@@ -55,6 +55,9 @@ public abstract class GeneiricManager extends StrategySkeleton implements Strate
 
     private static final Logger LOG = Logger.getLogger(GeneiricManager.class);
     
+    /**
+     * Конструктор по умолчанию
+     */
     public GeneiricManager() {
     }
     
@@ -172,5 +175,12 @@ public abstract class GeneiricManager extends StrategySkeleton implements Strate
         }
     }
 
+    /**
+     * Переопределяемый метод для запуска раннеров
+     * 
+     * @param runners
+     * @throws StrategyException
+     * @throws SQLException
+     */
     protected abstract void startRunners(Collection<RunnerModel> runners) throws StrategyException, SQLException;
 }

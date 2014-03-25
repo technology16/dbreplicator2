@@ -39,6 +39,9 @@ import ru.taximaxim.dbreplicator2.tp.WorkerThread;
  */
 public class Manager extends GeneiricManager implements Strategy {
   
+    /**
+     * Конструктор по умолчанию
+     */
     public Manager() {
         super();
     }
