@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 
@@ -95,7 +96,7 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
      * @return
      */
     protected int getRunner(StrategyModel data) {
-        if ((idRunner==null) & (data.getParam(ID_RUNNER)!=null)) {
+        if ((idRunner==null) && (data.getParam(ID_RUNNER)!=null)) {
             idRunner = Integer.parseInt(data.getParam(ID_RUNNER));
         }
         return idRunner;
@@ -179,8 +180,9 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
                 try (ResultSet targetResult = selectTargetStatement.executeQuery();) {            
                     if(targetResult.next()) {
                         boolean errorRows = false;
-                        for (String colsName : colsSource.keySet()) {
-                            if(!JdbcMetadata.isEquals(sourceResult, targetResult, colsName, colsSource.get(colsName))) {
+                        for (Entry<String, Integer> column: colsSource.entrySet()) {
+                            String colsName = column.getKey();
+                            if(!JdbcMetadata.isEquals(sourceResult, targetResult, colsName, column.getValue())) {
                                 String rowDump = String.format("[ поле %s => [%s != %s] ] ",  colsName, sourceResult.getObject(colsName), targetResult.getObject(colsName));
                                 rowDumpHead.append(rowDump);
                                 errorRows = true;
