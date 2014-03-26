@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 
@@ -54,8 +55,6 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
     
     private GenericDataTypeService sourceDataService;
     private GenericDataTypeService destDataService;
-    
-    private static Integer idRunner;
     
     /**
      * Конструктор по умолчанию
@@ -88,18 +87,6 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
     protected GenericDataTypeService getDestDataService() {
         return destDataService;
     }
-
-    /**
-     * Получение раннера
-     * @param data
-     * @return
-     */
-    protected int getRunner(StrategyModel data) {
-        if ((idRunner==null) & (data.getParam(ID_RUNNER)!=null)) {
-            idRunner = Integer.parseInt(data.getParam(ID_RUNNER));
-        }
-        return idRunner;
-    }
     
     /**
      * Функция отбора обрабатываемых операций из очереди операций.
@@ -116,6 +103,7 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
     @Override
     protected void selectLastOperations(Connection sourceConnection, 
             Connection targetConnection, StrategyModel data) throws SQLException, ClassNotFoundException {
+        int runnerId = Integer.parseInt(data.getParam(ID_RUNNER));
         // Задаем первоначальное смещение выборки равное 0.
         // При появлении ошибочных записей будем его увеличивать на 1.
         int offset = 0;
@@ -123,7 +111,7 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
         PreparedStatement deleteWorkPoolData = 
                 getWorkPoolService().getClearWorkPoolDataStatement();
         ResultSet operationsResult = 
-                getWorkPoolService().getLastOperations(getRunner(data), getFetchSize(), offset);
+                getWorkPoolService().getLastOperations(runnerId, getFetchSize(), offset);
         try {
             // Проходим по списку измененных записей
             for (int rowsCount = 1; operationsResult.next(); rowsCount++) {
@@ -139,7 +127,7 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
 
                     // Извлекаем новую порцию данных
                     operationsResult.close();
-                    operationsResult = getWorkPoolService().getLastOperations(getRunner(data), getFetchSize(), offset);
+                    operationsResult = getWorkPoolService().getLastOperations(runnerId, getFetchSize(), offset);
 
                     LOG.info(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Обработано %s строк...", 
                             data.getRunner().getId(), data.getRunner().getDescription(), data.getId(), rowsCount));
@@ -179,8 +167,9 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
                 try (ResultSet targetResult = selectTargetStatement.executeQuery();) {            
                     if(targetResult.next()) {
                         boolean errorRows = false;
-                        for (String colsName : colsSource.keySet()) {
-                            if(!JdbcMetadata.isEquals(sourceResult, targetResult, colsName, colsSource.get(colsName))) {
+                        for (Entry<String, Integer> column: colsSource.entrySet()) {
+                            String colsName = column.getKey();
+                            if(!JdbcMetadata.isEquals(sourceResult, targetResult, colsName, column.getValue())) {
                                 String rowDump = String.format("[ поле %s => [%s != %s] ] ",  colsName, sourceResult.getObject(colsName), targetResult.getObject(colsName));
                                 rowDumpHead.append(rowDump);
                                 errorRows = true;
