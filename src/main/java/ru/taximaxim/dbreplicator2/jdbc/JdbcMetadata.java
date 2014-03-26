@@ -29,10 +29,14 @@ package ru.taximaxim.dbreplicator2.jdbc;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -45,6 +49,7 @@ public final class JdbcMetadata {
     private static final String IS_AUTOINCREMENT = "IS_AUTOINCREMENT";
     private static final String IS_NULLABLE = "IS_NULLABLE";
     private static final String YES = "YES";
+    private static final String DATA_TYPE = "DATA_TYPE";
     
     /**
      * Сиглетон
@@ -178,5 +183,183 @@ public final class JdbcMetadata {
 
         return cols;
     }
+    
+    /**
+     * Получние имени колонок и их тип в ввиде целого числа
+     * @param result
+     * @return
+     * @throws SQLException
+     */
+    public static Map<String, Integer> getColumnsTypes(Connection connection, String tableName) throws SQLException {
+        Map<String, Integer> colsTypes = new HashMap<String, Integer>();
+        DatabaseMetaData metaData = connection.getMetaData();
+        
+        try (ResultSet colsResultSet = metaData.getColumns(null, null, tableName, null);) {
+            while (colsResultSet.next()) {
+                colsTypes.put(colsResultSet.getString(COLUMN_NAME).toUpperCase(), colsResultSet.getInt(DATA_TYPE));
+            }
+        }
+        return colsTypes;
+    }
+    
+    /**
+     * Функция получения списка ключевых колонок ии их типов таблицы на основе метаданных БД
+     * 
+     * @param connection
+     *            соединение к целевой БД
+     * @param tableName
+     *            имя таблицы
+     * @return список ключевых колонок таблицы
+     * @throws SQLException
+     */
+    public static Map<String, Integer>  getPrimaryColumnsTypes(Connection connection,
+            String tableName) throws SQLException {
+        // Получаем список ключевых колонок
+        Map<String, Integer> primaryKeyColsTypes = new HashMap<String, Integer>();
+        Map<String, Integer> colsTypes = getColumnsTypes(connection, tableName);
+        Set<String> primaryKeyCols = getPrimaryColumns(connection, tableName);
+        
+        for (String primaryKey: primaryKeyCols) {
+            primaryKeyColsTypes.put(primaryKey, colsTypes.get(primaryKey));
+        }
 
+        return primaryKeyColsTypes;
+    }
+    
+    /**
+     * Проверка isEquals(ResultSet,ResultSet)
+     * @param sourceResult
+     * @param targetResult
+     * @param colsName
+     * @param sqlType
+     * @return
+     * @throws SQLException
+     */
+    public static boolean isEquals(ResultSet sourceResult, ResultSet targetResult, String colsName, Integer sqlType) throws SQLException {
+      
+       boolean sourceBoolean = sourceResult.getObject(colsName) == null;
+       boolean targetBoolean = targetResult.getObject(colsName) == null;
+       if (sourceBoolean != targetBoolean) {
+           return false;
+       } else if (sourceBoolean & targetBoolean) {
+           return true;
+       } else {
+       
+         switch (sqlType) {
+            case Types.SMALLINT:
+                return sourceResult.getShort(colsName) == targetResult.getShort(colsName);
+            case Types.INTEGER:
+                return sourceResult.getInt(colsName) == targetResult.getInt(colsName);
+            case Types.TINYINT:
+                return sourceResult.getByte(colsName) == targetResult.getByte(colsName);
+            case Types.BIGINT:
+                return sourceResult.getLong(colsName) == targetResult.getLong(colsName);
+            case Types.REAL:
+            case Types.FLOAT:
+                return sourceResult.getFloat(colsName) == targetResult.getFloat(colsName);
+            case Types.DOUBLE:
+                return sourceResult.getDouble(colsName) == targetResult.getDouble(colsName);
+            case Types.DECIMAL:
+            case Types.NUMERIC:
+                return sourceResult.getBigDecimal(colsName) == targetResult.getBigDecimal(colsName);
+            case Types.CHAR:
+            case Types.VARCHAR:
+            case Types.LONGVARCHAR:
+            case Types.LONGNVARCHAR:
+                return sourceResult.getString(colsName).equals(targetResult.getString(colsName));
+            case Types.BINARY:
+            case Types.VARBINARY:
+            case Types.LONGVARBINARY:
+            case Types.ROWID:
+                return sourceResult.getBytes(colsName) == targetResult.getBytes(colsName);
+            case Types.BLOB:
+                return sourceResult.getBlob(colsName) == targetResult.getBlob(colsName);
+            case Types.CLOB:
+                return sourceResult.getClob(colsName) == targetResult.getClob(colsName);
+            case Types.BOOLEAN:
+            case Types.BIT:
+                return !(sourceResult.getBoolean(colsName) ^ targetResult.getBoolean(colsName));
+            case Types.DATE:
+                return sourceResult.getDate(colsName).getTime() == targetResult.getDate(colsName).getTime();
+            case Types.TIME:
+                return sourceResult.getTime(colsName).getTime() == targetResult.getTime(colsName).getTime();
+            case Types.TIMESTAMP:
+                return sourceResult.getTimestamp(colsName).getTime() == targetResult.getTimestamp(colsName).getTime();
+            default:
+                return sourceResult.getObject(colsName).equals(targetResult.getObject(colsName));
+          }
+      }
+    } 
+    
+    /**
+     * Установка параметров
+     * @param statement
+     * @param resultSet
+     * @param sqlType
+     * @param parameterIndex
+     * @param colsName
+     * @throws SQLException
+     */
+    public static void setOptionStatementPrimaryColumns(PreparedStatement statement, 
+            ResultSet resultSet, Integer sqlType, Integer parameterIndex, String colsName) throws SQLException {
+        switch (sqlType) {
+        case Types.SMALLINT:
+            statement.setShort(parameterIndex, resultSet.getShort(colsName));
+            break;
+        case Types.INTEGER:
+            statement.setInt(parameterIndex, resultSet.getInt(colsName));
+            break;
+        case Types.TINYINT:
+            statement.setByte(parameterIndex, resultSet.getByte(colsName));
+            break;
+        case Types.BIGINT:
+            statement.setLong(parameterIndex, resultSet.getLong(colsName));
+            break;
+        case Types.REAL:
+        case Types.FLOAT:
+            statement.setFloat(parameterIndex, resultSet.getFloat(colsName));
+            break;
+        case Types.DOUBLE:
+            statement.setDouble(parameterIndex, resultSet.getDouble(colsName));
+            break;
+        case Types.DECIMAL:
+        case Types.NUMERIC:
+            statement.setBigDecimal(parameterIndex, resultSet.getBigDecimal(colsName));
+            break;
+        case Types.CHAR:
+        case Types.VARCHAR:
+        case Types.LONGVARCHAR:
+        case Types.LONGNVARCHAR:
+            statement.setString(parameterIndex, resultSet.getString(colsName));
+            break;
+        case Types.BINARY:
+        case Types.VARBINARY:
+        case Types.LONGVARBINARY:
+        case Types.ROWID:
+            statement.setBytes(parameterIndex, resultSet.getBytes(colsName));
+            break;
+        case Types.BLOB:
+            statement.setBlob(parameterIndex, resultSet.getBlob(colsName));
+            break;
+        case Types.CLOB:
+            statement.setClob(parameterIndex, resultSet.getClob(colsName));
+            break;
+        case Types.BOOLEAN:
+        case Types.BIT:
+            statement.setBoolean(parameterIndex, resultSet.getBoolean(colsName));
+            break;
+        case Types.DATE:
+            statement.setDate(parameterIndex, resultSet.getDate(colsName));
+            break;
+        case Types.TIME:
+            statement.setTime(parameterIndex, resultSet.getTime(colsName));
+            break;
+        case Types.TIMESTAMP:
+            statement.setTimestamp(parameterIndex, resultSet.getTimestamp(colsName));
+            break;
+        default:
+            statement.setObject(parameterIndex, resultSet.getObject(colsName));
+            break;
+        }
+    }
 }

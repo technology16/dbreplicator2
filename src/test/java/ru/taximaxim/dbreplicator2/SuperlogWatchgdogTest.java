@@ -43,6 +43,8 @@ protected static final Logger LOG = Logger.getLogger(SuperlogWatchgdogTest.class
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
+        Core.configurationClose();
+        Core.getConfiguration("src/test/resources/hibernateIntegrityReplicatedData.cfg.xml");
         sessionFactory = Core.getSessionFactory();
         session = sessionFactory.openSession();
         connectionFactory = Core.getConnectionFactory();
@@ -59,7 +61,6 @@ protected static final Logger LOG = Logger.getLogger(SuperlogWatchgdogTest.class
             session.close();
         Core.connectionFactoryClose();
         Core.sessionFactoryClose();
-        Core.threadPoolClose();
         Core.statsServiceClose();
         Core.tasksPoolClose();
         Core.taskSettingsServiceClose(); 

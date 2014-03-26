@@ -37,7 +37,7 @@ import org.junit.Test;
  * 
  * @author ags
  */
-public class H2UsageCase {
+public class H2UsageCaseTest {
 
     private static final String TCP_PORT = "8084";
     private static final String JDBC_URL = "jdbc:h2:tcp://localhost:"

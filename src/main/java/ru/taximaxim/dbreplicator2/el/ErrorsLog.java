@@ -37,6 +37,12 @@ import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 
+/**
+ * Класс реализации механизма логирования ошибок
+ * 
+ * @author volodin_aa
+ *
+ */
 public class ErrorsLog implements ErrorsLogService, AutoCloseable{
 
     private static final Logger LOG = Logger.getLogger(ErrorsLog.class);
@@ -154,7 +160,7 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
             statement.setString(5, error);
             statement.execute(); 
         } catch (Throwable e) {
-            LOG.error("Ошибка записи ошибки:\n" + error + "\n", e);
+            LOG.error(String.format("Ошибка [add] runnerId: [%s], tableId: [%s], foreignId: [%s], записи ошибки:\n%s\n: ", runnerId, tableId, foreignId, error), e);
         }     
     }
     
@@ -199,7 +205,7 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
 
             statement.execute();
         } catch (Throwable e) {
-            LOG.error("Ошибка при установки статуса ошибки: ", e);
+            LOG.error(String.format("Ошибка [setStatus] runnerId: [%s], tableId: [%s], foreignId: [%s], при установки статуса ошибки: ", runnerId, tableId, foreignId), e);
         }       
     }
     

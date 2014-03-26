@@ -68,6 +68,7 @@ public class OffsetTest {
      */
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
+        Core.configurationClose();
         Core.getConfiguration("src/test/resources/hibernateOffset.cfg.xml");
         sessionFactory = Core.getSessionFactory();
         session = sessionFactory.openSession();

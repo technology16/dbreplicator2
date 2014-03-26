@@ -41,6 +41,7 @@ public final class QueryConstructors {
     private static final String SELECT = "SELECT ";
     private static final String FROM = " FROM ";
     private static final String WHERE = " WHERE ";
+    private static final String ORDER_BY = " ORDER BY ";
     private static final String AND = " AND ";
     private static final String DELETE_FROM = "DELETE FROM ";
     private static final String UPDATE = "UPDATE ";
@@ -208,6 +209,22 @@ public final class QueryConstructors {
             List<String> whereList) {
         StringBuffer query = new StringBuffer(constructSelectQuery(tableName, colsList))
                 .append(WHERE).append(listToString(whereList, AND, "=?"));
+
+        return query.toString();
+    }
+    
+    /**
+     * Создает строку запроса на выборку данных из таблицы с условием в группировкой по ключевым полям
+     * @param tableName
+     * @param colsList
+     * @param whereList
+     * @param orderByList
+     * @return
+     */
+    public static String constructSelectQuery(String tableName, List<String> colsList,
+            List<String> whereList, List<String> orderByList) {
+        StringBuffer query = new StringBuffer(constructSelectQuery(tableName, colsList, whereList));
+        query.append(ORDER_BY).append(listToString(orderByList, ", "));
 
         return query.toString();
     }
