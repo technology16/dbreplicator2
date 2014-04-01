@@ -160,7 +160,10 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
             statement.setString(5, error);
             statement.execute(); 
         } catch (Throwable e) {
-            LOG.error(String.format("Ошибка [add] runnerId: [%s], tableId: [%s], foreignId: [%s], записи ошибки:\n%s\n: ", runnerId, tableId, foreignId, error), e);
+            LOG.error(String.format(
+               "[ErrorsLog.add] Ошибка записи в rep2_errors_log\nERROR1: [%s]\nИсходная ошибка:\nERROR2: [%s]" +
+               "runnerId: [%s], tableId: [%s], foreignId: [%s], записи ошибки:\n%s\n: ", e, 
+               runnerId, tableId, foreignId, error));
         }     
     }
     
@@ -205,7 +208,9 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
 
             statement.execute();
         } catch (Throwable e) {
-            LOG.error(String.format("Ошибка [setStatus] runnerId: [%s], tableId: [%s], foreignId: [%s], при установки статуса ошибки: ", runnerId, tableId, foreignId), e);
+            LOG.error(String.format(
+              "[ErrorsLog.setStatus] Ошибка при установки статуса в rep2_errors_log\n" +
+              "runnerId: [%s], tableId: [%s], foreignId: [%s] \nERROR:", runnerId, tableId, foreignId), e);
         }       
     }
     
