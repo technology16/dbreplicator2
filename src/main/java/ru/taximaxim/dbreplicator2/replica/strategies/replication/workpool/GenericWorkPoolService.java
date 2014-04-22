@@ -69,7 +69,6 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
     private PreparedStatement clearWorkPoolDataStatement;
 
     private PreparedStatement lastOperationsStatement;
-
     @Override
     public PreparedStatement getLastOperationsStatement() throws SQLException {
         if (lastOperationsStatement == null) {

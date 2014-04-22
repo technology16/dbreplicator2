@@ -395,42 +395,43 @@ public class GenericAlgorithm implements Strategy {
      * @throws SQLException
      * @throws ClassNotFoundException 
      */
+
     protected void selectLastOperations(Connection sourceConnection, 
             Connection targetConnection, StrategyModel data) throws SQLException, ClassNotFoundException {
         // Задаем первоначальное смещение выборки равное 0.
         // При появлении ошибочных записей будем его увеличивать на 1.
         int offset = 0;
         // Извлекаем список последних операций по измененым записям
-        PreparedStatement deleteWorkPoolData = 
-                getWorkPoolService().getClearWorkPoolDataStatement();
-        ResultSet operationsResult = 
-                getWorkPoolService().getLastOperations(data.getRunner().getId(), getFetchSize(), offset);
-        try {
-            // Проходим по списку измененных записей
-            for (int rowsCount = 1; operationsResult.next(); rowsCount++) {
-                // Реплицируем операцию
-                if (!replicateOperation(data, operationsResult)) {
-                    if (isStrict()) {
-                        break;
-                    } else {
-                        offset++;
+        PreparedStatement deleteWorkPoolData = getWorkPoolService().getClearWorkPoolDataStatement();
+        //================================================================//
+        int count = 1;
+        while (count != 0) {
+            count = 0;
+            ResultSet operationsResult = getWorkPoolService().getLastOperations(
+                    data.getRunner().getId(), getFetchSize(), offset);
+            try {
+                // Проходим по списку измененных записей
+                while (operationsResult.next()) {
+                    count++;
+                    // Реплицируем операцию
+                    if (!replicateOperation(data, operationsResult)) {
+                        if (isStrict()) {
+                            break;
+                        } else {
+                            offset++;
+                        }
                     }
                 }
+                deleteWorkPoolData.executeBatch();
+                sourceConnection.commit();
+                writeStatCount(data.getId());
 
-                // Периодически сбрасываем батч в БД
-                if ((rowsCount % getBatchSize()) == 0) {
-                    deleteWorkPoolData.executeBatch();
-                    sourceConnection.commit();
-                    writeStatCount(data.getId());
-                    // Извлекаем новую порцию данных
-                    operationsResult.close();
-                    operationsResult = getWorkPoolService().getLastOperations(data.getRunner().getId(), getFetchSize(), offset);
-                }
+            } finally {
+                operationsResult.close();
+                writeStatCount(data.getId());
             }
-        } finally {
-            operationsResult.close();
-            writeStatCount(data.getId());
         }
+        //================================================================//
         // Подтверждаем транзакцию
         deleteWorkPoolData.executeBatch();
         sourceConnection.commit();
