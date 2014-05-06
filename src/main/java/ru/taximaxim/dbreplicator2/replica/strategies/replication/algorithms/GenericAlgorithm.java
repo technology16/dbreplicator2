@@ -404,12 +404,12 @@ public class GenericAlgorithm implements Strategy {
         // Извлекаем список последних операций по измененым записям
         PreparedStatement deleteWorkPoolData = getWorkPoolService().getClearWorkPoolDataStatement();
         //================================================================//
-        int count = 1;
-        while (count != 0) {
+        int count;
+        do {
             count = 0;
-            ResultSet operationsResult = getWorkPoolService().getLastOperations(
-                    data.getRunner().getId(), getFetchSize(), offset);
-            try {
+            
+            try (ResultSet operationsResult = getWorkPoolService().getLastOperations(
+                    data.getRunner().getId(), getFetchSize(), offset);) {
                 // Проходим по списку измененных записей
                 while (operationsResult.next()) {
                     count++;
@@ -425,16 +425,11 @@ public class GenericAlgorithm implements Strategy {
                 deleteWorkPoolData.executeBatch();
                 sourceConnection.commit();
                 writeStatCount(data.getId());
-
             } finally {
-                operationsResult.close();
                 writeStatCount(data.getId());
             }
-        }
+        } while (count != 0);
         //================================================================//
-        // Подтверждаем транзакцию
-        deleteWorkPoolData.executeBatch();
-        sourceConnection.commit();
     }
 
     /**
