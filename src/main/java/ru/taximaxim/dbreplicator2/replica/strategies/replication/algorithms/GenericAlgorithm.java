@@ -56,17 +56,11 @@ public class GenericAlgorithm implements Strategy {
     private static final String NEW_LINE = " \n";
     
     private static final int DEFAULT_FETCH_SIZE = 1000;
-    private static final int DEFAULT_BATCH_SIZE = 1000;
     
     /**
      * Размер выборки данных (строк)
      */
     private int fetchSize = DEFAULT_FETCH_SIZE;
-
-    /**
-     * Размер сбрасываемых в БД данных (строк)
-     */
-    private int batchSize = DEFAULT_BATCH_SIZE;
 
     private boolean isStrict = false;
 
@@ -90,7 +84,6 @@ public class GenericAlgorithm implements Strategy {
             DataService sourceDataService,
             DataService destDataService) {
         this.fetchSize = fetchSize;
-        this.batchSize = batchSize;
         this.isStrict = isStrict;
         this.workPoolService = workPoolService;
         this.sourceDataService = sourceDataService;
@@ -127,13 +120,6 @@ public class GenericAlgorithm implements Strategy {
      */
     protected int getFetchSize() {
         return fetchSize;
-    }
-
-    /**
-     * @return the batchSize
-     */
-    protected int getBatchSize() {
-        return batchSize;
     }
 
     /**
@@ -398,7 +384,6 @@ public class GenericAlgorithm implements Strategy {
         int offset = 0;
         // Извлекаем список последних операций по измененым записям
         PreparedStatement deleteWorkPoolData = getWorkPoolService().getClearWorkPoolDataStatement();
-        //================================================================//
         boolean fetchNext;
         do {
             fetchNext = false;
@@ -428,7 +413,6 @@ public class GenericAlgorithm implements Strategy {
                 writeStatCount(data.getId());
             }
         } while (fetchNext);
-        //================================================================//
     }
 
     /**

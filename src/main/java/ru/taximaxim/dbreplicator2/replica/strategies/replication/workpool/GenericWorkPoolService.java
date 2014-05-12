@@ -71,18 +71,18 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
     public PreparedStatement getLastOperationsStatement() throws SQLException {
         if (lastOperationsStatement == null) {
             lastOperationsStatement = 
-                getConnection().prepareStatement("SELECT MAX(id_superlog) AS id_superlog, id_foreign, id_table, COUNT(*) AS records_count, ? AS id_runner " +
-                		"  FROM ( " +
-                		"  SELECT id_superlog, id_foreign, id_table " +
-                		"    FROM rep2_workpool_data " +
-                		"    WHERE id_runner=? " +
-                		"    ORDER BY id_superlog " +
-                		"    LIMIT ? OFFSET ? " +
-                		"  ) AS part_rep2_workpool_data " +
-                		"GROUP BY id_foreign, id_table " +
-                		"ORDER BY id_superlog",
-                        ResultSet.TYPE_FORWARD_ONLY,
-                        ResultSet.CONCUR_READ_ONLY);
+                    getConnection().prepareStatement("SELECT MAX(id_superlog) AS id_superlog, id_foreign, id_table, COUNT(*) AS records_count, ? AS id_runner " +
+                            "  FROM ( " +
+                            "  SELECT id_superlog, id_foreign, id_table " +
+                            "    FROM rep2_workpool_data " +
+                            "    WHERE id_runner=? " +
+                            "    ORDER BY id_superlog " +
+                            "    LIMIT ? OFFSET ? " +
+                            "  ) AS part_rep2_workpool_data " +
+                            "GROUP BY id_foreign, id_table " +
+                            "ORDER BY id_superlog",
+                            ResultSet.TYPE_FORWARD_ONLY,
+                            ResultSet.CONCUR_READ_ONLY);
         }
         
         return lastOperationsStatement;
