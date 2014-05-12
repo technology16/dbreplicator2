@@ -384,7 +384,6 @@ public class GenericAlgorithm implements Strategy {
         // При появлении ошибочных записей будем его увеличивать на 1.
         int offset = 0;
         // Извлекаем список последних операций по измененым записям
-        PreparedStatement deleteWorkPoolData = getWorkPoolService().getClearWorkPoolDataStatement();
         boolean fetchNext;
         do {
             fetchNext = false;
@@ -408,7 +407,7 @@ public class GenericAlgorithm implements Strategy {
                     }
                     fetchNext = true;
                 }
-                deleteWorkPoolData.executeBatch();
+                getWorkPoolService().getClearWorkPoolDataStatement().executeBatch();
                 sourceConnection.commit();
             } finally {
                 writeStatCount(data.getId());
