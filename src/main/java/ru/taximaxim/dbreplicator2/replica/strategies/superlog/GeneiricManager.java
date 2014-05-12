@@ -64,7 +64,6 @@ public abstract class GeneiricManager extends StrategySkeleton implements Strate
     @Override
     public void execute(Connection sourceConnection, Connection targetConnection, StrategyModel data) throws StrategyException, SQLException {
         int fetchSize = getFetchSize(data);
-        int batchSize = getBatchSize(data);
         Boolean lastAutoCommit = null;
         Boolean lastTargetAutoCommit = null;
         lastAutoCommit = sourceConnection.getAutoCommit();
@@ -130,7 +129,7 @@ public abstract class GeneiricManager extends StrategySkeleton implements Strate
                         }
 
                         // Периодически сбрасываем батч в БД
-                        if ((rowsCount % batchSize) == 0) {
+                        if ((rowsCount % fetchSize) == 0) {
                             insertRunnerData.executeBatch();
                             deleteSuperLog.executeBatch();
                             targetConnection.commit();

@@ -74,12 +74,13 @@ public class GenericAlgorithm implements Strategy {
     private Count countError;
 
     /**
+     * Конструктор нпо умолчанию
      * 
-     * @param fetchSize
-     * @param batchSize
-     * @param isStrict
+     * @param fetchSize - размер выборки данных
+     * @param isStrict - флаг строго режима репликации. Если true, то 
+     * репликации останавливается при первой же ошибки.
      */
-    public GenericAlgorithm(int fetchSize, int batchSize, boolean isStrict, 
+    public GenericAlgorithm(int fetchSize, boolean isStrict, 
             WorkPoolService workPoolService,
             DataService sourceDataService,
             DataService destDataService) {

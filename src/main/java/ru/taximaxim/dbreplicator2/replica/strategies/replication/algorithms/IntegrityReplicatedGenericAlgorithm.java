@@ -60,16 +60,15 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
      * Конструктор по умолчанию
      * 
      * @param fetchSize - размер выборки за раз данных
-     * @param batchSize - размер сохраняемых за раз данных
      * @param isStrict
      * @param workPoolService
      * @param sourceDataService
      * @param destDataService
      */
-    public IntegrityReplicatedGenericAlgorithm(int fetchSize, int batchSize, 
+    public IntegrityReplicatedGenericAlgorithm(int fetchSize, 
             WorkPoolService workPoolService,
             GenericDataTypeService sourceDataService, GenericDataTypeService destDataService) {
-        super(fetchSize, batchSize,  false, workPoolService, sourceDataService, destDataService);
+        super(fetchSize, false, workPoolService, sourceDataService, destDataService);
         this.sourceDataService = sourceDataService;
         this.destDataService = destDataService;
     }
