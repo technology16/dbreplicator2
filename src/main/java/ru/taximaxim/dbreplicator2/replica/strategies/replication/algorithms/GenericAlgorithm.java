@@ -266,12 +266,11 @@ public class GenericAlgorithm implements Strategy {
                             return true;
                         } catch (SQLException e) {
                             // Поглощаем и логгируем ошибки обновления
-                            String message = String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при обновлении записи: \n[ tableName = %s  [ operation = %s  [ row = %s ] ] ]", 
+                            String message = String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при обновлении записи: \n[ tableName = %s  [ row = %s ] ]", 
                                     data.getRunner().getId(), 
                                     data.getRunner().getDescription(), 
                                     data.getId(), 
                                     table.getName(), 
-                                    getWorkPoolService().getOperation(operationsResult), 
                                     Jdbc.resultSetToString(sourceResult, 
                                             new ArrayList<String>(getSourceDataService().getAllCols(table)))); 
                             if (LOG.isDebugEnabled()) {
@@ -294,12 +293,11 @@ public class GenericAlgorithm implements Strategy {
                             return true;
                         } catch (SQLException e) {
                             // Поглощаем и логгируем ошибки вставки
-                            String message = String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при вставке записи: \n[ tableName = %s  [ operation = %s  [ row = %s ] ] ]", 
+                            String message = String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при вставке записи: \n[ tableName = %s  [ row = %s ] ]", 
                                     data.getRunner().getId(), 
                                     data.getRunner().getDescription(), 
                                     data.getId(), 
                                     table.getName(), 
-                                    getWorkPoolService().getOperation(operationsResult), 
                                     Jdbc.resultSetToString(sourceResult, 
                                             new ArrayList<String>(getSourceDataService().getAllCols(table)))); 
                             if (LOG.isDebugEnabled()) {
@@ -315,12 +313,11 @@ public class GenericAlgorithm implements Strategy {
                     }
                 } catch (SQLException e) {
                     // Поглощаем и логгируем ошибки извлечения данных из приемника
-                    String message = String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка извлечения данных из приемника: \n[ tableName = %s  [ operation = %s  [ row = %s ] ] ]", 
+                    String message = String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка извлечения данных из приемника: \n[ tableName = %s  [ row = %s ] ]", 
                             data.getRunner().getId(), 
                             data.getRunner().getDescription(), 
                             data.getId(), 
                             table.getName(), 
-                            getWorkPoolService().getOperation(operationsResult), 
                             Jdbc.resultSetToString(sourceResult, 
                                     new ArrayList<String>(getSourceDataService().getAllCols(table)))); 
                     if (LOG.isDebugEnabled()) {
@@ -344,12 +341,11 @@ public class GenericAlgorithm implements Strategy {
                     return true;
                 } catch (SQLException e) {
                     // Поглощаем и логгируем ошибки удаления
-                    String message = String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при удалении записи: \n[ tableName = %s  [ operation = %s  [ row = [ id = %s ] ] ] ]", 
+                    String message = String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при удалении записи: \n[ tableName = %s  [ row = [ id = %s ] ] ]", 
                             data.getRunner().getId(), 
                             data.getRunner().getDescription(), 
                             data.getId(), 
                             table.getName(), 
-                            getWorkPoolService().getOperation(operationsResult), 
                             String.valueOf(getWorkPoolService().getForeign(operationsResult))); 
                     if (LOG.isDebugEnabled()) {
                         LOG.debug(message, e);
@@ -364,12 +360,11 @@ public class GenericAlgorithm implements Strategy {
             }
         } catch (SQLException e) {
             // Поглощаем и логгируем ошибки извлечения данных из источника
-            String message = String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка извлечения данных из источника: \n[ tableName = %s  [ operation = %s  [ row = [ id = %s ] ] ] ]", 
+            String message = String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка извлечения данных из источника: \n[ tableName = %s  [ row = [ id = %s ] ] ]", 
                     data.getRunner().getId(), 
                     data.getRunner().getDescription(), 
                     data.getId(), 
                     table.getName(), 
-                    getWorkPoolService().getOperation(operationsResult), 
                     String.valueOf(getWorkPoolService().getForeign(operationsResult))); 
             if (LOG.isDebugEnabled()) {
                 LOG.debug(message, e);
@@ -404,31 +399,35 @@ public class GenericAlgorithm implements Strategy {
         // Извлекаем список последних операций по измененым записям
         PreparedStatement deleteWorkPoolData = getWorkPoolService().getClearWorkPoolDataStatement();
         //================================================================//
-        int count;
+        boolean fetchNext;
         do {
-            count = 0;
+            fetchNext = false;
             
             try (ResultSet operationsResult = getWorkPoolService().getLastOperations(
                     data.getRunner().getId(), getFetchSize(), offset);) {
                 // Проходим по списку измененных записей
                 while (operationsResult.next()) {
-                    count++;
                     // Реплицируем операцию
                     if (!replicateOperation(data, operationsResult)) {
                         if (isStrict()) {
+                            // Устанавливаем флаг выборки новой порции данных только 
+                            // в случае успешного цикла обработки данных, иначе 
+                            // прерываем обработку данных в strict режиме
+                            fetchNext = false;
                             break;
                         } else {
-                            offset++;
+                            // Пропускаем сгруппированые записи
+                            offset = offset + getWorkPoolService().getRecordsCount(operationsResult);
                         }
                     }
+                    fetchNext = true;
                 }
                 deleteWorkPoolData.executeBatch();
                 sourceConnection.commit();
-                writeStatCount(data.getId());
             } finally {
                 writeStatCount(data.getId());
             }
-        } while (count != 0);
+        } while (fetchNext);
         //================================================================//
     }
 
