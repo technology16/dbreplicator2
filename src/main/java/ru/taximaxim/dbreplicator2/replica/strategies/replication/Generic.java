@@ -52,7 +52,6 @@ public class Generic extends StrategySkeleton implements Strategy {
                 GenericDataService genericDataServiceSourceConnection = new GenericDataService(sourceConnection);
                 GenericDataService genericDataServiceTargetConnection = new GenericDataService(targetConnection);) {
             GenericAlgorithm strategy = new GenericAlgorithm(getFetchSize(data), 
-                    getBatchSize(data), 
                     false, 
                     genericWorkPoolService, 
                     genericDataServiceSourceConnection, 

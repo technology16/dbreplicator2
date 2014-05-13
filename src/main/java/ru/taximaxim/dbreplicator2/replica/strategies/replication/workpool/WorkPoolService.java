@@ -26,7 +26,6 @@ package ru.taximaxim.dbreplicator2.replica.strategies.replication.workpool;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 
 /**
  * ИНтерфейс для инкапсуляции работы стратегии с данными в очереди репликации.
@@ -70,6 +69,11 @@ public interface WorkPoolService {
      * value = "id_runner"
      */
     String ID_RUNNER = "id_runner";
+
+    /**
+     * value = "records_count"
+     */
+    String RECORDS_COUNT = "records_count";
     
     /**
      * Получение подготовленного выражения для выборки последних операций
@@ -129,15 +133,6 @@ public interface WorkPoolService {
     String getTable(ResultSet resultSet) throws SQLException;
     
     /**
-     * Получение имени текущей операции
-     * 
-     * @param resultSet
-     * @return
-     * @throws SQLException
-     */
-    String getOperation(ResultSet resultSet) throws SQLException;
-    
-    /**
      * Получение идентификатора текущей записи
      * 
      * @param resultSet
@@ -163,32 +158,13 @@ public interface WorkPoolService {
      * @throws SQLException
      */
     Long getSuperlog(ResultSet resultSet) throws SQLException;
-
-    /**
-     * Получение идентификатора соединения текущей операции
-     * 
-     * @param resultSet
-     * @return
-     * @throws SQLException
-     */
-    String getPool(ResultSet resultSet) throws SQLException;
     
     /**
-     * Получение даты и времени текущей операции
+     * Получение колличества сгруппированных записей
      * 
      * @param resultSet
      * @return
      * @throws SQLException
      */
-    Timestamp getDate(ResultSet resultSet) throws SQLException;
-    
-    /**
-     * Получение идентификатора транзакции текущей операции
-     * 
-     * @param resultSet
-     * @return
-     * @throws SQLException
-     */
-    String getTransaction(ResultSet resultSet) throws SQLException;
-
+    int getRecordsCount(ResultSet resultSet) throws SQLException;
 }

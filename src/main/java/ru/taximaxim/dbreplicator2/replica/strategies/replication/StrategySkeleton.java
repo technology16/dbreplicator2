@@ -32,9 +32,7 @@ import ru.taximaxim.dbreplicator2.model.StrategyModel;
 public class StrategySkeleton {
 
     private static final String FETCH_SIZE = "fetchSize";
-    private static final String BATCH_SIZE = "batchSize";
     private static final int DEFAULT_FETCH_SIZE = 1000;
-    private static final int DEFAULT_BATCH_SIZE = 1000;
     /**
      * Размер выборки данных (строк)
      */
@@ -45,18 +43,6 @@ public class StrategySkeleton {
             fetchSize = Integer.parseInt(data.getParam(FETCH_SIZE));
         }
         return fetchSize;
-    }
-
-    /**
-     * Размер сбрасываемых в БД данных (строк)
-     */
-    private int batchSize = DEFAULT_BATCH_SIZE;
-    
-    protected int getBatchSize(StrategyModel data) {
-        if (data.getParam(BATCH_SIZE) != null) {
-            batchSize = Integer.parseInt(data.getParam(BATCH_SIZE));
-        }
-        return batchSize;
     }
 
 }
