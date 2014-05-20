@@ -133,7 +133,16 @@ public interface DataService {
      */
     Set<String> getIgnoredCols(TableModel table) throws SQLException;
 
-
+    /**
+     * Кешированное получение списка реплицируеммых колонок
+     * 
+     * @param connection
+     * @param table.getName()
+     * @return
+     * @throws SQLException
+     */
+    Set<String> getRequiredCols(TableModel table) throws SQLException;
+    
     /**
      * Устанавливает сессионную переменную с именем текущео владельца записи.
      * Триггер который отслеживает изменение записей реагирует на этот флаг и заполняет

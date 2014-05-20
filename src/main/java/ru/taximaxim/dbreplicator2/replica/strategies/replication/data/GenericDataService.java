@@ -35,6 +35,7 @@ import java.util.Set;
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.jdbc.QueryConstructors;
 import ru.taximaxim.dbreplicator2.model.IgnoreColumnsTableModel;
+import ru.taximaxim.dbreplicator2.model.RequiredColumnsTableModel;
 import ru.taximaxim.dbreplicator2.model.TableModel;
 
 /**
@@ -64,7 +65,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
     private Map<TableModel, Set<String>> dataCols = new HashMap<TableModel, Set<String>>();
     private Map<TableModel, Set<String>> identityCols = new HashMap<TableModel, Set<String>>();
     private Map<TableModel, Set<String>> ignoredCols = new HashMap<TableModel, Set<String>>();
-    
+    private Map<TableModel, Set<String>> requiredCols = new HashMap<TableModel, Set<String>>();
     /**
      * 
      */
@@ -210,13 +211,27 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
             for (String ignoredCol: getIgnoredCols(table)) {
                 cols.remove(ignoredCol.toUpperCase());
             }
-            
+            if(getRequiredCols(table).size() != 0) {
+                Set<String> tempColm = new  HashSet<String>(cols);
+                //Формируем список колонок которые необходимо удалить
+                for (String requiredCol: getRequiredCols(table)) {
+                    if(cols.contains(requiredCol.toUpperCase())) {
+                        tempColm.remove(requiredCol.toUpperCase());
+                    }
+                }
+                // Добавляем реплицируемые колонки
+                for (String requiredCol: tempColm) {
+                    if(cols.contains(requiredCol.toUpperCase())) {
+                        cols.remove(requiredCol.toUpperCase());
+                    }
+                }
+            }
             allCols.put(table, cols);
         }
 
         return cols;
     }
-
+    
     /**
      * Кешированное получение списка колонок с данными
      * 
@@ -280,7 +295,27 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
 
         return cols;
     }
+    
+    /**
+     * Кешированное получение списка реплицуруеммых колонок
+     * 
+     * @param connection
+     * @param table.getName()
+     * @return
+     * @throws SQLException
+     */
+    public Set<String> getRequiredCols(TableModel table) throws SQLException {
+        Set<String> cols = requiredCols.get(table);
+        if (cols == null) {
+            cols = new HashSet<String>();
+            for (RequiredColumnsTableModel requiredColumn: table.getRequiredColumnsTable()) {
+                cols.add(requiredColumn.getColumnName());
+            }
+            requiredCols.put(table, cols);
+        }
 
+        return cols;
+    }
     /**
      * Устанавливает сессионную переменную с именем текущей подписки или
      * публикации

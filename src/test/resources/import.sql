@@ -153,7 +153,7 @@ insert into runners (id_runner, source, target, description) values (10, 'source
 insert into strategies (id, className, param, isEnabled, priority, id_runner) values (11, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.ReplicationTimeWatchgdog', 'period=0
 partEmail=10', true, 100, 10);
 
---Ignore Columns Table
+-- Ignore Columns Table
 insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (1, 1, '_STRING');
 insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (2, 2, '_STRING');
 insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (3, 3, '_STRING');
@@ -167,6 +167,23 @@ insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name
 insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (11, 11, '_STRING');
 insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (12, 12, '_STRING');
 insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (13, 13, '_STRING');
+
+-- Required Columns Table
+insert into required_columns_table (id_required_columns_table, id_table, column_name) values ( 1, 2, 'ID');
+insert into required_columns_table (id_required_columns_table, id_table, column_name) values ( 2, 2, '_INT');
+insert into required_columns_table (id_required_columns_table, id_table, column_name) values ( 3, 2, '_BOOLEAN');
+insert into required_columns_table (id_required_columns_table, id_table, column_name) values ( 4, 2, '_LONG');
+insert into required_columns_table (id_required_columns_table, id_table, column_name) values ( 5, 2, '_DECIMAL');
+insert into required_columns_table (id_required_columns_table, id_table, column_name) values ( 6, 2, '_DOUBLE');
+insert into required_columns_table (id_required_columns_table, id_table, column_name) values ( 7, 2, '_FLOAT');
+insert into required_columns_table (id_required_columns_table, id_table, column_name) values ( 8, 2, '_BYTE');
+insert into required_columns_table (id_required_columns_table, id_table, column_name) values ( 9, 2, '_DATE');
+insert into required_columns_table (id_required_columns_table, id_table, column_name) values (10, 2, '_TIME');
+insert into required_columns_table (id_required_columns_table, id_table, column_name) values (11, 2, '_TIMESTAMP');
+insert into required_columns_table (id_required_columns_table, id_table, column_name) values (12, 2, '_NOCOLOMN');
+insert into required_columns_table (id_required_columns_table, id_table, column_name) values (13, 2, '_STRING');
+
+
 
 -- Задача с ошибочной стратегией
 insert into tasks (id_task, id_runner, enabled, success_interval, fail_interval, description) values (16, 16, true, 10000, 300000, 'ru.taximaxim.dbreplicator2.utils.OutOfMemoryErrorStrategy');
