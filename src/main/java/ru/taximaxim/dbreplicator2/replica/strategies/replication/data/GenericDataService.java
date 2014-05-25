@@ -208,24 +208,13 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
             cols = JdbcMetadata.getColumns(getConnection(), table.getName());
             
             // Удаляем игнорируемые колонки
-            for (String ignoredCol: getIgnoredCols(table)) {
-                cols.remove(ignoredCol.toUpperCase());
-            }
+            cols.removeAll(getIgnoredCols(table));
+            
+            // Оставляем обязательные колонки
             if(getRequiredCols(table).size() != 0) {
-                Set<String> tempColm = new  HashSet<String>(cols);
-                //Формируем список колонок которые необходимо удалить
-                for (String requiredCol: getRequiredCols(table)) {
-                    if(cols.contains(requiredCol.toUpperCase())) {
-                        tempColm.remove(requiredCol.toUpperCase());
-                    }
-                }
-                // Добавляем реплицируемые колонки
-                for (String requiredCol: tempColm) {
-                    if(cols.contains(requiredCol.toUpperCase())) {
-                        cols.remove(requiredCol.toUpperCase());
-                    }
-                }
+                cols.retainAll(getRequiredCols(table));
             }
+            
             allCols.put(table, cols);
         }
 
@@ -288,7 +277,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
         if (cols == null) {
             cols = new HashSet<String>();
             for (IgnoreColumnsTableModel ignoredColumn: table.getIgnoreColumnsTable()) {
-                cols.add(ignoredColumn.getColumnName());
+                cols.add(ignoredColumn.getColumnName().toUpperCase());
             }
             ignoredCols.put(table, cols);
         }
@@ -309,7 +298,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
         if (cols == null) {
             cols = new HashSet<String>();
             for (RequiredColumnsTableModel requiredColumn: table.getRequiredColumnsTable()) {
-                cols.add(requiredColumn.getColumnName());
+                cols.add(requiredColumn.getColumnName().toUpperCase());
             }
             requiredCols.put(table, cols);
         }

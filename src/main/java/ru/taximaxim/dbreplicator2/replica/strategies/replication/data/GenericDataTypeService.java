@@ -72,25 +72,22 @@ public class GenericDataTypeService extends GenericDataService implements DataSe
         Map<String, Integer> colsTypes = allColsTypes.get(table);
         if (colsTypes == null) {
             colsTypes = JdbcMetadata.getColumnsTypes(getConnection(), table.getName());
+            
             // Удаляем игнорируемые колонки
             for (String ignoredCol: getIgnoredCols(table)) {
-                colsTypes.remove(ignoredCol.toUpperCase());
+                colsTypes.remove(ignoredCol);
             }
-            if(getRequiredCols(table).size() != 0) {
-                Set<String> tempColm = colsTypes.keySet();
-                //Формируем список колонок которые необходимо удалить
-                for (String requiredCol: getRequiredCols(table)) {
-                    if(colsTypes.containsKey(requiredCol.toUpperCase())) {
-                        tempColm.remove(requiredCol.toUpperCase());
-                    }
-                }
-                // Добавляем реплицируемые колонки
-                for (String requiredCol: tempColm) {
-                    if(colsTypes.containsKey(requiredCol.toUpperCase())) {
-                        colsTypes.remove(requiredCol.toUpperCase());
+            
+            // Оставляем обязательно реплицируемые колонки
+            Set<String> requiredColsSet = getRequiredCols(table);
+            if(requiredColsSet.size() != 0) {
+                for (String colName: colsTypes.keySet()) {
+                    if(!requiredColsSet.contains(colName)) {
+                        colsTypes.remove(colName);
                     }
                 }
             }
+            
             allColsTypes.put(table, colsTypes);
         }
         return colsTypes;
