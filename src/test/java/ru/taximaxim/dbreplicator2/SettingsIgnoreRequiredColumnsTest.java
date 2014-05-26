@@ -82,7 +82,7 @@ public class SettingsIgnoreRequiredColumnsTest {
         
         for (String ignoredCol: i) {
             b.remove(ignoredCol.toUpperCase());
-        }
+        }        
         
         LOG.info("==================================================");
         for (String baseCol: b) {
@@ -91,21 +91,9 @@ public class SettingsIgnoreRequiredColumnsTest {
             LOG.info("colmName: " + baseCol.toUpperCase());
         }
         LOG.info("==================================================");
-        if(r.size() != 0) {
-            Set<String> t = new  HashSet <String>(b);
-            // Добавляем реплицируемые колонки
-            for (String requiredCol: r) {
-                if(b.contains(requiredCol.toUpperCase())) {
-                    t.remove(requiredCol.toUpperCase());
-                }
-            }
-            
-            for (String tempCol: t) {
-                if(b.contains(tempCol.toUpperCase())) {
-                    b.remove(tempCol.toUpperCase());
-                }
-            }
-        }
+        
+        b.retainAll(r);
+        
         LOG.info("==================================================");
         for (String baseCol: b) {
             boolean repl = baseCol.equals("B") | baseCol.equals("D");
@@ -144,21 +132,9 @@ public class SettingsIgnoreRequiredColumnsTest {
             LOG.info("colmName: " + baseCol.toUpperCase());
         }
         LOG.info("==================================================");
-        if(r.size() != 0) {
-            Set<String> t = new  HashSet <String>(b);
-            // Добавляем реплицируемые колонки
-            for (String requiredCol: r) {
-                if(b.contains(requiredCol.toUpperCase())) {
-                    t.remove(requiredCol.toUpperCase());
-                }
-            }
-            
-            for (String tempCol: t) {
-                if(b.contains(tempCol.toUpperCase())) {
-                    b.remove(tempCol.toUpperCase());
-                }
-            }
-        }
+        
+        b.retainAll(r);
+        
         LOG.info("==================================================");
         for (String baseCol: b) {
             boolean repl = baseCol.equals("B") | baseCol.equals("D") | baseCol.equals("A") | baseCol.equals("F");
@@ -205,21 +181,9 @@ public class SettingsIgnoreRequiredColumnsTest {
             LOG.info("colmName: " + baseCol.toUpperCase());
         }
         LOG.info("==================================================");
-        if(r.size() != 0) {
-            Set<String> t = new  HashSet <String>(b);
-            // Добавляем реплицируемые колонки
-            for (String requiredCol: r) {
-                if(b.contains(requiredCol.toUpperCase())) {
-                    t.remove(requiredCol.toUpperCase());
-                }
-            }
-            
-            for (String tempCol: t) {
-                if(b.contains(tempCol.toUpperCase())) {
-                    b.remove(tempCol.toUpperCase());
-                }
-            }
-        }
+        
+        b.retainAll(r);
+        
         LOG.info("==================================================");
         for (String baseCol: b) {
             boolean repl = baseCol.equals("B") | baseCol.equals("D") | baseCol.equals("F") | baseCol.equals("A");
@@ -269,6 +233,8 @@ public class SettingsIgnoreRequiredColumnsTest {
                 LOG.info("tableModel: " + tableModel.getTableId());
                 LOG.info("tableModel: " + tableModel.getName());
             }
+        } else {
+            assertEquals("Список реплицируеммых колонок пуст ", false);
         }
     }
     @Test
@@ -297,6 +263,8 @@ public class SettingsIgnoreRequiredColumnsTest {
                 LOG.info("tableModel: " + tableModel.getTableId());
                 LOG.info("tableModel: " + tableModel.getName());
             }
+        } else {
+            assertEquals("Список игнорируеммых колонок пуст ", false);
         }
     }
 }
