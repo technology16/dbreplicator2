@@ -213,6 +213,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
             // Оставляем обязательные колонки
             if(getRequiredCols(table).size() != 0) {
                 cols.retainAll(getRequiredCols(table));
+                cols.addAll(getPriCols(table));
             }
             
             allCols.put(table, cols);
@@ -233,12 +234,8 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
             throws SQLException {
         Set<String> cols = dataCols.get(table);
         if (cols == null) {
-            Set<String> priColsList = getPriCols(table);
-            Set<String> allColsList = getAllCols(table);
-            cols = new HashSet<String>(allColsList);
-            for (String col : priColsList) {
-                cols.remove(col);
-            }
+            cols = new HashSet<String>(getAllCols(table));
+            cols.removeAll(getPriCols(table));
 
             dataCols.put(table, cols);
         }
