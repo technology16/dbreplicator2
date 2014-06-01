@@ -28,6 +28,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.model.TableModel;
@@ -71,10 +72,22 @@ public class GenericDataTypeService extends GenericDataService implements DataSe
         Map<String, Integer> colsTypes = allColsTypes.get(table);
         if (colsTypes == null) {
             colsTypes = JdbcMetadata.getColumnsTypes(getConnection(), table.getName());
+            
             // Удаляем игнорируемые колонки
             for (String ignoredCol: getIgnoredCols(table)) {
-                colsTypes.remove(ignoredCol.toUpperCase());
+                colsTypes.remove(ignoredCol);
             }
+            
+            // Оставляем обязательно реплицируемые колонки
+            Set<String> requiredColsSet = getRequiredCols(table);
+            if(requiredColsSet.size() != 0) {
+                for (String colName: colsTypes.keySet()) {
+                    if(!requiredColsSet.contains(colName)) {
+                        colsTypes.remove(colName);
+                    }
+                }
+            }
+            
             allColsTypes.put(table, colsTypes);
         }
         return colsTypes;

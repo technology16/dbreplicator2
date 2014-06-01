@@ -468,8 +468,14 @@ public class H2CopyTableDataTest {
         Helper.executeSqlFromFile(conn, "sql_delete.sql");   
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
+        
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
+        
+        Helper.InfoList(listSource);
+        
+        Helper.InfoList(listDest);
+        
         Helper.AssertEquals(listSource, listDest);
 
         listSource = Helper.InfoTest(conn, "t_table1");

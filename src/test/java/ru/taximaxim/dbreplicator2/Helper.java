@@ -113,6 +113,73 @@ public class Helper {
             LOG.info("====================================================================");
         }
     }
+    /**
+     * Сравнивание записи по листам
+     * @param listSource
+     * @param listDest
+     * @throws InterruptedException 
+     */
+    public static void AssertEqualsIgnoreReplication(List<MyTablesType> listSource, List<MyTablesType> listDest) throws InterruptedException{
+        Thread.sleep(REPLICATION_DELAY);
+        assertTrue(String.format("Количество записей не равны [%s == %s]", listSource.size(), listDest.size()),
+                listSource.size() == listDest.size());
+        
+        if(!listSource.equals(listDest)) {
+            LOG.info("====================================================================");
+            for (int i = 0; i < listSource.size(); i++) {
+                
+                //==============================
+                // реплицуруемая колонка
+                assertTrue(String.format("Ошибка в поле _int [%s != %s]", listSource.get(i)._int, listDest.get(i)._int), 
+                        listSource.get(i)._int == listDest.get(i)._int);
+                
+                assertTrue(String.format("Ошибка в поле _boolean [%s != %s]", listSource.get(i)._boolean, listDest.get(i)._boolean), 
+                        listSource.get(i)._boolean == listDest.get(i)._boolean);
+              //==============================
+                
+                assertTrue(String.format("Ошибка Реплицировалась колонка не включенная в репликацию _long [%s != %s]", listSource.get(i)._long, listDest.get(i)._long), 
+                        !listSource.get(i)._long.equals(listDest.get(i)._long));
+                
+                assertTrue(String.format("Ошибка Реплицировалась колонка не включенная в репликацию _decimal [%s != %s]", listSource.get(i)._decimal, listDest.get(i)._decimal), 
+                        listSource.get(i)._decimal != listDest.get(i)._decimal);
+                
+                //==============================
+                // игнорируемая колонка
+                assertTrue(String.format("Ошибка в поле _string [%s != %s]", listSource.get(i)._string, listDest.get(i)._string), 
+                        listSource.get(i)._string != listDest.get(i)._string);
+                //==============================
+                
+                assertTrue(String.format("Ошибка Реплицировалась колонка не включенная в репликацию _byte [%s != %s]", listSource.get(i)._byte, listDest.get(i)._byte), 
+                        listSource.get(i)._byte != listDest.get(i)._byte);
+                
+                //==============================
+                // реплицуруемая колонка
+                Assert.assertNotNull(String.format("Ошибка нулевое значение в поле _date [%s]", listSource.get(i)._date), listSource.get(i)._date);
+                Assert.assertNotNull(String.format("Ошибка нулевое значение в поле _date [%s]", listDest.get(i)._date), listDest.get(i)._date);
+                assertTrue(String.format("Ошибка в поле _date [%s == %s]", listSource.get(i)._date, listDest.get(i)._date), 
+                        listSource.get(i)._date.equals(listDest.get(i)._date));
+                
+                Assert.assertNotNull(String.format("Ошибка нулевое значение в поле _time [%s]", listSource.get(i)._time), listSource.get(i)._time);
+                Assert.assertNotNull(String.format("Ошибка нулевое значение в поле _time [%s]", listDest.get(i)._time), listDest.get(i)._time);
+                assertTrue(String.format("Ошибка в поле _time [%s == %s]", listSource.get(i)._time, listDest.get(i)._time), 
+                        listSource.get(i)._time.equals(listDest.get(i)._time));
+                
+                Assert.assertNotNull(String.format("Ошибка нулевое значение в поле _timestamp [%s]", listSource.get(i)._timestamp), listSource.get(i)._timestamp);
+                Assert.assertNotNull(String.format("Ошибка нулевое значение в поле _timestamp [%s]", listDest.get(i)._timestamp), listDest.get(i)._timestamp);
+                assertTrue(String.format("Ошибка в поле _timestamp [%s == %s]", listSource.get(i)._timestamp, listDest.get(i)._timestamp), 
+                        listSource.get(i)._timestamp.equals(listDest.get(i)._timestamp));
+              //==============================
+                
+                assertTrue(String.format("Ошибка Реплицировалась колонка не включенная в репликацию  _double [%s != %s]", listSource.get(i)._double, listDest.get(i)._double), 
+                        listSource.get(i)._double != listDest.get(i)._double);
+               
+                
+                assertTrue(String.format("Ошибка Реплицировалась колонка не включенная в репликацию  _float [%s != %s]", listSource.get(i)._float, listDest.get(i)._float), 
+                        listSource.get(i)._float != listDest.get(i)._float);
+            }
+            LOG.info("====================================================================");
+        }
+    }
     
     /**
      * Сравнивание записи по листам

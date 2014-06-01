@@ -174,4 +174,30 @@ public class TableModel {
     public void setIgnoreColumnsTable(List<IgnoreColumnsTableModel> ignoreColumnsTable) {
         this.ignoreColumnsTable = ignoreColumnsTable;
     }
+    
+    /**
+     * Список реплицируеммых колонок
+     */
+    @OneToMany(mappedBy = "table", fetch = FetchType.EAGER)
+    @Fetch(FetchMode.SELECT)
+    private List<RequiredColumnsTableModel> requiredColumnsTable;
+    
+    /**
+     * Получения списка игнорируеммых колонок
+     * @return
+     */
+    public List<RequiredColumnsTableModel> getRequiredColumnsTable() {
+        if (requiredColumnsTable == null) {
+            requiredColumnsTable = new ArrayList<RequiredColumnsTableModel>();
+        }
+        return requiredColumnsTable;
+    }
+
+    /**
+     * Установка списка игнорируемых колонок
+     * @param ignoreColumnsTable
+     */
+    public void setRequiredColumnsTable(List<RequiredColumnsTableModel> requiredColumnsTable) {
+        this.requiredColumnsTable = requiredColumnsTable;
+    }
 }

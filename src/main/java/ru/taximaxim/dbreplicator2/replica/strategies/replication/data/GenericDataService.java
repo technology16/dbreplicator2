@@ -35,6 +35,7 @@ import java.util.Set;
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.jdbc.QueryConstructors;
 import ru.taximaxim.dbreplicator2.model.IgnoreColumnsTableModel;
+import ru.taximaxim.dbreplicator2.model.RequiredColumnsTableModel;
 import ru.taximaxim.dbreplicator2.model.TableModel;
 
 /**
@@ -64,7 +65,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
     private Map<TableModel, Set<String>> dataCols = new HashMap<TableModel, Set<String>>();
     private Map<TableModel, Set<String>> identityCols = new HashMap<TableModel, Set<String>>();
     private Map<TableModel, Set<String>> ignoredCols = new HashMap<TableModel, Set<String>>();
-    
+    private Map<TableModel, Set<String>> requiredCols = new HashMap<TableModel, Set<String>>();
     /**
      * 
      */
@@ -207,8 +208,12 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
             cols = JdbcMetadata.getColumns(getConnection(), table.getName());
             
             // Удаляем игнорируемые колонки
-            for (String ignoredCol: getIgnoredCols(table)) {
-                cols.remove(ignoredCol.toUpperCase());
+            cols.removeAll(getIgnoredCols(table));
+            
+            // Оставляем обязательные колонки
+            if(getRequiredCols(table).size() != 0) {
+                cols.retainAll(getRequiredCols(table));
+                cols.addAll(getPriCols(table));
             }
             
             allCols.put(table, cols);
@@ -216,7 +221,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
 
         return cols;
     }
-
+    
     /**
      * Кешированное получение списка колонок с данными
      * 
@@ -229,12 +234,8 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
             throws SQLException {
         Set<String> cols = dataCols.get(table);
         if (cols == null) {
-            Set<String> priColsList = getPriCols(table);
-            Set<String> allColsList = getAllCols(table);
-            cols = new HashSet<String>(allColsList);
-            for (String col : priColsList) {
-                cols.remove(col);
-            }
+            cols = new HashSet<String>(getAllCols(table));
+            cols.removeAll(getPriCols(table));
 
             dataCols.put(table, cols);
         }
@@ -273,14 +274,34 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
         if (cols == null) {
             cols = new HashSet<String>();
             for (IgnoreColumnsTableModel ignoredColumn: table.getIgnoreColumnsTable()) {
-                cols.add(ignoredColumn.getColumnName());
+                cols.add(ignoredColumn.getColumnName().toUpperCase());
             }
             ignoredCols.put(table, cols);
         }
 
         return cols;
     }
+    
+    /**
+     * Кешированное получение списка реплицуруеммых колонок
+     * 
+     * @param connection
+     * @param table.getName()
+     * @return
+     * @throws SQLException
+     */
+    public Set<String> getRequiredCols(TableModel table) throws SQLException {
+        Set<String> cols = requiredCols.get(table);
+        if (cols == null) {
+            cols = new HashSet<String>();
+            for (RequiredColumnsTableModel requiredColumn: table.getRequiredColumnsTable()) {
+                cols.add(requiredColumn.getColumnName().toUpperCase());
+            }
+            requiredCols.put(table, cols);
+        }
 
+        return cols;
+    }
     /**
      * Устанавливает сессионную переменную с именем текущей подписки или
      * публикации
