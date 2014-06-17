@@ -63,28 +63,28 @@ public interface TaskSettings {
      *
      * @return
      */
-    int getSuccessInterval();
+    Integer getSuccessInterval();
 
     /**
      * Установка интервала ожидания после корректного завершения задачи, мс
      *
      * @param successInterval
      */
-    void setSuccessInterval(int successInterval);
+    void setSuccessInterval(Integer successInterval);
 
     /**
      * Получение интервала ожидания после ошибочного завершения задачи, мс
      *
      * @return
      */
-    int getFailInterval();
+    Integer getFailInterval();
 
     /**
      * Установка интервала ожидания после ошибочного завершения задачи, мс
      *
      * @param failInterval
      */
-    void setFailInterval(int failInterval);
+    void setFailInterval(Integer failInterval);
 
     /**
      * Описание задачи
