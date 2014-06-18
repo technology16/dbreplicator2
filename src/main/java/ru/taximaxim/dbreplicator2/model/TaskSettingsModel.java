@@ -60,13 +60,13 @@ public class TaskSettingsModel implements TaskSettings{
      * Интервал после успешного выполнения задачи, мс
      */
     @Column(name = "success_interval")
-    private int successInterval;
+    private Integer successInterval;
 
     /**
      * Интервал после ошибочного выполнения задачи
      */
     @Column(name = "fail_interval")
-    private int failInterval;
+    private Integer failInterval;
 
     /**
      * Интервал после ошибочного выполнения задачи
@@ -109,22 +109,22 @@ public class TaskSettingsModel implements TaskSettings{
     }
 
     @Override
-    public int getSuccessInterval() {
+    public Integer getSuccessInterval() {
         return successInterval;
     }
 
     @Override
-    public void setSuccessInterval(int successInterval) {
+    public void setSuccessInterval(Integer successInterval) {
         this.successInterval = successInterval;
     }
 
      @Override
-    public int getFailInterval() {
+    public Integer getFailInterval() {
         return failInterval;
     }
 
     @Override
-    public void setFailInterval(int failInterval) {
+    public void setFailInterval(Integer failInterval) {
         this.failInterval = failInterval;
     }
 

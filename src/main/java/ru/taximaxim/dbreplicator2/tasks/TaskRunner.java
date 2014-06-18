@@ -121,25 +121,32 @@ public class TaskRunner implements Runnable {
             
             try {
                 if (isSuccess) {
-                    // Ожидаем окончания периода синхронизации
-                    long sleepTime = startTime + taskSettings.getSuccessInterval()
-                            - new Date().getTime();
-                    if (sleepTime > 0) {
-                        LOG.info(String
-                                .format("Ожидаем %d милисекунд после завершения задачи [id_task = %d, %s]",
-                                        sleepTime, taskSettings.getTaskId(),
-                                        taskSettings.getDescription()));
-                        Thread.sleep(sleepTime);
+                    if(taskSettings.getSuccessInterval()==null) {
+                        stop();
+                    } else {
+                        // Ожидаем окончания периода синхронизации
+                        long sleepTime = startTime + taskSettings.getSuccessInterval()
+                                - new Date().getTime();
+                        if (sleepTime > 0) {
+                            LOG.info(String
+                                    .format("Ожидаем %d милисекунд после завершения задачи [id_task = %d, %s]",
+                                            sleepTime, taskSettings.getTaskId(),
+                                            taskSettings.getDescription()));
+                            Thread.sleep(sleepTime);
+                        }
                     }
                 } else {
-                    long sleepTime = startTime + taskSettings.getFailInterval()
-                            - new Date().getTime();
-                    if (sleepTime > 0) {
-                        LOG.info(String.format(
-                                "Ожидаем %d миллисекунд до рестарта задачи [id_task = %d, %s]",
-                                sleepTime, taskSettings.getTaskId(), 
-                                taskSettings.getDescription()));
-                        Thread.sleep(sleepTime);
+                    if(taskSettings.getFailInterval()==null) {
+                        stop();
+                    } else {
+                        long sleepTime = startTime + taskSettings.getFailInterval() - new Date().getTime();
+                        if (sleepTime > 0) {
+                            LOG.info(String.format(
+                                    "Ожидаем %d миллисекунд до рестарта задачи [id_task = %d, %s]",
+                                    sleepTime, taskSettings.getTaskId(), 
+                                    taskSettings.getDescription()));
+                            Thread.sleep(sleepTime);
+                        }
                     }
                 }
             } catch (InterruptedException ex) {
