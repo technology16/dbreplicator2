@@ -73,14 +73,7 @@ public final class JdbcMetadata {
         // Получаем список колонок
         Set<String> colsList = new HashSet<String>();
         DatabaseMetaData metaData = connection.getMetaData();
-        String schemaName = null;
-        String tabName = tableName;
-        String[] s = tableName.split("\\.");
-        if(s.length==2){
-            tabName = s[1];
-            schemaName = s[0];
-        }
-        try (ResultSet colsResultSet = metaData.getColumns(null, schemaName, tabName, null);) {
+        try (ResultSet colsResultSet = metaData.getColumns(null, getSchemaName(tableName), getTableName(tableName), null);) {
             while (colsResultSet.next()) {
                 colsList.add(colsResultSet.getString(COLUMN_NAME).toUpperCase());
             }
@@ -127,20 +120,40 @@ public final class JdbcMetadata {
         // Получаем список ключевых колонок
         Set<String> primaryKeyColsList = new HashSet<String>();
         DatabaseMetaData metaData = connection.getMetaData();
-        String schemaName = null;
-        String tabName = tableName;
-        String[] s = tableName.split("\\.");
-        if(s.length==2){
-            tabName = s[1];
-            schemaName = s[0];
-        }
-        try (ResultSet primaryKeysResultSet = metaData.getPrimaryKeys(null, schemaName, tabName);) {
+        try (ResultSet primaryKeysResultSet = metaData.getPrimaryKeys(null, getSchemaName(tableName), getTableName(tableName));) {
             while (primaryKeysResultSet.next()) {
                 primaryKeyColsList.add(primaryKeysResultSet.getString(COLUMN_NAME).toUpperCase());
             }
         }
 
         return primaryKeyColsList;
+    }
+
+    /**
+     * Извлечение имени схемы из имени таблицы
+     * 
+     * @param fullName
+     */
+    public static String getSchemaName(String fullName) {
+        String[] s = fullName.split("\\.");
+        if(s.length==2){
+            return s[0];
+        }
+        
+        return null;
+    }
+
+    /**
+     * Извлечение имени таблицы из полного имени таблицы
+     * 
+     * @param fullName
+     */
+    public static String getTableName(String fullName) {
+        String[] s = fullName.split("\\.");
+        if(s.length==2){
+            return s[1];
+        }
+        return fullName;
     }
     
     /**
@@ -158,14 +171,8 @@ public final class JdbcMetadata {
         // Получаем список колонок
         Set<String> colsList = new HashSet<String>();
         DatabaseMetaData metaData = connection.getMetaData();
-        String schemaName = null;
-        String tabName = tableName;
-        String[] s = tableName.split("\\.");
-        if(s.length==2){
-            tabName = s[1];
-            schemaName = s[0];
-        }
-        try (ResultSet colsResultSet = metaData.getColumns(null, schemaName, tabName, null);) {
+        getSchemaName(tableName);
+        try (ResultSet colsResultSet = metaData.getColumns(null, getSchemaName(tableName), getTableName(tableName), null);) {
             while (colsResultSet.next()) {
                 if (colsResultSet.getString(IS_AUTOINCREMENT).equalsIgnoreCase(YES)) {
                     colsList.add(colsResultSet.getString(COLUMN_NAME).toUpperCase());
@@ -191,15 +198,8 @@ public final class JdbcMetadata {
             String tableName) throws SQLException {
         // Получаем список колонок
         Set<String> cols = new HashSet<String>();
-        String schemaName = null;
-        String tabName = tableName;
-        String[] s = tableName.split("\\.");
-        if(s.length==2){
-            tabName = s[1];
-            schemaName = s[0];
-        }
         DatabaseMetaData metaData = connection.getMetaData();
-        try (ResultSet colsResultSet = metaData.getColumns(null, schemaName, tabName, null);) {
+        try (ResultSet colsResultSet = metaData.getColumns(null, getSchemaName(tableName), getTableName(tableName), null);) {
             while (colsResultSet.next()) {
                 if (colsResultSet.getString(IS_NULLABLE).equalsIgnoreCase(YES)) {
                     cols.add(colsResultSet.getString(COLUMN_NAME).toUpperCase());
@@ -219,14 +219,7 @@ public final class JdbcMetadata {
     public static Map<String, Integer> getColumnsTypes(Connection connection, String tableName) throws SQLException {
         Map<String, Integer> colsTypes = new HashMap<String, Integer>();
         DatabaseMetaData metaData = connection.getMetaData();
-        String schemaName = null;
-        String tabName = tableName;
-        String[] s = tableName.split("\\.");
-        if(s.length==2){
-            tabName = s[1];
-            schemaName = s[0];
-        }        
-        try (ResultSet colsResultSet = metaData.getColumns(null, schemaName, tabName, null);) {
+        try (ResultSet colsResultSet = metaData.getColumns(null, getSchemaName(tableName), getTableName(tableName), null);) {
             while (colsResultSet.next()) {
                 colsTypes.put(colsResultSet.getString(COLUMN_NAME).toUpperCase(), colsResultSet.getInt(DATA_TYPE));
             }
