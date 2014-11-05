@@ -107,15 +107,10 @@ public class H2CopyTableData2repTest {
      * 
      * вставка таблицу подчиненную
      * изменение главной таблицы
-     * 
-     * 
-     * @throws SQLException
-     * @throws ClassNotFoundException
-     * @throws IOException
-     * @throws InterruptedException 
+     * @throws Exception 
      */
     @Test
-    public void testForeignKey() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
+    public void testForeignKey() throws Exception {
         Thread.sleep(REPLICATION_DELAY);
         //Проверка внешних ключей
         LOG.info("Проверка внешних ключей");
@@ -186,13 +181,10 @@ public class H2CopyTableData2repTest {
     
     /**
      * Проверка обновления
-     * @throws SQLException
-     * @throws ClassNotFoundException
-     * @throws IOException
-     * @throws InterruptedException 
+     * @throws Exception 
      */
     @Test
-    public void testUpdate() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
+    public void testUpdate() throws Exception {
         testInsert();
         //Проверка обновления
         LOG.info("Проверка обновления");
@@ -237,13 +229,10 @@ public class H2CopyTableData2repTest {
     
     /**
      * Проверка удаления
-     * @throws SQLException
-     * @throws ClassNotFoundException
-     * @throws IOException
-     * @throws InterruptedException 
+     * @throws Exception 
      */
     @Test
-    public void testDelete() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
+    public void testDelete() throws Exception {
         testInsert();
         LOG.info("Проверка удаления");
         //Проверка удаления
@@ -288,13 +277,10 @@ public class H2CopyTableData2repTest {
     
     /**
      * Проверка вставки и обновления
-     * @throws SQLException
-     * @throws ClassNotFoundException
-     * @throws IOException
-     * @throws InterruptedException 
+     * @throws Exception 
      */
     @Test
-    public void testInsertUpdate() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
+    public void testInsertUpdate() throws Exception {
       //Проверка вставки и обновления
         LOG.info("Проверка вставки и обновления");
         Helper.executeSqlFromFile(conn, "sql_insert.sql");   
@@ -340,13 +326,10 @@ public class H2CopyTableData2repTest {
     
     /**
      * Проверка вставки и удаления
-     * @throws SQLException
-     * @throws ClassNotFoundException
-     * @throws IOException
-     * @throws InterruptedException 
+     * @throws Exception 
      */
     @Test
-    public void testInsertDelete() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
+    public void testInsertDelete() throws Exception {
         LOG.info("Проверка вставки и удаления");
       //Проверка вставки и удаления
         Helper.executeSqlFromFile(conn, "sql_insert.sql");   
@@ -415,13 +398,10 @@ public class H2CopyTableData2repTest {
 
     /**
      * Проверка вставки 
-     * @throws SQLException
-     * @throws ClassNotFoundException
-     * @throws IOException
-     * @throws InterruptedException 
+     * @throws Exception 
      */
     @Test
-    public void testInsert() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
+    public void testInsert() throws Exception {
       //Проверка вставки
         Helper.executeSqlFromFile(conn, "sql_insert.sql");
         workerRun();
@@ -464,13 +444,13 @@ public class H2CopyTableData2repTest {
         assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }
     
-    public void workerRun() throws IOException, SQLException, InterruptedException{
+    public void workerRun() throws Exception{
         worker.run();
         Helper.executeSqlFromSql(conn, "UPDATE T_TAB SET _value = ?", "dest");
         Thread.sleep(REPLICATION_DELAY);
     }
     
-    public void workerRun2() throws IOException, SQLException, InterruptedException{
+    public void workerRun2() throws Exception{
         worker2.run();
         Helper.executeSqlFromSql(connDest, "UPDATE T_TAB SET _value = ?", "source");
         Thread.sleep(REPLICATION_DELAY);

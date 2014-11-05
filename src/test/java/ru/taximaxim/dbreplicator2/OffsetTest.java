@@ -128,18 +128,16 @@ public class OffsetTest {
      * 
      * вставка таблицу подчиненную
      * изменение главной таблицы
-     * 
-     * 
-     * @throws SQLException
-     * @throws ClassNotFoundException
-     * @throws IOException
-     * @throws InterruptedException 
+     * @throws Exception 
      */
     @Test
-    public void testOffset() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
+    public void testOffset() throws Exception {
         //Проверка внешних ключей
+        System.out.println("label1");
         LOG.info("Проверка внешних ключей");
         Helper.executeSqlFromFile(conn, "sql_foreign_key_error.sql");
+        
+        System.out.println("label2");
         
         workerPg.run();
         Thread.sleep(REPLICATION_DELAY);

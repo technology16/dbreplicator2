@@ -129,15 +129,10 @@ public class WorkpoolDataClearingTest {
      * 
      * вставка таблицу подчиненную
      * изменение главной таблицы
-     * 
-     * 
-     * @throws SQLException
-     * @throws ClassNotFoundException
-     * @throws IOException
-     * @throws InterruptedException 
+     * @throws Exception 
      */
     @Test
-    public void testWorkpoolDataClearing() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
+    public void testWorkpoolDataClearing() throws Exception {
         // Добавляем операцию над несуществующеми данными
         try (PreparedStatement statement = 
                 conn.prepareStatement("INSERT INTO REP2_SUPERLOG (id_foreign, id_table, c_operation, c_date, id_transaction, id_pool) VALUES (?, 'T_TABLE2', ?, now(), 0, 'source')")) {

@@ -23,6 +23,7 @@
 package ru.taximaxim.dbreplicator2.utils;
 
 import java.io.File;
+
 import org.apache.log4j.Logger;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -35,6 +36,9 @@ import ru.taximaxim.dbreplicator2.model.ApplicatonSettingsService;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
 import ru.taximaxim.dbreplicator2.model.TaskSettingsService;
 import ru.taximaxim.dbreplicator2.el.ErrorsLog;
+import ru.taximaxim.dbreplicator2.qr.RunnersHandler;
+import ru.taximaxim.dbreplicator2.qr.RunnersQueue;
+import ru.taximaxim.dbreplicator2.qr.ThreadPoolQueue;
 import ru.taximaxim.dbreplicator2.stats.StatsService;
 import ru.taximaxim.dbreplicator2.tasks.TasksPool;
 import ru.taximaxim.dbreplicator2.tp.ThreadPool;
@@ -67,6 +71,10 @@ public final class Core {
     private static ThreadPool threadPool;
     
     private static StatsService statsService;
+    
+    private static RunnersQueue runnersQueue;
+    
+    private static ThreadPoolQueue threadPoolQueue;
     
     /**
      * Получение настроек из файла
@@ -226,10 +234,40 @@ public final class Core {
     }
     
     /**
+     * Возвращает очередь раннеров
+     * 
+     * @return очередь раннеров
+     */
+    public static synchronized RunnersQueue getRunnersQueue() {
+        if (runnersQueue == null) {
+            runnersQueue = new RunnersQueue();
+            new RunnersHandler(runnersQueue);
+        }
+
+        return runnersQueue;
+    }
+    
+    /**
      * Закрываем сервис настройки соединений
      */
     public static void tasksPoolClose() {
         tasksPool = null;
+    }
+    
+    /**
+     * Возвращает пул потоков
+     * 
+     * @return пул потоков
+     * @throws InterruptedException 
+     */
+    public static synchronized ThreadPoolQueue getThreadPoolQueue() throws InterruptedException {
+        if (threadPoolQueue == null) {
+            ApplicatonSettingsService aService = new ApplicatonSettingsService(sessionFactory);
+            int count = Integer.parseInt(aService.getValue("tp.threads"));
+            threadPoolQueue = new ThreadPoolQueue(count);
+        }
+
+        return threadPoolQueue;
     }
     
     /**
