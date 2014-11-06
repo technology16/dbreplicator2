@@ -50,11 +50,8 @@ public class Manager extends GeneiricManager implements Strategy {
     protected void startRunners(Collection<RunnerModel> runners)  throws StrategyException, SQLException  {
         // Запускаем обработчики реплик
         for (RunnerModel runner : runners) {
-            // Пока синхронный запуск!
-            if (!runner.getTables().isEmpty()) {
-                WorkerThread workerThread = new WorkerThread(runner);
-                workerThread.run();
-            }
+            WorkerThread workerThread = new WorkerThread(runner);
+            workerThread.run();
         }
     }
 }

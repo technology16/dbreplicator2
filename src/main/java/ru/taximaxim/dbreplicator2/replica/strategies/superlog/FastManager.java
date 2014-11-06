@@ -56,9 +56,7 @@ public class FastManager extends GeneiricManager implements Strategy {
         try {
             // Асинхронно запускаем обработчики реплик
             for (RunnerModel runner : runners) {
-                if (!runner.getTables().isEmpty()) {
-                    Core.getThreadPool().start(runner);
-                }
+                Core.getThreadPool().start(runner);
             }
         } catch (InterruptedException e) {
             LOG.warn("Работа потока прервана.", e);
