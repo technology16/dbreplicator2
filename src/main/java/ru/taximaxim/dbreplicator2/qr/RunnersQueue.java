@@ -26,6 +26,7 @@ package ru.taximaxim.dbreplicator2.qr;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 
+import ru.taximaxim.dbreplicator2.model.Runner;
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
 
 /**
@@ -36,7 +37,7 @@ import ru.taximaxim.dbreplicator2.model.RunnerModel;
  */
 public class RunnersQueue {
 
-    private Collection<RunnerModel> queueRunners = new LinkedHashSet<RunnerModel>();
+    private Collection<Runner> queueRunners = new LinkedHashSet<Runner>();
     private Observer handler;
     
     public void attach(Observer observer) {
@@ -54,7 +55,7 @@ public class RunnersQueue {
         handler.update();
     }
     
-    public Collection<RunnerModel> getQueueRunners() {
+    public Collection<Runner> getQueueRunners() {
         return queueRunners;
     }
 }

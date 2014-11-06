@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
-import ru.taximaxim.dbreplicator2.model.RunnerModel;
+import ru.taximaxim.dbreplicator2.model.Runner;
 /**
  * Пул потоков
  * 
@@ -46,7 +46,8 @@ public class ThreadPoolQueue {
     private static final Logger LOG = Logger.getLogger(ThreadPoolQueue.class);
 
     private ExecutorService executor = null;
-    private Collection<RunnerModel> workRunners = new LinkedHashSet<RunnerModel>();
+    private Collection<Runner> workRunners = new LinkedHashSet<Runner>();
+    private RunnersQueue awaitRunners;
     private int count;
 
     /**
@@ -55,10 +56,12 @@ public class ThreadPoolQueue {
      * @param count - максимальное количество активных потоков
      * @throws InterruptedException
      */
-    public ThreadPoolQueue(int count) throws InterruptedException {
+    public ThreadPoolQueue(int count, RunnersQueue awaitRunners) throws InterruptedException {
         this.count = count;
         executor = Executors.newFixedThreadPool(count);
-
+        
+        this.awaitRunners = awaitRunners;
+        
         LOG.info(String.format("Создание и запуск пула потоков (%s)", count));
     }
 
@@ -91,31 +94,19 @@ public class ThreadPoolQueue {
     /**
      * Запуск потока RunnerModel. Поток будет поставлен в очередь на выполнение.
      */
-    public void start(RunnerModel runner) {
-//        synchronized(runner) {
-//            if (workerThreadQueue == null) {
-//                workerThreadQueue = new WorkerThreadQueue(runner);
-//            }
-//            workRunners.add(runner);
-//            Future<Runner> result = executor.submit(workerThreadQueue);
-//            try {
-//                Runner resRunner = result.get();
-//                workRunners.remove(resRunner);
-//            } catch (ExecutionException e) {
-//                workRunners.remove(runner);
-//                throw e;
-//            }
-//        }
-        Runnable worker = new QueueThread(runner, workRunners);
+    public void start() {
+        Runnable worker = new QueueThread(awaitRunners.getQueueRunners(), workRunners);
         executor.execute(worker);
         
     }
     
-    public Collection<RunnerModel> getWorkRunners() {
-        return workRunners;
-    }
-    
     public int getCount(){
         return this.count;
+    }
+    
+    public int getWorkRunnersCount(){
+        synchronized(workRunners) {
+            return workRunners.size();
+        }
     }
 }

@@ -23,9 +23,9 @@
 package ru.taximaxim.dbreplicator2.qr;
 
 import java.util.Collection;
+import java.util.Iterator;
 
 import ru.taximaxim.dbreplicator2.model.Runner;
-import ru.taximaxim.dbreplicator2.model.RunnerModel;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
 
 /**
@@ -38,42 +38,62 @@ import ru.taximaxim.dbreplicator2.tp.WorkerThread;
  */
 public class QueueThread implements Runnable {
 
-    private Collection<RunnerModel> workRunners;
-    private Runner runner;
-    private WorkerThread workerThread;
-
+    private Collection<Runner> workRunners;
+    private Collection<Runner> awaitRunners;
     /**
      * Конструктор по списку ожидающих раннеров и раннеру
      * 
      * @param workRunners - список ожидающих обработки раннеров
      * @param runner - текущий раннер
      */
-    public QueueThread(Runner runner, Collection<RunnerModel> workRunners) {
+    public QueueThread(Collection<Runner> awaitRunners, Collection<Runner> workRunners) {
         this.workRunners = workRunners;
-        this.runner = runner;
+        this.awaitRunners = awaitRunners;
     }
 
-    @Override
-    public void run() {
-        try {
-            getWorkerThread().run();
-        }finally {
+    protected Runner getRunner(){
+        synchronized(awaitRunners) {
+            Iterator<Runner> it = awaitRunners.iterator();
+            while (it.hasNext()) {
+                Runner awaitRun = it.next();
+                try {
+                    synchronized(workRunners) {
+                        if (!workRunners.contains(awaitRun)) {
+                            workRunners.add(awaitRun);
+                            it.remove();
+                            return awaitRun;
+                        }
+                    }
+                } finally {
+                    fireRunner(awaitRun);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    protected void fireRunner(Runner runner){
+        if (runner != null) {
             synchronized(workRunners) {
                 workRunners.remove(runner);
             }
         }
     }
-
-    /**
-     * Метод с отложенной инициализацией потока обработчика раннера
-     * 
-     * @return the workerThread - поток обработчика раннера
-     */
-    protected synchronized WorkerThread getWorkerThread() {
-        if (workerThread==null) {
-            workerThread = new WorkerThread(runner);
+    
+    @Override
+    public void run() {
+        Runner runner = this.getRunner();
+        try {
+           while (runner != null) {
+               WorkerThread worker = new WorkerThread(runner);
+               worker.run();
+               
+               this.fireRunner(runner);
+               runner = this.getRunner();
+           }
+        } finally {
+            this.fireRunner(runner);
         }
-        return workerThread;
     }
-
 }

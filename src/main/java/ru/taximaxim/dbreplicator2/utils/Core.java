@@ -237,11 +237,16 @@ public final class Core {
      * Возвращает очередь раннеров
      * 
      * @return очередь раннеров
+     * @throws InterruptedException 
      */
-    public static synchronized RunnersQueue getRunnersQueue() {
+    public static synchronized RunnersQueue getRunnersQueue() throws InterruptedException {
         if (runnersQueue == null) {
             runnersQueue = new RunnersQueue();
-            new RunnersHandler(runnersQueue);
+            
+            ApplicatonSettingsService aService = new ApplicatonSettingsService(sessionFactory);
+            int count = Integer.parseInt(aService.getValue("tp.threads"));
+            threadPoolQueue = new ThreadPoolQueue(count,  runnersQueue);
+            new RunnersHandler( runnersQueue, threadPoolQueue);
         }
 
         return runnersQueue;
@@ -252,22 +257,6 @@ public final class Core {
      */
     public static void tasksPoolClose() {
         tasksPool = null;
-    }
-    
-    /**
-     * Возвращает пул потоков
-     * 
-     * @return пул потоков
-     * @throws InterruptedException 
-     */
-    public static synchronized ThreadPoolQueue getThreadPoolQueue() throws InterruptedException {
-        if (threadPoolQueue == null) {
-            ApplicatonSettingsService aService = new ApplicatonSettingsService(sessionFactory);
-            int count = Integer.parseInt(aService.getValue("tp.threads"));
-            threadPoolQueue = new ThreadPoolQueue(count);
-        }
-
-        return threadPoolQueue;
     }
     
     /**

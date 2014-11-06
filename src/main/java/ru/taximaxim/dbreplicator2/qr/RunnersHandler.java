@@ -24,10 +24,8 @@
 package ru.taximaxim.dbreplicator2.qr;
 
 import java.util.Collection;
-import java.util.Iterator;
 
-import ru.taximaxim.dbreplicator2.model.RunnerModel;
-import ru.taximaxim.dbreplicator2.utils.Core;
+import ru.taximaxim.dbreplicator2.model.Runner;
 
 /**
  * Обработчик очереди раннеров
@@ -35,39 +33,25 @@ import ru.taximaxim.dbreplicator2.utils.Core;
  * @author petrov_im
  * 
  */
-public class RunnersHandler extends Observer{
+public class RunnersHandler implements Observer{
     
-    public RunnersHandler(RunnersQueue runnersQueue) {
+    private RunnersQueue runnersQueue;
+    private ThreadPoolQueue threadPool;
+    
+    public RunnersHandler(RunnersQueue runnersQueue, ThreadPoolQueue threadPool) {
         this.runnersQueue = runnersQueue;
         this.runnersQueue.attach(this);
+        this.threadPool = threadPool;
     }
     
     @Override
     public void update() throws InterruptedException {
-              
-        
-        ThreadPoolQueue threadPool = Core.getThreadPoolQueue();
-        Collection<RunnerModel> awaitRunners = runnersQueue.getQueueRunners();
-        Collection<RunnerModel> workRunners = threadPool.getWorkRunners();
-        synchronized(awaitRunners) {
-            synchronized(workRunners) {
-                if (threadPool.getCount() > workRunners.size()) {
-                    Iterator<RunnerModel> it = awaitRunners.iterator();
-                    while (it.hasNext()) {
-                        RunnerModel awaitRun = it.next();
-                        it.remove();
-                        workRunners.add(awaitRun);
-                        threadPool.start(awaitRun);
-                    }
-                    /*for (RunnerModel awaitRun : awaitRunners) {
-                        if (!workRunners.contains(awaitRun) && threadPool.getCount()>workRunners.size()) {
-                            awaitRunners.remove(awaitRun);
-                            workRunners.add(awaitRun);
-                            threadPool.start(awaitRun);
-                        }
-                    }*/
-                }
-            }
-        }       
+        Collection<Runner> awaitRunners = runnersQueue.getQueueRunners();
+        for (int i = threadPool.getWorkRunnersCount(); 
+                (i <= threadPool.getCount()) && (i <= awaitRunners.size()); 
+                i++) {
+            threadPool.start();
+        }
     }
 }
+

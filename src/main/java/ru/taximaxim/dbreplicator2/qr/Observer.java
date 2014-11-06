@@ -24,15 +24,13 @@
 package ru.taximaxim.dbreplicator2.qr;
 
 /**
- * Абстрактный класс обработчика очереди раннеров (наблюдатель)
+ * Интерфейс для обработчика очереди раннеров (наблюдатель)
  * 
  * @author petrov_im
  * 
  */
-public abstract class Observer {
-    
-    protected RunnersQueue runnersQueue;
-    
+public interface Observer {
+       
     public abstract void update() throws InterruptedException;
 
 }
