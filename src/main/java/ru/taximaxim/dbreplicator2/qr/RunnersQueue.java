@@ -26,6 +26,8 @@ package ru.taximaxim.dbreplicator2.qr;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 
+import org.apache.log4j.Logger;
+
 import ru.taximaxim.dbreplicator2.model.Runner;
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
 
@@ -36,25 +38,30 @@ import ru.taximaxim.dbreplicator2.model.RunnerModel;
  * 
  */
 public class RunnersQueue {
+    
+    private static final Logger LOG = Logger.getLogger(RunnersQueue.class);
 
     private Collection<Runner> queueRunners = new LinkedHashSet<Runner>();
-    private Observer handler;
     
-    public void attach(Observer observer) {
-        handler = observer;
-    }
-    
+    /**
+     * Добавляет поступившие из суперлога раннеры в очередь на обработку
+     * 
+     * @param runners
+     * @throws InterruptedException
+     */
     public void addAll(Collection<RunnerModel> runners) throws InterruptedException {
         synchronized (queueRunners) {
             queueRunners.addAll(runners);
-            notifyHandler();
+            queueRunners.notifyAll();
+            LOG.warn("queueRunners.notifyAll()");
         }
     }
     
-    public void notifyHandler() throws InterruptedException {
-        handler.update();
-    }
-    
+    /**
+     * Возвращает очередь раннеров, ожидающих обработки
+     * 
+     * @return
+     */
     public Collection<Runner> getQueueRunners() {
         return queueRunners;
     }

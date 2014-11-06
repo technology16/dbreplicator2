@@ -25,6 +25,8 @@ package ru.taximaxim.dbreplicator2.qr;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.apache.log4j.Logger;
+
 import ru.taximaxim.dbreplicator2.model.Runner;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
 
@@ -37,9 +39,12 @@ import ru.taximaxim.dbreplicator2.tp.WorkerThread;
  *
  */
 public class QueueThread implements Runnable {
+    
+    private static final Logger LOG = Logger.getLogger(QueueThread.class);
 
-    private Collection<Runner> workRunners;
     private Collection<Runner> awaitRunners;
+    private Collection<Runner> workRunners;
+    
     /**
      * Конструктор по списку ожидающих раннеров и раннеру
      * 
@@ -47,10 +52,15 @@ public class QueueThread implements Runnable {
      * @param runner - текущий раннер
      */
     public QueueThread(Collection<Runner> awaitRunners, Collection<Runner> workRunners) {
-        this.workRunners = workRunners;
         this.awaitRunners = awaitRunners;
+        this.workRunners = workRunners;
     }
 
+    /**
+     * Выбирает раннер для запуска на обработку
+     * @return
+     * @throws InterruptedException 
+     */
     protected Runner getRunner(){
         synchronized(awaitRunners) {
             Iterator<Runner> it = awaitRunners.iterator();
@@ -73,6 +83,10 @@ public class QueueThread implements Runnable {
         return null;
     }
 
+    /**
+     * Удаляет раннер из коллекции обрабатывающихся раннеров
+     * @param runner
+     */
     protected void fireRunner(Runner runner){
         if (runner != null) {
             synchronized(workRunners) {
@@ -81,19 +95,32 @@ public class QueueThread implements Runnable {
         }
     }
     
+    /**
+     * Запускает раннер на обработку
+     */
     @Override
     public void run() {
-        Runner runner = this.getRunner();
-        try {
-           while (runner != null) {
-               WorkerThread worker = new WorkerThread(runner);
-               worker.run();
-               
-               this.fireRunner(runner);
-               runner = this.getRunner();
-           }
-        } finally {
-            this.fireRunner(runner);
+        while (true) {
+            Runner runner = this.getRunner();
+                while (runner != null) {
+                    try {
+                        LOG.warn("Work runner " + runner.getId());
+                        WorkerThread worker = new WorkerThread(runner);
+                        worker.run();
+                    } finally {
+                        this.fireRunner(runner);
+                    }
+                    runner = this.getRunner();
+                }
+            try {
+                LOG.warn("awaitRunners.wait()");
+                
+                synchronized (awaitRunners) {
+                    awaitRunners.wait();
+                }
+            } catch (InterruptedException e1) {
+
+            }
         }
     }
 }

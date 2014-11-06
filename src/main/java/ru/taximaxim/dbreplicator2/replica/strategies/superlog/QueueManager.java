@@ -43,7 +43,7 @@ import ru.taximaxim.dbreplicator2.utils.Core;
  */
 public class QueueManager extends GeneiricManager implements Strategy {
     
-    private static final Logger LOG = Logger.getLogger(FastManager.class);
+    private static final Logger LOG = Logger.getLogger(QueueManager.class);
     
     /**
      * Конструктор по умолчанию

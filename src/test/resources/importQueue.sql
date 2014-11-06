@@ -36,13 +36,13 @@ insert into tables (id_table, id_pool, name) values (16, 'source', 'T_TABLE8');
 --Runners Super Log
 insert into runners (id_runner, source, target, description) values (1, 'source', 'source', 'QueueManager');
 --Strategies Add Super Log
-insert into strategies (id, className, param, isEnabled, priority, id_runner) values (1, 'ru.taximaxim.dbreplicator2.replica.strategies.superlog.Manager', 'key1=value1
+insert into strategies (id, className, param, isEnabled, priority, id_runner) values (1, 'ru.taximaxim.dbreplicator2.replica.strategies.superlog.QueueManager', 'key1=value1
 key2=''value2''', true, 100, 1);
 
 --Runners Super Log 2
 insert into runners (id_runner, source, target, description) values (2, 'dest', 'dest', 'QueueManager');
 --Strategies Add Super Log 2
-insert into strategies (id, className, param, isEnabled, priority, id_runner) values (2, 'ru.taximaxim.dbreplicator2.replica.strategies.superlog.Manager', 'key1=value1
+insert into strategies (id, className, param, isEnabled, priority, id_runner) values (2, 'ru.taximaxim.dbreplicator2.replica.strategies.superlog.QueueManager', 'key1=value1
 key2=''value2''', true, 100, 2);
 
 

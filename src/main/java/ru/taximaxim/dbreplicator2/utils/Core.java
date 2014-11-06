@@ -36,7 +36,6 @@ import ru.taximaxim.dbreplicator2.model.ApplicatonSettingsService;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
 import ru.taximaxim.dbreplicator2.model.TaskSettingsService;
 import ru.taximaxim.dbreplicator2.el.ErrorsLog;
-import ru.taximaxim.dbreplicator2.qr.RunnersHandler;
 import ru.taximaxim.dbreplicator2.qr.RunnersQueue;
 import ru.taximaxim.dbreplicator2.qr.ThreadPoolQueue;
 import ru.taximaxim.dbreplicator2.stats.StatsService;
@@ -73,8 +72,6 @@ public final class Core {
     private static StatsService statsService;
     
     private static RunnersQueue runnersQueue;
-    
-    private static ThreadPoolQueue threadPoolQueue;
     
     /**
      * Получение настроек из файла
@@ -245,8 +242,9 @@ public final class Core {
             
             ApplicatonSettingsService aService = new ApplicatonSettingsService(sessionFactory);
             int count = Integer.parseInt(aService.getValue("tp.threads"));
-            threadPoolQueue = new ThreadPoolQueue(count,  runnersQueue);
-            new RunnersHandler( runnersQueue, threadPoolQueue);
+            new ThreadPoolQueue(count,  runnersQueue);
+            
+            LOG.warn("getRunnersQueue()");
         }
 
         return runnersQueue;

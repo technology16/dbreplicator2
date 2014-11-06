@@ -62,6 +62,10 @@ public class ThreadPoolQueue {
         
         this.awaitRunners = awaitRunners;
         
+        for (int i=0; i<count; i++){
+            this.start();
+        }
+        
         LOG.info(String.format("Создание и запуск пула потоков (%s)", count));
     }
 
@@ -100,10 +104,18 @@ public class ThreadPoolQueue {
         
     }
     
+    /**
+     * Возвращает максимальное возможное количество потоков
+     * @return
+     */
     public int getCount(){
         return this.count;
     }
     
+    /**
+     * Возвращает число обрабатывающихся раннеров
+     * @return
+     */
     public int getWorkRunnersCount(){
         synchronized(workRunners) {
             return workRunners.size();

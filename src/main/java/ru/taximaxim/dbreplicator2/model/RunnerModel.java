@@ -218,4 +218,13 @@ public class RunnerModel implements Runner {
     public void setTables(List<TableModel> tables) {
         this.tables = tables;
     }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return "RunnerModel [id=" + id + ", source=" + source.getPoolId() + ", target=" + target.getPoolId()
+                + ", description=" + description;
+    }
 }

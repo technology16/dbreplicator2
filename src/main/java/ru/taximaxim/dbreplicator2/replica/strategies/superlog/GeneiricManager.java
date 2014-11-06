@@ -151,7 +151,11 @@ public abstract class GeneiricManager extends StrategySkeleton implements Strate
             throw e;
         }
         // запускаем обработчики реплик
-        startRunners(sourcePool.getRunners());
+        Set<RunnerModel> runners = new HashSet<RunnerModel>();
+        for (TableModel table : sourcePool.getTables()) {
+            runners.addAll(table.getRunners());
+        }
+        startRunners(runners);
 
         try {
             if (lastAutoCommit != null) {

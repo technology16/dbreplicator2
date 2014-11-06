@@ -31,6 +31,11 @@ package ru.taximaxim.dbreplicator2.qr;
  */
 public interface Observer {
        
+    /**
+     * Метод, запускающийся в наблюдателе при изменении наблюдаемого
+     * 
+     * @throws InterruptedException
+     */
     public abstract void update() throws InterruptedException;
 
 }
