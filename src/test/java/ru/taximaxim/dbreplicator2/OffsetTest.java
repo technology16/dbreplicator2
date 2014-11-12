@@ -25,55 +25,37 @@ package ru.taximaxim.dbreplicator2;
 
 import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
+import ru.taximaxim.dbreplicator2.abstracts.AbstractTest;
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.model.RunnerService;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
-import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
  * @author mardanov_rm
  *
  */
-public class OffsetTest {
+public class OffsetTest extends AbstractTest {
     // Задержка между циклами репликации
     private static final int REPLICATION_DELAY = 500;
     protected static final Logger LOG = Logger.getLogger(OffsetTest.class);
-    protected static SessionFactory sessionFactory;
-    protected static Session session;
-    protected static ConnectionFactory connectionFactory;
-    protected static Connection conn = null;
-    protected static Connection connDest = null;
-    protected static Runnable workerPg = null;
-    protected static Runnable workerMs = null;
-    protected static Runnable errorsCountWatchdogWorker = null;
 
     /**
      * @throws java.lang.Exception
      */
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        Core.configurationClose();
-        Core.getConfiguration("src/test/resources/hibernateOffset.cfg.xml");
-        sessionFactory = Core.getSessionFactory();
-        session = sessionFactory.openSession();
-        connectionFactory = Core.getConnectionFactory();
-        initialization();
+        setUp("src/test/resources/hibernateOffset.cfg.xml", null, "importRep2.sql", "importSourceOffset.sql", "importDest.sql");
+        initRunners();
     }
 
     /**
@@ -81,37 +63,13 @@ public class OffsetTest {
      */
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
-        if(conn!=null)
-            conn.close();
-        if(connDest!=null)
-            connDest.close();
-        if(session!=null)
-            session.close();
-        Core.connectionFactoryClose();
-        Core.sessionFactoryClose();
-        Core.threadPoolClose();
-        Core.statsServiceClose();
-        Core.tasksPoolClose();
-        Core.taskSettingsServiceClose(); 
-        Core.configurationClose();
+        close();
     }
-
+    
     /**
-     * Инициализация
+     * Инициализация раннеров
      */
-    public static void initialization() throws ClassNotFoundException, SQLException, IOException{
-        LOG.info("initialization");
-        String source = "source";
-        conn = connectionFactory.getConnection(source);
-        
-        Helper.executeSqlFromFile(conn, "importRep2.sql");
-        Helper.executeSqlFromFile(conn, "importSourceOffset.sql");
-        
-        String dest = "dest";
-        connDest = connectionFactory.getConnection(dest);
-        Helper.executeSqlFromFile(connDest, "importRep2.sql");
-        Helper.executeSqlFromFile(connDest, "importDest.sql");
-        
+    public static void initRunners() {
         RunnerService runnerService = new RunnerService(sessionFactory);
 
         workerPg = new WorkerThread(runnerService.getRunner(1));
@@ -133,11 +91,8 @@ public class OffsetTest {
     @Test
     public void testOffset() throws Exception {
         //Проверка внешних ключей
-        System.out.println("label1");
         LOG.info("Проверка внешних ключей");
         Helper.executeSqlFromFile(conn, "sql_foreign_key_error.sql");
-        
-        System.out.println("label2");
         
         workerPg.run();
         Thread.sleep(REPLICATION_DELAY);
@@ -163,7 +118,7 @@ public class OffsetTest {
             }
         }
         
-       // errorsCountWatchdogWorker.run();
+        //errorsCountWatchdogWorker.run();
         workerPg.run();
         Thread.sleep(REPLICATION_DELAY);
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table2");
