@@ -32,9 +32,9 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ru.taximaxim.dbreplicator2.abstracts.AbstractSecondTest;
+import ru.taximaxim.dbreplicator2.abstracts.AbstractSettingTest;
 
-public class TriggerH2Test extends AbstractSecondTest {
+public class TriggerH2Test extends AbstractSettingTest {
     
     protected static final Logger LOG = Logger.getLogger(TriggerH2Test.class);
     

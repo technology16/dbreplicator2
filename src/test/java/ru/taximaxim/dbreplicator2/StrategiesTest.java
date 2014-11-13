@@ -30,12 +30,12 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ru.taximaxim.dbreplicator2.abstracts.AbstractSecondTest;
+import ru.taximaxim.dbreplicator2.abstracts.AbstractSettingTest;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsModel;
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 
-public class StrategiesTest extends AbstractSecondTest {
+public class StrategiesTest extends AbstractSettingTest {
 
     protected static final Logger LOG = Logger.getLogger(StrategiesTest.class);
 

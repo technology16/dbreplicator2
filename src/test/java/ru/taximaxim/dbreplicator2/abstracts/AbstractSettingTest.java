@@ -28,97 +28,66 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
-import org.hibernate.SessionFactory;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 
 import ru.taximaxim.dbreplicator2.Helper;
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
-import ru.taximaxim.dbreplicator2.el.ErrorsLog;
+import ru.taximaxim.dbreplicator2.stats.StatsService;
 import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
- * Абстракный класс для инициализации общих полей нескольких классов
+ * Абстракный класс для инициализации общих полей тестовых классов
  * 
  * @author petrov_im
  *
  */
-public abstract class AbstractFirstTest {
+public class AbstractSettingTest {
     
-    protected static final Logger LOG = Logger.getLogger(AbstractFirstTest.class);
-    
+    protected static final Logger LOG = Logger.getLogger(AbstractSettingTest.class);
+
     protected static SessionFactory sessionFactory;
     protected static Session session;
     protected static ConnectionFactory connectionFactory;
-    protected static ErrorsLog errorsLog; 
+    protected static StatsService statsService;
     protected static Connection conn = null;
-    protected static Connection connDest = null;
-    protected static Runnable worker = null;
-    protected static Runnable worker2 = null;
-    protected static Runnable workerPg = null;
-    protected static Runnable workerMs = null;
-    protected static Runnable errorsCountWatchdogWorker = null;
 
-    protected static void setUp(String xmlForConfig, String xmlForSession, String sqlRep2, String sqlSourse, String sqlDest) throws ClassNotFoundException, SQLException, IOException {   
-        Core.configurationClose();
-        if(xmlForConfig != null){
-            Core.getConfiguration(xmlForConfig);
-        }
-        else {
-            Core.getConfiguration();
-        }       
-        if(xmlForSession != null){
-            sessionFactory = Core.getSessionFactory(xmlForSession);
-        }
-        else {
-            sessionFactory = Core.getSessionFactory();
-        }      
+    protected static void setUp(String sqlRep2, String sqlSourse, String sqlDest) throws ClassNotFoundException, SQLException, IOException {
+        sessionFactory = Core.getSessionFactory();
         session = sessionFactory.openSession();
         connectionFactory = Core.getConnectionFactory();
-        errorsLog = Core.getErrorsLog();
-        initialization(sqlRep2, sqlSourse, sqlDest);
+        statsService = Core.getStatsService();
+        
+        String source = "source";
+        conn = connectionFactory.getConnection(source);
+        
+        if (sqlRep2 != null)
+            Helper.executeSqlFromFile(conn, sqlRep2);
+        if (sqlSourse != null)
+            Helper.executeSqlFromFile(conn, sqlSourse);
+        if (sqlDest != null)
+            Helper.executeSqlFromFile(conn, sqlDest);
     }
-    
+
     /**
      * Закрытие соединений
      * @throws SQLException 
      * @throws InterruptedException 
      */
     protected static void close() throws SQLException, InterruptedException {
-        if(conn!=null)
-            conn.close();
-        if(connDest!=null)
-            connDest.close();
-        if(session!=null)
+        if (session != null)
             session.close();
-        sessionFactory.close();
+        if (conn != null)
+            conn.close();
         connectionFactory.close();
         sessionFactory.close();
         Core.connectionFactoryClose();
         Core.sessionFactoryClose();
         Core.statsServiceClose();
-        Core.tasksPoolClose();
-        Core.taskSettingsServiceClose();
-        Core.configurationClose();
         Core.threadPoolClose();
-        errorsLog.close();
-    }
-    
-    /**
-     * Инициализация
-     */
-    public static void initialization(String sqlRep2, String sqlSourse, String sqlDest) throws ClassNotFoundException, SQLException, IOException{
-        LOG.info("initialization");
-        String source = "source";
-        conn = connectionFactory.getConnection(source);
-
-        Helper.executeSqlFromFile(conn, sqlRep2);
-        Helper.executeSqlFromFile(conn, sqlSourse);
-
-        String dest = "dest";
-        connDest = connectionFactory.getConnection(dest);
-        Helper.executeSqlFromFile(connDest, sqlRep2);
-        Helper.executeSqlFromFile(connDest, sqlDest);
+        Core.tasksPoolClose();
+        Core.taskSettingsServiceClose(); 
+        Core.configurationClose();
     }
 
 }
-

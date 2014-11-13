@@ -12,13 +12,13 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ru.taximaxim.dbreplicator2.abstracts.AbstractSecondTest;
+import ru.taximaxim.dbreplicator2.abstracts.AbstractSettingTest;
 import ru.taximaxim.dbreplicator2.model.IgnoreColumnsTableModel;
 import ru.taximaxim.dbreplicator2.model.RequiredColumnsTableModel;
 import ru.taximaxim.dbreplicator2.model.TableModel;
 import ru.taximaxim.dbreplicator2.utils.Utils;
 
-public class SettingsIgnoreRequiredColumnsTest extends AbstractSecondTest {
+public class SettingsIgnoreRequiredColumnsTest extends AbstractSettingTest {
 
     protected static final Logger LOG = Logger.getLogger(SettingsIgnoreRequiredColumnsTest.class);
 

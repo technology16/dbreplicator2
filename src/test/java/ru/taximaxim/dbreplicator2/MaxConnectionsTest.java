@@ -30,7 +30,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ru.taximaxim.dbreplicator2.abstracts.AbstractThirdTest;
+import ru.taximaxim.dbreplicator2.abstracts.AbstractBoneCPTest;
 import ru.taximaxim.dbreplicator2.cf.BoneCPConnectionsFactory;
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsModel;
@@ -41,7 +41,7 @@ import ru.taximaxim.dbreplicator2.model.BoneCPSettingsModel;
  * @author volodin_aa
  *
  */
-public class MaxConnectionsTest extends AbstractThirdTest {
+public class MaxConnectionsTest extends AbstractBoneCPTest {
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {

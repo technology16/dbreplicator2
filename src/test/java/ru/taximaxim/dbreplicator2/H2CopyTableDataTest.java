@@ -39,7 +39,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ru.taximaxim.dbreplicator2.abstracts.AbstractFirstTest;
+import ru.taximaxim.dbreplicator2.abstracts.AbstractReplicationTest;
 import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.model.RunnerService;
@@ -58,7 +58,7 @@ import ru.taximaxim.dbreplicator2.utils.Core;
  * @author volodin_aa
  *
  */
-public class H2CopyTableDataTest extends AbstractFirstTest {
+public class H2CopyTableDataTest extends AbstractReplicationTest {
     protected static final Logger LOG = Logger.getLogger(H2CopyTableDataTest.class);
     // Задержка между циклами репликации
     private static final int REPLICATION_DELAY = 2000;
@@ -93,7 +93,6 @@ public class H2CopyTableDataTest extends AbstractFirstTest {
      */
     @Test
     public void testRep2TablesClearing() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
-        Helper.executeSqlFromFile(conn, "importSourceData.sql");
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
         

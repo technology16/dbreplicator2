@@ -24,67 +24,54 @@
 package ru.taximaxim.dbreplicator2.abstracts;
 
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
 
-import org.apache.log4j.Logger;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.service.ServiceRegistryBuilder;
 
-import ru.taximaxim.dbreplicator2.Helper;
-import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
-import ru.taximaxim.dbreplicator2.stats.StatsService;
+import ru.taximaxim.dbreplicator2.model.BoneCPDataBaseSettingsStorage;
+import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
 import ru.taximaxim.dbreplicator2.utils.Core;
 
+
 /**
- * Абстракный класс для инициализации общих полей нескольких классов
+ * Абстракный класс для инициализации общих полей тестовых классов
  * 
  * @author petrov_im
  *
  */
-public class AbstractSecondTest {
+public abstract class AbstractBoneCPTest {
     
-    protected static final Logger LOG = Logger.getLogger(AbstractSecondTest.class);
-
     protected static SessionFactory sessionFactory;
-    protected static Session session;
-    protected static ConnectionFactory connectionFactory;
-    protected static StatsService statsService;
-    protected static Connection conn = null;
+    protected static BoneCPDataBaseSettingsStorage settingStorage;
+    
+    protected static void setUp() throws ClassNotFoundException, SQLException, IOException {   
+        Configuration configuration = new Configuration().configure();
+        
+        // Инициализируем Hibernate
+        sessionFactory = new Configuration()
+        .configure()
+        .buildSessionFactory(new ServiceRegistryBuilder()
+            .applySettings(configuration.getProperties()).buildServiceRegistry());
 
-    protected static void setUp(String sqlRep2, String sqlSourse, String sqlDest) throws ClassNotFoundException, SQLException, IOException {
-        sessionFactory = Core.getSessionFactory();
-        session = sessionFactory.openSession();
-        connectionFactory = Core.getConnectionFactory();
-        statsService = Core.getStatsService();
-        
-        String source = "source";
-        conn = connectionFactory.getConnection(source);
-        
-        if (sqlRep2 != null)
-            Helper.executeSqlFromFile(conn, sqlRep2);
-        if (sqlSourse != null)
-            Helper.executeSqlFromFile(conn, sqlSourse);
-        if (sqlDest != null)
-            Helper.executeSqlFromFile(conn, sqlDest);
+        // Инициализируем хранилище настроек пулов соединений
+        settingStorage = new BoneCPSettingsService(sessionFactory);
+
     }
-
+    
     /**
      * Закрытие соединений
      * @throws SQLException 
      * @throws InterruptedException 
      */
     protected static void close() throws SQLException, InterruptedException {
-        if (session != null)
-            session.close();
-        if (conn != null)
-            conn.close();
-        connectionFactory.close();
-        sessionFactory.close();
+        if (sessionFactory != null) {
+            sessionFactory.close();
+        }
         Core.connectionFactoryClose();
         Core.sessionFactoryClose();
         Core.statsServiceClose();
-        Core.threadPoolClose();
         Core.tasksPoolClose();
         Core.taskSettingsServiceClose(); 
         Core.configurationClose();

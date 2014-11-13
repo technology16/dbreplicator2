@@ -32,7 +32,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ru.taximaxim.dbreplicator2.abstracts.AbstractThirdTest;
+import ru.taximaxim.dbreplicator2.abstracts.AbstractBoneCPTest;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettings;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsModel;
 /**
@@ -41,7 +41,7 @@ import ru.taximaxim.dbreplicator2.model.BoneCPSettingsModel;
  * @author volodin_aa
  *
  */
-public class TaskTest extends AbstractThirdTest  {
+public class TaskTest extends AbstractBoneCPTest  {
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {

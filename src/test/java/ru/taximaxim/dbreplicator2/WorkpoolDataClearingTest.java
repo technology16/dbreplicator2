@@ -35,7 +35,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ru.taximaxim.dbreplicator2.abstracts.AbstractFirstTest;
+import ru.taximaxim.dbreplicator2.abstracts.AbstractReplicationTest;
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.model.RunnerService;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
@@ -49,7 +49,7 @@ import ru.taximaxim.dbreplicator2.tp.WorkerThread;
  * @author volodin_aa
  *
  */
-public class WorkpoolDataClearingTest extends AbstractFirstTest {
+public class WorkpoolDataClearingTest extends AbstractReplicationTest {
     // Задержка между циклами репликации
     private static final int REPLICATION_DELAY = 500;
     protected static final Logger LOG = Logger.getLogger(WorkpoolDataClearingTest.class);
@@ -77,7 +77,7 @@ public class WorkpoolDataClearingTest extends AbstractFirstTest {
     public static void initRunners() {
         RunnerService runnerService = new RunnerService(sessionFactory);
 
-        workerPg = new WorkerThread(runnerService.getRunner(1));
+        worker = new WorkerThread(runnerService.getRunner(1));
         errorsCountWatchdogWorker = new WorkerThread(runnerService.getRunner(7));
     }
     
@@ -111,11 +111,11 @@ public class WorkpoolDataClearingTest extends AbstractFirstTest {
         LOG.info("Проверка внешних ключей");
         Helper.executeSqlFromFile(conn, "sql_foreign_key_error.sql");
         
-        workerPg.run();
+        worker.run();
         Thread.sleep(REPLICATION_DELAY);
-        workerPg.run();
+        worker.run();
         Thread.sleep(REPLICATION_DELAY);
-        workerPg.run();
+        worker.run();
         Thread.sleep(REPLICATION_DELAY);
         
         // Выводим данные из rep2_superlog_table
@@ -136,7 +136,7 @@ public class WorkpoolDataClearingTest extends AbstractFirstTest {
         }
         
        // errorsCountWatchdogWorker.run();
-        workerPg.run();
+        worker.run();
         Thread.sleep(REPLICATION_DELAY);
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table2");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table2");

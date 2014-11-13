@@ -17,14 +17,14 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ru.taximaxim.dbreplicator2.abstracts.AbstractSecondTest;
+import ru.taximaxim.dbreplicator2.abstracts.AbstractSettingTest;
 import ru.taximaxim.dbreplicator2.stats.StatsService;
 
 /**
  * @author mardanov_rm
  * 
  */
-public class StatsServiceTest extends AbstractSecondTest {
+public class StatsServiceTest extends AbstractSettingTest {
     // Задержка между циклами репликации
     private static final int REPLICATION_DELAY = 500;
     protected static final Logger LOG = Logger.getLogger(StatsServiceTest.class);
