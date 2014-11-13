@@ -36,7 +36,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ru.taximaxim.dbreplicator2.abstracts.AbstractTest;
+import ru.taximaxim.dbreplicator2.abstracts.AbstractFirstTest;
 import ru.taximaxim.dbreplicator2.model.RunnerService;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
 
@@ -51,7 +51,7 @@ import ru.taximaxim.dbreplicator2.tp.WorkerThread;
  * @author volodin_aa
  *
  */
-public class IntegrityReplicatedDataTest extends AbstractTest {
+public class IntegrityReplicatedDataTest extends AbstractFirstTest {
     protected static final Logger LOG = Logger.getLogger(IntegrityReplicatedDataTest.class);
     
     // Задержка между циклами репликации

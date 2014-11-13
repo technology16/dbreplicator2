@@ -35,7 +35,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ru.taximaxim.dbreplicator2.abstracts.AbstractTest;
+import ru.taximaxim.dbreplicator2.abstracts.AbstractFirstTest;
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.model.RunnerService;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
@@ -44,7 +44,7 @@ import ru.taximaxim.dbreplicator2.tp.WorkerThread;
  * @author mardanov_rm
  *
  */
-public class OffsetTest extends AbstractTest {
+public class OffsetTest extends AbstractFirstTest {
     // Задержка между циклами репликации
     private static final int REPLICATION_DELAY = 500;
     protected static final Logger LOG = Logger.getLogger(OffsetTest.class);

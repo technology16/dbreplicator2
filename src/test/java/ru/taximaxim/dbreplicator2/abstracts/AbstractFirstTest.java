@@ -10,18 +10,21 @@ import org.hibernate.Session;
 
 import ru.taximaxim.dbreplicator2.Helper;
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
+import ru.taximaxim.dbreplicator2.el.ErrorsLog;
 import ru.taximaxim.dbreplicator2.utils.Core;
 
-public abstract class AbstractTest {
+public abstract class AbstractFirstTest {
     
-    protected static final Logger LOG = Logger.getLogger(AbstractTest.class);
+    protected static final Logger LOG = Logger.getLogger(AbstractFirstTest.class);
     
     protected static SessionFactory sessionFactory;
     protected static Session session;
     protected static ConnectionFactory connectionFactory;
+    protected static ErrorsLog errorsLog; 
     protected static Connection conn = null;
     protected static Connection connDest = null;
     protected static Runnable worker = null;
+    protected static Runnable worker2 = null;
     protected static Runnable workerPg = null;
     protected static Runnable workerMs = null;
     protected static Runnable errorsCountWatchdogWorker = null;
@@ -29,7 +32,12 @@ public abstract class AbstractTest {
     protected static void setUp(String xmlForConfig, String xmlForSession, String sqlRep2, String sqlSourse, String sqlDest) throws ClassNotFoundException, SQLException, IOException {
         
         Core.configurationClose();
-        Core.getConfiguration(xmlForConfig);
+        if(xmlForConfig != null){
+            Core.getConfiguration(xmlForConfig);
+        }
+        else {
+            Core.getConfiguration();
+        } 
         
         if(xmlForSession != null){
             sessionFactory = Core.getSessionFactory(xmlForSession);
@@ -40,6 +48,7 @@ public abstract class AbstractTest {
        
         session = sessionFactory.openSession();
         connectionFactory = Core.getConnectionFactory();
+        errorsLog = Core.getErrorsLog();
         initialization(sqlRep2, sqlSourse, sqlDest);
     
     }
@@ -64,7 +73,8 @@ public abstract class AbstractTest {
         Core.taskSettingsServiceClose();
         Core.configurationClose();
         Core.threadPoolClose();
-     
+        errorsLog.close();
+        
     }
     
     /**

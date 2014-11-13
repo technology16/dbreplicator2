@@ -14,14 +14,14 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ru.taximaxim.dbreplicator2.abstracts.AbstractTest;
+import ru.taximaxim.dbreplicator2.abstracts.AbstractFirstTest;
 import ru.taximaxim.dbreplicator2.model.RunnerService;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
 /**
  * @author mardanov_rm
  *
  */
-public class SuperlogWatchgdogTest extends AbstractTest {
+public class SuperlogWatchgdogTest extends AbstractFirstTest {
 
 protected static final Logger LOG = Logger.getLogger(SuperlogWatchgdogTest.class);
     

@@ -26,7 +26,6 @@ package ru.taximaxim.dbreplicator2;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -35,19 +34,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
+import ru.taximaxim.dbreplicator2.abstracts.AbstractFirstTest;
 import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.model.RunnerService;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
-import ru.taximaxim.dbreplicator2.el.ErrorsLog;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
 import ru.taximaxim.dbreplicator2.utils.Core;
 
@@ -62,46 +58,30 @@ import ru.taximaxim.dbreplicator2.utils.Core;
  * @author volodin_aa
  *
  */
-public class H2CopyTableDataTest {
+public class H2CopyTableDataTest extends AbstractFirstTest {
     protected static final Logger LOG = Logger.getLogger(H2CopyTableDataTest.class);
     // Задержка между циклами репликации
     private static final int REPLICATION_DELAY = 2000;
     
-    protected static SessionFactory sessionFactory;
-    protected static Session session;
-    protected static ConnectionFactory connectionFactory;
-    protected static Connection conn = null;
-    protected static Connection connDest = null;
-    protected static Runnable worker = null;
-    protected static Runnable worker2 = null;
-    protected static Runnable errorsCountWatchdogWorker = null;
-    protected static ErrorsLog errorsLog; 
-    
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        sessionFactory = Core.getSessionFactory();
-        session = sessionFactory.openSession();
-        connectionFactory = Core.getConnectionFactory();
-        errorsLog = Core.getErrorsLog();
-        initialization();
+        setUp(null, null, "importRep2.sql", "importSource.sql", "importDest.sql"); 
+        initRunners();
     }
 
     @AfterClass
     public static void setUpAfterClass() throws Exception {
-        if(conn!=null)
-            conn.close();
-        if(connDest!=null)
-            connDest.close();
-        if(session!=null)
-            session.close();
-        Core.connectionFactoryClose();
-        Core.sessionFactoryClose();
-        Core.threadPoolClose();
-        Core.statsServiceClose();
-        Core.tasksPoolClose();
-        Core.taskSettingsServiceClose(); 
-        Core.configurationClose();
-        errorsLog.close();
+        close();
+    }
+    
+    /**
+     * Инициализация раннеров
+     */
+    public static void initRunners() {
+        RunnerService runnerService = new RunnerService(sessionFactory);
+
+        worker = new WorkerThread(runnerService.getRunner(1));
+        errorsCountWatchdogWorker = new WorkerThread(runnerService.getRunner(7));
     }
     
     /**
@@ -113,7 +93,6 @@ public class H2CopyTableDataTest {
      */
     @Test
     public void testRep2TablesClearing() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
-
         Helper.executeSqlFromFile(conn, "importSourceData.sql");
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
@@ -140,7 +119,6 @@ public class H2CopyTableDataTest {
         Helper.InfoList(listDest);
         LOG.info(">======Inception======<");
 
-        
         int count = Helper.InfoCount(conn,  "rep2_superlog");
         assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }
@@ -161,10 +139,9 @@ public class H2CopyTableDataTest {
         Thread.sleep(REPLICATION_DELAY);
         Helper.InfoSelect(conn, "rep2_errors_log");
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table4");
-        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table4");
-        
+        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table4");   
         Helper.AssertEqualsNull(listSource, listDest);
-//
+
         listSource = Helper.InfoTest(conn, "t_table5");
         listDest   = Helper.InfoTest(connDest, "t_table5");
         Helper.AssertEqualsNull(listSource, listDest);
@@ -356,14 +333,8 @@ public class H2CopyTableDataTest {
         Helper.executeSqlFromFile(conn, "sql_insert.sql");  
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
-        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
-        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
-        Helper.AssertEquals(listSource, listDest);
-        
-        listSource = Helper.InfoTest(conn, "t_table1");
-        listDest   = Helper.InfoTest(connDest, "t_table1");
-        Helper.AssertEquals(listSource, listDest);
-        
+      
+        verifyTables();
 
         int count = Helper.InfoCount(conn,  "rep2_superlog");
         assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
@@ -384,14 +355,8 @@ public class H2CopyTableDataTest {
         Helper.executeSqlFromFile(conn, "sql_update.sql");   
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
-        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
-        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
-        Helper.AssertEquals(listSource, listDest);
         
-        listSource = Helper.InfoTest(conn, "t_table1");
-        listDest   = Helper.InfoTest(connDest, "t_table1");
-        Helper.AssertEquals(listSource, listDest);
-        
+        verifyTables();
 
         int count = Helper.InfoCount(conn,  "rep2_superlog");
         assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
@@ -412,14 +377,8 @@ public class H2CopyTableDataTest {
         Helper.executeSqlFromFile(conn, "sql_delete.sql");   
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
-        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
-        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
-        Helper.AssertEquals(listSource, listDest);
-
-        listSource = Helper.InfoTest(conn, "t_table1");
-        listDest   = Helper.InfoTest(connDest, "t_table1");
-        Helper.AssertEquals(listSource, listDest);
         
+        verifyTables();
 
         int count = Helper.InfoCount(conn,  "rep2_superlog");
         assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
@@ -440,14 +399,8 @@ public class H2CopyTableDataTest {
         Helper.executeSqlFromFile(conn, "sql_update.sql");   
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
-        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
-        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
-        Helper.AssertEquals(listSource, listDest);
         
-        listSource = Helper.InfoTest(conn, "t_table1");
-        listDest   = Helper.InfoTest(connDest, "t_table1");
-        Helper.AssertEquals(listSource, listDest);
-        
+        verifyTables();
 
         int count = Helper.InfoCount(conn,  "rep2_superlog");
         assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
@@ -469,19 +422,7 @@ public class H2CopyTableDataTest {
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
         
-        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
-        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
-        
-        Helper.InfoList(listSource);
-        
-        Helper.InfoList(listDest);
-        
-        Helper.AssertEquals(listSource, listDest);
-
-        listSource = Helper.InfoTest(conn, "t_table1");
-        listDest   = Helper.InfoTest(connDest, "t_table1");
-        Helper.AssertEquals(listSource, listDest);
-        
+        verifyTables();        
 
         int count = Helper.InfoCount(conn,  "rep2_superlog");
         assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
@@ -544,28 +485,14 @@ public class H2CopyTableDataTest {
         
         checkErrorInRunner(17);
     }
-    
-    /**
-     * Инициализация
-     */
-    public static void initialization() throws ClassNotFoundException, SQLException, IOException{
-        LOG.info("initialization");
-        String source = "source";
-        conn = connectionFactory.getConnection(source);
+ 
+    protected void verifyTables() throws SQLException, InterruptedException {
+        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
+        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
+        Helper.AssertEquals(listSource, listDest);
         
-        Helper.executeSqlFromFile(conn, "importRep2.sql");
-        Helper.executeSqlFromFile(conn, "importSource.sql");
-        
-        String dest = "dest";
-        connDest = connectionFactory.getConnection(dest);
-        Helper.executeSqlFromFile(connDest, "importRep2.sql");
-        Helper.executeSqlFromFile(connDest, "importDest.sql");
-        
-        RunnerService runnerService = new RunnerService(sessionFactory);
-
-        worker = new WorkerThread(runnerService.getRunner(1));
-        errorsCountWatchdogWorker = new WorkerThread(runnerService.getRunner(7));
+        listSource = Helper.InfoTest(conn, "t_table1");
+        listDest   = Helper.InfoTest(connDest, "t_table1");
+        Helper.AssertEquals(listSource, listDest);
     }
-    
-    
 }
