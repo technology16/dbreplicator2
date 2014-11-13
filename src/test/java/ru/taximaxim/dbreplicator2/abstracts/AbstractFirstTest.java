@@ -120,6 +120,5 @@ public abstract class AbstractFirstTest {
         Helper.executeSqlFromFile(connDest, sqlDest);
     }
 
-    
 }
 
