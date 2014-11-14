@@ -42,7 +42,7 @@ import ru.taximaxim.dbreplicator2.utils.Core;
  * @author petrov_im
  *
  */
-public class AbstractSettingTest {
+public abstract class AbstractSettingTest {
     
     protected static final Logger LOG = Logger.getLogger(AbstractSettingTest.class);
 
@@ -67,6 +67,7 @@ public class AbstractSettingTest {
             Helper.executeSqlFromFile(conn, sqlSourse);
         if (sqlDest != null)
             Helper.executeSqlFromFile(conn, sqlDest);
+        
     }
 
     /**
