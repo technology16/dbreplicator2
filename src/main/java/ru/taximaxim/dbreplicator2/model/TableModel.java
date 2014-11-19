@@ -51,7 +51,7 @@ import org.hibernate.annotations.FetchMode;
  */
 @Entity
 @Table(name = "tables")
-public class TableModel {
+public class TableModel implements Cloneable{
 
     /**
      * Идентификатор таблицы
@@ -200,4 +200,21 @@ public class TableModel {
     public void setRequiredColumnsTable(List<RequiredColumnsTableModel> requiredColumnsTable) {
         this.requiredColumnsTable = requiredColumnsTable;
     }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    public Object clone() {
+        TableModel clone;
+        try {
+            clone = (TableModel) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new InternalError();
+        }
+        
+        return clone;
+    }
+    
+    
 }
