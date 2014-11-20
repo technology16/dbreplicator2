@@ -227,23 +227,19 @@ public class GenericAlgorithm implements Strategy {
      * @return
      */
     protected TableModel getDestTable(StrategyModel data, TableModel sourceTable) {
-        TableModel destTable = getDestTables().get(sourceTable);
+        TableModel destTable = destTables.get(sourceTable);
         if (destTable == null) {
             destTable = sourceTable;
             // Проверяем, есть ли явное сопоставление имен таблиц
             String destTableName = data.getParam("tables." + sourceTable.getName());
             if (destTableName != null) {
-                // Пытаемся найти таблицу в приемнике
-                destTable = data.getRunner().getTarget().getTable(destTableName);
-                if (destTable == null) {
-                    // Создаем копию для таблицы приемника
-                    destTable = (TableModel) sourceTable.clone();
-                    destTable.setName(destTableName);
-                    destTable.setPool(data.getRunner().getTarget());
-                    destTable.setRunners(null);
-                }
+                // Создаем копию для таблицы приемника
+                destTable = (TableModel) sourceTable.clone();
+                destTable.setName(destTableName);
+                destTable.setPool(data.getRunner().getTarget());
+                destTable.setRunners(null);
             }
-            getDestTables().put(sourceTable, destTable);
+            destTables.put(sourceTable, destTable);
         }
         return destTable;
     }
@@ -526,13 +522,6 @@ public class GenericAlgorithm implements Strategy {
                         data.getRunner().getId(), data.getRunner().getDescription(), data.getId()), sqlException);
             }
         }
-    }
-
-    /**
-     * @return the destTables
-     */
-    protected Map<TableModel, TableModel> getDestTables() {
-        return destTables;
     }
 
 }
