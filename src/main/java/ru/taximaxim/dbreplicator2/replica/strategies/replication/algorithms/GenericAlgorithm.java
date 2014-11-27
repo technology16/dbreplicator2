@@ -27,10 +27,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -159,44 +158,44 @@ public class GenericAlgorithm implements Strategy {
     /**
      * Функция репликации вставки записи.
      * 
-     * @param table         - модель таблицы источника
-     * @param sourceResult  - текущая запись из источника.
+     * @param table - модель таблицы источника
+     * @param data  - текущая запись из источника.
      * 
      * @return количество измененых записей
      * 
      * @throws SQLException
      */
     protected int replicateInsertion(TableModel table,
-            ResultSet sourceResult) throws SQLException {
+            Map<String, Object> data) throws SQLException {
         PreparedStatement insertDestStatement = 
                 getDestDataService().getInsertStatement(table);
         // Добавляем данные в целевую таблицу
         Jdbc.fillStatementFromResultSet(insertDestStatement,
-                sourceResult, 
-                new ArrayList<String>(getDestDataService().getAllCols(table)));
+                data, 
+                getDestDataService().getAllCols(table));
         return insertDestStatement.executeUpdate();
     }
 
     /**
      * Функция репликации обновления записи.
      * 
-     * @param table         - модель таблицы источника
-     * @param sourceResult  - текущая запись из источника.
+     * @param table - модель таблицы источника
+     * @param data  - текущая запись из источника.
      * 
      * @return количество измененых записей
      * 
      * @throws SQLException
      */
     protected int replicateUpdation(TableModel table,
-            ResultSet sourceResult) throws SQLException {
+            Map<String, Object> data) throws SQLException {
         // Если Была операция вставки или изменения, то сначала пытаемся обновить запись,
         PreparedStatement updateDestStatement = 
                 getDestDataService().getUpdateStatement(table);
         // Добавляем данные в целевую таблицу
-        List<String> colsForUpdate = new ArrayList<String>(getDestDataService().getDataCols(table));
+        Collection<String> colsForUpdate = getDestDataService().getDataCols(table);
         colsForUpdate.addAll(getDestDataService().getPriCols(table));
         Jdbc.fillStatementFromResultSet(updateDestStatement,
-                sourceResult, colsForUpdate);
+                data, colsForUpdate);
         return updateDestStatement.executeUpdate();
     }
 
@@ -267,6 +266,8 @@ public class GenericAlgorithm implements Strategy {
         selectSourceStatement.setLong(1, getWorkPoolService().getForeign(operationsResult));
         try (ResultSet sourceResult = selectSourceStatement.executeQuery();) {
             if (sourceResult.next()) {
+                Map<String, Object> sourceData = Jdbc.resultSetToMap(sourceResult, getSourceDataService().getAllCols(sourceTable));
+                
                 // Извлекаем данные из приемника
                 PreparedStatement selectDestStatement = 
                         getDestDataService().getSelectStatement(destTable);
@@ -278,7 +279,7 @@ public class GenericAlgorithm implements Strategy {
                         // 1    - запись обновлена
                         // Пробуем обновить запись
                         try {
-                            replicateUpdation(destTable, sourceResult);
+                            replicateUpdation(destTable, sourceData);
                             getWorkPoolService().clearWorkPoolData(operationsResult);
                             getCountSuccess().add(getWorkPoolService().getTable(operationsResult));
                             
@@ -291,7 +292,7 @@ public class GenericAlgorithm implements Strategy {
                                     data.getId(), 
                                     destTable.getName(), 
                                     Jdbc.resultSetToString(sourceResult, 
-                                            new ArrayList<String>(getSourceDataService().getAllCols(sourceTable)))); 
+                                            getSourceDataService().getAllCols(sourceTable))); 
                             if (LOG.isDebugEnabled()) {
                                 LOG.debug(message, e);
                             } else {
@@ -305,7 +306,7 @@ public class GenericAlgorithm implements Strategy {
                     } else {
                         try {
                             // и если такой записи нет, то пытаемся вставить
-                            replicateInsertion(destTable, sourceResult);
+                            replicateInsertion(destTable, sourceData);
                             getWorkPoolService().clearWorkPoolData(operationsResult);
                             getCountSuccess().add(getWorkPoolService().getTable(operationsResult));
                             
@@ -318,7 +319,7 @@ public class GenericAlgorithm implements Strategy {
                                     data.getId(), 
                                     destTable.getName(), 
                                     Jdbc.resultSetToString(sourceResult, 
-                                            new ArrayList<String>(getSourceDataService().getAllCols(sourceTable)))); 
+                                            getSourceDataService().getAllCols(sourceTable))); 
                             if (LOG.isDebugEnabled()) {
                                 LOG.debug(message, e);
                             } else {
@@ -338,7 +339,7 @@ public class GenericAlgorithm implements Strategy {
                             data.getId(), 
                             destTable.getName(), 
                             Jdbc.resultSetToString(sourceResult, 
-                                    new ArrayList<String>(getSourceDataService().getAllCols(sourceTable)))); 
+                                    getSourceDataService().getAllCols(sourceTable))); 
                     if (LOG.isDebugEnabled()) {
                         LOG.debug(message, e);
                     } else {
