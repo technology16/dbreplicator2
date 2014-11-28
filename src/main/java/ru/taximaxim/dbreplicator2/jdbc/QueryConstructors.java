@@ -28,7 +28,7 @@
 package ru.taximaxim.dbreplicator2.jdbc;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 /**
  * @author volodin_aa
@@ -63,7 +63,7 @@ public final class QueryConstructors {
      *            разделитель
      * @return строка из элементов списка, разделенных разделителем delimiter
      */
-    public static String listToString(List<?> list, String delimiter) {
+    public static String listToString(Collection<?> list, String delimiter) {
         StringBuffer result = new StringBuffer();
 
         boolean setComma = false;
@@ -92,7 +92,7 @@ public final class QueryConstructors {
      * @return строка из элементов списка с добавленным postfix в конце и
      *         разделенных разделителем delimiter
      */
-    public static String listToString(List<?> list, String delimiter, String postfix) {
+    public static String listToString(Collection<?> list, String delimiter, String postfix) {
         StringBuffer result = new StringBuffer();
 
         boolean setComma = false;
@@ -109,14 +109,14 @@ public final class QueryConstructors {
     }
 
     /**
-     * Строит список вопрос для передачи экранированых параметров
+     * Строит список вопросов для передачи экранированых параметров
      * 
      * @param colsList
      *            список колонок
-     * @return список вопрос для передачи экранированых параметров
+     * @return список вопросов для передачи экранированых параметров
      */
-    public static List<String> questionMarks(List<?> colsList) {
-        List<String> result = new ArrayList<String>();
+    public static Collection<String> questionMarks(Collection<?> colsList) {
+        Collection<String> result = new ArrayList<String>();
         int colsListSize = colsList.size();
         for (int i = 0; i < colsListSize; i++) {
             result.add("?");
@@ -134,7 +134,7 @@ public final class QueryConstructors {
      *            список колонок
      * @return строка запроса для вставки данных
      */
-    public static String constructInsertQuery(String tableName, List<String> colsList) {
+    public static String constructInsertQuery(String tableName, Collection<String> colsList) {
         StringBuffer insertQuery = new StringBuffer().append(INSERT_INTO)
                 .append(tableName).append("(").append(listToString(colsList, ", "))
                 .append(VALUES).append(listToString(questionMarks(colsList), ", "))
@@ -156,7 +156,7 @@ public final class QueryConstructors {
      * @return строка запроса вставки из запроса выборки
      */
     public static String constructInsertSelectQuery(String tableName,
-            List<String> colsList) {
+            Collection<String> colsList) {
         StringBuffer insertQuery = new StringBuffer().append(INSERT_INTO)
                 .append(tableName).append("(").append(listToString(colsList, ", "))
                 .append(") ").append(constructSelectQuery(questionMarks(colsList)));
@@ -171,7 +171,7 @@ public final class QueryConstructors {
      *            список колонок для вставки
      * @return строкf запроса на выборку данных
      */
-    public static String constructSelectQuery(List<String> colsList) {
+    public static String constructSelectQuery(Collection<String> colsList) {
         StringBuffer query = new StringBuffer().append(SELECT).append(
                 listToString(colsList, ", "));
 
@@ -187,7 +187,7 @@ public final class QueryConstructors {
      *            список колонок
      * @return строка запроса на выборку данных из таблицы
      */
-    public static String constructSelectQuery(String tableName, List<String> colsList) {
+    public static String constructSelectQuery(String tableName, Collection<String> colsList) {
         StringBuffer query = new StringBuffer(constructSelectQuery(colsList)).append(
                 FROM).append(tableName);
 
@@ -205,8 +205,8 @@ public final class QueryConstructors {
      *            список колонок условия
      * @return строка запроса на выборку данных из таблицы с условием
      */
-    public static String constructSelectQuery(String tableName, List<String> colsList,
-            List<String> whereList) {
+    public static String constructSelectQuery(String tableName, Collection<String> colsList,
+            Collection<String> whereList) {
         StringBuffer query = new StringBuffer(constructSelectQuery(tableName, colsList))
                 .append(WHERE).append(listToString(whereList, AND, "=?"));
 
@@ -221,8 +221,8 @@ public final class QueryConstructors {
      * @param orderByList
      * @return
      */
-    public static String constructSelectQuery(String tableName, List<String> colsList,
-            List<String> whereList, List<String> orderByList) {
+    public static String constructSelectQuery(String tableName, Collection<String> colsList,
+            Collection<String> whereList, Collection<String> orderByList) {
         StringBuffer query = new StringBuffer(constructSelectQuery(tableName, colsList, whereList));
         query.append(ORDER_BY).append(listToString(orderByList, ", "));
 
@@ -240,7 +240,7 @@ public final class QueryConstructors {
      *            условие
      * @return строка запроса на выборку данных из таблицы с условием
      */
-    public static String constructSelectQuery(String tableName, List<String> colsList,
+    public static String constructSelectQuery(String tableName, Collection<String> colsList,
             String where) {
         StringBuffer query = new StringBuffer(constructSelectQuery(tableName, colsList))
                 .append(WHERE).append(where);
@@ -257,7 +257,7 @@ public final class QueryConstructors {
      *            список колонок условия
      * @return
      */
-    public static String constructDeleteQuery(String tableName, List<String> whereList) {
+    public static String constructDeleteQuery(String tableName, Collection<String> whereList) {
         StringBuffer query = new StringBuffer().append(DELETE_FROM).append(tableName)
                 .append(WHERE).append(listToString(whereList, AND, "=?"));
 
@@ -275,8 +275,8 @@ public final class QueryConstructors {
      *            список колонок условия
      * @return строка запроса для обновления данных
      */
-    public static String constructUpdateQuery(String tableName, List<String> colsList,
-            List<String> whereList) {
+    public static String constructUpdateQuery(String tableName, Collection<String> colsList,
+            Collection<String> whereList) {
         StringBuffer insertQuery = new StringBuffer().append(UPDATE).append(tableName)
                 .append(SET).append(listToString(colsList, ", ", "=?"))
                 .append(WHERE).append(listToString(whereList, AND, "=?"));

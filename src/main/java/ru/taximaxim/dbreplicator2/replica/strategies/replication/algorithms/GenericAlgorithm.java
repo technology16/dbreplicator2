@@ -27,6 +27,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -158,42 +159,50 @@ public class GenericAlgorithm implements Strategy {
     /**
      * Функция репликации вставки записи.
      * 
-     * @param table - модель таблицы источника
+     * @param destTable - модель таблицы источника
      * @param data  - текущая запись из источника.
      * 
      * @return количество измененых записей
      * 
      * @throws SQLException
      */
-    protected int replicateInsertion(TableModel table,
-            Map<String, Object> data) throws SQLException {
+    protected int replicateInsertion(TableModel sourceTable, TableModel destTable,
+            ResultSet data) throws SQLException {
         PreparedStatement insertDestStatement = 
-                getDestDataService().getInsertStatement(table);
+                getDestDataService().getInsertStatement(
+                        destTable, 
+                        getSourceDataService().getAllCols(sourceTable));
         // Добавляем данные в целевую таблицу
         Jdbc.fillStatementFromResultSet(insertDestStatement,
                 data, 
-                getDestDataService().getAllCols(table));
+                getDestDataService().getAllAvaliableCols(destTable, 
+                        getSourceDataService().getAllCols(sourceTable)));
         return insertDestStatement.executeUpdate();
     }
 
     /**
      * Функция репликации обновления записи.
      * 
-     * @param table - модель таблицы источника
+     * @param destTable - модель таблицы источника
      * @param data  - текущая запись из источника.
      * 
      * @return количество измененых записей
      * 
      * @throws SQLException
      */
-    protected int replicateUpdation(TableModel table,
-            Map<String, Object> data) throws SQLException {
+    protected int replicateUpdation(TableModel sourceTable, TableModel destTable,
+            ResultSet data) throws SQLException {
         // Если Была операция вставки или изменения, то сначала пытаемся обновить запись,
         PreparedStatement updateDestStatement = 
-                getDestDataService().getUpdateStatement(table);
+                getDestDataService().getUpdateStatement(
+                        destTable, 
+                        getSourceDataService().getAllCols(sourceTable));
         // Добавляем данные в целевую таблицу
-        Collection<String> colsForUpdate = getDestDataService().getDataCols(table);
-        colsForUpdate.addAll(getDestDataService().getPriCols(table));
+        Collection<String> colsForUpdate = 
+                new ArrayList<String>(
+                        getDestDataService().getAvaliableDataCols(destTable, 
+                                getSourceDataService().getAllCols(sourceTable)));
+        colsForUpdate.addAll(getDestDataService().getPriCols(destTable));
         Jdbc.fillStatementFromResultSet(updateDestStatement,
                 data, colsForUpdate);
         return updateDestStatement.executeUpdate();
@@ -262,15 +271,16 @@ public class GenericAlgorithm implements Strategy {
         
         // Извлекаем данные из исходной таблицы
         PreparedStatement selectSourceStatement = 
-                getSourceDataService().getSelectStatement(sourceTable);
+                getSourceDataService().getSelectStatement(
+                        sourceTable, 
+                        getDestDataService().getAllCols(destTable));
         selectSourceStatement.setLong(1, getWorkPoolService().getForeign(operationsResult));
         try (ResultSet sourceResult = selectSourceStatement.executeQuery();) {
             if (sourceResult.next()) {
-                Map<String, Object> sourceData = Jdbc.resultSetToMap(sourceResult, getSourceDataService().getAllCols(sourceTable));
-                
                 // Извлекаем данные из приемника
                 PreparedStatement selectDestStatement = 
-                        getDestDataService().getSelectStatement(destTable);
+                        getDestDataService().getSelectStatement(
+                                destTable, getSourceDataService().getAllCols(sourceTable));
                 selectDestStatement.setLong(1, getWorkPoolService().getForeign(operationsResult));
                 try (ResultSet destResult = selectDestStatement.executeQuery();) {
                     if (destResult.next()) {
@@ -279,7 +289,7 @@ public class GenericAlgorithm implements Strategy {
                         // 1    - запись обновлена
                         // Пробуем обновить запись
                         try {
-                            replicateUpdation(destTable, sourceData);
+                            replicateUpdation(sourceTable, destTable, sourceResult);
                             getWorkPoolService().clearWorkPoolData(operationsResult);
                             getCountSuccess().add(getWorkPoolService().getTable(operationsResult));
                             
@@ -306,7 +316,7 @@ public class GenericAlgorithm implements Strategy {
                     } else {
                         try {
                             // и если такой записи нет, то пытаемся вставить
-                            replicateInsertion(destTable, sourceData);
+                            replicateInsertion(sourceTable, destTable, sourceResult);
                             getWorkPoolService().clearWorkPoolData(operationsResult);
                             getCountSuccess().add(getWorkPoolService().getTable(operationsResult));
                             

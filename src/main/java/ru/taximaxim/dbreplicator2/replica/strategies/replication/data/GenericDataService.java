@@ -26,9 +26,9 @@ package ru.taximaxim.dbreplicator2.replica.strategies.replication.data;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -61,6 +61,8 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
     private Map<TableModel, PreparedStatement> insertStatements = new HashMap<TableModel, PreparedStatement>();
 
     private Map<TableModel, Set<String>> priCols = new HashMap<TableModel, Set<String>>();
+    private Map<TableModel, Set<String>> allAvaliableCols = new HashMap<TableModel, Set<String>>();
+    private Map<TableModel, Set<String>> avaliableDataCols = new HashMap<TableModel, Set<String>>();
     private Map<TableModel, Set<String>> allCols = new HashMap<TableModel, Set<String>>();
     private Map<TableModel, Set<String>> dataCols = new HashMap<TableModel, Set<String>>();
     private Map<TableModel, Set<String>> identityCols = new HashMap<TableModel, Set<String>>();
@@ -82,7 +84,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
         if (statement == null) {
             statement = getConnection().prepareStatement(QueryConstructors
                     .constructDeleteQuery(table.getName(),
-                            new ArrayList<String>(getPriCols(table))));
+                            getPriCols(table)));
             getDeleteStatements().put(table, statement);
         }
 
@@ -125,13 +127,13 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * @see ru.taximaxim.dbreplicator2.replica.DataService2#getSelectStatement(ru.taximaxim.dbreplicator2.model.TableModel)
      */
     @Override
-    public PreparedStatement getSelectStatement(TableModel table) throws SQLException {
+    public PreparedStatement getSelectStatement(TableModel table, Collection<String> avaliableCals) throws SQLException {
         PreparedStatement statement = getSelectStatements().get(table);
         if (statement == null) {
             statement = getConnection().prepareStatement(QueryConstructors
                     .constructSelectQuery(table.getName(),
-                            new ArrayList<String>(getAllCols(table)),
-                                    new ArrayList<String>(getPriCols(table))));
+                            getAllAvaliableCols(table, avaliableCals),
+                            getPriCols(table)));
 
             getSelectStatements().put(table, statement);
         }
@@ -143,13 +145,13 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * @see ru.taximaxim.dbreplicator2.replica.DataService2#getUpdateStatement(ru.taximaxim.dbreplicator2.model.TableModel)
      */
     @Override
-    public PreparedStatement getUpdateStatement(TableModel table) throws SQLException {
+    public PreparedStatement getUpdateStatement(TableModel table, Collection<String> avaliableCals) throws SQLException {
         PreparedStatement statement = getUpdateStatements().get(table);
         if (statement == null) {
             statement = getConnection().prepareStatement(QueryConstructors
                     .constructUpdateQuery(table.getName(),
-                            new ArrayList<String>(getDataCols(table)),
-                                    new ArrayList<String>(getPriCols(table))));
+                            getAvaliableDataCols(table, avaliableCals),
+                            getPriCols(table)));
 
             getUpdateStatements().put(table, statement);
         }
@@ -161,11 +163,11 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * @see ru.taximaxim.dbreplicator2.replica.DataService2#getInsertStatement(ru.taximaxim.dbreplicator2.model.TableModel)
      */
     @Override
-    public PreparedStatement getInsertStatement(TableModel table) throws SQLException {
+    public PreparedStatement getInsertStatement(TableModel table, Collection<String> avaliableCals) throws SQLException {
         PreparedStatement statement = getInsertStatements().get(table);
         if (statement == null) {
             String insertQuery = QueryConstructors.constructInsertQuery(table.getName(), 
-                    new ArrayList<String>(getAllCols(table)));
+                    getAllAvaliableCols(table, avaliableCals));
             statement = getConnection().prepareStatement(insertQuery);
 
             getInsertStatements().put(table, statement);
@@ -196,7 +198,6 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
     /**
      * Кешированное получение списка всех колонок
      * 
-     * @param connection
      * @param table.getName()
      * @return
      * @throws SQLException
@@ -221,6 +222,28 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
 
         return cols;
     }
+
+    /**
+     * Кешированное получение списка всех доступных колонок
+     * 
+     * @param table.getName()
+     * @return
+     * @throws SQLException
+     */
+    public Set<String> getAllAvaliableCols(TableModel table, Collection<String> avaliableCals)
+            throws SQLException {
+        Set<String> cols = allAvaliableCols.get(table);
+        if (cols == null) {
+            cols = new LinkedHashSet<String>(getAllCols(table));
+            
+            // Оставляем только доступные колонки
+            cols.retainAll(avaliableCals);
+            
+            allAvaliableCols.put(table, cols);
+        }
+
+        return cols;
+    }
     
     /**
      * Кешированное получение списка колонок с данными
@@ -234,10 +257,31 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
             throws SQLException {
         Set<String> cols = dataCols.get(table);
         if (cols == null) {
-            cols = new HashSet<String>(getAllCols(table));
+            cols = new LinkedHashSet<String>(getAllCols(table));
             cols.removeAll(getPriCols(table));
 
             dataCols.put(table, cols);
+        }
+
+        return cols;
+    }
+    
+    /**
+     * Кешированное получение списка доступных колонок с данными
+     * 
+     * @param connection
+     * @param table.getName()
+     * @return
+     * @throws SQLException
+     */
+    public Set<String> getAvaliableDataCols(TableModel table, Collection<String> avaliableCals)
+            throws SQLException {
+        Set<String> cols = avaliableDataCols.get(table);
+        if (cols == null) {
+            cols = new LinkedHashSet<String>(getDataCols(table));
+            
+            // Оставляем только доступные колонки
+            cols.retainAll(avaliableCals);
         }
 
         return cols;
@@ -272,7 +316,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
     public Set<String> getIgnoredCols(TableModel table) throws SQLException {
         Set<String> cols = ignoredCols.get(table);
         if (cols == null) {
-            cols = new HashSet<String>();
+            cols = new LinkedHashSet<String>();
             for (IgnoreColumnsTableModel ignoredColumn: table.getIgnoreColumnsTable()) {
                 cols.add(ignoredColumn.getColumnName().toUpperCase());
             }
@@ -293,7 +337,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
     public Set<String> getRequiredCols(TableModel table) throws SQLException {
         Set<String> cols = requiredCols.get(table);
         if (cols == null) {
-            cols = new HashSet<String>();
+            cols = new LinkedHashSet<String>();
             for (RequiredColumnsTableModel requiredColumn: table.getRequiredColumnsTable()) {
                 cols.add(requiredColumn.getColumnName().toUpperCase());
             }
@@ -302,6 +346,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
 
         return cols;
     }
+    
     /**
      * Устанавливает сессионную переменную с именем текущей подписки или
      * публикации
