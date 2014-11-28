@@ -59,7 +59,7 @@ public interface DataService {
      * @return the selectSourceStatements
      * @throws SQLException
      */
-    PreparedStatement getSelectStatement(TableModel table, Collection<String> avaliableCals)
+    PreparedStatement getSelectStatement(TableModel table)
             throws SQLException;
 
     /**

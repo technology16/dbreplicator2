@@ -151,14 +151,12 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
         
         // Извлекаем данные из исходной таблицы
         PreparedStatement selectSourceStatement = getSourceDataService()
-                .getSelectStatement(sourceTable,
-                        getDestDataService().getAllCols(destTable));
+                .getSelectStatement(sourceTable);
         selectSourceStatement.setLong(1, getWorkPoolService()
                 .getForeign(operationsResult));
 
         PreparedStatement selectTargetStatement = getDestDataService()
-                .getSelectStatement(destTable,
-                        getSourceDataService().getAllCols(sourceTable));
+                .getSelectStatement(destTable);
 
         try (ResultSet sourceResult = selectSourceStatement.executeQuery();) {
             StringBuffer rowDumpHead = new StringBuffer(String.format("Ошибка в целостности реплицированных данных [%s => %s]\n",

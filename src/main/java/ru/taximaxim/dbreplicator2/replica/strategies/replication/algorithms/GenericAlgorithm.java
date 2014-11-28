@@ -272,15 +272,14 @@ public class GenericAlgorithm implements Strategy {
         // Извлекаем данные из исходной таблицы
         PreparedStatement selectSourceStatement = 
                 getSourceDataService().getSelectStatement(
-                        sourceTable, 
-                        getDestDataService().getAllCols(destTable));
+                        sourceTable);
         selectSourceStatement.setLong(1, getWorkPoolService().getForeign(operationsResult));
         try (ResultSet sourceResult = selectSourceStatement.executeQuery();) {
             if (sourceResult.next()) {
                 // Извлекаем данные из приемника
                 PreparedStatement selectDestStatement = 
                         getDestDataService().getSelectStatement(
-                                destTable, getSourceDataService().getAllCols(sourceTable));
+                                destTable);
                 selectDestStatement.setLong(1, getWorkPoolService().getForeign(operationsResult));
                 try (ResultSet destResult = selectDestStatement.executeQuery();) {
                     if (destResult.next()) {

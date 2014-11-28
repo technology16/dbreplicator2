@@ -127,12 +127,12 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * @see ru.taximaxim.dbreplicator2.replica.DataService2#getSelectStatement(ru.taximaxim.dbreplicator2.model.TableModel)
      */
     @Override
-    public PreparedStatement getSelectStatement(TableModel table, Collection<String> avaliableCals) throws SQLException {
+    public PreparedStatement getSelectStatement(TableModel table) throws SQLException {
         PreparedStatement statement = getSelectStatements().get(table);
         if (statement == null) {
             statement = getConnection().prepareStatement(QueryConstructors
                     .constructSelectQuery(table.getName(),
-                            getAllAvaliableCols(table, avaliableCals),
+                            getAllCols(table),
                             getPriCols(table)));
 
             getSelectStatements().put(table, statement);
