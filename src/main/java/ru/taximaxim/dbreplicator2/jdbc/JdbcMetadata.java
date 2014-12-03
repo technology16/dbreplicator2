@@ -35,7 +35,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -71,7 +71,7 @@ public final class JdbcMetadata {
     public static Set<String> getColumns(Connection connection, String tableName)
             throws SQLException {
         // Получаем список колонок
-        Set<String> colsList = new HashSet<String>();
+        Set<String> colsList = new LinkedHashSet<String>();
         DatabaseMetaData metaData = connection.getMetaData();
         try (ResultSet colsResultSet = metaData.getColumns(null, getSchemaName(tableName), getTableName(tableName), null);) {
             while (colsResultSet.next()) {
@@ -95,7 +95,7 @@ public final class JdbcMetadata {
     public static Set<String> getColumns(ResultSet result)
             throws SQLException {
         // Получаем список колонок
-        Set<String> colsList = new HashSet<String>();
+        Set<String> colsList = new LinkedHashSet<String>();
         ResultSetMetaData metaData = result.getMetaData();
         int columnCount = metaData.getColumnCount();
         for (int i = 1; i <= columnCount; i++) {
@@ -118,7 +118,7 @@ public final class JdbcMetadata {
     public static Set<String> getPrimaryColumns(Connection connection,
             String tableName) throws SQLException {
         // Получаем список ключевых колонок
-        Set<String> primaryKeyColsList = new HashSet<String>();
+        Set<String> primaryKeyColsList = new LinkedHashSet<String>();
         DatabaseMetaData metaData = connection.getMetaData();
         try (ResultSet primaryKeysResultSet = metaData.getPrimaryKeys(null, getSchemaName(tableName), getTableName(tableName));) {
             while (primaryKeysResultSet.next()) {
@@ -169,7 +169,7 @@ public final class JdbcMetadata {
     public static Set<String> getIdentityColumns(Connection connection,
             String tableName) throws SQLException {
         // Получаем список колонок
-        Set<String> colsList = new HashSet<String>();
+        Set<String> colsList = new LinkedHashSet<String>();
         DatabaseMetaData metaData = connection.getMetaData();
         getSchemaName(tableName);
         try (ResultSet colsResultSet = metaData.getColumns(null, getSchemaName(tableName), getTableName(tableName), null);) {
@@ -197,7 +197,7 @@ public final class JdbcMetadata {
     public static Set<String> getNullableColumns(Connection connection,
             String tableName) throws SQLException {
         // Получаем список колонок
-        Set<String> cols = new HashSet<String>();
+        Set<String> cols = new LinkedHashSet<String>();
         DatabaseMetaData metaData = connection.getMetaData();
         try (ResultSet colsResultSet = metaData.getColumns(null, getSchemaName(tableName), getTableName(tableName), null);) {
             while (colsResultSet.next()) {

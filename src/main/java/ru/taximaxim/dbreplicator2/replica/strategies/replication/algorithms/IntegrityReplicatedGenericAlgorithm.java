@@ -146,20 +146,24 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
     @Override
     protected boolean replicateOperation(StrategyModel data, ResultSet operationsResult) throws SQLException {
         boolean result = true;
-        TableModel table = data.getRunner().getSource().getTable(getWorkPoolService().getTable(operationsResult));
+        TableModel sourceTable = data.getRunner().getSource().getTable(getWorkPoolService().getTable(operationsResult));
+        TableModel destTable = getDestTable(data, sourceTable);
         
         // Извлекаем данные из исходной таблицы
-        PreparedStatement selectSourceStatement = getSourceDataService().getSelectStatement(table);
-        selectSourceStatement.setLong(1, getWorkPoolService().getForeign(operationsResult));
-        
-        PreparedStatement selectTargetStatement = getDestDataService().getSelectStatement(table);
-        
+        PreparedStatement selectSourceStatement = getSourceDataService()
+                .getSelectStatement(sourceTable);
+        selectSourceStatement.setLong(1, getWorkPoolService()
+                .getForeign(operationsResult));
+
+        PreparedStatement selectTargetStatement = getDestDataService()
+                .getSelectStatement(destTable);
+
         try (ResultSet sourceResult = selectSourceStatement.executeQuery();) {
             StringBuffer rowDumpHead = new StringBuffer(String.format("Ошибка в целостности реплицированных данных [%s => %s]\n",
                     data.getRunner().getSource().getPoolId(),
                     data.getRunner().getTarget().getPoolId()));
-            Map<String, Integer> colsSource = new HashMap<String, Integer>(getSourceDataService().getAllColsTypes(table));
-            List<String> priCols = new ArrayList<String>(getSourceDataService().getPriCols(table));
+            Map<String, Integer> colsSource = new HashMap<String, Integer>(getSourceDataService().getAllColsTypes(sourceTable));
+            List<String> priCols = new ArrayList<String>(getSourceDataService().getPriCols(sourceTable));
             if(sourceResult.next()) {
                 selectTargetStatement.setLong(1, getWorkPoolService().getForeign(operationsResult));
                 
@@ -176,8 +180,9 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
                         }
                         if(errorRows) {
                             result = false;
-                            rowDumpHead.insert(0, String.format("Ошибка в таблице %s, данные не равны в строке %s: ", 
-                                    table.getName(),
+                            rowDumpHead.insert(0, String.format("Ошибка в таблицах %s -> %s, данные не равны в строке %s: ", 
+                                    sourceTable.getName(),
+                                    destTable.getName(),
                                     Jdbc.resultSetToString(sourceResult, priCols)));
                             getWorkPoolService().trackError(rowDumpHead.toString(), new SQLException(), operationsResult);
  
@@ -187,7 +192,7 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
                     } else {
                         rowDumpHead.append(String.format(
                             "Ошибка в таблице %s, отсутствует запись приемнике %s",
-                            table.getName(),
+                            destTable.getName(),
                             Jdbc.resultSetToString(sourceResult, priCols)));
                         getWorkPoolService().trackError(rowDumpHead.toString(), new SQLException(), operationsResult);
                         result = false;
@@ -199,7 +204,7 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
                     if(targetResult.next()) {
                         rowDumpHead.append(String.format(
                                 "Ошибка в таблице %s, присутствует удаленная запись приемнике %s",
-                                table.getName(),
+                                destTable.getName(),
                                 Jdbc.resultSetToString(targetResult, priCols)));
                             getWorkPoolService().trackError(rowDumpHead.toString(), new SQLException(), operationsResult);
                             result = false;

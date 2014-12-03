@@ -29,8 +29,8 @@ package ru.taximaxim.dbreplicator2.jdbc;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -62,7 +62,7 @@ public final class Jdbc {
      * @throws SQLException
      */
     public static void fillStatementFromResultSet(PreparedStatement statement,
-            ResultSet data, List<String> columnsList) throws SQLException {
+            ResultSet data, Collection<String> columnsList) throws SQLException {
         LOG.debug(statement);
 
         int columnIndex = 1;
@@ -83,7 +83,7 @@ public final class Jdbc {
      * @throws SQLException
      */
     public static String resultSetToString(ResultSet data, 
-            List<String> columnsList) throws SQLException {
+            Collection<String> columnsList) throws SQLException {
         StringBuffer str  = new StringBuffer();
         for (String columnName : columnsList) {
             str.append("[ col ").append(columnName).append(" = ")
@@ -105,7 +105,7 @@ public final class Jdbc {
      * @throws SQLException
      */
     public static void fillStatementFromResultSet(PreparedStatement statement,
-            Map<String, Object> data, List<String> columnsList) throws SQLException {
+            Map<String, Object> data, Collection<String> columnsList) throws SQLException {
         LOG.debug(statement);
 
         int columnIndex = 1;
@@ -127,7 +127,7 @@ public final class Jdbc {
      * @throws SQLException
      */
     public static Map<String, Object> resultSetToMap(ResultSet data,
-            List<String> columnsList) throws SQLException {
+            Collection<String> columnsList) throws SQLException {
         Map<String, Object> result = new HashMap<String, Object>();
 
         for (String columnName : columnsList) {

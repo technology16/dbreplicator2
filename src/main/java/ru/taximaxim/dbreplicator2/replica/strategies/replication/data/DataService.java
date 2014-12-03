@@ -29,6 +29,7 @@ package ru.taximaxim.dbreplicator2.replica.strategies.replication.data;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.Set;
 
 import ru.taximaxim.dbreplicator2.model.TableModel;
@@ -68,7 +69,7 @@ public interface DataService {
      * @return the updateDestStatements
      * @throws SQLException
      */
-    PreparedStatement getUpdateStatement(TableModel table)
+    PreparedStatement getUpdateStatement(TableModel table, Collection<String> avaliableCals)
             throws SQLException;
 
     /**
@@ -78,39 +79,54 @@ public interface DataService {
      * @return the insertDestStatements
      * @throws SQLException
      */
-    PreparedStatement getInsertStatement(TableModel table)
+    PreparedStatement getInsertStatement(TableModel table, Collection<String> avaliableCals)
             throws SQLException;
     
     /**
      * Кешированное получение списка ключевых колонок
      * 
-     * @param connection
      * @param table.getName()
      * @return
      * @throws SQLException
      */
     Set<String> getPriCols(TableModel table) throws SQLException;
 
-
     /**
      * Кешированное получение списка всех колонок
      * 
-     * @param connection
      * @param table.getName()
      * @return
      * @throws SQLException
      */
     Set<String> getAllCols(TableModel table) throws SQLException;
+
+    /**
+     * Кешированное получение списка всех доступных колонок
+     * 
+     * @param table.getName()
+     * @return
+     * @throws SQLException
+     */
+    Set<String> getAllAvaliableCols(TableModel table, Collection<String> avaliableCals) throws SQLException;
     
     /**
      * Кешированное получение списка колонок с данными
      * 
-     * @param connection
      * @param table.getName()
      * @return
      * @throws SQLException
      */
     Set<String> getDataCols(TableModel table)
+            throws SQLException;    
+    
+    /**
+     * Кешированное получение списка всех доступных колонок с данными
+     * 
+     * @param table.getName()
+     * @return
+     * @throws SQLException
+     */
+    Set<String> getAvaliableDataCols(TableModel table, Collection<String> avaliableCals)
             throws SQLException;    
     
     /**
@@ -126,7 +142,6 @@ public interface DataService {
     /**
      * Кешированное получение списка игнорируемых колонок
      * 
-     * @param connection
      * @param table.getName()
      * @return
      * @throws SQLException
@@ -136,7 +151,6 @@ public interface DataService {
     /**
      * Кешированное получение списка реплицируеммых колонок
      * 
-     * @param connection
      * @param table.getName()
      * @return
      * @throws SQLException

@@ -28,8 +28,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
@@ -72,6 +75,8 @@ public class GenericAlgorithm implements Strategy {
 
     private Count countSuccess;
     private Count countError;
+    
+    private Map<TableModel, TableModel> destTables = new HashMap<TableModel, TableModel>();
 
     /**
      * Конструктор нпо умолчанию
@@ -154,44 +159,52 @@ public class GenericAlgorithm implements Strategy {
     /**
      * Функция репликации вставки записи.
      * 
-     * @param table         - модель таблицы источника
-     * @param sourceResult  - текущая запись из источника.
+     * @param destTable - модель таблицы источника
+     * @param data  - текущая запись из источника.
      * 
      * @return количество измененых записей
      * 
      * @throws SQLException
      */
-    protected int replicateInsertion(TableModel table,
-            ResultSet sourceResult) throws SQLException {
+    protected int replicateInsertion(TableModel sourceTable, TableModel destTable,
+            ResultSet data) throws SQLException {
         PreparedStatement insertDestStatement = 
-                getDestDataService().getInsertStatement(table);
+                getDestDataService().getInsertStatement(
+                        destTable, 
+                        getSourceDataService().getAllCols(sourceTable));
         // Добавляем данные в целевую таблицу
         Jdbc.fillStatementFromResultSet(insertDestStatement,
-                sourceResult, 
-                new ArrayList<String>(getDestDataService().getAllCols(table)));
+                data, 
+                getDestDataService().getAllAvaliableCols(destTable, 
+                        getSourceDataService().getAllCols(sourceTable)));
         return insertDestStatement.executeUpdate();
     }
 
     /**
      * Функция репликации обновления записи.
      * 
-     * @param table         - модель таблицы источника
-     * @param sourceResult  - текущая запись из источника.
+     * @param destTable - модель таблицы источника
+     * @param data  - текущая запись из источника.
      * 
      * @return количество измененых записей
      * 
      * @throws SQLException
      */
-    protected int replicateUpdation(TableModel table,
-            ResultSet sourceResult) throws SQLException {
+    protected int replicateUpdation(TableModel sourceTable, TableModel destTable,
+            ResultSet data) throws SQLException {
         // Если Была операция вставки или изменения, то сначала пытаемся обновить запись,
         PreparedStatement updateDestStatement = 
-                getDestDataService().getUpdateStatement(table);
+                getDestDataService().getUpdateStatement(
+                        destTable, 
+                        getSourceDataService().getAllCols(sourceTable));
         // Добавляем данные в целевую таблицу
-        List<String> colsForUpdate = new ArrayList<String>(getDestDataService().getDataCols(table));
-        colsForUpdate.addAll(getDestDataService().getPriCols(table));
+        Collection<String> colsForUpdate = 
+                new ArrayList<String>(
+                        getDestDataService().getAvaliableDataCols(destTable, 
+                                getSourceDataService().getAllCols(sourceTable)));
+        colsForUpdate.addAll(getDestDataService().getPriCols(destTable));
         Jdbc.fillStatementFromResultSet(updateDestStatement,
-                sourceResult, colsForUpdate);
+                data, colsForUpdate);
         return updateDestStatement.executeUpdate();
     }
 
@@ -215,6 +228,31 @@ public class GenericAlgorithm implements Strategy {
     }
 
     /**
+     * Получение сопоставленной таблицы в приемке для таблицы источника
+     * 
+     * @param data
+     * @param sourceTable
+     * @return
+     */
+    protected TableModel getDestTable(StrategyModel data, TableModel sourceTable) {
+        TableModel destTable = destTables.get(sourceTable);
+        if (destTable == null) {
+            destTable = sourceTable;
+            // Проверяем, есть ли явное сопоставление имен таблиц
+            String destTableName = data.getParam("tables." + sourceTable.getName());
+            if (destTableName != null) {
+                // Создаем копию для таблицы приемника
+                destTable = (TableModel) sourceTable.clone();
+                destTable.setName(destTableName);
+                destTable.setPool(data.getRunner().getTarget());
+                destTable.setRunners(null);
+            }
+            destTables.put(sourceTable, destTable);
+        }
+        return destTable;
+    }
+
+    /**
      * Функция для репликации данных. Здесь вызываются подфункции репликации 
      * конкретных операций и обрабатываются исключительнык ситуации.
      * 
@@ -227,17 +265,21 @@ public class GenericAlgorithm implements Strategy {
      */
     protected boolean replicateOperation(StrategyModel data, 
             ResultSet operationsResult) throws SQLException{
-        TableModel table = data.getRunner().getSource()
+        TableModel sourceTable = data.getRunner().getSource()
                 .getTable(getWorkPoolService().getTable(operationsResult));
+        TableModel destTable = getDestTable(data, sourceTable);
+        
         // Извлекаем данные из исходной таблицы
         PreparedStatement selectSourceStatement = 
-                getSourceDataService().getSelectStatement(table);
+                getSourceDataService().getSelectStatement(
+                        sourceTable);
         selectSourceStatement.setLong(1, getWorkPoolService().getForeign(operationsResult));
         try (ResultSet sourceResult = selectSourceStatement.executeQuery();) {
             if (sourceResult.next()) {
-                // Извлекаем данные из исходной таблицы
+                // Извлекаем данные из приемника
                 PreparedStatement selectDestStatement = 
-                        getDestDataService().getSelectStatement(table);
+                        getDestDataService().getSelectStatement(
+                                destTable);
                 selectDestStatement.setLong(1, getWorkPoolService().getForeign(operationsResult));
                 try (ResultSet destResult = selectDestStatement.executeQuery();) {
                     if (destResult.next()) {
@@ -246,7 +288,7 @@ public class GenericAlgorithm implements Strategy {
                         // 1    - запись обновлена
                         // Пробуем обновить запись
                         try {
-                            replicateUpdation(table, sourceResult);
+                            replicateUpdation(sourceTable, destTable, sourceResult);
                             getWorkPoolService().clearWorkPoolData(operationsResult);
                             getCountSuccess().add(getWorkPoolService().getTable(operationsResult));
                             
@@ -257,9 +299,9 @@ public class GenericAlgorithm implements Strategy {
                                     data.getRunner().getId(), 
                                     data.getRunner().getDescription(), 
                                     data.getId(), 
-                                    table.getName(), 
+                                    destTable.getName(), 
                                     Jdbc.resultSetToString(sourceResult, 
-                                            new ArrayList<String>(getSourceDataService().getAllCols(table)))); 
+                                            getSourceDataService().getAllCols(sourceTable))); 
                             if (LOG.isDebugEnabled()) {
                                 LOG.debug(message, e);
                             } else {
@@ -273,7 +315,7 @@ public class GenericAlgorithm implements Strategy {
                     } else {
                         try {
                             // и если такой записи нет, то пытаемся вставить
-                            replicateInsertion(table, sourceResult);
+                            replicateInsertion(sourceTable, destTable, sourceResult);
                             getWorkPoolService().clearWorkPoolData(operationsResult);
                             getCountSuccess().add(getWorkPoolService().getTable(operationsResult));
                             
@@ -284,9 +326,9 @@ public class GenericAlgorithm implements Strategy {
                                     data.getRunner().getId(), 
                                     data.getRunner().getDescription(), 
                                     data.getId(), 
-                                    table.getName(), 
+                                    destTable.getName(), 
                                     Jdbc.resultSetToString(sourceResult, 
-                                            new ArrayList<String>(getSourceDataService().getAllCols(table)))); 
+                                            getSourceDataService().getAllCols(sourceTable))); 
                             if (LOG.isDebugEnabled()) {
                                 LOG.debug(message, e);
                             } else {
@@ -304,9 +346,9 @@ public class GenericAlgorithm implements Strategy {
                             data.getRunner().getId(), 
                             data.getRunner().getDescription(), 
                             data.getId(), 
-                            table.getName(), 
+                            destTable.getName(), 
                             Jdbc.resultSetToString(sourceResult, 
-                                    new ArrayList<String>(getSourceDataService().getAllCols(table)))); 
+                                    getSourceDataService().getAllCols(sourceTable))); 
                     if (LOG.isDebugEnabled()) {
                         LOG.debug(message, e);
                     } else {
@@ -321,7 +363,7 @@ public class GenericAlgorithm implements Strategy {
                 // Если запись фактически отсутствует, то
                 // удалем ее в приемнике
                 try {
-                    replicateDeletion(operationsResult, table);
+                    replicateDeletion(operationsResult, destTable);
                     getWorkPoolService().clearWorkPoolData(operationsResult);
                     getCountSuccess().add(getWorkPoolService().getTable(operationsResult));
                     
@@ -332,7 +374,7 @@ public class GenericAlgorithm implements Strategy {
                             data.getRunner().getId(), 
                             data.getRunner().getDescription(), 
                             data.getId(), 
-                            table.getName(), 
+                            destTable.getName(), 
                             String.valueOf(getWorkPoolService().getForeign(operationsResult))); 
                     if (LOG.isDebugEnabled()) {
                         LOG.debug(message, e);
@@ -351,7 +393,7 @@ public class GenericAlgorithm implements Strategy {
                     data.getRunner().getId(), 
                     data.getRunner().getDescription(), 
                     data.getId(), 
-                    table.getName(), 
+                    sourceTable.getName(), 
                     String.valueOf(getWorkPoolService().getForeign(operationsResult))); 
             if (LOG.isDebugEnabled()) {
                 LOG.debug(message, e);
