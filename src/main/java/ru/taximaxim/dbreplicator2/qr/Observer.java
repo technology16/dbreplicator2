@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2013 Technologiya
+ * Copyright (c) 2014 Technologiya
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -21,37 +21,21 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ru.taximaxim.dbreplicator2.replica.strategies.superlog;
-
-import java.sql.SQLException;
-import java.util.Collection;
-
-import ru.taximaxim.dbreplicator2.model.RunnerModel;
-import ru.taximaxim.dbreplicator2.replica.Strategy;
-import ru.taximaxim.dbreplicator2.replica.StrategyException;
-import ru.taximaxim.dbreplicator2.tp.WorkerThread;
+package ru.taximaxim.dbreplicator2.qr;
 
 /**
- * Класс стратегии менеджера записей суперлог таблицы
+ * Интерфейс для обработчика очереди раннеров (наблюдатель)
  * 
- * @author volodin_aa
+ * @author petrov_im
  * 
  */
-public class Manager extends GeneiricManager implements Strategy {
-  
+public interface Observer {
+       
     /**
-     * Конструктор по умолчанию
+     * Метод, запускающийся в наблюдателе при изменении наблюдаемого
+     * 
+     * @throws InterruptedException
      */
-    public Manager() {
-        super();
-    }
-    
-    @Override
-    protected void startRunners(Collection<RunnerModel> runners)  throws StrategyException, SQLException  {
-        // Запускаем обработчики реплик
-        for (RunnerModel runner : runners) {
-            WorkerThread workerThread = new WorkerThread(runner);
-            workerThread.run();
-        }
-    }
+    public abstract void update() throws InterruptedException;
+
 }

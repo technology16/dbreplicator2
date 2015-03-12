@@ -25,26 +25,20 @@ package ru.taximaxim.dbreplicator2;
 
 import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
+import ru.taximaxim.dbreplicator2.abstracts.AbstractReplicationTest;
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.model.RunnerService;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
-import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
  * Тест очистки rep2_workpool_data в случае если есть записи об операциях над 
@@ -55,29 +49,18 @@ import ru.taximaxim.dbreplicator2.utils.Core;
  * @author volodin_aa
  *
  */
-public class WorkpoolDataClearingTest {
+public class WorkpoolDataClearingTest extends AbstractReplicationTest {
     // Задержка между циклами репликации
     private static final int REPLICATION_DELAY = 500;
     protected static final Logger LOG = Logger.getLogger(WorkpoolDataClearingTest.class);
-    protected static SessionFactory sessionFactory;
-    protected static Session session;
-    protected static ConnectionFactory connectionFactory;
-    protected static Connection conn = null;
-    protected static Connection connDest = null;
-    protected static Runnable workerPg = null;
-    protected static Runnable workerMs = null;
-    protected static Runnable errorsCountWatchdogWorker = null;
 
     /**
      * @throws java.lang.Exception
      */
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        Core.getConfiguration("src/test/resources/hibernateWorkpoolDataClearing.cfg.xml");
-        sessionFactory = Core.getSessionFactory();
-        session = sessionFactory.openSession();
-        connectionFactory = Core.getConnectionFactory();
-        initialization();
+        setUp("src/test/resources/hibernateWorkpoolDataClearing.cfg.xml", null, "importRep2.sql", "importSourceOffset.sql", "importDest.sql");   
+        initRunners();
     }
 
     /**
@@ -85,37 +68,16 @@ public class WorkpoolDataClearingTest {
      */
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
-        if(conn!=null)
-            conn.close();
-        if(connDest!=null)
-            connDest.close();
-        if(session!=null)
-            session.close();
-        Core.connectionFactoryClose();
-        Core.sessionFactoryClose();
-        Core.statsServiceClose();
-        Core.configurationClose();
+        close();
     }
-
+    
     /**
-     * Инициализация
+     * Инициализация раннеров
      */
-    public static void initialization() throws ClassNotFoundException, SQLException, IOException{
-        LOG.info("initialization");
-        String source = "source";
-        conn = connectionFactory.getConnection(source);
-        
-        Helper.executeSqlFromFile(conn, "importRep2.sql");
-        Helper.executeSqlFromFile(conn, "importSourceOffset.sql");
-        
-        String dest = "dest";
-        connDest = connectionFactory.getConnection(dest);
-        Helper.executeSqlFromFile(connDest, "importRep2.sql");
-        Helper.executeSqlFromFile(connDest, "importDest.sql");
-        
+    public static void initRunners() {
         RunnerService runnerService = new RunnerService(sessionFactory);
 
-        workerPg = new WorkerThread(runnerService.getRunner(1));
+        worker = new WorkerThread(runnerService.getRunner(1));
         errorsCountWatchdogWorker = new WorkerThread(runnerService.getRunner(7));
     }
     
@@ -129,15 +91,10 @@ public class WorkpoolDataClearingTest {
      * 
      * вставка таблицу подчиненную
      * изменение главной таблицы
-     * 
-     * 
-     * @throws SQLException
-     * @throws ClassNotFoundException
-     * @throws IOException
-     * @throws InterruptedException 
+     * @throws Exception 
      */
     @Test
-    public void testWorkpoolDataClearing() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
+    public void testWorkpoolDataClearing() throws Exception {
         // Добавляем операцию над несуществующеми данными
         try (PreparedStatement statement = 
                 conn.prepareStatement("INSERT INTO REP2_SUPERLOG (id_foreign, id_table, c_operation, c_date, id_transaction, id_pool) VALUES (?, 'T_TABLE2', ?, now(), 0, 'source')")) {
@@ -154,11 +111,11 @@ public class WorkpoolDataClearingTest {
         LOG.info("Проверка внешних ключей");
         Helper.executeSqlFromFile(conn, "sql_foreign_key_error.sql");
         
-        workerPg.run();
+        worker.run();
         Thread.sleep(REPLICATION_DELAY);
-        workerPg.run();
+        worker.run();
         Thread.sleep(REPLICATION_DELAY);
-        workerPg.run();
+        worker.run();
         Thread.sleep(REPLICATION_DELAY);
         
         // Выводим данные из rep2_superlog_table
@@ -179,7 +136,7 @@ public class WorkpoolDataClearingTest {
         }
         
        // errorsCountWatchdogWorker.run();
-        workerPg.run();
+        worker.run();
         Thread.sleep(REPLICATION_DELAY);
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table2");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table2");

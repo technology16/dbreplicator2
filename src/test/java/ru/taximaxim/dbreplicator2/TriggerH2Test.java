@@ -24,47 +24,30 @@
 package ru.taximaxim.dbreplicator2;
 
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
-import ru.taximaxim.dbreplicator2.utils.Core;
+import ru.taximaxim.dbreplicator2.abstracts.AbstractSettingTest;
 
-public class TriggerH2Test {
+public class TriggerH2Test extends AbstractSettingTest {
     
     protected static final Logger LOG = Logger.getLogger(TriggerH2Test.class);
-    protected static SessionFactory sessionFactory;
-    protected static Session session;
-    protected static ConnectionFactory connectionFactory;
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        sessionFactory = Core.getSessionFactory();
-        session = sessionFactory.openSession();
-        connectionFactory = Core.getConnectionFactory();
+        setUp("importRep2.sql", "importSource.sql", "importSourceData.sql");
     }
 
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
-        session.close();
-        connectionFactory.close();
-        sessionFactory.close();
-        Core.connectionFactoryClose();
-        Core.sessionFactoryClose();
-        Core.statsServiceClose();
-        Core.tasksPoolClose();
-        Core.taskSettingsServiceClose(); 
-        Core.configurationClose();
+        close();
     }
-
+    
     /**
      * Проверка тригерров
      * @throws SQLException
@@ -73,15 +56,7 @@ public class TriggerH2Test {
      * @throws InterruptedException 
      */
     @Test
-    public void testTrigger() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
-        
-        String source = "source";
-        Connection conn = connectionFactory.getConnection(source);
-        
-        Helper.executeSqlFromFile(conn, "importRep2.sql");
-        Helper.executeSqlFromFile(conn, "importSource.sql");
-        Helper.executeSqlFromFile(conn, "importSourceData.sql");
-        
+    public void testTrigger() throws SQLException, InterruptedException {     
         int countT_TABLE = Helper.InfoCount(conn, "t_table");
         if(countT_TABLE==0) {
             LOG.error("Таблице t_table не должна пустой: count = " + countT_TABLE);
@@ -101,6 +76,5 @@ public class TriggerH2Test {
         LOG.info("<====== rep2_superlog ======>");
         Helper.InfoSelect(conn, "rep2_superlog");
         LOG.info("======= rep2_superlog =======");
-        conn.close();
     }
 }
