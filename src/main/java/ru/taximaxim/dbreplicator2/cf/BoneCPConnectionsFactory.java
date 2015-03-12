@@ -115,7 +115,7 @@ public class BoneCPConnectionsFactory implements ConnectionFactory {
             Connection connection = connectionPool.getConnection();
             if (connection == null) {
                 throw new SQLException(String.format("java.lang.NullPointerException\n" +
-                		"Ошибка getConnection(%s)=null", poolName));
+                        "Ошибка getConnection(%s)=null", poolName));
             }
             return connection;
         }

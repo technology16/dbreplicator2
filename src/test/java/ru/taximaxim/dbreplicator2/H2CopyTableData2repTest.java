@@ -26,7 +26,6 @@ package ru.taximaxim.dbreplicator2;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -34,18 +33,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
+import ru.taximaxim.dbreplicator2.abstracts.AbstractReplicationTest;
 import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.model.RunnerService;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
-import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
  * Тест репликации данных между базами H2-H2. 
@@ -58,43 +54,32 @@ import ru.taximaxim.dbreplicator2.utils.Core;
  * @author volodin_aa
  *
  */
-public class H2CopyTableData2repTest {
+public class H2CopyTableData2repTest extends AbstractReplicationTest {
     // Задержка между циклами репликации
     private static final int REPLICATION_DELAY = 500;
     
     protected static final Logger LOG = Logger.getLogger(H2CopyTableDataTest.class);
-    protected static SessionFactory sessionFactory;
-    protected static Session session;
-    protected static ConnectionFactory connectionFactory;
-    protected static Connection conn = null;
-    protected static Connection connDest = null;
-    protected static Runnable worker = null;
-    protected static Runnable worker2 = null;
-    protected static Runnable errorsCountWatchdogWorker = null;
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        sessionFactory = Core.getSessionFactory();
-        session = sessionFactory.openSession();
-        connectionFactory = Core.getConnectionFactory();
-        initialization();
+        setUp(null, null, "importRep2.sql", "importSource.sql", "importDest.sql"); 
+        initRunners();
     }
 
     @AfterClass
     public static void setUpAfterClass() throws Exception {
-        Core.threadPoolClose();
-        if(conn!=null)
-            conn.close();
-        if(connDest!=null)
-            connDest.close();
-        if(session!=null)
-            session.close();
-        Core.connectionFactoryClose();
-        Core.sessionFactoryClose();
-        Core.statsServiceClose();
-        Core.tasksPoolClose();
-        Core.taskSettingsServiceClose(); 
-        Core.configurationClose();
+        close();
+    }
+    
+    /**
+     * Инициализация раннеров
+     */
+    public static void initRunners() {
+        RunnerService runnerService = new RunnerService(sessionFactory);
+
+        worker = new WorkerThread(runnerService.getRunner(1));
+        worker2 = new WorkerThread(runnerService.getRunner(2));
+        errorsCountWatchdogWorker = new WorkerThread(runnerService.getRunner(6));
     }
     
     /**
@@ -107,15 +92,10 @@ public class H2CopyTableData2repTest {
      * 
      * вставка таблицу подчиненную
      * изменение главной таблицы
-     * 
-     * 
-     * @throws SQLException
-     * @throws ClassNotFoundException
-     * @throws IOException
-     * @throws InterruptedException 
+     * @throws Exception 
      */
     @Test
-    public void testForeignKey() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
+    public void testForeignKey() throws Exception {
         Thread.sleep(REPLICATION_DELAY);
         //Проверка внешних ключей
         LOG.info("Проверка внешних ключей");
@@ -186,13 +166,10 @@ public class H2CopyTableData2repTest {
     
     /**
      * Проверка обновления
-     * @throws SQLException
-     * @throws ClassNotFoundException
-     * @throws IOException
-     * @throws InterruptedException 
+     * @throws Exception 
      */
     @Test
-    public void testUpdate() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
+    public void testUpdate() throws Exception {
         testInsert();
         //Проверка обновления
         LOG.info("Проверка обновления");
@@ -204,29 +181,7 @@ public class H2CopyTableData2repTest {
         workerRun();
         workerRun2();
         
-        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
-        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
-        Helper.AssertEquals(listSource, listDest);
-        
-        listSource = Helper.InfoTest(conn, "t_table1");
-        listDest   = Helper.InfoTest(connDest, "t_table1");
-        Helper.AssertEquals(listSource, listDest);
-        
-        listSource = Helper.InfoTest(conn, "t_table2");
-        listDest   = Helper.InfoTest(connDest, "t_table2");
-        Helper.AssertEquals(listSource, listDest);
-        
-        listSource = Helper.InfoTest(conn, "t_table3");
-        listDest   = Helper.InfoTest(connDest, "t_table3");
-        Helper.AssertEquals(listSource, listDest);
-        
-        listSource = Helper.InfoTest(conn, "t_table4");
-        listDest   = Helper.InfoTest(connDest, "t_table4");
-        Helper.AssertEquals(listSource, listDest);
-        
-        listSource = Helper.InfoTest(conn, "t_table5");
-        listDest   = Helper.InfoTest(connDest, "t_table5");
-        Helper.AssertEquals(listSource, listDest);
+        verifyTables();
         
         workerEnd();
         workerEnd2();
@@ -237,13 +192,10 @@ public class H2CopyTableData2repTest {
     
     /**
      * Проверка удаления
-     * @throws SQLException
-     * @throws ClassNotFoundException
-     * @throws IOException
-     * @throws InterruptedException 
+     * @throws Exception 
      */
     @Test
-    public void testDelete() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
+    public void testDelete() throws Exception {
         testInsert();
         LOG.info("Проверка удаления");
         //Проверка удаления
@@ -255,29 +207,7 @@ public class H2CopyTableData2repTest {
         workerRun();
         workerRun2();
         
-        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
-        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
-        Helper.AssertEquals(listSource, listDest);
-
-        listSource = Helper.InfoTest(conn, "t_table1");
-        listDest   = Helper.InfoTest(connDest, "t_table1");
-        Helper.AssertEquals(listSource, listDest);
-        
-        listSource = Helper.InfoTest(conn, "t_table2");
-        listDest   = Helper.InfoTest(connDest, "t_table2");
-        Helper.AssertEquals(listSource, listDest);
-        
-        listSource = Helper.InfoTest(conn, "t_table3");
-        listDest   = Helper.InfoTest(connDest, "t_table3");
-        Helper.AssertEquals(listSource, listDest);
-        
-        listSource = Helper.InfoTest(conn, "t_table4");
-        listDest   = Helper.InfoTest(connDest, "t_table4");
-        Helper.AssertEquals(listSource, listDest);
-        
-        listSource = Helper.InfoTest(conn, "t_table5");
-        listDest   = Helper.InfoTest(connDest, "t_table5");
-        Helper.AssertEquals(listSource, listDest);
+        verifyTables();
         
         workerEnd();
         workerEnd2();
@@ -288,13 +218,10 @@ public class H2CopyTableData2repTest {
     
     /**
      * Проверка вставки и обновления
-     * @throws SQLException
-     * @throws ClassNotFoundException
-     * @throws IOException
-     * @throws InterruptedException 
+     * @throws Exception 
      */
     @Test
-    public void testInsertUpdate() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
+    public void testInsertUpdate() throws Exception {
       //Проверка вставки и обновления
         LOG.info("Проверка вставки и обновления");
         Helper.executeSqlFromFile(conn, "sql_insert.sql");   
@@ -307,29 +234,7 @@ public class H2CopyTableData2repTest {
         workerRun();
         workerRun2();
         
-        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
-        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
-        Helper.AssertEquals(listSource, listDest);
-        
-        listSource = Helper.InfoTest(conn, "t_table1");
-        listDest   = Helper.InfoTest(connDest, "t_table1");
-        Helper.AssertEquals(listSource, listDest);
-        
-        listSource = Helper.InfoTest(conn, "t_table2");
-        listDest   = Helper.InfoTest(connDest, "t_table2");
-        Helper.AssertEquals(listSource, listDest);
-        
-        listSource = Helper.InfoTest(conn, "t_table3");
-        listDest   = Helper.InfoTest(connDest, "t_table3");
-        Helper.AssertEquals(listSource, listDest);
-        
-        listSource = Helper.InfoTest(conn, "t_table4");
-        listDest   = Helper.InfoTest(connDest, "t_table4");
-        Helper.AssertEquals(listSource, listDest);
-        
-        listSource = Helper.InfoTest(conn, "t_table5");
-        listDest   = Helper.InfoTest(connDest, "t_table5");
-        Helper.AssertEquals(listSource, listDest);
+        verifyTables();
         
         workerEnd();
         workerEnd2();
@@ -340,13 +245,10 @@ public class H2CopyTableData2repTest {
     
     /**
      * Проверка вставки и удаления
-     * @throws SQLException
-     * @throws ClassNotFoundException
-     * @throws IOException
-     * @throws InterruptedException 
+     * @throws Exception 
      */
     @Test
-    public void testInsertDelete() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
+    public void testInsertDelete() throws Exception {
         LOG.info("Проверка вставки и удаления");
       //Проверка вставки и удаления
         Helper.executeSqlFromFile(conn, "sql_insert.sql");   
@@ -359,29 +261,7 @@ public class H2CopyTableData2repTest {
         workerRun();
         workerRun2();
         
-        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
-        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
-        Helper.AssertEquals(listSource, listDest);
-
-        listSource = Helper.InfoTest(conn, "t_table1");
-        listDest   = Helper.InfoTest(connDest, "t_table1");
-        Helper.AssertEquals(listSource, listDest);
-        
-        listSource = Helper.InfoTest(conn, "t_table2");
-        listDest   = Helper.InfoTest(connDest, "t_table2");
-        Helper.AssertEquals(listSource, listDest);
-        
-        listSource = Helper.InfoTest(conn, "t_table3");
-        listDest   = Helper.InfoTest(connDest, "t_table3");
-        Helper.AssertEquals(listSource, listDest);
-        
-        listSource = Helper.InfoTest(conn, "t_table4");
-        listDest   = Helper.InfoTest(connDest, "t_table4");
-        Helper.AssertEquals(listSource, listDest);
-        
-        listSource = Helper.InfoTest(conn, "t_table5");
-        listDest   = Helper.InfoTest(connDest, "t_table5");
-        Helper.AssertEquals(listSource, listDest);
+        verifyTables();
         
         workerEnd();
         workerEnd2();
@@ -389,39 +269,13 @@ public class H2CopyTableData2repTest {
         int count = Helper.InfoCount(conn,  "rep2_superlog");
         assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }
-    
-    /**
-     * Инициализация
-     */
-    public static void initialization() throws ClassNotFoundException, SQLException, IOException{
-        LOG.info("initialization");
-        String source = "source";
-        conn = connectionFactory.getConnection(source);
-        
-        Helper.executeSqlFromFile(conn, "importRep2.sql");
-        Helper.executeSqlFromFile(conn, "importSource.sql");
-        
-        String dest = "dest";
-        connDest = connectionFactory.getConnection(dest);
-        Helper.executeSqlFromFile(connDest, "importRep2.sql");
-        Helper.executeSqlFromFile(connDest, "importDest.sql");
-        
-        RunnerService runnerService = new RunnerService(sessionFactory);
-
-        worker = new WorkerThread(runnerService.getRunner(1));
-        worker2 = new WorkerThread(runnerService.getRunner(2));
-        errorsCountWatchdogWorker = new WorkerThread(runnerService.getRunner(6));
-    }
 
     /**
      * Проверка вставки 
-     * @throws SQLException
-     * @throws ClassNotFoundException
-     * @throws IOException
-     * @throws InterruptedException 
+     * @throws Exception 
      */
     @Test
-    public void testInsert() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
+    public void testInsert() throws Exception {
       //Проверка вставки
         Helper.executeSqlFromFile(conn, "sql_insert.sql");
         workerRun();
@@ -433,11 +287,20 @@ public class H2CopyTableData2repTest {
         
         workerRun();
         workerRun2();
-
+        
+        verifyTables();
+        
+        workerEnd();
+        workerEnd2();        
+        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
+    }
+    
+    protected void verifyTables() throws SQLException, InterruptedException {
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
         Helper.AssertEquals(listSource, listDest);
-        
+
         listSource = Helper.InfoTest(conn, "t_table1");
         listDest   = Helper.InfoTest(connDest, "t_table1");
         Helper.AssertEquals(listSource, listDest);
@@ -457,20 +320,15 @@ public class H2CopyTableData2repTest {
         listSource = Helper.InfoTest(conn, "t_table5");
         listDest   = Helper.InfoTest(connDest, "t_table5");
         Helper.AssertEquals(listSource, listDest);
-        
-        workerEnd();
-        workerEnd2();        
-        int count = Helper.InfoCount(conn,  "rep2_superlog");
-        assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }
     
-    public void workerRun() throws IOException, SQLException, InterruptedException{
+    public void workerRun() throws Exception{
         worker.run();
         Helper.executeSqlFromSql(conn, "UPDATE T_TAB SET _value = ?", "dest");
         Thread.sleep(REPLICATION_DELAY);
     }
     
-    public void workerRun2() throws IOException, SQLException, InterruptedException{
+    public void workerRun2() throws Exception{
         worker2.run();
         Helper.executeSqlFromSql(connDest, "UPDATE T_TAB SET _value = ?", "source");
         Thread.sleep(REPLICATION_DELAY);

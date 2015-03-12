@@ -25,39 +25,28 @@ package ru.taximaxim.dbreplicator2;
 import static org.junit.Assert.*;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import ru.taximaxim.dbreplicator2.abstracts.AbstractSettingTest;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsModel;
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
-import ru.taximaxim.dbreplicator2.utils.Core;
 
-public class StrategiesTest {
-
-    protected static SessionFactory sessionFactory;
+public class StrategiesTest extends AbstractSettingTest {
 
     protected static final Logger LOG = Logger.getLogger(StrategiesTest.class);
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-
-        sessionFactory = Core.getSessionFactory();
+        setUp(null, null, null);
     }
     
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
-        sessionFactory.close();
-        Core.connectionFactoryClose();
-        Core.sessionFactoryClose();
-        Core.statsServiceClose();
-        Core.tasksPoolClose();
-        Core.taskSettingsServiceClose(); 
-        Core.configurationClose();
+        close();
     }
     
     /**
@@ -66,13 +55,10 @@ public class StrategiesTest {
     @Test
     public void test() {
 
-        Session session = sessionFactory.openSession();
         session.beginTransaction();
 
-        RunnerModel runner = createRunner(new BoneCPSettingsModel(), new BoneCPSettingsModel(),
-                "Описание исполняемого потока");
-        StrategyModel strategy = createStrategy("ru.taximaxim.Class", "key", "value",
-                true, 100);
+        RunnerModel runner = createRunner(new BoneCPSettingsModel(), new BoneCPSettingsModel(), "Описание исполняемого потока");
+        StrategyModel strategy = createStrategy("ru.taximaxim.Class", "key", "value", true, 100);
 
         Assert.assertNull(runner.getId());
         LOG.debug("Идентификатор потока перед сохранением: " + runner.getId());
@@ -81,32 +67,25 @@ public class StrategiesTest {
         session.saveOrUpdate(runner);
         session.saveOrUpdate(strategy);
 
-        LOG.debug("Идентификатор потока после его сохранения: "
-                + runner.getId());
+        LOG.debug("Идентификатор потока после его сохранения: " + runner.getId());
         Assert.assertNotNull(runner.getId());
 
-        RunnerModel runner_compare = (RunnerModel) session.get(
-                RunnerModel.class, runner.getId());
+        RunnerModel runner_compare = (RunnerModel) session.get(RunnerModel.class, runner.getId());
 
-        LOG.debug("Идентификатор потока после его восстановления: "
-                + runner_compare.getId());
+        LOG.debug("Идентификатор потока после его восстановления: " + runner_compare.getId());
         Assert.assertEquals(runner.getId(), runner_compare.getId());
 
-        RunnerModel runner2 = createRunner(new BoneCPSettingsModel(), new BoneCPSettingsModel(),
-                "Описание исполняемого потока (2)");
-        StrategyModel strategy2 = createStrategy("ru.taximaxim.Class", "key", "value",
-                true, 100);
+        RunnerModel runner2 = createRunner(new BoneCPSettingsModel(), new BoneCPSettingsModel(), "Описание исполняемого потока (2)");
+        StrategyModel strategy2 = createStrategy("ru.taximaxim.Class", "key", "value", true, 100);
         addStrategy(runner2, strategy2);
 
         session.saveOrUpdate(runner2);
         session.saveOrUpdate(strategy2);
 
-        Assert.assertNotNull(((StrategyModel) runner2.getStrategyModels()
-                .get(0)).getId());
+        Assert.assertNotNull(((StrategyModel) runner2.getStrategyModels().get(0)).getId());
     }
 
-    public RunnerModel createRunner(BoneCPSettingsModel source, BoneCPSettingsModel target,
-            String description) {
+    public RunnerModel createRunner(BoneCPSettingsModel source, BoneCPSettingsModel target, String description) {
 
         RunnerModel runner = new RunnerModel();
 
@@ -117,8 +96,7 @@ public class StrategiesTest {
         return runner;
     }
 
-    public StrategyModel createStrategy(String className, String key, String value,
-            boolean isEnabled, int priority) {
+    public StrategyModel createStrategy(String className, String key, String value, boolean isEnabled, int priority) {
 
         StrategyModel strategy = new StrategyModel();
 

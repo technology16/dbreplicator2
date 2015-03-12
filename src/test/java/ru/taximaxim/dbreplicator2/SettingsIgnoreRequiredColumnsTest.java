@@ -7,56 +7,29 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
-import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
+import ru.taximaxim.dbreplicator2.abstracts.AbstractSettingTest;
 import ru.taximaxim.dbreplicator2.model.IgnoreColumnsTableModel;
 import ru.taximaxim.dbreplicator2.model.RequiredColumnsTableModel;
 import ru.taximaxim.dbreplicator2.model.TableModel;
-import ru.taximaxim.dbreplicator2.utils.Core;
 import ru.taximaxim.dbreplicator2.utils.Utils;
 
-public class SettingsIgnoreRequiredColumnsTest {
+public class SettingsIgnoreRequiredColumnsTest extends AbstractSettingTest {
 
-    protected static final Logger LOG = Logger
-            .getLogger(SettingsIgnoreRequiredColumnsTest.class);
-    protected static SessionFactory sessionFactory;
-    protected static Session session;
-    protected static ConnectionFactory connectionFactory;
+    protected static final Logger LOG = Logger.getLogger(SettingsIgnoreRequiredColumnsTest.class);
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        sessionFactory = Core.getSessionFactory();
-        session = sessionFactory.openSession();
-        connectionFactory = Core.getConnectionFactory();
+        setUp(null, null, null);
     }
 
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
-        if(session!=null)
-            session.close();
-        Core.connectionFactoryClose();
-        Core.sessionFactoryClose();
-        Core.threadPoolClose();
-        Core.statsServiceClose();
-        Core.tasksPoolClose();
-        Core.taskSettingsServiceClose(); 
-        Core.configurationClose();
-    }
-
-    @Before
-    public void setUp() throws Exception {
-    }
-
-    @After
-    public void tearDown() throws Exception {
+        close();
     }
 
     @Test

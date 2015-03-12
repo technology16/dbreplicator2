@@ -28,18 +28,13 @@ import static org.junit.Assert.*;
 import java.sql.SQLException;
 import java.util.Map;
 
-import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
-import org.hibernate.service.ServiceRegistryBuilder;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ru.taximaxim.dbreplicator2.model.BoneCPDataBaseSettingsStorage;
+import ru.taximaxim.dbreplicator2.abstracts.AbstractBoneCPTest;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettings;
-import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsModel;
-import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
  * Класс для тестирования пулов соединений
@@ -47,37 +42,16 @@ import ru.taximaxim.dbreplicator2.utils.Core;
  * @author volodin_aa
  * 
  */
-public class BoneCPSettingsServiceTest {
-
-    static private SessionFactory sessionFactory;
-    // Хранилище настроек
-    static protected BoneCPDataBaseSettingsStorage settingStorage;
+public class BoneCPSettingsServiceTest extends AbstractBoneCPTest {
 
     @BeforeClass
-    static public void setUp() throws Exception {
-        Configuration configuration = new Configuration().configure();
-        
-        // Инициализируем Hibernate
-        sessionFactory = new Configuration()
-        .configure()
-        .buildSessionFactory(new ServiceRegistryBuilder()
-            .applySettings(configuration.getProperties()).buildServiceRegistry());
-
-        // Инициализируем хранилище настроек пулов соединений
-        settingStorage = new BoneCPSettingsService(sessionFactory);
+    public static void setUpBeforeClass() throws Exception {
+        setUp();
     }
 
     @AfterClass
-    static public void tearDown() throws Exception {
-        if (sessionFactory != null) {
-            sessionFactory.close();
-        }
-        Core.connectionFactoryClose();
-        Core.sessionFactoryClose();
-        Core.statsServiceClose();
-        Core.tasksPoolClose();
-        Core.taskSettingsServiceClose(); 
-        Core.configurationClose();
+    public static void tearDownAfterClass() throws Exception {
+        close();
     }
 
     /**
@@ -198,11 +172,6 @@ public class BoneCPSettingsServiceTest {
                 .getDataBaseSettingsByName("testSetDataBaseSettings2");
         assertEquals("Ошибка при получение настроек с новым идентификатором!",
                 updatedBoneCPSettings, boneCPSettings);
-
-        // updatedBoneCPSettings =
-        // settingStorage.getDataBaseSettingsByName("testSetDataBaseSettings");
-        // assertNull("Существуют настройки со старым идентификатором!",
-        // updatedBoneCPSettings);
     }
 
     /**
@@ -231,11 +200,10 @@ public class BoneCPSettingsServiceTest {
         boneCPSettings = settingStorage
                 .getDataBaseSettingsByName("testDelDataBaseSettings");
         assertNull("Существуют удаленные настройки!", boneCPSettings);
-
     }
 
     /**
-     * Тест раблты со списком таблиц
+     * Тест работы со списком таблиц
      * 
      * @throws ClassNotFoundException
      * @throws SQLException
@@ -260,7 +228,6 @@ public class BoneCPSettingsServiceTest {
         boneCPSettings = settingStorage
                 .getDataBaseSettingsByName("testDelDataBaseSettings");
         assertNull("Существуют удаленные настройки!", boneCPSettings);
-
     }
 
 }

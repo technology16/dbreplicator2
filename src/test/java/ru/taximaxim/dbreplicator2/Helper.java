@@ -417,7 +417,7 @@ public class Helper {
      * @throws IOException
      * @throws SQLException
      */
-    protected static void executeSqlFromFile(Connection connection, String fileName) throws IOException, SQLException{
+    public static void executeSqlFromFile(Connection connection, String fileName) throws IOException, SQLException{
         executeSqlFromFile(connection, fileName, 0);
     }
     

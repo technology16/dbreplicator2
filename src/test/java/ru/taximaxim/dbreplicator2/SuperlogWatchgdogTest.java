@@ -6,65 +6,39 @@ package ru.taximaxim.dbreplicator2;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
+import ru.taximaxim.dbreplicator2.abstracts.AbstractReplicationTest;
 import ru.taximaxim.dbreplicator2.model.RunnerService;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
-import ru.taximaxim.dbreplicator2.utils.Core;
 /**
  * @author mardanov_rm
  *
  */
-public class SuperlogWatchgdogTest {
+public class SuperlogWatchgdogTest extends AbstractReplicationTest {
 
 protected static final Logger LOG = Logger.getLogger(SuperlogWatchgdogTest.class);
     
     // Задержка между циклами репликации
     private static final int REPLICATION_DELAY = 1500;
-    
-    protected static SessionFactory sessionFactory;
-    protected static Session session;
-    protected static ConnectionFactory connectionFactory;
-    protected static Connection conn = null;
-    protected static Connection connDest = null;
-    protected static Runnable worker = null;
-    protected static Runnable errorsCountWatchdogWorker = null;
+
     protected static Runnable errorsSuperlogWatchgdog = null;
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        Core.configurationClose();
-        Core.getConfiguration("src/test/resources/hibernateIntegrityReplicatedData.cfg.xml");
-        sessionFactory = Core.getSessionFactory();
-        session = sessionFactory.openSession();
-        connectionFactory = Core.getConnectionFactory();
-        initialization();
+        setUp("src/test/resources/hibernateIntegrityReplicatedData.cfg.xml", null, "importRep2.sql", "importSource.sql", "importDest.sql");
+        initRunners();
     }
 
     @AfterClass
     public static void setUpAfterClass() throws Exception {
-        if(conn!=null)
-            conn.close();
-        if(connDest!=null)
-            connDest.close();
-        if(session!=null)
-            session.close();
-        Core.connectionFactoryClose();
-        Core.sessionFactoryClose();
-        Core.statsServiceClose();
-        Core.tasksPoolClose();
-        Core.taskSettingsServiceClose(); 
-        Core.configurationClose();
+        close();
     }
     
     /**
@@ -97,21 +71,9 @@ protected static final Logger LOG = Logger.getLogger(SuperlogWatchgdogTest.class
     }
     
     /**
-     * Инициализация
+     * Инициализация раннеров
      */
-    public static void initialization() throws ClassNotFoundException, SQLException, IOException{
-        LOG.info("initialization");
-        String source = "source";
-        conn = connectionFactory.getConnection(source);
-        
-        Helper.executeSqlFromFile(conn, "importRep2.sql");
-        Helper.executeSqlFromFile(conn, "importSource.sql");
-        
-        String dest = "dest";
-        connDest = connectionFactory.getConnection(dest);
-        Helper.executeSqlFromFile(connDest, "importRep2.sql");
-        Helper.executeSqlFromFile(connDest, "importDest.sql");
-        
+    public static void initRunners() {
         RunnerService runnerService = new RunnerService(sessionFactory);
 
         worker = new WorkerThread(runnerService.getRunner(1));

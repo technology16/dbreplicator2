@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2013 Technologiya
+ * Copyright (c) 2014 Technologiya
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -29,35 +29,34 @@ import java.util.Collection;
 import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
+import ru.taximaxim.dbreplicator2.qr.RunnersQueue;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
 import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
- * Класс стратегии менеджера записей суперлог таблицы с асинхронным параллельным
- * запуском обработчиков реплик
+ * Класс стратегии менеджера записей суперлог таблицы
+ * с запуском обработчиков реплик из очереди
  * 
- * @author volodin_aa
+ * @author petrov_im
  * 
  */
-public class FastManager extends GeneiricManager implements Strategy {
-
-    private static final Logger LOG = Logger.getLogger(FastManager.class);
-
+public class QueueManager extends GeneiricManager implements Strategy {
+    
+    private static final Logger LOG = Logger.getLogger(QueueManager.class);
+    
     /**
      * Конструктор по умолчанию
      */
-    public FastManager() {
+    public QueueManager() {
         super();
     }
     
     @Override
-    protected void startRunners(Collection<RunnerModel> runners) throws StrategyException, SQLException  {
+    protected void startRunners(Collection<RunnerModel> runners)  throws StrategyException, SQLException  {
         try {
-            // Асинхронно запускаем обработчики реплик
-            for (RunnerModel runner : runners) {
-                Core.getThreadPool().start(runner);
-            }
+            RunnersQueue runnersQueue = Core.getRunnersQueue();
+            runnersQueue.addAll(runners);
         } catch (InterruptedException e) {
             LOG.warn("Работа потока прервана.", e);
             throw new StrategyException(e);

@@ -26,18 +26,14 @@ package ru.taximaxim.dbreplicator2;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import junit.framework.TestCase;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
-import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
-import org.hibernate.service.ServiceRegistryBuilder;
-
+import ru.taximaxim.dbreplicator2.abstracts.AbstractBoneCPTest;
 import ru.taximaxim.dbreplicator2.cf.BoneCPConnectionsFactory;
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
-import ru.taximaxim.dbreplicator2.model.BoneCPDataBaseSettingsStorage;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsModel;
-import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
-import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
  * Класс для тестирования пулов соединений
@@ -45,26 +41,23 @@ import ru.taximaxim.dbreplicator2.utils.Core;
  * @author volodin_aa
  *
  */
-public class MaxConnectionsTest extends TestCase {
+public class MaxConnectionsTest extends AbstractBoneCPTest {
 
-    private SessionFactory sessionFactory;
-    
-    // Хранилище настроек
-    protected BoneCPDataBaseSettingsStorage settingStorage;
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
+        setUp();    
+        initialization();
+    }
 
-    @Override
-    protected void setUp() throws Exception {
-        Configuration configuration = new Configuration().configure();
-        
-        // Инициализируем Hibernate
-        sessionFactory = new Configuration()
-        .configure()
-        .buildSessionFactory(new ServiceRegistryBuilder()
-            .applySettings(configuration.getProperties()).buildServiceRegistry());
+    @AfterClass
+    public static void tearDownAfterClass() throws Exception {
+        close();
+    }
 
-        // Инициализируем хранилище настроек пулов соединений
-        settingStorage = new BoneCPSettingsService(sessionFactory);
-
+    /**
+     * Инициализация
+     */
+    public static void initialization() {
         settingStorage.setDataBaseSettings(new BoneCPSettingsModel("1",
                 "org.h2.Driver",
                 "jdbc:h2:mem://localhost/~/test", "sa", ""));
@@ -82,26 +75,14 @@ public class MaxConnectionsTest extends TestCase {
                 "jdbc:h2:mem://localhost/~/test", "sa", "",
                 1, 3, 1, 10000, 0));
     }
-
-    @Override
-    protected void tearDown() throws Exception {
-        if (sessionFactory != null) {
-            sessionFactory.close();
-        }
-        Core.connectionFactoryClose();
-        Core.sessionFactoryClose();
-        Core.statsServiceClose();
-        Core.tasksPoolClose();
-        Core.taskSettingsServiceClose(); 
-        Core.configurationClose();
-    }
-
+    
     /**
      * Тест таймаута при привышении максимального количества открытых соединений
      *
      * @throws ClassNotFoundException
      * @throws SQLException
      */
+    @Test
     public void testMaxConnections() throws ClassNotFoundException,
             SQLException {
         ConnectionFactory connectionsFactory = new BoneCPConnectionsFactory(

@@ -23,6 +23,7 @@
 package ru.taximaxim.dbreplicator2.utils;
 
 import java.io.File;
+
 import org.apache.log4j.Logger;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -35,6 +36,8 @@ import ru.taximaxim.dbreplicator2.model.ApplicatonSettingsService;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
 import ru.taximaxim.dbreplicator2.model.TaskSettingsService;
 import ru.taximaxim.dbreplicator2.el.ErrorsLog;
+import ru.taximaxim.dbreplicator2.qr.RunnersQueue;
+import ru.taximaxim.dbreplicator2.qr.ThreadPoolQueue;
 import ru.taximaxim.dbreplicator2.stats.StatsService;
 import ru.taximaxim.dbreplicator2.tasks.TasksPool;
 import ru.taximaxim.dbreplicator2.tp.ThreadPool;
@@ -67,6 +70,8 @@ public final class Core {
     private static ThreadPool threadPool;
     
     private static StatsService statsService;
+    
+    private static RunnersQueue runnersQueue;
     
     /**
      * Получение настроек из файла
@@ -223,6 +228,26 @@ public final class Core {
         }
 
         return tasksPool;
+    }
+    
+    /**
+     * Возвращает очередь раннеров
+     * 
+     * @return очередь раннеров
+     * @throws InterruptedException 
+     */
+    public static synchronized RunnersQueue getRunnersQueue() throws InterruptedException {
+        if (runnersQueue == null) {
+            runnersQueue = new RunnersQueue();
+            
+            ApplicatonSettingsService aService = new ApplicatonSettingsService(sessionFactory);
+            int count = Integer.parseInt(aService.getValue("tp.threads"));
+            new ThreadPoolQueue(count,  runnersQueue);
+            
+            LOG.info("Создана новая очередь раннеров RunnersQueue");
+        }
+
+        return runnersQueue;
     }
     
     /**
