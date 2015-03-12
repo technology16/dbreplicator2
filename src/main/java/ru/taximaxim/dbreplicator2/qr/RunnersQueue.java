@@ -53,7 +53,7 @@ public class RunnersQueue {
         synchronized (queueRunners) {
             queueRunners.addAll(runners);
             queueRunners.notifyAll();
-            LOG.warn("queueRunners.notifyAll()");
+            LOG.debug("queueRunners.notifyAll()");
         }
     }
     

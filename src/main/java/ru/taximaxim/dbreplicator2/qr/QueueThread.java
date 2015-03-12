@@ -104,7 +104,7 @@ public class QueueThread implements Runnable {
             Runner runner = this.getRunner();
                 while (runner != null) {
                     try {
-                        LOG.warn("Work runner " + runner.getId());
+                        LOG.debug("Work runner " + runner.getId());
                         WorkerThread worker = new WorkerThread(runner);
                         worker.run();
                     } finally {
@@ -113,13 +113,13 @@ public class QueueThread implements Runnable {
                     runner = this.getRunner();
                 }
             try {
-                LOG.warn("awaitRunners.wait()");
+                LOG.debug("awaitRunners.wait()");
                 
                 synchronized (awaitRunners) {
                     awaitRunners.wait();
                 }
             } catch (InterruptedException e1) {
-
+                LOG.warn(e1);
             }
         }
     }

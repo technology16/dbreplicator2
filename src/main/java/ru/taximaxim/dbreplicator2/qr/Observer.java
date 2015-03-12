@@ -36,6 +36,6 @@ public interface Observer {
      * 
      * @throws InterruptedException
      */
-    public abstract void update() throws InterruptedException;
+    void update() throws InterruptedException;
 
 }
