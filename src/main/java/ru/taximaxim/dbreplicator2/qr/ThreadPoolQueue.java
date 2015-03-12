@@ -98,7 +98,7 @@ public class ThreadPoolQueue {
     /**
      * Запуск потока RunnerModel. Поток будет поставлен в очередь на выполнение.
      */
-    public void start() {
+    public final void start() {
         Runnable worker = new QueueThread(awaitRunners.getQueueRunners(), workRunners);
         executor.execute(worker);
         
