@@ -29,6 +29,7 @@ package ru.taximaxim.dbreplicator2.jdbc;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * @author volodin_aa
@@ -36,6 +37,8 @@ import java.util.Collection;
  */
 public final class QueryConstructors {
     
+    private static final String QUESTION = "?";
+    private static final String DELIMITER = ", ";
     private static final String INSERT_INTO = "INSERT INTO ";
     private static final String VALUES = ") VALUES (";
     private static final String SELECT = "SELECT ";
@@ -119,7 +122,7 @@ public final class QueryConstructors {
         Collection<String> result = new ArrayList<String>();
         int colsListSize = colsList.size();
         for (int i = 0; i < colsListSize; i++) {
-            result.add("?");
+            result.add(QUESTION);
         }
 
         return result;
@@ -136,8 +139,8 @@ public final class QueryConstructors {
      */
     public static String constructInsertQuery(String tableName, Collection<String> colsList) {
         StringBuffer insertQuery = new StringBuffer().append(INSERT_INTO)
-                .append(tableName).append("(").append(listToString(colsList, ", "))
-                .append(VALUES).append(listToString(questionMarks(colsList), ", "))
+                .append(tableName).append("(").append(listToString(colsList, DELIMITER))
+                .append(VALUES).append(listToString(questionMarks(colsList), DELIMITER))
                 .append(")");
 
         return insertQuery.toString();
@@ -158,7 +161,7 @@ public final class QueryConstructors {
     public static String constructInsertSelectQuery(String tableName,
             Collection<String> colsList) {
         StringBuffer insertQuery = new StringBuffer().append(INSERT_INTO)
-                .append(tableName).append("(").append(listToString(colsList, ", "))
+                .append(tableName).append("(").append(listToString(colsList, DELIMITER))
                 .append(") ").append(constructSelectQuery(questionMarks(colsList)));
 
         return insertQuery.toString();
@@ -173,7 +176,7 @@ public final class QueryConstructors {
      */
     public static String constructSelectQuery(Collection<String> colsList) {
         StringBuffer query = new StringBuffer().append(SELECT).append(
-                listToString(colsList, ", "));
+                listToString(colsList, DELIMITER));
 
         return query.toString();
     }
@@ -224,7 +227,7 @@ public final class QueryConstructors {
     public static String constructSelectQuery(String tableName, Collection<String> colsList,
             Collection<String> whereList, Collection<String> orderByList) {
         StringBuffer query = new StringBuffer(constructSelectQuery(tableName, colsList, whereList));
-        query.append(ORDER_BY).append(listToString(orderByList, ", "));
+        query.append(ORDER_BY).append(listToString(orderByList, DELIMITER));
 
         return query.toString();
     }
@@ -278,9 +281,85 @@ public final class QueryConstructors {
     public static String constructUpdateQuery(String tableName, Collection<String> colsList,
             Collection<String> whereList) {
         StringBuffer insertQuery = new StringBuffer().append(UPDATE).append(tableName)
-                .append(SET).append(listToString(colsList, ", ", "=?"))
+                .append(SET).append(listToString(colsList, DELIMITER, "=?"))
                 .append(WHERE).append(listToString(whereList, AND, "=?"));
 
         return insertQuery.toString();
+    }
+    
+    /**
+     * Генерирует строку запроса для вставки данных с подменой значений колонок 
+     * выражениями из карты подстановки
+     * 
+     * @param tableName
+     *            имя целевой таблицы
+     * @param colsList
+     *            список колонок
+     * @param castColumns
+     *            карта подстановки вместо колонок
+     * @return строка запроса для вставки данных
+     */
+    public static String constructInsertQuery(String tableName, Collection<String> colsList, Map<String, String> castColumns) {
+        StringBuffer insertQuery = new StringBuffer().append(INSERT_INTO)
+                .append(tableName).append("(").append(listToString(colsList, DELIMITER))
+                .append(VALUES).append(listToString(questionMarks(colsList, castColumns), DELIMITER))
+                .append(")");
+        
+        return insertQuery.toString();
+    }
+
+    /**
+     * Строит список вопросов для передачи экранированых параметров с заменой
+     * значений колонок выражениями из карты подстановки
+     * 
+     * @param colsList
+     *            список колонок
+     * @param castColumns
+     *            карта подстановки вместо колонок
+     * @return список вопросов для передачи экранированых параметров
+     */
+    public static Collection<String> questionMarks(Collection<?> colsList, Map<String, String> castColumns) {
+        Collection<String> result = new ArrayList<String>();
+        for (Object col : colsList) {
+            if (castColumns.keySet().contains(col)) {
+                result.add(castColumns.get(col));
+            } else {
+                result.add(QUESTION);
+            }
+        }
+
+        return result;
+    }
+    
+    /**
+     * Строит строку из элементов списка, разделенных разделителем delimiter
+     * с заменой значений колонок выражениями из карты подстановки
+     * 
+     * @param list
+     *            список объектов
+     * @param castColumns
+     *            карта подстановки вместо колонок
+     * @param delimiter
+     *            разделитель
+     * @return строка из элементов списка, разделенных разделителем delimiter
+     */
+    public static String listToString(Collection<?> list, Map<String, String> castColumns, String delimiter) {
+        StringBuffer result = new StringBuffer();
+
+        boolean setComma = false;
+        for (Object val : list) {
+            if (setComma) {
+                result.append(delimiter);
+            } else {
+                setComma = true;
+            }
+            if (castColumns.keySet().contains(val)) {
+                result.append(castColumns.get(val));
+            } else {
+                result.append(val);
+            }
+        }
+
+        return result.toString();
     }
 }
