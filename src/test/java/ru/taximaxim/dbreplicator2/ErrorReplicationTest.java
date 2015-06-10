@@ -81,7 +81,7 @@ public class ErrorReplicationTest extends AbstractReplicationTest{
       //Проверка вставки
         Helper.executeSqlFromFile(conn, "sql_insert_error.sql");
         worker.run();
-        Thread.sleep(REPLICATION_DELAY+3000);
+        Thread.sleep(REPLICATION_DELAY);
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table1");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table1");
         assertTrue(String.format("Количество записей не равны [%s != 5]", listSource.size()),
