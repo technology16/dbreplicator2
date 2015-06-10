@@ -46,7 +46,7 @@ import ru.taximaxim.dbreplicator2.tp.WorkerThread;
  * если последняя выборка меньше fetchsize
  * (Придется принудительно завершать процесс)
  * 
- * @author volodin_aa
+ * @author petrov_im
  *
  */
 public class ErrorReplicationTest extends AbstractReplicationTest{
@@ -66,7 +66,16 @@ public class ErrorReplicationTest extends AbstractReplicationTest{
         close();
     }
     
-
+    /**
+     * В случае появления нереплицируемой ошибки и нарушения
+     * алгоритма выборки из воркпула (если выборка меньше fetchsize)
+     * гет приводит к бесконечному циклу.
+     * (Придется завершать процесс)
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     * @throws IOException
+     * @throws InterruptedException
+     */
     @Test
     public void testErroReplicated() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
       //Проверка вставки
