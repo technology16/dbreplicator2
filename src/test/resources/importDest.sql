@@ -13,7 +13,7 @@ CREATE TABLE T_TAB (ID IDENTITY PRIMARY KEY, _value VARCHAR(250));
 INSERT INTO T_TAB (_value) VALUES('');
 
 CREATE TABLE T_TABLE (ID IDENTITY PRIMARY KEY, _int INT, _boolean BOOLEAN, _long BIGINT, _decimal DECIMAL, _double DOUBLE, _float REAL, _string VARCHAR(250), _byte TINYINT, _date DATE, _time TIME, _timestamp TIMESTAMP);
-CREATE TABLE T_TABLE1 (ID IDENTITY PRIMARY KEY, _int INT, _boolean BOOLEAN, _long BIGINT, _decimal DECIMAL, _double DOUBLE, _float REAL, _string VARCHAR(250), _byte TINYINT, _date DATE, _time TIME, _timestamp TIMESTAMP);
+CREATE TABLE T_TABLE1 (ID IDENTITY PRIMARY KEY, _int INT NOT NULL, _boolean BOOLEAN, _long BIGINT, _decimal DECIMAL, _double DOUBLE, _float REAL, _string VARCHAR(250), _byte TINYINT, _date DATE, _time TIME, _timestamp TIMESTAMP);
 --
 CREATE TABLE T_TABLE2 (ID IDENTITY PRIMARY KEY, _int INT, _boolean BOOLEAN, _long BIGINT, _decimal DECIMAL, _double DOUBLE, _float REAL, _string VARCHAR(250), _byte TINYINT, _date DATE, _time TIME, _timestamp TIMESTAMP);
 CREATE TABLE T_TABLE3 (ID IDENTITY PRIMARY KEY, _int INT, _boolean BOOLEAN, _long BIGINT, _decimal DECIMAL, _double DOUBLE, _float REAL, _string VARCHAR(250), _byte TINYINT, _date DATE, _time TIME, _timestamp TIMESTAMP);
