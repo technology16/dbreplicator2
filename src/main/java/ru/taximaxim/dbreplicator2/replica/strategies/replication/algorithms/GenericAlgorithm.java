@@ -493,7 +493,7 @@ public class GenericAlgorithm implements Strategy {
             lastAutoCommit = sourceConnection.getAutoCommit();
             lastTargetAutoCommit = targetConnection.getAutoCommit();
             // Начинаем транзакцию
-            sourceConnection.setAutoCommit(false);
+            sourceConnection.setAutoCommit(true);
             sourceConnection
             .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 
