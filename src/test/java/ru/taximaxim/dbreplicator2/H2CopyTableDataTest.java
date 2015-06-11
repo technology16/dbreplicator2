@@ -299,13 +299,10 @@ public class H2CopyTableDataTest extends AbstractReplicationTest {
         Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 62);
         Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 63);
         worker.run();
-        Thread.sleep(REPLICATION_DELAY);
-        int count = Helper.InfoCount(conn, "rep2_errors_log where c_status = 0");
-        assertTrue(String.format("Количество записей не равны [%s == %s]", 14, count),14 == count);
-        errorsCountWatchdogWorker.run();
-        Thread.sleep(REPLICATION_DELAY);
-        worker.run();
-        Thread.sleep(REPLICATION_DELAY);
+        
+        // Данные должны реплицироваться за 1 проход, т.к. в случае наличия
+        // ошибок стратегия начнет их заново реплицировать
+        
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table2");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table2");
         Helper.AssertEquals(listSource, listDest);
@@ -315,7 +312,7 @@ public class H2CopyTableDataTest extends AbstractReplicationTest {
         Helper.AssertEquals(listSource, listDest);
 
         Thread.sleep(REPLICATION_DELAY);
-        count = Helper.InfoCount(conn, "rep2_errors_log where c_status = 1");
+        int count = Helper.InfoCount(conn, "rep2_errors_log where c_status = 1");
         assertTrue(String.format("Количество записей не равны [%s == %s]", 14, count), 14 == count);
     }
     

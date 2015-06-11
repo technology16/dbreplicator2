@@ -419,7 +419,6 @@ public class GenericAlgorithm implements Strategy {
      * @throws SQLException
      * @throws ClassNotFoundException 
      */
-
     protected void selectLastOperations(Connection sourceConnection, 
             Connection targetConnection, StrategyModel data) throws SQLException, ClassNotFoundException {
         // Задаем первоначальное смещение выборки равное 0.
@@ -432,10 +431,14 @@ public class GenericAlgorithm implements Strategy {
             
             try (ResultSet operationsResult = getWorkPoolService().getLastOperations(
                     data.getRunner().getId(), getFetchSize(), offset);) {
+                int succed = 0;
+                int all = 0;
                 // Проходим по списку измененных записей
                 while (operationsResult.next()) {
                     // Реплицируем операцию
-                    if (!replicateOperation(data, operationsResult)) {
+                    if (replicateOperation(data, operationsResult)) {
+                        succed = succed + getWorkPoolService().getRecordsCount(operationsResult);
+                    } else {
                         if (isStrict()) {
                             // Устанавливаем флаг выборки новой порции данных только 
                             // в случае успешного цикла обработки данных, иначе 
@@ -446,8 +449,15 @@ public class GenericAlgorithm implements Strategy {
                             // Пропускаем сгруппированые записи
                             offset = offset + getWorkPoolService().getRecordsCount(operationsResult);
                         }
-                    }
+                    } 
+                    all = all + getWorkPoolService().getRecordsCount(operationsResult);
+                    
                     fetchNext = true;
+                }
+                // Если реплицирована хотя бы 1 одна запись и в выборке было меньше 
+                // fetchSize, и были ошибки, то начинаем реплицировать с начала воркпула
+                if ((0<succed) && (all<getFetchSize()) && (offset>0)) {
+                    offset = 0;
                 }
                 getWorkPoolService().getClearWorkPoolDataStatement().executeBatch();
                 sourceConnection.commit();
@@ -456,7 +466,7 @@ public class GenericAlgorithm implements Strategy {
             }
         } while (fetchNext);
     }
-
+    
     /**
      * Запись счетчиков
      * @param strategy
