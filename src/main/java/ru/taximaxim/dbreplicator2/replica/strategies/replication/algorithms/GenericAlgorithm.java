@@ -505,7 +505,6 @@ public class GenericAlgorithm implements Strategy {
 
             selectLastOperations(sourceConnection, targetConnection, data);
         } catch (Throwable e) {
-            sourceConnection.rollback();
             throw e;
         } finally {    
             // Сбрасываем флаг текущего владельца записей
