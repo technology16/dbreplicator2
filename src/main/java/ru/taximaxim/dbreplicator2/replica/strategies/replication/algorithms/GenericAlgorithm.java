@@ -450,7 +450,6 @@ public class GenericAlgorithm implements Strategy {
                     fetchNext = true;
                 }
                 getWorkPoolService().getClearWorkPoolDataStatement().executeBatch();
-                sourceConnection.commit();
             } finally {
                 writeStatCount(data.getId());
             }
