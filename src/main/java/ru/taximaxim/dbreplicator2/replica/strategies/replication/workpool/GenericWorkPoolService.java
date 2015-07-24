@@ -64,7 +64,7 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
         return connection;
     }
 
-    protected PreparedStatement clearWorkPoolDataStatement;
+    private PreparedStatement clearWorkPoolDataStatement;
 
     private PreparedStatement lastOperationsStatement;
     @Override
