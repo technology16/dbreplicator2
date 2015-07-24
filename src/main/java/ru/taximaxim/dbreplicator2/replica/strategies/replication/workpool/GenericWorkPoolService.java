@@ -162,7 +162,12 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
     public int getRunner(ResultSet resultSet) throws SQLException {
         return resultSet.getInt(ID_RUNNER);
     }
-    
+
+    @Override
+    public Long getSuperlog(ResultSet resultSet) throws SQLException {
+        return resultSet.getLong(ID_SUPERLOG);
+    }
+
     @Override
     public Long getSuperlogMax(ResultSet resultSet) throws SQLException {
         return resultSet.getLong(ID_SUPERLOG_MAX);

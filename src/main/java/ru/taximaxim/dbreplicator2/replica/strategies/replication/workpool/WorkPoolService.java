@@ -165,6 +165,15 @@ public interface WorkPoolService {
      * @return
      * @throws SQLException
      */
+    Long getSuperlog(ResultSet resultSet) throws SQLException;
+    
+    /**
+     * Получение максимального идентификатора текущей операции
+     * 
+     * @param resultSet
+     * @return
+     * @throws SQLException
+     */
     Long getSuperlogMax(ResultSet resultSet) throws SQLException;
     
     /**
