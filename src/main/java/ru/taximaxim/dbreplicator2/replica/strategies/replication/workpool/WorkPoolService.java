@@ -53,6 +53,14 @@ public interface WorkPoolService {
      */
     String ID_SUPERLOG = "id_superlog";
     /**
+     * values = "id_superlog" максимальный id_superlog из выборки
+     */
+    String ID_SUPERLOG_MAX = "id_superlog_max";
+    /**
+     * values = "id_superlog" мимнимальный id_superlog из выборки
+     */
+    String ID_SUPERLOG_MIN = "id_superlog_min";
+    /**
      * values = "id_pool"
      */
     String ID_POOL = "id_pool";
@@ -151,13 +159,22 @@ public interface WorkPoolService {
     int getRunner(ResultSet resultSet) throws SQLException;
     
     /**
-     * Получение идентификатора текущей операции
+     * Получение максимального идентификатора текущей операции
      * 
      * @param resultSet
      * @return
      * @throws SQLException
      */
-    Long getSuperlog(ResultSet resultSet) throws SQLException;
+    Long getSuperlogMax(ResultSet resultSet) throws SQLException;
+    
+    /**
+     * Получение минимального идентификатора текущей операции
+     * 
+     * @param resultSet
+     * @return
+     * @throws SQLException
+     */
+    Long getSuperlogMin(ResultSet resultSet) throws SQLException;
     
     /**
      * Получение колличества сгруппированных записей
