@@ -122,7 +122,6 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
                 // Периодически сбрасываем батч в БД
                 if ((rowsCount % getFetchSize()) == 0) {
                     deleteWorkPoolData.executeBatch();
-                    sourceConnection.commit();
 
                     // Извлекаем новую порцию данных
                     operationsResult.close();
@@ -137,7 +136,6 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
         }
         // Подтверждаем транзакцию
         deleteWorkPoolData.executeBatch();
-        sourceConnection.commit();
     }
     
     /* (non-Javadoc)
