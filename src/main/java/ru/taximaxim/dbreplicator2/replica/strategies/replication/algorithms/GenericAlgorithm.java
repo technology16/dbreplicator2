@@ -503,8 +503,6 @@ public class GenericAlgorithm implements Strategy {
             getDestDataService().setRepServerName(data.getRunner().getSource().getPoolId());
 
             selectLastOperations(sourceConnection, targetConnection, data);
-        } catch (Throwable e) {
-            throw e;
         } finally {    
             // Сбрасываем флаг текущего владельца записей
             getSourceDataService().setRepServerName(null);
