@@ -460,7 +460,6 @@ public class GenericAlgorithm implements Strategy {
                     offset = 0;
                 }
                 getWorkPoolService().getClearWorkPoolDataStatement().executeBatch();
-                sourceConnection.commit();
             } finally {
                 writeStatCount(data.getId());
             }
@@ -503,7 +502,7 @@ public class GenericAlgorithm implements Strategy {
             lastAutoCommit = sourceConnection.getAutoCommit();
             lastTargetAutoCommit = targetConnection.getAutoCommit();
             // Начинаем транзакцию
-            sourceConnection.setAutoCommit(false);
+            sourceConnection.setAutoCommit(true);
             sourceConnection
             .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 
@@ -514,9 +513,6 @@ public class GenericAlgorithm implements Strategy {
             getDestDataService().setRepServerName(data.getRunner().getSource().getPoolId());
 
             selectLastOperations(sourceConnection, targetConnection, data);
-        } catch (Throwable e) {
-            sourceConnection.rollback();
-            throw e;
         } finally {    
             // Сбрасываем флаг текущего владельца записей
             getSourceDataService().setRepServerName(null);
