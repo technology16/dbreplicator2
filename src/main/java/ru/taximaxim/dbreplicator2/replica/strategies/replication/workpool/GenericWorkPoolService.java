@@ -164,11 +164,6 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
     }
 
     @Override
-    public Long getSuperlog(ResultSet resultSet) throws SQLException {
-        return resultSet.getLong(ID_SUPERLOG);
-    }
-
-    @Override
     public Long getSuperlogMax(ResultSet resultSet) throws SQLException {
         return resultSet.getLong(ID_SUPERLOG_MAX);
     }
