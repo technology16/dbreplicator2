@@ -71,7 +71,7 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
     public PreparedStatement getLastOperationsStatement() throws SQLException {
         if (lastOperationsStatement == null) {
             lastOperationsStatement = 
-                    getConnection().prepareStatement("SELECT MAX(id_superlog) AS id_superlog, id_foreign, id_table, COUNT(*) AS records_count, ? AS id_runner " +
+                    getConnection().prepareStatement("SELECT MIN(id_superlog) AS id_superlog_min, MAX(id_superlog) AS id_superlog_max, id_foreign, id_table, COUNT(*) AS records_count, ? AS id_runner " +
                             "  FROM ( " +
                             "  SELECT id_superlog, id_foreign, id_table " +
                             "    FROM rep2_workpool_data " +
@@ -80,7 +80,7 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
                             "    LIMIT ? OFFSET ? " +
                             "  ) AS part_rep2_workpool_data " +
                             "GROUP BY id_foreign, id_table " +
-                            "ORDER BY id_superlog",
+                            "ORDER BY id_superlog_max",
                             ResultSet.TYPE_FORWARD_ONLY,
                             ResultSet.CONCUR_READ_ONLY);
         }
@@ -114,7 +114,7 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
     public PreparedStatement getClearWorkPoolDataStatement() throws SQLException {
         if (clearWorkPoolDataStatement == null) {
             clearWorkPoolDataStatement = 
-                    getConnection().prepareStatement("DELETE FROM rep2_workpool_data WHERE id_runner=? AND id_foreign=? AND id_table=? AND id_superlog<=?");
+                    getConnection().prepareStatement("DELETE FROM rep2_workpool_data WHERE id_runner=? AND id_foreign=? AND id_table=? AND id_superlog>=? AND id_superlog<=?");
         }
         
         return clearWorkPoolDataStatement;
@@ -133,7 +133,8 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
         deleteWorkPoolData.setInt(1, getRunner(operationsResult));
         deleteWorkPoolData.setLong(2, getForeign(operationsResult));
         deleteWorkPoolData.setString(3, getTable(operationsResult));
-        deleteWorkPoolData.setLong(4, getSuperlog(operationsResult));
+        deleteWorkPoolData.setLong(4, getSuperlogMin(operationsResult));
+        deleteWorkPoolData.setLong(5, getSuperlogMax(operationsResult));
         deleteWorkPoolData.addBatch();
         getErrorsLog().setStatus(getRunner(operationsResult), getTable(operationsResult), getForeign(operationsResult), 1);
     }
@@ -161,10 +162,15 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
     public int getRunner(ResultSet resultSet) throws SQLException {
         return resultSet.getInt(ID_RUNNER);
     }
-    
+
     @Override
-    public Long getSuperlog(ResultSet resultSet) throws SQLException {
-        return resultSet.getLong(ID_SUPERLOG);
+    public Long getSuperlogMax(ResultSet resultSet) throws SQLException {
+        return resultSet.getLong(ID_SUPERLOG_MAX);
+    }
+
+    @Override
+    public Long getSuperlogMin(ResultSet resultSet) throws SQLException {
+        return resultSet.getLong(ID_SUPERLOG_MIN);
     }
 
     @Override
