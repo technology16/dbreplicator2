@@ -64,13 +64,12 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
     private Map<TableModel, Set<String>> allCols = new HashMap<TableModel, Set<String>>();
     private Map<TableModel, Set<String>> dataCols = new HashMap<TableModel, Set<String>>();
     private Map<TableModel, Set<String>> identityCols = new HashMap<TableModel, Set<String>>();
-    private Map<TableModel, Set<String>> ignoredCols = new HashMap<TableModel, Set<String>>();
-    private Map<TableModel, Set<String>> requiredCols = new HashMap<TableModel, Set<String>>();
+    
     /**
      * 
      */
     public GenericDataService(Connection connection) {
-        super(connection);        
+        super(connection);
     }
 
     /* (non-Javadoc)
@@ -312,16 +311,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * @throws SQLException
      */
     public Set<String> getIgnoredCols(TableModel table) throws SQLException {
-        Set<String> cols = ignoredCols.get(table);
-        if (cols == null) {
-            cols = new LinkedHashSet<String>();
-            for (String column: table.getIgnoredColumns()) {
-                cols.add(column.toUpperCase());
-            }
-            ignoredCols.put(table, cols);
-        }
-
-        return cols;
+        return (Set<String>)table.getIgnoredColumns();
     }
     
     /**
@@ -333,16 +323,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * @throws SQLException
      */
     public Set<String> getRequiredCols(TableModel table) throws SQLException {
-        Set<String> cols = requiredCols.get(table);
-        if (cols == null) {
-            cols = new LinkedHashSet<String>();
-            for (String column: table.getRequiredColumns()) {
-                cols.add(column.toUpperCase());
-            }
-            requiredCols.put(table, cols);
-        }
-
-        return cols;
+        return (Set<String>)table.getRequiredColumns();
     }
     
     /**
