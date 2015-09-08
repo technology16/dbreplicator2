@@ -13,8 +13,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ru.taximaxim.dbreplicator2.abstracts.AbstractSettingTest;
-import ru.taximaxim.dbreplicator2.model.IgnoreColumnsTableModel;
-import ru.taximaxim.dbreplicator2.model.RequiredColumnsTableModel;
 import ru.taximaxim.dbreplicator2.model.TableModel;
 import ru.taximaxim.dbreplicator2.utils.Utils;
 
@@ -171,30 +169,26 @@ public class SettingsIgnoreRequiredColumnsTest extends AbstractSettingTest {
         
         TableModel table = (TableModel) session.get(TableModel.class, 2);
 
-        if (table.getRequiredColumnsTable() != null) {
-            for (RequiredColumnsTableModel requiredColumn : table.getRequiredColumnsTable()) {
-                LOG.info("getId:         " + requiredColumn.getId());
-                LOG.info("getColumnName: " + requiredColumn.getColumnName());
-                LOG.info("getTable:      " + requiredColumn.getTable().getName());
+        if (table.getRequiredColumns() != null) {
+            for (String requiredColumn : table.getRequiredColumns()) {
+                LOG.info("requiredColumnName: " + requiredColumn);
                 LOG.info("===========================================================");
                 
-                boolean repl = requiredColumn.getColumnName().equals("ID") |  
-                        requiredColumn.getColumnName().equals("_INT") | 
-                        requiredColumn.getColumnName().equals("_BOOLEAN") |
-                        requiredColumn.getColumnName().equals("_LONG") |
-                        requiredColumn.getColumnName().equals("_DECIMAL") |
-                        requiredColumn.getColumnName().equals("_DOUBLE") |
-                        requiredColumn.getColumnName().equals("_FLOAT") |
-                        requiredColumn.getColumnName().equals("_BYTE") |
-                        requiredColumn.getColumnName().equals("_DATE") |
-                        requiredColumn.getColumnName().equals("_TIME") |
-                        requiredColumn.getColumnName().equals("_TIMESTAMP") |
-                        requiredColumn.getColumnName().equals("_NOCOLOMN") |
-                        requiredColumn.getColumnName().equals("_STRING");
+                boolean repl = requiredColumn.equals("ID") |  
+                        requiredColumn.equals("_INT") | 
+                        requiredColumn.equals("_BOOLEAN") |
+                        requiredColumn.equals("_LONG") |
+                        requiredColumn.equals("_DECIMAL") |
+                        requiredColumn.equals("_DOUBLE") |
+                        requiredColumn.equals("_FLOAT") |
+                        requiredColumn.equals("_BYTE") |
+                        requiredColumn.equals("_DATE") |
+                        requiredColumn.equals("_TIME") |
+                        requiredColumn.equals("_TIMESTAMP") |
+                        requiredColumn.equals("_NOCOLOMN") |
+                        requiredColumn.equals("_STRING");
                 
-                assertEquals("Ошибка в реплицируеемых колонках " + requiredColumn.getColumnName(), true,  repl);
-                
-                assertEquals("Ошибка Название таблиц не равны!", table.getName(),  requiredColumn.getTable().getName());
+                assertEquals("Ошибка в реплицируеемых колонках " + requiredColumn, true,  repl);
             }
 
             List<TableModel> tableList = Utils.castList(
@@ -215,16 +209,12 @@ public class SettingsIgnoreRequiredColumnsTest extends AbstractSettingTest {
 
         TableModel table = (TableModel) session.get(TableModel.class, 2);
 
-        if (table.getIgnoreColumnsTable() != null) {
-            for (IgnoreColumnsTableModel ignoredColumn : table.getIgnoreColumnsTable()) {
-                LOG.info("getId:         " + ignoredColumn.getId());
-                LOG.info("getColumnName: " + ignoredColumn.getColumnName());
-                LOG.info("getTable:      " + ignoredColumn.getTable().getName());
+        if (table.getIgnoredColumns() != null) {
+            for (String ignoredColumn : table.getIgnoredColumns()) {
+                LOG.info("ignoredColumnName: " + ignoredColumn);
                 LOG.info("===========================================================");
-                assertEquals("Ошибка Название игнорируеммой колонки не верно!", ignoredColumn.getColumnName(),
+                assertEquals("Ошибка Название игнорируеммой колонки не верно!", ignoredColumn,
                         "_STRING");
-                assertEquals("Ошибка Название таблиц не равны!", table.getName(),
-                        ignoredColumn.getTable().getName());
             }
 
             List<TableModel> tableList = Utils.castList(

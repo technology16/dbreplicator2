@@ -55,6 +55,8 @@ public abstract class GeneiricManager extends StrategySkeleton implements Strate
 
     private static final Logger LOG = Logger.getLogger(GeneiricManager.class);
     
+    private List<TableModel> tables;
+    
     /**
      * Конструктор по умолчанию
      */
@@ -99,12 +101,12 @@ public abstract class GeneiricManager extends StrategySkeleton implements Strate
                         }
                         // Копируем записи
                         // Проходим по списку слушателей текущей таблицы
-                        for (TableModel table : sourcePool.getTables()) {
+                        for (TableModel table : getTables(sourcePool)) {
                             if (LOG.isDebugEnabled()) {
                                 LOG.debug(table.getName() + " id: " + table.getTableId());
                             }
                             if (table.getName().equalsIgnoreCase(superLogResult.getString(WorkPoolService.ID_TABLE))) {
-                                for (RunnerModel runner : table.getRunners()) {
+                                for (RunnerModel runner : getRunners(sourcePool, table.getName())) {
                                     if (!superLogResult.getString(WorkPoolService.ID_POOL).equals(runner.getTarget().getPoolId())) {
                                         insertRunnerData.setInt(1, runner.getId());
                                         insertRunnerData.setLong(2, superLogResult.getLong(WorkPoolService.ID_SUPERLOG));
@@ -152,8 +154,8 @@ public abstract class GeneiricManager extends StrategySkeleton implements Strate
         }
         // запускаем обработчики реплик
         Set<RunnerModel> runners = new HashSet<RunnerModel>();
-        for (TableModel table : sourcePool.getTables()) {
-            runners.addAll(table.getRunners());
+        for (TableModel table : getTables(sourcePool)) {
+            runners.addAll(getRunners(sourcePool, table.getName()));
         }
         startRunners(runners);
 
@@ -178,6 +180,58 @@ public abstract class GeneiricManager extends StrategySkeleton implements Strate
         }
     }
 
+    
+    /**
+     * Получение списка раннеров, обрабатывающих таблицу с данным наименованием
+     */
+    public List<RunnerModel> getRunners(BoneCPSettingsModel sourcePool, String tableName) {
+        List<RunnerModel> runners = new ArrayList<RunnerModel>();
+        for (TableModel table : getTables(sourcePool, tableName)) {
+            runners.add(table.getRunner());
+        }
+        return runners;
+    }
+    
+    /**
+     * Получение списка таблиц в текущей БД
+     * 
+     * @return
+     */
+    public List<TableModel> getTables(BoneCPSettingsModel sourcePool) {
+        if (tables == null) {
+            tables = new ArrayList<TableModel>();
+            for (RunnerModel runner : sourcePool.getRunners()) {
+                if (runner.getTables() != null) {
+                    for (TableModel table : runner.getTables()) {
+                        if (!tables.contains(table)) {
+                            tables.add(table);
+                        }
+                    }
+                }
+            }
+        }
+        return tables;
+    }
+    
+    /**
+     * Получение списка таблиц в текущей БД, с наименованием tableName
+     * 
+     * @return
+     */
+    public List<TableModel> getTables(BoneCPSettingsModel sourcePool, String tableName) {
+        List<TableModel> tables = new ArrayList<TableModel>();
+        for (RunnerModel runner : sourcePool.getRunners()) {
+            if (runner.getTables() != null) {
+                for (TableModel table : runner.getTables()) {
+                    if (table.getName().equalsIgnoreCase(tableName)) {
+                        tables.add(table);
+                    }
+                }
+            }
+        }
+        return tables;
+    }
+    
     /**
      * Переопределяемый метод для запуска раннеров
      * 

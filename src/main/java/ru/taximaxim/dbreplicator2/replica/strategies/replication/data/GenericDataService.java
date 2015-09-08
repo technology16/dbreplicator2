@@ -34,8 +34,6 @@ import java.util.Set;
 
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.jdbc.QueryConstructors;
-import ru.taximaxim.dbreplicator2.model.IgnoreColumnsTableModel;
-import ru.taximaxim.dbreplicator2.model.RequiredColumnsTableModel;
 import ru.taximaxim.dbreplicator2.model.TableModel;
 
 /**
@@ -317,8 +315,8 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
         Set<String> cols = ignoredCols.get(table);
         if (cols == null) {
             cols = new LinkedHashSet<String>();
-            for (IgnoreColumnsTableModel ignoredColumn: table.getIgnoreColumnsTable()) {
-                cols.add(ignoredColumn.getColumnName().toUpperCase());
+            for (String column: table.getIgnoredColumns()) {
+                cols.add(column.toUpperCase());
             }
             ignoredCols.put(table, cols);
         }
@@ -338,8 +336,8 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
         Set<String> cols = requiredCols.get(table);
         if (cols == null) {
             cols = new LinkedHashSet<String>();
-            for (RequiredColumnsTableModel requiredColumn: table.getRequiredColumnsTable()) {
-                cols.add(requiredColumn.getColumnName().toUpperCase());
+            for (String column: table.getRequiredColumns()) {
+                cols.add(column.toUpperCase());
             }
             requiredCols.put(table, cols);
         }

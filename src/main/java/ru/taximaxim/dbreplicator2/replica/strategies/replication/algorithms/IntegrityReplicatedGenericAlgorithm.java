@@ -144,7 +144,9 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
     @Override
     protected boolean replicateOperation(StrategyModel data, ResultSet operationsResult) throws SQLException {
         boolean result = true;
-        TableModel sourceTable = data.getRunner().getSource().getTable(getWorkPoolService().getTable(operationsResult));
+        TableModel sourceTable = data.getRunner().getSource()
+                .getRunner(Integer.parseInt(data.getParam(ID_RUNNER)))
+                .getTable(getWorkPoolService().getTable(operationsResult));
         TableModel destTable = getDestTable(data, sourceTable);
         
         // Извлекаем данные из исходной таблицы
@@ -213,5 +215,33 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
             }
         }
         return result;
+    }
+    
+    /**
+     * Получение сопоставленной таблицы в приемке для таблицы источника
+     * 
+     * @param data
+     * @param sourceTable
+     * @return
+     */
+    @Override
+    protected TableModel getDestTable(StrategyModel data, TableModel sourceTable) {
+        TableModel destTable = destTables.get(sourceTable);
+        if (destTable == null) {
+            destTable = sourceTable;
+            // Проверяем, есть ли явное сопоставление имен таблиц
+            String destTableName = data.getRunner().getSource()
+                    .getRunner(Integer.parseInt(data.getParam(ID_RUNNER)))
+                    .getTable(sourceTable.getName()).getParam("dest");
+            if (destTableName != null) {
+                // Создаем копию для таблицы приемника
+                destTable = (TableModel) sourceTable.clone();
+                destTable.setName(destTableName);
+                destTable.setParam(null, null);
+                destTable.setRunner(null);
+            }
+            destTables.put(sourceTable, destTable);
+        }
+        return destTable;
     }
 }
