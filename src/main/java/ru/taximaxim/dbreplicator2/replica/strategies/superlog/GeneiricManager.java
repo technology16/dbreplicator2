@@ -219,17 +219,17 @@ public abstract class GeneiricManager extends StrategySkeleton implements Strate
      * @return
      */
     public List<TableModel> getTables(BoneCPSettingsModel sourcePool, String tableName) {
-        List<TableModel> tables = new ArrayList<TableModel>();
+        List<TableModel> tablesWithName = new ArrayList<TableModel>();
         for (RunnerModel runner : sourcePool.getRunners()) {
             if (runner.getTables() != null) {
                 for (TableModel table : runner.getTables()) {
                     if (table.getName().equalsIgnoreCase(tableName)) {
-                        tables.add(table);
+                        tablesWithName.add(table);
                     }
                 }
             }
         }
-        return tables;
+        return tablesWithName;
     }
     
     /**

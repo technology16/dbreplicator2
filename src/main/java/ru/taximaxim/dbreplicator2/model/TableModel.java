@@ -168,7 +168,7 @@ public class TableModel implements Cloneable{
                 try {
                     properties.load(new StringReader(param));
                 } catch (IOException e) {
-                    Logger.getLogger("RunnerTablesModel").error("Ошибка при чтение параметров [" + param + "]!", e);
+                    Logger.getLogger("TableModel").error("Ошибка при чтение параметров [" + param + "]!", e);
                 }
             }
         }
@@ -184,6 +184,7 @@ public class TableModel implements Cloneable{
         try {
             clone = (TableModel) super.clone();
         } catch (CloneNotSupportedException e) {
+            Logger.getLogger("TableModel").error("Ошибка при копировании объекта TableModel!", e);
             throw new InternalError();
         }
         
@@ -238,5 +239,18 @@ public class TableModel implements Cloneable{
             requiredColumns.addAll(str2upperList(getParam(REQUIRED_COLUMNS)));
         }
         return requiredColumns;
+    }
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((runner == null) ? 0 : runner.hashCode());
+        result = prime * result + ((param == null) ? 0 : param.hashCode());
+        return result;
     }
 }
