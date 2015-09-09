@@ -184,7 +184,6 @@ public class TableModel implements Cloneable{
         try {
             clone = (TableModel) super.clone();
         } catch (CloneNotSupportedException e) {
-            Logger.getLogger("TableModel").error("Ошибка при копировании объекта TableModel!", e);
             throw new InternalError();
         }
         
