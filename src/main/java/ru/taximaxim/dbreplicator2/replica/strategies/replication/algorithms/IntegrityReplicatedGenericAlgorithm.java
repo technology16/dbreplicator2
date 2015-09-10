@@ -237,7 +237,7 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
                 // Создаем копию для таблицы приемника
                 destTable = (TableModel) sourceTable.clone();
                 destTable.setName(destTableName);
-                destTable.setParam(null, null);
+                destTable.setParam("tempKey", "tempValue");
                 destTable.setRunner(null);
             }
             destTables.put(sourceTable, destTable);
