@@ -209,10 +209,12 @@ public final class QueryConstructors {
      * @return строка запроса на выборку данных из таблицы с условием
      */
     public static String constructSelectQuery(String tableName, Collection<String> colsList,
-            Collection<String> whereList) {
+            Collection<String> whereList, String where) {
         StringBuffer query = new StringBuffer(constructSelectQuery(tableName, colsList))
                 .append(WHERE).append(listToString(whereList, AND, "=?"));
-
+        if (where != null && !where.isEmpty()) {
+            query.append(AND).append(where);
+        }
         return query.toString();
     }
     
@@ -225,8 +227,8 @@ public final class QueryConstructors {
      * @return
      */
     public static String constructSelectQuery(String tableName, Collection<String> colsList,
-            Collection<String> whereList, Collection<String> orderByList) {
-        StringBuffer query = new StringBuffer(constructSelectQuery(tableName, colsList, whereList));
+            Collection<String> whereList, Collection<String> orderByList, String where) {
+        StringBuffer query = new StringBuffer(constructSelectQuery(tableName, colsList, whereList, where));
         query.append(ORDER_BY).append(listToString(orderByList, DELIMITER));
 
         return query.toString();

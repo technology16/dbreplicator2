@@ -65,6 +65,9 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
     private Map<TableModel, Set<String>> dataCols = new HashMap<TableModel, Set<String>>();
     private Map<TableModel, Set<String>> identityCols = new HashMap<TableModel, Set<String>>();
     
+
+    protected static final String WHERE = "where";
+    
     /**
      * 
      */
@@ -130,7 +133,8 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
             statement = getConnection().prepareStatement(QueryConstructors
                     .constructSelectQuery(table.getName(),
                             getAllCols(table),
-                            getPriCols(table)));
+                            getPriCols(table),
+                            table.getParam(WHERE)));
 
             getSelectStatements().put(table, statement);
         }
