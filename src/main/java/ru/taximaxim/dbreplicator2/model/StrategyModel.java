@@ -24,7 +24,6 @@ package ru.taximaxim.dbreplicator2.model;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.Serializable;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Properties;
@@ -42,9 +41,7 @@ import org.apache.log4j.Logger;
 @Entity
 @Table(name = "strategies")
 @IdClass(StrategyKey.class)
-public class StrategyModel implements Serializable {
-    
-    private static final long serialVersionUID = 1L;
+public class StrategyModel {
     
     public StrategyModel() {}
     
