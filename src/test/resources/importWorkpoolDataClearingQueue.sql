@@ -31,5 +31,5 @@ insert into strategies (id, className, param, isEnabled, priority, id_runner) va
 partEmail=10', true, 100, 7);
 
 --Tables
-insert into tables (id_table, name, id_runner, param) values (1, 'T_TABLE2', 2, 'ignoredCols=_STRING');
-insert into tables (id_table, name, id_runner, param) values (2, 'T_TABLE3', 2, 'ignoredCols=_STRING');
+insert into tables (name, id_runner, param) values ('T_TABLE2', 2, 'ignoredCols=_STRING');
+insert into tables (name, id_runner, param) values ('T_TABLE3', 2, 'ignoredCols=_STRING');

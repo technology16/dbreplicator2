@@ -115,24 +115,24 @@ partEmail=10', true, 100, 10);
 insert into tasks (id_task, id_runner, enabled, success_interval, fail_interval, description) values (16, 16, true, 10000, 300000, 'ru.taximaxim.dbreplicator2.utils.OutOfMemoryErrorStrategy');
 
 --Tables
-insert into tables (id_table, name, id_runner, param) values (1, 'T_TABLE', 3, 'ignoredCols=_STRING');
-insert into tables (id_table, name, id_runner, param) values (2, 'T_TABLE1', 25, 'ignoredCols=_STRING
+insert into tables (name, id_runner, param) values ('T_TABLE', 3, 'ignoredCols=_STRING');
+insert into tables (name, id_runner, param) values ('T_TABLE1', 25, 'ignoredCols=_STRING
 requiredCols=ID,_INT,_BOOLEAN,_LONG,_DECIMAL,_DOUBLE,_FLOAT,_BYTE,_DATE,_TIME,_TIMESTAMP,_NOCOLOMN,_STRING');
-insert into tables (id_table, name, id_runner, param) values (3, 'T_TABLE2', 25, 'ignoredCols=_STRING');
-insert into tables (id_table, name, id_runner, param) values (4, 'T_TABLE3', 25, 'ignoredCols=_STRING');
-insert into tables (id_table, name, id_runner, param) values (5, 'T_TABLE4', 25, 'ignoredCols=_STRING');
-insert into tables (id_table, name, id_runner, param) values (6, 'T_TABLE5', 25, 'ignoredCols=_STRING');
-insert into tables (id_table, name, id_runner, param) values (8, 'T_TABLE', 8, 'ignoredCols=_STRING');
-insert into tables (id_table, name, id_runner, param) values (9, 'T_TABLE1', 9, 'ignoredCols=_STRING');
-insert into tables (id_table, name, id_runner, param) values (10, 'T_TABLE2', 9, 'ignoredCols=_STRING');
-insert into tables (id_table, name, id_runner, param) values (11, 'T_TABLE3', 9, 'ignoredCols=_STRING');
-insert into tables (id_table, name, id_runner, param) values (12, 'T_TABLE4', 9, 'ignoredCols=_STRING');
-insert into tables (id_table, name, id_runner, param) values (13, 'T_TABLE5', 9, 'ignoredCols=_STRING');
-insert into tables (id_table, name, id_runner, param) values (14, 'T_TABLE6', 25, '');
-insert into tables (id_table, name, id_runner, param) values (15, 'T_TABLE7', 25, '');
-insert into tables (id_table, name, id_runner, param) values (16, 'T_TABLE8', 25, '');
-insert into tables (id_table, name, id_runner, param) values (17, 'T_TABLE1', 4, 'ignoredCols=_STRING');
-insert into tables (id_table, name, id_runner, param) values (18, 'T_TABLE2', 6, 'ignoredCols=_STRING');
-insert into tables (id_table, name, id_runner, param) values (19, 'T_TABLE3', 6, 'ignoredCols=_STRING');
-insert into tables (id_table, name, id_runner, param) values (20, 'T_TABLE4', 6, 'ignoredCols=_STRING');
-insert into tables (id_table, name, id_runner, param) values (21, 'T_TABLE5', 5, 'ignoredCols=_STRING');
+insert into tables (name, id_runner, param) values ('T_TABLE2', 25, 'ignoredCols=_STRING');
+insert into tables (name, id_runner, param) values ('T_TABLE3', 25, 'ignoredCols=_STRING');
+insert into tables (name, id_runner, param) values ('T_TABLE4', 25, 'ignoredCols=_STRING');
+insert into tables (name, id_runner, param) values ('T_TABLE5', 25, 'ignoredCols=_STRING');
+insert into tables (name, id_runner, param) values ('T_TABLE', 8, 'ignoredCols=_STRING');
+insert into tables (name, id_runner, param) values ('T_TABLE1', 9, 'ignoredCols=_STRING');
+insert into tables (name, id_runner, param) values ('T_TABLE2', 9, 'ignoredCols=_STRING');
+insert into tables (name, id_runner, param) values ('T_TABLE3', 9, 'ignoredCols=_STRING');
+insert into tables (name, id_runner, param) values ('T_TABLE4', 9, 'ignoredCols=_STRING');
+insert into tables (name, id_runner, param) values ('T_TABLE5', 9, 'ignoredCols=_STRING');
+insert into tables (name, id_runner, param) values ('T_TABLE6', 25, '');
+insert into tables (name, id_runner, param) values ('T_TABLE7', 25, '');
+insert into tables (name, id_runner, param) values ('T_TABLE8', 25, '');
+insert into tables (name, id_runner, param) values ('T_TABLE1', 4, 'ignoredCols=_STRING');
+insert into tables (name, id_runner, param) values ('T_TABLE2', 6, 'ignoredCols=_STRING');
+insert into tables (name, id_runner, param) values ('T_TABLE3', 6, 'ignoredCols=_STRING');
+insert into tables (name, id_runner, param) values ('T_TABLE4', 6, 'ignoredCols=_STRING');
+insert into tables (name, id_runner, param) values ('T_TABLE5', 5, 'ignoredCols=_STRING');

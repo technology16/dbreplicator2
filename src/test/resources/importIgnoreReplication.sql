@@ -42,7 +42,7 @@ partEmail=10', true, 100, 7);
 insert into strategies (id, className, param, isEnabled, priority, id_runner) values (10, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.CountWatchgdog', null, true, 100, 7);
 
 --Tables
-insert into tables (id_table, name, id_runner, param) values (1, 'T_TABLE', 3, 'ignoredCols=_STRING
+insert into tables (name, id_runner, param) values ('T_TABLE', 3, 'ignoredCols=_STRING
 requiredCols=ID,_INT,_BOOLEAN,_DATE,_TIME,_TIMESTAMP,_NOCOLOMN,_STRING');
-insert into tables (id_table, name, id_runner, param) values (2, 'T_TABLE1', 4, 'ignoredCols=_STRING
+insert into tables (name, id_runner, param) values ('T_TABLE1', 4, 'ignoredCols=_STRING
 requiredCols=ID,_INT,_BOOLEAN,_DATE,_TIME,_TIMESTAMP,_NOCOLOMN,_STRING');
