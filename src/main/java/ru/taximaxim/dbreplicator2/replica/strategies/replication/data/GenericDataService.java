@@ -64,7 +64,8 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
     private Map<TableModel, Set<String>> allCols = new HashMap<TableModel, Set<String>>();
     private Map<TableModel, Set<String>> dataCols = new HashMap<TableModel, Set<String>>();
     private Map<TableModel, Set<String>> identityCols = new HashMap<TableModel, Set<String>>();
-    
+    private Map<TableModel, Set<String>> ignoredCols = new HashMap<TableModel, Set<String>>();
+    private Map<TableModel, Set<String>> requiredCols = new HashMap<TableModel, Set<String>>();
 
     protected static final String WHERE = "where";
     
@@ -315,7 +316,13 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * @throws SQLException
      */
     public Set<String> getIgnoredCols(TableModel table) throws SQLException {
-        return (Set<String>)table.getIgnoredColumns();
+        Set<String> cols = ignoredCols.get(table);
+        if (cols == null) {
+            cols = (Set<String>)table.getIgnoredColumns();
+            ignoredCols.put(table, cols);
+        }
+
+        return cols;
     }
     
     /**
@@ -327,7 +334,13 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * @throws SQLException
      */
     public Set<String> getRequiredCols(TableModel table) throws SQLException {
-        return (Set<String>)table.getRequiredColumns();
+        Set<String> cols = requiredCols.get(table);
+        if (cols == null) {
+            cols = (Set<String>)table.getRequiredColumns();
+            requiredCols.put(table, cols);
+        }
+
+        return cols;
     }
     
     /**
