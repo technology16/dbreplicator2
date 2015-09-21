@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.persistence.*;
 
@@ -220,8 +221,8 @@ public class TableModel implements Cloneable{
      * Получение списка игнорируемых колонок
      * @return
      */
-    public Collection<String> getIgnoredColumns(){
-        Collection<String> ingnoredColumns = new HashSet<String>();
+    public Set<String> getIgnoredColumns(){
+        Set<String> ingnoredColumns = new HashSet<String>();
         if (getParam(IGNORED_COLUMNS) != null) {
             ingnoredColumns.addAll(str2upperList(getParam(IGNORED_COLUMNS)));
         }
@@ -232,8 +233,8 @@ public class TableModel implements Cloneable{
      * Получение списка колонок, обязательных к репликации
      * @return
      */
-    public Collection<String> getRequiredColumns(){
-        Collection<String> requiredColumns = new HashSet<String>();
+    public Set<String> getRequiredColumns(){
+        Set<String> requiredColumns = new HashSet<String>();
         if (getParam(REQUIRED_COLUMNS) != null) {
             requiredColumns.addAll(str2upperList(getParam(REQUIRED_COLUMNS)));
         }

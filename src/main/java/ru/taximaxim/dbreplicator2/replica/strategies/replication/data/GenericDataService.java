@@ -318,7 +318,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
     public Set<String> getIgnoredCols(TableModel table) throws SQLException {
         Set<String> cols = ignoredCols.get(table);
         if (cols == null) {
-            cols = (Set<String>)table.getIgnoredColumns();
+            cols = table.getIgnoredColumns();
             ignoredCols.put(table, cols);
         }
 
@@ -336,7 +336,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
     public Set<String> getRequiredCols(TableModel table) throws SQLException {
         Set<String> cols = requiredCols.get(table);
         if (cols == null) {
-            cols = (Set<String>)table.getRequiredColumns();
+            cols = table.getRequiredColumns();
             requiredCols.put(table, cols);
         }
 
