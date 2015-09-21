@@ -23,10 +23,7 @@
 package ru.taximaxim.dbreplicator2.model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -347,35 +344,6 @@ public class BoneCPSettingsModel implements BoneCPSettings {
     }
 
     /**
-     * Список обрабатываемых таблиц
-     */
-    private List<TableModel> tables;
-
-    /**
-     * Получение списка таблиц в текущей БД
-     * 
-     * @return
-     */
-    @Column
-    @OneToMany(targetEntity=TableModel.class, mappedBy="pool", fetch=FetchType.EAGER)
-    public List<TableModel> getTables() {
-        if (tables == null) {
-            tables = new ArrayList<TableModel>();
-        }
-
-        return tables;
-    }
-
-    /**
-     * Запись списка таблиц
-     * 
-     * @param tables
-     */
-    public void setTables(List<TableModel> tables) {
-        this.tables = tables;
-    }
-
-    /**
      * Список обработчиков
      */
     private List<RunnerModel> runners;
@@ -393,7 +361,17 @@ public class BoneCPSettingsModel implements BoneCPSettings {
 
         return runners;
     }
-
+    
+    
+    public RunnerModel getRunner(int runnerId) {
+        for (RunnerModel runner : getRunners()) {
+            if (runner.getId() == runnerId) {
+                return runner;
+            }
+        }
+        return null;
+    }
+    
     /**
      * Сохранение списка обработчиков
      */
@@ -487,23 +465,5 @@ public class BoneCPSettingsModel implements BoneCPSettings {
             return false;
         }
         return true;
-    }
-
-    private Map<String, TableModel> tablesMap = null;
-    
-    /**
-     * Получение списка таблиц БД
-     * 
-     * @param tableName
-     * @return
-     */
-    public TableModel getTable(String tableName) {
-        if (tablesMap == null) {
-            tablesMap = new HashMap<String, TableModel>();
-            for (TableModel table: getTables()) {
-                tablesMap.put(table.getName().toUpperCase(), table);
-            }
-        }
-        return tablesMap.get(tableName.toUpperCase());
     }
 }

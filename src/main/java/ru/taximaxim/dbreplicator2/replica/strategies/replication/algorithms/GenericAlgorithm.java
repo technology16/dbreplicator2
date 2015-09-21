@@ -76,8 +76,8 @@ public class GenericAlgorithm implements Strategy {
     private Count countSuccess;
     private Count countError;
     
-    private Map<TableModel, TableModel> destTables = new HashMap<TableModel, TableModel>();
-
+    protected Map<TableModel, TableModel> destTables = new HashMap<TableModel, TableModel>();
+    
     /**
      * Конструктор нпо умолчанию
      * 
@@ -239,13 +239,13 @@ public class GenericAlgorithm implements Strategy {
         if (destTable == null) {
             destTable = sourceTable;
             // Проверяем, есть ли явное сопоставление имен таблиц
-            String destTableName = data.getParam("tables." + sourceTable.getName());
+            String destTableName = data.getRunner().getTable(sourceTable.getName()).getParam("dest");
             if (destTableName != null) {
                 // Создаем копию для таблицы приемника
                 destTable = (TableModel) sourceTable.clone();
                 destTable.setName(destTableName);
-                destTable.setPool(data.getRunner().getTarget());
-                destTable.setRunners(null);
+                destTable.setParam("tempKey", "tempValue");
+                destTable.setRunner(null);
             }
             destTables.put(sourceTable, destTable);
         }
@@ -265,8 +265,7 @@ public class GenericAlgorithm implements Strategy {
      */
     protected boolean replicateOperation(StrategyModel data, 
             ResultSet operationsResult) throws SQLException{
-        TableModel sourceTable = data.getRunner().getSource()
-                .getTable(getWorkPoolService().getTable(operationsResult));
+        TableModel sourceTable = data.getRunner().getTable(getWorkPoolService().getTable(operationsResult));
         TableModel destTable = getDestTable(data, sourceTable);
         
         // Извлекаем данные из исходной таблицы
@@ -539,5 +538,4 @@ public class GenericAlgorithm implements Strategy {
             }
         }
     }
-
 }

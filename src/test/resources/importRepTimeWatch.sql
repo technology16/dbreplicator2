@@ -12,20 +12,6 @@ insert into application_settings (key, value) values ('tp.threads', '10');
 insert into application_settings (key, value) values ('stats.dest', 'source');
 insert into application_settings (key, value) values ('error.dest', 'source');
 
---Tables
-insert into tables (id_table, id_pool, name) values (1, 'source', 'T_TABLE');
-insert into tables (id_table, id_pool, name) values (2, 'source', 'T_TABLE1');
-insert into tables (id_table, id_pool, name) values (3, 'source', 'T_TABLE2');
-insert into tables (id_table, id_pool, name) values (4, 'source', 'T_TABLE3');
-insert into tables (id_table, id_pool, name) values (5, 'source', 'T_TABLE4');
-insert into tables (id_table, id_pool, name) values (6, 'source', 'T_TABLE5');
-insert into tables (id_table, id_pool, name) values (8, 'dest',   'T_TABLE');
-insert into tables (id_table, id_pool, name) values (9, 'dest', 'T_TABLE1');
-insert into tables (id_table, id_pool, name) values (10, 'dest', 'T_TABLE2');
-insert into tables (id_table, id_pool, name) values (11, 'dest', 'T_TABLE3');
-insert into tables (id_table, id_pool, name) values (12, 'dest', 'T_TABLE4');
-insert into tables (id_table, id_pool, name) values (13, 'dest', 'T_TABLE5');
-
 --Runners Super Log
 insert into runners (id_runner, source, target, description) values (1, 'source', 'source', 'SuperlogRunner');
 --Strategies Add Super Log
@@ -87,20 +73,6 @@ insert into strategies (id, className, param, isEnabled, priority, id_runner) va
 
 -------
 
---Runner tables
-insert into table_observers (id_runner, id_table) values (3, 1);
-insert into table_observers (id_runner, id_table) values (4, 2);
-insert into table_observers (id_runner, id_table) values (5, 6);
-insert into table_observers (id_runner, id_table) values (6, 3);
-insert into table_observers (id_runner, id_table) values (6, 4);
-insert into table_observers (id_runner, id_table) values (6, 5);
-insert into table_observers (id_runner, id_table) values (8, 8);
-insert into table_observers (id_runner, id_table) values (9, 9);
-insert into table_observers (id_runner, id_table) values (9, 10);
-insert into table_observers (id_runner, id_table) values (9, 11);
-insert into table_observers (id_runner, id_table) values (9, 12);
-insert into table_observers (id_runner, id_table) values (9, 13);
-
 --Runner CountWatchgdog
 insert into runners (id_runner, source, target, description) values (7, 'source', 'source', 'ErrorsCountWatchgdogStrategy');
 --Strategy  CountWatchgdog
@@ -129,17 +101,16 @@ runners=', true, 100);
 insert into strategies (id, id_runner, className, param, isEnabled, priority) values (16, 10, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.ReplicationTimeWatchgdog', 'period=0
 partEmail=10', true, 100);
 
---Ignore Columns Table
-insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (1, 1, '_STRING');
-insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (2, 2, '_STRING');
-insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (3, 3, '_STRING');
-insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (4, 4, '_STRING');
-insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (5, 5, '_STRING');
-insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (6, 6, '_STRING');
-
-insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (8, 8, '_STRING');
-insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (9, 9, '_STRING');
-insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (10, 10, '_STRING');
-insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (11, 11, '_STRING');
-insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (12, 12, '_STRING');
-insert into ignore_columns_table (id_ignore_columns_table, id_table, column_name) values (13, 13, '_STRING');
+--Tables
+insert into tables (name, id_runner, param) values ('T_TABLE', 3, 'ignoredCols=_STRING');
+insert into tables (name, id_runner, param) values ('T_TABLE1', 4, 'ignoredCols=_STRING');
+insert into tables (name, id_runner, param) values ('T_TABLE2', 6, 'ignoredCols=_STRING');
+insert into tables (name, id_runner, param) values ('T_TABLE3', 6, 'ignoredCols=_STRING');
+insert into tables (name, id_runner, param) values ('T_TABLE4', 6, 'ignoredCols=_STRING');
+insert into tables (name, id_runner, param) values ('T_TABLE5', 5, 'ignoredCols=_STRING');
+insert into tables (name, id_runner, param) values ('T_TABLE', 8, 'ignoredCols=_STRING');
+insert into tables (name, id_runner, param) values ('T_TABLE1', 9, 'ignoredCols=_STRING');
+insert into tables (name, id_runner, param) values ('T_TABLE2', 9, 'ignoredCols=_STRING');
+insert into tables (name, id_runner, param) values ('T_TABLE3', 9, 'ignoredCols=_STRING');
+insert into tables (name, id_runner, param) values ('T_TABLE4', 9, 'ignoredCols=_STRING');
+insert into tables (name, id_runner, param) values ('T_TABLE5', 9, 'ignoredCols=_STRING');

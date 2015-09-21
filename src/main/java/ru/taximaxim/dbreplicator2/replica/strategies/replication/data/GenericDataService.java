@@ -34,8 +34,6 @@ import java.util.Set;
 
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.jdbc.QueryConstructors;
-import ru.taximaxim.dbreplicator2.model.IgnoreColumnsTableModel;
-import ru.taximaxim.dbreplicator2.model.RequiredColumnsTableModel;
 import ru.taximaxim.dbreplicator2.model.TableModel;
 
 /**
@@ -68,11 +66,14 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
     private Map<TableModel, Set<String>> identityCols = new HashMap<TableModel, Set<String>>();
     private Map<TableModel, Set<String>> ignoredCols = new HashMap<TableModel, Set<String>>();
     private Map<TableModel, Set<String>> requiredCols = new HashMap<TableModel, Set<String>>();
+
+    protected static final String WHERE = "where";
+    
     /**
      * 
      */
     public GenericDataService(Connection connection) {
-        super(connection);        
+        super(connection);
     }
 
     /* (non-Javadoc)
@@ -133,7 +134,8 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
             statement = getConnection().prepareStatement(QueryConstructors
                     .constructSelectQuery(table.getName(),
                             getAllCols(table),
-                            getPriCols(table)));
+                            getPriCols(table),
+                            table.getParam(WHERE)));
 
             getSelectStatements().put(table, statement);
         }
@@ -316,10 +318,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
     public Set<String> getIgnoredCols(TableModel table) throws SQLException {
         Set<String> cols = ignoredCols.get(table);
         if (cols == null) {
-            cols = new LinkedHashSet<String>();
-            for (IgnoreColumnsTableModel ignoredColumn: table.getIgnoreColumnsTable()) {
-                cols.add(ignoredColumn.getColumnName().toUpperCase());
-            }
+            cols = table.getIgnoredColumns();
             ignoredCols.put(table, cols);
         }
 
@@ -337,10 +336,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
     public Set<String> getRequiredCols(TableModel table) throws SQLException {
         Set<String> cols = requiredCols.get(table);
         if (cols == null) {
-            cols = new LinkedHashSet<String>();
-            for (RequiredColumnsTableModel requiredColumn: table.getRequiredColumnsTable()) {
-                cols.add(requiredColumn.getColumnName().toUpperCase());
-            }
+            cols = table.getRequiredColumns();
             requiredCols.put(table, cols);
         }
 

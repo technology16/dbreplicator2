@@ -25,18 +25,7 @@ package ru.taximaxim.dbreplicator2.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
@@ -194,12 +183,12 @@ public class RunnerModel implements Runner {
     /**
      * Список таблиц, которые обрабатывает раннер
      */
-    @ManyToMany(fetch = FetchType.EAGER, mappedBy = "runners")
+    @OneToMany(mappedBy = "runner", fetch = FetchType.EAGER)
     @Fetch(FetchMode.SELECT)
     private List<TableModel> tables;
     
     /**
-     * Получение списка списка обрабатываемых раннером таблиц
+     * Получение списка обрабатываемых раннером таблиц
      * 
      * @return список таблиц
      */
@@ -209,7 +198,21 @@ public class RunnerModel implements Runner {
         }
         return this.tables;
     }
- 
+    
+    /**
+     * Получение таблицы tableName, обрабатываемую раннером
+     * 
+     * @return список таблиц
+     */
+    public TableModel getTable(String tableName) {
+        for (TableModel table : tables) {
+            if (table.getName().equalsIgnoreCase(tableName)) {
+                return table;
+            }
+        }
+        return null;
+    }
+    
     /**
      * Изменнение списка обрабатываемых раннером таблиц
      * 
@@ -226,5 +229,29 @@ public class RunnerModel implements Runner {
     public String toString() {
         return "RunnerModel [id=" + id + ", source=" + source.getPoolId() + ", target=" + target.getPoolId()
                 + ", description=" + description;
+    }
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals()
+     */
+    @Override
+    public boolean equals(Object runnerModel) {
+        if (this.getId() == ((RunnerModel)runnerModel).getId()) {
+            return true;
+        }
+        return false;
+    }
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 10;
+        result = prime * result + ((source == null) ? 0 : source.hashCode());
+        result = prime * result + ((target == null) ? 0 : target.hashCode());
+        result = prime * result + ((description == null) ? 0 : description.hashCode());
+        return result;
     }
 }

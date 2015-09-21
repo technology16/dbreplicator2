@@ -28,14 +28,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Properties;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import org.apache.log4j.Logger;
 
@@ -47,15 +40,38 @@ import org.apache.log4j.Logger;
  */
 @Entity
 @Table(name = "strategies")
+@IdClass(StrategyKey.class)
 public class StrategyModel {
+    
+    public StrategyModel() {}
+    
+    public StrategyModel(StrategyKey key) {
+        this.id = key.getId();
+        this.runner = key.getRunner();
+    }
     
     /**
      * Идентификатор стратегии
      */
+    /**
+     * Идентификатор настройки
+     */
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private Integer id;
+    @AttributeOverrides({
+        @AttributeOverride(name = "id", column = @Column(name = "id")),
+        @AttributeOverride(name = "runner", column = @Column(name = "id_runner"))
+    })
 
+    @Column(name = "id")
+    private Integer id;
+    
+    /**
+     * Поток исполнитель, которому принадлежит стратегия
+     */
+    @ManyToOne
+    @JoinColumn(name = "id_runner")
+    private RunnerModel runner;
+    
     /**
      * Имя класса
      */
@@ -81,14 +97,6 @@ public class StrategyModel {
      * Настройки
     */
     private Properties prop;
-    
-    
-    /**
-     * Поток исполнитель, которому принадлежит стратегия
-     */
-    @ManyToOne
-    @JoinColumn(name = "id_runner")
-    private RunnerModel runner;
 
     /**
      * @see StrategyModel#runner

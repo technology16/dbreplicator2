@@ -58,7 +58,7 @@ public class StrategiesTest extends AbstractSettingTest {
         session.beginTransaction();
 
         RunnerModel runner = createRunner(new BoneCPSettingsModel(), new BoneCPSettingsModel(), "Описание исполняемого потока");
-        StrategyModel strategy = createStrategy("ru.taximaxim.Class", "key", "value", true, 100);
+        StrategyModel strategy = createStrategy(1, "ru.taximaxim.Class", "key", "value", true, 100);
 
         Assert.assertNull(runner.getId());
         LOG.debug("Идентификатор потока перед сохранением: " + runner.getId());
@@ -76,13 +76,24 @@ public class StrategiesTest extends AbstractSettingTest {
         Assert.assertEquals(runner.getId(), runner_compare.getId());
 
         RunnerModel runner2 = createRunner(new BoneCPSettingsModel(), new BoneCPSettingsModel(), "Описание исполняемого потока (2)");
-        StrategyModel strategy2 = createStrategy("ru.taximaxim.Class", "key", "value", true, 100);
+        StrategyModel strategy2 = createStrategy(2, "ru.taximaxim.Class", "key", "value", true, 100);
         addStrategy(runner2, strategy2);
 
         session.saveOrUpdate(runner2);
         session.saveOrUpdate(strategy2);
-
+        
         Assert.assertNotNull(((StrategyModel) runner2.getStrategyModels().get(0)).getId());
+        Assert.assertTrue("Нарушение описания состаного ключа стратегии", runner2.getStrategyModels().get(0).getRunner().equals(runner2));
+        
+        StrategyModel strategy3 = createStrategy(3, "ru.taximaxim.Class", "key", "value", true, 100);
+        addStrategy(runner2, strategy3);
+
+        session.saveOrUpdate(runner2);
+        session.saveOrUpdate(strategy3);
+        
+        Assert.assertNotNull(((StrategyModel) runner2.getStrategyModels().get(1)).getId());
+        Assert.assertTrue("Нарушение описания состаного ключа стратегии", runner2.getStrategyModels().get(1).getRunner().equals(runner2));
+        
     }
 
     public RunnerModel createRunner(BoneCPSettingsModel source, BoneCPSettingsModel target, String description) {
@@ -96,10 +107,11 @@ public class StrategiesTest extends AbstractSettingTest {
         return runner;
     }
 
-    public StrategyModel createStrategy(String className, String key, String value, boolean isEnabled, int priority) {
+    public StrategyModel createStrategy(Integer id, String className, String key, String value, boolean isEnabled, int priority) {
 
         StrategyModel strategy = new StrategyModel();
 
+        strategy.setId(id);
         strategy.setClassName(className);
         strategy.setParam(key, value);
         strategy.setEnabled(isEnabled);
