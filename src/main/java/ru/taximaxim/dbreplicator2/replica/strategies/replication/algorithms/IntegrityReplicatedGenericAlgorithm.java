@@ -159,7 +159,7 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
             if (LOG.isDebugEnabled()) {
                 LOG.debug(message, e);
             } else {
-                LOG.warn(message + "\n" + e.getMessage());
+                LOG.warn(message + NEW_LINE + e.getMessage());
             }
             getWorkPoolService().trackError(message, e, operationsResult);
             getCountError().add(getWorkPoolService().getTable(operationsResult));

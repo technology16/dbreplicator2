@@ -56,7 +56,7 @@ public class GenericAlgorithm implements Strategy {
 
     private static final Logger LOG = Logger.getLogger(GenericAlgorithm.class);
     
-    private static final String NEW_LINE = " \n";
+    protected static final String NEW_LINE = " \n";
     
     private static final int DEFAULT_FETCH_SIZE = 1000;
     
