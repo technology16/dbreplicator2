@@ -266,6 +266,25 @@ public class GenericAlgorithm implements Strategy {
     protected boolean replicateOperation(StrategyModel data, 
             ResultSet operationsResult) throws SQLException{
         TableModel sourceTable = data.getRunner().getTable(getWorkPoolService().getTable(operationsResult));
+        if (sourceTable == null) {
+            // Обработка возможной ошибки при рестарте
+            // с непустым воркпулом
+            String message = String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: В списке таблиц раннера отстутсвует таблица %s", 
+                    data.getRunner().getId(), 
+                    data.getRunner().getDescription(), 
+                    data.getId(),
+                    operationsResult.getString(4)); 
+            SQLException e = new SQLException(message);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(message, e);
+            } else {
+                LOG.warn(message + NEW_LINE + e.getMessage());
+            }
+            getWorkPoolService().trackError(message, e, operationsResult);
+            getCountError().add(getWorkPoolService().getTable(operationsResult));
+
+            return false;
+        }
         TableModel destTable = getDestTable(data, sourceTable);
         
         // Извлекаем данные из исходной таблицы
