@@ -86,7 +86,6 @@ public class GenericAlgorithm implements Strategy {
     protected enum ErrorType {
         INSERT,
         UPDATE,
-        UPDATE_INSERT,
         DELETE,
         EXTRACT_DEST,
         EXTRACT_SOURCE;
@@ -101,8 +100,6 @@ public class GenericAlgorithm implements Strategy {
                 return "Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при вставке записи: \n[ tableName = %s  [ row = %s ] ]";
             case UPDATE:
                 return "Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при обновлении записи: \n[ tableName = %s  [ row = %s ] ]";
-            case UPDATE_INSERT:
-                return "Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при вставке/обновлении записи: \n[ tableName = %s  [ row = %s ] ]";
             case DELETE:
                 return "Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при удалении записи: \n[ tableName = %s  [ row = [ id = %s ] ] ]";
             case EXTRACT_DEST:
