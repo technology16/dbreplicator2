@@ -79,6 +79,43 @@ public class GenericAlgorithm implements Strategy {
     protected Map<TableModel, TableModel> destTables = new HashMap<TableModel, TableModel>();
     
     /**
+     * Перечисление возможных типов ошибок при репликации
+     * @author petrov_im
+     *
+     */
+    protected enum ErrorType {
+        INSERT,
+        UPDATE,
+        UPDATE_INSERT,
+        DELETE,
+        EXTRACT_DEST,
+        EXTRACT_SOURCE;
+        
+        /**
+         * Текст сообщения в зависимости от типа ошибки
+         * @return
+         */
+        public String getMessageBody() {
+            switch(this) {
+            case INSERT:
+                return "Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при вставке записи: \n[ tableName = %s  [ row = %s ] ]";
+            case UPDATE:
+                return "Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при обновлении записи: \n[ tableName = %s  [ row = %s ] ]";
+            case UPDATE_INSERT:
+                return "Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при вставке/обновлении записи: \n[ tableName = %s  [ row = %s ] ]";
+            case DELETE:
+                return "Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при удалении записи: \n[ tableName = %s  [ row = [ id = %s ] ] ]";
+            case EXTRACT_DEST:
+                return "Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка извлечения данных из приемника: \n[ tableName = %s  [ row = %s ] ]";
+            case EXTRACT_SOURCE:
+                return "Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка извлечения данных из источника: \n[ tableName = %s  [ row = [ id = %s ] ] ]";
+            default:
+                return "Неизвестный тип ошибки!";
+            }
+        }
+    }
+    
+    /**
      * Конструктор нпо умолчанию
      * 
      * @param fetchSize - размер выборки данных
@@ -252,6 +289,14 @@ public class GenericAlgorithm implements Strategy {
         return destTable;
     }
 
+    /**
+     * Обработка ситуации, когда в списке таблиц раннера отсутствует
+     * таблица полученная из воркпула
+     * (ситуация возможна при рестарте репликатора с непустым воркпулом)
+     * @param data
+     * @param operationsResult
+     * @throws SQLException
+     */
     protected void tableIsNullHandling(StrategyModel data, ResultSet operationsResult) throws SQLException {
         String message = String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: В списке таблиц раннера отстутсвует таблица %s", 
                 data.getRunner().getId(), 
@@ -259,6 +304,37 @@ public class GenericAlgorithm implements Strategy {
                 data.getId(),
                 operationsResult.getString(4)); 
         SQLException e = new SQLException(message);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(message, e);
+        } else {
+            LOG.warn(message + NEW_LINE + e.getMessage());
+        }
+        getWorkPoolService().trackError(message, e, operationsResult);
+        getCountError().add(getWorkPoolService().getTable(operationsResult));
+    }
+    
+    /**
+     * Обработка ошибок репликации
+     * @param data
+     * @param operationsResult
+     * @throws SQLException
+     */
+    protected void errorsHandling(ErrorType eType, StrategyModel data, TableModel sourceTable,
+            ResultSet sourceResult, ResultSet operationsResult, SQLException e) throws SQLException {
+        
+        String rowMess;
+        if (eType == ErrorType.DELETE || eType == ErrorType.EXTRACT_SOURCE) {
+            rowMess = String.valueOf(getWorkPoolService().getForeign(operationsResult));
+        } else {
+            rowMess = Jdbc.resultSetToString(sourceResult, 
+                    getSourceDataService().getAllCols(sourceTable));
+        }
+        String message = String.format(eType.getMessageBody(), 
+                data.getRunner().getId(), 
+                data.getRunner().getDescription(), 
+                data.getId(),
+                getDestTable(data, sourceTable).getName(),
+                rowMess); 
         if (LOG.isDebugEnabled()) {
             LOG.debug(message, e);
         } else {
@@ -316,21 +392,8 @@ public class GenericAlgorithm implements Strategy {
                             return true;
                         } catch (SQLException e) {
                             // Поглощаем и логгируем ошибки обновления
-                            String message = String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при обновлении записи: \n[ tableName = %s  [ row = %s ] ]", 
-                                    data.getRunner().getId(), 
-                                    data.getRunner().getDescription(), 
-                                    data.getId(), 
-                                    destTable.getName(), 
-                                    Jdbc.resultSetToString(sourceResult, 
-                                            getSourceDataService().getAllCols(sourceTable))); 
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug(message, e);
-                            } else {
-                                LOG.warn(message + NEW_LINE + e.getMessage());
-                            }
-                            getWorkPoolService().trackError(message, e, operationsResult);
-                            getCountError().add(getWorkPoolService().getTable(operationsResult));
-
+                            errorsHandling(ErrorType.UPDATE, data, sourceTable, sourceResult, operationsResult, e);
+                            
                             return false;
                         }
                     } else {
@@ -343,41 +406,15 @@ public class GenericAlgorithm implements Strategy {
                             return true;
                         } catch (SQLException e) {
                             // Поглощаем и логгируем ошибки вставки
-                            String message = String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при вставке записи: \n[ tableName = %s  [ row = %s ] ]", 
-                                    data.getRunner().getId(), 
-                                    data.getRunner().getDescription(), 
-                                    data.getId(), 
-                                    destTable.getName(), 
-                                    Jdbc.resultSetToString(sourceResult, 
-                                            getSourceDataService().getAllCols(sourceTable))); 
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug(message, e);
-                            } else {
-                                LOG.warn(message + NEW_LINE + e.getMessage());
-                            }
-                            getWorkPoolService().trackError(message, e, operationsResult);
-                            getCountError().add(getWorkPoolService().getTable(operationsResult));
-
+                            errorsHandling(ErrorType.INSERT, data, sourceTable, sourceResult, operationsResult, e);
+                            
                             return false;
                         }
                     }
                 } catch (SQLException e) {
                     // Поглощаем и логгируем ошибки извлечения данных из приемника
-                    String message = String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка извлечения данных из приемника: \n[ tableName = %s  [ row = %s ] ]", 
-                            data.getRunner().getId(), 
-                            data.getRunner().getDescription(), 
-                            data.getId(), 
-                            destTable.getName(), 
-                            Jdbc.resultSetToString(sourceResult, 
-                                    getSourceDataService().getAllCols(sourceTable))); 
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(message, e);
-                    } else {
-                        LOG.warn(message + NEW_LINE + e.getMessage());
-                    }
-                    getWorkPoolService().trackError(message, e, operationsResult);
-                    getCountError().add(getWorkPoolService().getTable(operationsResult));
-
+                    errorsHandling(ErrorType.EXTRACT_DEST, data, sourceTable, sourceResult, operationsResult, e);
+                    
                     return false;
                 }
             } else {
@@ -391,39 +428,15 @@ public class GenericAlgorithm implements Strategy {
                     return true;
                 } catch (SQLException e) {
                     // Поглощаем и логгируем ошибки удаления
-                    String message = String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при удалении записи: \n[ tableName = %s  [ row = [ id = %s ] ] ]", 
-                            data.getRunner().getId(), 
-                            data.getRunner().getDescription(), 
-                            data.getId(), 
-                            destTable.getName(), 
-                            String.valueOf(getWorkPoolService().getForeign(operationsResult))); 
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(message, e);
-                    } else {
-                        LOG.warn(message + NEW_LINE + e.getMessage());
-                    }
-                    getWorkPoolService().trackError(message, e, operationsResult);
-                    getCountError().add(getWorkPoolService().getTable(operationsResult));
+                    errorsHandling(ErrorType.DELETE, data, sourceTable, null, operationsResult, e);
                     
                     return false;
                 }
             }
         } catch (SQLException e) {
             // Поглощаем и логгируем ошибки извлечения данных из источника
-            String message = String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка извлечения данных из источника: \n[ tableName = %s  [ row = [ id = %s ] ] ]", 
-                    data.getRunner().getId(), 
-                    data.getRunner().getDescription(), 
-                    data.getId(), 
-                    sourceTable.getName(), 
-                    String.valueOf(getWorkPoolService().getForeign(operationsResult))); 
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(message, e);
-            } else {
-                LOG.warn(message + NEW_LINE + e.getMessage());
-            }
-            getWorkPoolService().trackError(message, e, operationsResult);
-            getCountError().add(getWorkPoolService().getTable(operationsResult));
-
+            errorsHandling(ErrorType.EXTRACT_SOURCE, data, sourceTable, null, operationsResult, e);
+            
             return false;
         }
     }
