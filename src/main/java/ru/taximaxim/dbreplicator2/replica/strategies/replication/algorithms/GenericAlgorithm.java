@@ -276,8 +276,8 @@ public class GenericAlgorithm implements Strategy {
      * @param operationsResult
      * @throws SQLException
      */
-    protected void errorsHandling(String messTemplate, String rowMess, StrategyModel data, TableModel sourceTable,
-            ResultSet sourceResult, ResultSet operationsResult, SQLException e) throws SQLException {
+    protected void errorsHandling(String messTemplate, String rowMess, StrategyModel data,
+            TableModel sourceTable, ResultSet operationsResult, SQLException e) throws SQLException {
         
         String message = String.format(messTemplate, 
                 data.getRunner().getId(), 
@@ -355,7 +355,7 @@ public class GenericAlgorithm implements Strategy {
                             // Поглощаем и логгируем ошибки обновления
                             errorsHandling("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при обновлении записи: \n[ tableName = %s  [ row = %s ] ]",
                                     Jdbc.resultSetToString(sourceResult, getSourceDataService().getAllCols(sourceTable)),
-                                    data, sourceTable, sourceResult, operationsResult, e);
+                                    data, sourceTable, operationsResult, e);
                             
                             return false;
                         }
@@ -371,7 +371,7 @@ public class GenericAlgorithm implements Strategy {
                             // Поглощаем и логгируем ошибки вставки
                             errorsHandling("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при вставке записи: \n[ tableName = %s  [ row = %s ] ]",
                                     Jdbc.resultSetToString(sourceResult, getSourceDataService().getAllCols(sourceTable)),
-                                    data, sourceTable, sourceResult, operationsResult, e);
+                                    data, sourceTable, operationsResult, e);
                             
                             return false;
                         }
@@ -380,7 +380,7 @@ public class GenericAlgorithm implements Strategy {
                     // Поглощаем и логгируем ошибки извлечения данных из приемника
                     errorsHandling("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка извлечения данных из приемника: \n[ tableName = %s  [ row = %s ] ]",
                             Jdbc.resultSetToString(sourceResult, getSourceDataService().getAllCols(sourceTable)),
-                            data, sourceTable, sourceResult, operationsResult, e);
+                            data, sourceTable, operationsResult, e);
                     
                     return false;
                 }
@@ -397,7 +397,7 @@ public class GenericAlgorithm implements Strategy {
                     // Поглощаем и логгируем ошибки удаления
                     errorsHandling("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при удалении записи: \n[ tableName = %s  [ row = [ id = %s ] ] ]",
                             String.valueOf(getWorkPoolService().getForeign(operationsResult)),
-                            data, sourceTable, null, operationsResult, e);
+                            data, sourceTable, operationsResult, e);
                     
                     return false;
                 }
@@ -406,7 +406,7 @@ public class GenericAlgorithm implements Strategy {
             // Поглощаем и логгируем ошибки извлечения данных из источника
             errorsHandling("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка извлечения данных из источника: \n[ tableName = %s  [ row = [ id = %s ] ] ]",
                     String.valueOf(getWorkPoolService().getForeign(operationsResult)),
-                    data, sourceTable, null, operationsResult, e);
+                    data, sourceTable, operationsResult, e);
             
             return false;
         }
