@@ -304,13 +304,7 @@ public class GenericAlgorithm implements Strategy {
                 data.getId(),
                 operationsResult.getString(4)); 
         SQLException e = new SQLException(message);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(message, e);
-        } else {
-            LOG.warn(message + NEW_LINE + e.getMessage());
-        }
-        getWorkPoolService().trackError(message, e, operationsResult);
-        getCountError().add(getWorkPoolService().getTable(operationsResult));
+        addErrorLog(message, e, operationsResult);
     }
     
     /**
@@ -334,7 +328,11 @@ public class GenericAlgorithm implements Strategy {
                 data.getRunner().getDescription(), 
                 data.getId(),
                 getDestTable(data, sourceTable).getName(),
-                rowMess); 
+                rowMess);
+        addErrorLog(message, e, operationsResult);
+    }
+    
+    protected void addErrorLog(String message, SQLException e, ResultSet operationsResult) throws SQLException {
         if (LOG.isDebugEnabled()) {
             LOG.debug(message, e);
         } else {
