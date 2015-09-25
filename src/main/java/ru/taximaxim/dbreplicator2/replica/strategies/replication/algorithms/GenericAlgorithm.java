@@ -79,40 +79,6 @@ public class GenericAlgorithm implements Strategy {
     protected Map<TableModel, TableModel> destTables = new HashMap<TableModel, TableModel>();
     
     /**
-     * Перечисление возможных типов ошибок при репликации
-     * @author petrov_im
-     *
-     */
-    protected enum ErrorType {
-        INSERT,
-        UPDATE,
-        DELETE,
-        EXTRACT_DEST,
-        EXTRACT_SOURCE;
-        
-        /**
-         * Текст сообщения в зависимости от типа ошибки
-         * @return
-         */
-        public String getMessageBody() {
-            switch(this) {
-            case INSERT:
-                return "Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при вставке записи: \n[ tableName = %s  [ row = %s ] ]";
-            case UPDATE:
-                return "Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при обновлении записи: \n[ tableName = %s  [ row = %s ] ]";
-            case DELETE:
-                return "Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при удалении записи: \n[ tableName = %s  [ row = [ id = %s ] ] ]";
-            case EXTRACT_DEST:
-                return "Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка извлечения данных из приемника: \n[ tableName = %s  [ row = %s ] ]";
-            case EXTRACT_SOURCE:
-                return "Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка извлечения данных из источника: \n[ tableName = %s  [ row = [ id = %s ] ] ]";
-            default:
-                return "Неизвестный тип ошибки!";
-            }
-        }
-    }
-    
-    /**
      * Конструктор нпо умолчанию
      * 
      * @param fetchSize - размер выборки данных
@@ -310,17 +276,10 @@ public class GenericAlgorithm implements Strategy {
      * @param operationsResult
      * @throws SQLException
      */
-    protected void errorsHandling(ErrorType eType, StrategyModel data, TableModel sourceTable,
+    protected void errorsHandling(String messTemplate, String rowMess, StrategyModel data, TableModel sourceTable,
             ResultSet sourceResult, ResultSet operationsResult, SQLException e) throws SQLException {
         
-        String rowMess;
-        if (eType == ErrorType.DELETE || eType == ErrorType.EXTRACT_SOURCE) {
-            rowMess = String.valueOf(getWorkPoolService().getForeign(operationsResult));
-        } else {
-            rowMess = Jdbc.resultSetToString(sourceResult, 
-                    getSourceDataService().getAllCols(sourceTable));
-        }
-        String message = String.format(eType.getMessageBody(), 
+        String message = String.format(messTemplate, 
                 data.getRunner().getId(), 
                 data.getRunner().getDescription(), 
                 data.getId(),
@@ -329,6 +288,13 @@ public class GenericAlgorithm implements Strategy {
         addErrorLog(message, e, operationsResult);
     }
     
+    /**
+     * Вывод ошибки в лог и добавление в таблицу rep2_error_logs
+     * @param message
+     * @param e
+     * @param operationsResult
+     * @throws SQLException
+     */
     protected void addErrorLog(String message, SQLException e, ResultSet operationsResult) throws SQLException {
         if (LOG.isDebugEnabled()) {
             LOG.debug(message, e);
@@ -387,7 +353,9 @@ public class GenericAlgorithm implements Strategy {
                             return true;
                         } catch (SQLException e) {
                             // Поглощаем и логгируем ошибки обновления
-                            errorsHandling(ErrorType.UPDATE, data, sourceTable, sourceResult, operationsResult, e);
+                            errorsHandling("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при обновлении записи: \n[ tableName = %s  [ row = %s ] ]",
+                                    Jdbc.resultSetToString(sourceResult, getSourceDataService().getAllCols(sourceTable)),
+                                    data, sourceTable, sourceResult, operationsResult, e);
                             
                             return false;
                         }
@@ -401,14 +369,18 @@ public class GenericAlgorithm implements Strategy {
                             return true;
                         } catch (SQLException e) {
                             // Поглощаем и логгируем ошибки вставки
-                            errorsHandling(ErrorType.INSERT, data, sourceTable, sourceResult, operationsResult, e);
+                            errorsHandling("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при вставке записи: \n[ tableName = %s  [ row = %s ] ]",
+                                    Jdbc.resultSetToString(sourceResult, getSourceDataService().getAllCols(sourceTable)),
+                                    data, sourceTable, sourceResult, operationsResult, e);
                             
                             return false;
                         }
                     }
                 } catch (SQLException e) {
                     // Поглощаем и логгируем ошибки извлечения данных из приемника
-                    errorsHandling(ErrorType.EXTRACT_DEST, data, sourceTable, sourceResult, operationsResult, e);
+                    errorsHandling("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка извлечения данных из приемника: \n[ tableName = %s  [ row = %s ] ]",
+                            Jdbc.resultSetToString(sourceResult, getSourceDataService().getAllCols(sourceTable)),
+                            data, sourceTable, sourceResult, operationsResult, e);
                     
                     return false;
                 }
@@ -423,14 +395,18 @@ public class GenericAlgorithm implements Strategy {
                     return true;
                 } catch (SQLException e) {
                     // Поглощаем и логгируем ошибки удаления
-                    errorsHandling(ErrorType.DELETE, data, sourceTable, null, operationsResult, e);
+                    errorsHandling("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при удалении записи: \n[ tableName = %s  [ row = [ id = %s ] ] ]",
+                            String.valueOf(getWorkPoolService().getForeign(operationsResult)),
+                            data, sourceTable, null, operationsResult, e);
                     
                     return false;
                 }
             }
         } catch (SQLException e) {
             // Поглощаем и логгируем ошибки извлечения данных из источника
-            errorsHandling(ErrorType.EXTRACT_SOURCE, data, sourceTable, null, operationsResult, e);
+            errorsHandling("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка извлечения данных из источника: \n[ tableName = %s  [ row = [ id = %s ] ] ]",
+                    String.valueOf(getWorkPoolService().getForeign(operationsResult)),
+                    data, sourceTable, null, operationsResult, e);
             
             return false;
         }
