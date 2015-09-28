@@ -228,7 +228,7 @@ public class RunnerModel implements Runner {
     @Override
     public String toString() {
         return "RunnerModel [id=" + id + ", source=" + source.getPoolId() + ", target=" + target.getPoolId()
-                + ", description=" + description;
+                + ", description=" + description + "]";
     }
     
     /* (non-Javadoc)

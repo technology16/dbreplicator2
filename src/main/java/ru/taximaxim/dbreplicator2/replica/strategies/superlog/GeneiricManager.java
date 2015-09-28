@@ -30,9 +30,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
-
+import java.util.TreeMap;
 import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
@@ -55,8 +55,6 @@ public abstract class GeneiricManager extends StrategySkeleton implements Strate
 
     private static final Logger LOG = Logger.getLogger(GeneiricManager.class);
     
-    private List<TableModel> tables;
-    
     /**
      * Конструктор по умолчанию
      */
@@ -74,6 +72,10 @@ public abstract class GeneiricManager extends StrategySkeleton implements Strate
         sourceConnection.setAutoCommit(false);
         targetConnection.setAutoCommit(false);
         BoneCPSettingsModel sourcePool = data.getRunner().getSource();
+        
+        Map<String, Collection<RunnerModel>> tableObservers = 
+                getTableObservers(sourcePool);
+        
         try {
             sourceConnection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
             targetConnection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
@@ -85,7 +87,7 @@ public abstract class GeneiricManager extends StrategySkeleton implements Strate
                     PreparedStatement selectSuperLog = sourceConnection.prepareStatement("SELECT * FROM rep2_superlog ORDER BY id_superlog");) {
                 selectSuperLog.setFetchSize(fetchSize);
                 try (ResultSet superLogResult = selectSuperLog.executeQuery();) {
-                    List<String> cols = new ArrayList<String>();
+                    Collection<String> cols = new ArrayList<String>();
                     cols.add(WorkPoolService.ID_SUPERLOG);
                     cols.add(WorkPoolService.ID_POOL);
                     cols.add(WorkPoolService.ID_FOREIGN);
@@ -100,34 +102,29 @@ public abstract class GeneiricManager extends StrategySkeleton implements Strate
                             LOG.debug(Jdbc.resultSetToString(superLogResult, cols));
                         }
                         // Копируем записи
-                        // Проходим по списку слушателей текущей таблицы
-                        for (TableModel table : getTables(sourcePool)) {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug(table.getName() + " id: " + table.getTableId());
-                            }
-                            if (table.getName().equalsIgnoreCase(superLogResult.getString(WorkPoolService.ID_TABLE))) {
-                                for (RunnerModel runner : getRunners(sourcePool, table.getName())) {
-                                    if (!superLogResult.getString(WorkPoolService.ID_POOL).equals(runner.getTarget().getPoolId())) {
-                                        insertRunnerData.setInt(1, runner.getId());
-                                        insertRunnerData.setLong(2, superLogResult.getLong(WorkPoolService.ID_SUPERLOG));
-                                        insertRunnerData.setInt(3, superLogResult.getInt(WorkPoolService.ID_FOREIGN));
-                                        insertRunnerData.setString(4, superLogResult.getString(WorkPoolService.ID_TABLE));
-                                        insertRunnerData.setString(5, superLogResult.getString(WorkPoolService.C_OPERATION));
-                                        insertRunnerData.setTimestamp(6, superLogResult.getTimestamp(WorkPoolService.C_DATE));
-                                        insertRunnerData.setString(7, superLogResult.getString(WorkPoolService.ID_TRANSACTION));
-                                        insertRunnerData.addBatch();
-                                        // Выводим данные из rep2_superlog_table
-                                        if (LOG.isDebugEnabled()) {
-                                            LOG.debug("INSERT");
-                                        }
-                                        runners.add(runner);
+                        String tableName = superLogResult.getString(WorkPoolService.ID_TABLE);
+                        Collection<RunnerModel> observers = tableObservers.get(tableName);
+                        if (observers!=null) {
+                            for (RunnerModel runner : observers) {
+                                if (!superLogResult.getString(WorkPoolService.ID_POOL).equals(runner.getTarget().getPoolId())) {
+                                    insertRunnerData.setInt(1, runner.getId());
+                                    insertRunnerData.setLong(2, superLogResult.getLong(WorkPoolService.ID_SUPERLOG));
+                                    insertRunnerData.setInt(3, superLogResult.getInt(WorkPoolService.ID_FOREIGN));
+                                    insertRunnerData.setString(4, tableName);
+                                    insertRunnerData.setString(5, superLogResult.getString(WorkPoolService.C_OPERATION));
+                                    insertRunnerData.setTimestamp(6, superLogResult.getTimestamp(WorkPoolService.C_DATE));
+                                    insertRunnerData.setString(7, superLogResult.getString(WorkPoolService.ID_TRANSACTION));
+                                    insertRunnerData.addBatch();
+                                    // Выводим данные из rep2_superlog_table
+                                    if (LOG.isDebugEnabled()) {
+                                        LOG.debug("INSERT");
                                     }
-                                    // Удаляем исходную запись
-                                    deleteSuperLog.setLong(1, superLogResult.getLong(WorkPoolService.ID_SUPERLOG));
-                                    deleteSuperLog.addBatch();
+                                    runners.add(runner);
                                 }
+                                // Удаляем исходную запись
+                                deleteSuperLog.setLong(1, superLogResult.getLong(WorkPoolService.ID_SUPERLOG));
+                                deleteSuperLog.addBatch();
                             }
-
                         }
 
                         // Периодически сбрасываем батч в БД
@@ -154,8 +151,8 @@ public abstract class GeneiricManager extends StrategySkeleton implements Strate
         }
         // запускаем обработчики реплик
         Set<RunnerModel> runners = new HashSet<RunnerModel>();
-        for (TableModel table : getTables(sourcePool)) {
-            runners.addAll(getRunners(sourcePool, table.getName()));
+        for (Collection<RunnerModel> observers : tableObservers.values()) {
+            runners.addAll(observers);
         }
         startRunners(runners);
 
@@ -179,57 +176,27 @@ public abstract class GeneiricManager extends StrategySkeleton implements Strate
             LOG.warn("Ошибка при возврате автокомита в исходное состояние.", sqlException);
         }
     }
-
     
     /**
-     * Получение списка раннеров, обрабатывающих таблицу с данным наименованием
-     */
-    public List<RunnerModel> getRunners(BoneCPSettingsModel sourcePool, String tableName) {
-        List<RunnerModel> runners = new ArrayList<RunnerModel>();
-        for (TableModel table : getTables(sourcePool, tableName)) {
-            runners.add(table.getRunner());
-        }
-        return runners;
-    }
-    
-    /**
-     * Получение списка таблиц в текущей БД
+     * Получение привязки списка раннеров к именам таблиц в текущей БД
      * 
      * @return
      */
-    public List<TableModel> getTables(BoneCPSettingsModel sourcePool) {
-        if (tables == null) {
-            tables = new ArrayList<TableModel>();
-            for (RunnerModel runner : sourcePool.getRunners()) {
-                if (runner.getTables() != null) {
-                    for (TableModel table : runner.getTables()) {
-                        if (!tables.contains(table)) {
-                            tables.add(table);
-                        }
-                    }
-                }
-            }
-        }
-        return tables;
-    }
-    
-    /**
-     * Получение списка таблиц в текущей БД, с наименованием tableName
-     * 
-     * @return
-     */
-    public List<TableModel> getTables(BoneCPSettingsModel sourcePool, String tableName) {
-        List<TableModel> tablesWithName = new ArrayList<TableModel>();
+    public Map<String, Collection<RunnerModel>> getTableObservers(BoneCPSettingsModel sourcePool) {
+        Map<String, Collection<RunnerModel>> tableObservers = 
+                new TreeMap<String, Collection<RunnerModel>>(String.CASE_INSENSITIVE_ORDER);
         for (RunnerModel runner : sourcePool.getRunners()) {
-            if (runner.getTables() != null) {
-                for (TableModel table : runner.getTables()) {
-                    if (table.getName().equalsIgnoreCase(tableName)) {
-                        tablesWithName.add(table);
-                    }
+            for (TableModel table : runner.getTables()) {
+                String tableName = table.getName();
+                Collection<RunnerModel> observers = tableObservers.get(tableName);
+                if (observers==null) {
+                    observers = new ArrayList<RunnerModel>();
+                    tableObservers.put(tableName, observers);
                 }
+                observers.add(runner);
             }
         }
-        return tablesWithName;
+        return tableObservers;
     }
     
     /**

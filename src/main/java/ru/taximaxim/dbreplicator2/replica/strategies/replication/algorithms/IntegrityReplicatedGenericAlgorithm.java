@@ -49,6 +49,8 @@ import ru.taximaxim.dbreplicator2.replica.strategies.replication.workpool.WorkPo
  */
 public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implements Strategy {
 
+    private static final String INTEGRITY_ERROR = "Ошибка в целостности реплицированных данных [%s => %s]\n";
+
     private static final Logger LOG = Logger.getLogger(IntegrityReplicatedGenericAlgorithm.class);
     
     private static final String ID_RUNNER = "idRunner";
@@ -87,6 +89,98 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
         return destDataService;
     }
     
+    /* (non-Javadoc)
+     * @see ru.taximaxim.dbreplicator2.replica.strategies.replication.algorithms.GenericAlgorithm#replicateRecord(ru.taximaxim.dbreplicator2.model.StrategyModel, java.sql.ResultSet, ru.taximaxim.dbreplicator2.model.TableModel, ru.taximaxim.dbreplicator2.model.TableModel, java.sql.ResultSet)
+     */
+    @Override
+    protected boolean replicateRecord(StrategyModel data, ResultSet operationsResult,
+            TableModel sourceTable, TableModel destTable, ResultSet sourceResult)
+            throws SQLException {
+        // Вместо репликации проверяем запись
+        StringBuffer rowDumpHead = new StringBuffer(String.format(
+                INTEGRITY_ERROR, data
+                        .getRunner().getSource().getPoolId(), data.getRunner()
+                        .getTarget().getPoolId()));
+        List<String> priCols = new ArrayList<String>(getSourceDataService().getPriCols(
+                sourceTable));
+
+        PreparedStatement selectTargetStatement = getDestDataService()
+                .getSelectStatement(destTable);
+        selectTargetStatement.setLong(1, getWorkPoolService()
+                .getForeign(operationsResult));
+
+        try (ResultSet targetResult = selectTargetStatement.executeQuery();) {
+            if (targetResult.next()) {
+                Map<String, Integer> colsSource = new HashMap<String, Integer>(
+                        getSourceDataService().getAllColsTypes(sourceTable));
+
+                boolean errorRows = false;
+                for (Entry<String, Integer> column : colsSource.entrySet()) {
+                    String colsName = column.getKey();
+                    if (!JdbcMetadata.isEquals(sourceResult, targetResult, colsName,
+                            column.getValue())) {
+                        String rowDump = String.format("[ поле %s => [%s != %s] ] ",
+                                colsName, sourceResult.getObject(colsName),
+                                targetResult.getObject(colsName));
+                        rowDumpHead.append(rowDump);
+                        errorRows = true;
+                    }
+                }
+                if (errorRows) {
+                    rowDumpHead.insert(0, String.format(
+                            "Ошибка в таблицах %s -> %s, данные не равны в строке %s: ",
+                            sourceTable.getName(), destTable.getName(),
+                            Jdbc.resultSetToString(sourceResult, priCols)));
+                    getWorkPoolService().trackError(rowDumpHead.toString(),
+                            new SQLException(), operationsResult);
+
+                    return false;
+                } else {
+                    getWorkPoolService().clearWorkPoolData(operationsResult);
+                    return true;
+                }
+            }
+        }
+
+        rowDumpHead.append(String.format(
+                "Ошибка в таблице %s, отсутствует запись приемнике %s",
+                destTable.getName(), Jdbc.resultSetToString(sourceResult, priCols)));
+        getWorkPoolService().trackError(rowDumpHead.toString(), new SQLException(),
+                operationsResult);
+        return false;
+    }
+
+    /* (non-Javadoc)
+     * @see ru.taximaxim.dbreplicator2.replica.strategies.replication.algorithms.GenericAlgorithm#deleteRecord(ru.taximaxim.dbreplicator2.model.StrategyModel, java.sql.ResultSet, ru.taximaxim.dbreplicator2.model.TableModel, ru.taximaxim.dbreplicator2.model.TableModel)
+     */
+    @Override
+    protected boolean deleteRecord(StrategyModel data, ResultSet operationsResult,
+            TableModel sourceTable, TableModel destTable) throws SQLException {
+        // Вместо удаления проверяем отсутствие записи в приемнике
+        PreparedStatement selectTargetStatement = getDestDataService()
+                .getSelectStatement(destTable);
+        selectTargetStatement.setLong(1, getWorkPoolService().getForeign(operationsResult));
+        try (ResultSet targetResult = selectTargetStatement.executeQuery();) {            
+            if(targetResult.next()) {
+                StringBuffer rowDumpHead = new StringBuffer(String.format(
+                        INTEGRITY_ERROR, data
+                                .getRunner().getSource().getPoolId(), data.getRunner()
+                                .getTarget().getPoolId()));
+                List<String> priCols = new ArrayList<String>(getSourceDataService().getPriCols(
+                        sourceTable));
+                
+                rowDumpHead.append(String.format(
+                        "Ошибка в таблице %s, присутствует удаленная запись приемнике %s",
+                        destTable.getName(),
+                        Jdbc.resultSetToString(targetResult, priCols)));
+                    getWorkPoolService().trackError(rowDumpHead.toString(), new SQLException(), operationsResult);
+                    return false;
+            }
+        }
+        getWorkPoolService().clearWorkPoolData(operationsResult);
+        return true;
+    }
+
     /**
      * Функция отбора обрабатываемых операций из очереди операций.
      * Для каждой операции вызывается функция replicateOperation(...).
@@ -137,86 +231,18 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
         // Подтверждаем транзакцию
         deleteWorkPoolData.executeBatch();
     }
-    
+
     /* (non-Javadoc)
-     * @see ru.taximaxim.dbreplicator2.replica.strategies.replication.GenericAlgorithm#replicateOperation(ru.taximaxim.dbreplicator2.model.StrategyModel, ru.taximaxim.dbreplicator2.replica.strategies.replication.workpool.WorkPoolService, ru.taximaxim.dbreplicator2.replica.strategies.replication.data.DataService, ru.taximaxim.dbreplicator2.replica.strategies.replication.data.DataService, java.sql.ResultSet)
+     * @see ru.taximaxim.dbreplicator2.replica.strategies.replication.algorithms.GenericAlgorithm#getSourceTable(ru.taximaxim.dbreplicator2.model.StrategyModel, java.sql.ResultSet)
      */
     @Override
-    protected boolean replicateOperation(StrategyModel data, ResultSet operationsResult) throws SQLException {
-        boolean result = true;
-        TableModel sourceTable = data.getRunner().getSource()
+    protected TableModel getSourceTable(StrategyModel data, ResultSet operationsResult)
+            throws SQLException {
+        return data.getRunner().getSource()
                 .getRunner(Integer.parseInt(data.getParam(ID_RUNNER)))
                 .getTable(getWorkPoolService().getTable(operationsResult));
-        TableModel destTable = getDestTable(data, sourceTable);
-        
-        // Извлекаем данные из исходной таблицы
-        PreparedStatement selectSourceStatement = getSourceDataService()
-                .getSelectStatement(sourceTable);
-        selectSourceStatement.setLong(1, getWorkPoolService()
-                .getForeign(operationsResult));
-
-        PreparedStatement selectTargetStatement = getDestDataService()
-                .getSelectStatement(destTable);
-
-        try (ResultSet sourceResult = selectSourceStatement.executeQuery();) {
-            StringBuffer rowDumpHead = new StringBuffer(String.format("Ошибка в целостности реплицированных данных [%s => %s]\n",
-                    data.getRunner().getSource().getPoolId(),
-                    data.getRunner().getTarget().getPoolId()));
-            Map<String, Integer> colsSource = new HashMap<String, Integer>(getSourceDataService().getAllColsTypes(sourceTable));
-            List<String> priCols = new ArrayList<String>(getSourceDataService().getPriCols(sourceTable));
-            if(sourceResult.next()) {
-                selectTargetStatement.setLong(1, getWorkPoolService().getForeign(operationsResult));
-                
-                try (ResultSet targetResult = selectTargetStatement.executeQuery();) {            
-                    if(targetResult.next()) {
-                        boolean errorRows = false;
-                        for (Entry<String, Integer> column: colsSource.entrySet()) {
-                            String colsName = column.getKey();
-                            if(!JdbcMetadata.isEquals(sourceResult, targetResult, colsName, column.getValue())) {
-                                String rowDump = String.format("[ поле %s => [%s != %s] ] ",  colsName, sourceResult.getObject(colsName), targetResult.getObject(colsName));
-                                rowDumpHead.append(rowDump);
-                                errorRows = true;
-                             }
-                        }
-                        if(errorRows) {
-                            result = false;
-                            rowDumpHead.insert(0, String.format("Ошибка в таблицах %s -> %s, данные не равны в строке %s: ", 
-                                    sourceTable.getName(),
-                                    destTable.getName(),
-                                    Jdbc.resultSetToString(sourceResult, priCols)));
-                            getWorkPoolService().trackError(rowDumpHead.toString(), new SQLException(), operationsResult);
- 
-                        } else {
-                            getWorkPoolService().clearWorkPoolData(operationsResult);
-                        }
-                    } else {
-                        rowDumpHead.append(String.format(
-                            "Ошибка в таблице %s, отсутствует запись приемнике %s",
-                            destTable.getName(),
-                            Jdbc.resultSetToString(sourceResult, priCols)));
-                        getWorkPoolService().trackError(rowDumpHead.toString(), new SQLException(), operationsResult);
-                        result = false;
-                    }
-                }
-            } else {
-                selectTargetStatement.setLong(1, getWorkPoolService().getForeign(operationsResult));
-                try (ResultSet targetResult = selectTargetStatement.executeQuery();) {            
-                    if(targetResult.next()) {
-                        rowDumpHead.append(String.format(
-                                "Ошибка в таблице %s, присутствует удаленная запись приемнике %s",
-                                destTable.getName(),
-                                Jdbc.resultSetToString(targetResult, priCols)));
-                            getWorkPoolService().trackError(rowDumpHead.toString(), new SQLException(), operationsResult);
-                            result = false;
-                    } else {
-                        getWorkPoolService().clearWorkPoolData(operationsResult);
-                    }
-                }
-            }
-        }
-        return result;
     }
-    
+
     /**
      * Получение сопоставленной таблицы в приемке для таблицы источника
      * 
