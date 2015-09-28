@@ -124,9 +124,9 @@ public class IntegrityReplicatedDataTest extends AbstractReplicationTest {
         Thread.sleep(REPLICATION_DELAY);
         
         count_rep2_errors_log = Helper.InfoCount(conn, "rep2_errors_log where c_status = 0"); 
-        assertTrue(String.format("Должны быть ошибки исправлены rep2_errors_log [%s==0]", count_rep2_errors_log), count_rep2_errors_log == 0);
-        
         Helper.InfoSelect(conn, "rep2_errors_log");
+        
+        assertTrue(String.format("Должны быть ошибки исправлены rep2_errors_log [%s==0]", count_rep2_errors_log), count_rep2_errors_log == 0);
     }
 
     /**

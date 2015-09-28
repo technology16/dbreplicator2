@@ -228,6 +228,19 @@ public class GenericAlgorithm implements Strategy {
     }
 
     /**
+     * Получение таблицы источника
+     * 
+     * @param data
+     * @param operationsResult
+     * @return
+     * @throws SQLException
+     */
+    protected TableModel getSourceTable(StrategyModel data, ResultSet operationsResult)
+            throws SQLException {
+        return data.getRunner().getTable(getWorkPoolService().getTable(operationsResult));
+    }
+
+    /**
      * Получение сопоставленной таблицы в приемке для таблицы источника
      * 
      * @param data
@@ -265,7 +278,7 @@ public class GenericAlgorithm implements Strategy {
                 data.getRunner().getId(), 
                 data.getRunner().getDescription(), 
                 data.getId(),
-                operationsResult.getString(4)); 
+                getWorkPoolService().getTable(operationsResult)); 
         SQLException e = new SQLException(message);
         addErrorLog(message, e, operationsResult);
     }
@@ -372,6 +385,36 @@ public class GenericAlgorithm implements Strategy {
     }
 
     /**
+     * Удаляем запись в приемнике
+     * 
+     * @param data
+     * @param operationsResult
+     * @param sourceTable
+     * @param destTable
+     * @return
+     * @throws SQLException
+     */
+    protected boolean deleteRecord(StrategyModel data, ResultSet operationsResult,
+            TableModel sourceTable, TableModel destTable) throws SQLException {
+        // Если запись фактически отсутствует, то
+        // удалем ее в приемнике
+        try {
+            replicateDeletion(operationsResult, destTable);
+            getWorkPoolService().clearWorkPoolData(operationsResult);
+            getCountSuccess().add(getWorkPoolService().getTable(operationsResult));
+            
+            return true;
+        } catch (SQLException e) {
+            // Поглощаем и логгируем ошибки удаления
+            errorsHandling("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при удалении записи: \n[ tableName = %s  [ row = [ id = %s ] ] ]",
+                    String.valueOf(getWorkPoolService().getForeign(operationsResult)),
+                    data, sourceTable, operationsResult, e);
+            
+            return false;
+        }
+    }
+
+    /**
      * Функция для репликации данных. Здесь вызываются подфункции репликации 
      * конкретных операций и обрабатываются исключительнык ситуации.
      * 
@@ -384,7 +427,7 @@ public class GenericAlgorithm implements Strategy {
      */
     protected boolean replicateOperation(StrategyModel data, 
             ResultSet operationsResult) throws SQLException{
-        TableModel sourceTable = data.getRunner().getTable(getWorkPoolService().getTable(operationsResult));
+        TableModel sourceTable = getSourceTable(data, operationsResult);
         if (sourceTable == null) {
             // Обработка возможной ошибки при рестарте
             // с непустым воркпулом
@@ -403,22 +446,7 @@ public class GenericAlgorithm implements Strategy {
                 return replicateRecord(data, operationsResult, sourceTable, destTable,
                         sourceResult);
             } else {
-                // Если запись фактически отсутствует, то
-                // удалем ее в приемнике
-                try {
-                    replicateDeletion(operationsResult, destTable);
-                    getWorkPoolService().clearWorkPoolData(operationsResult);
-                    getCountSuccess().add(getWorkPoolService().getTable(operationsResult));
-                    
-                    return true;
-                } catch (SQLException e) {
-                    // Поглощаем и логгируем ошибки удаления
-                    errorsHandling("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при удалении записи: \n[ tableName = %s  [ row = [ id = %s ] ] ]",
-                            String.valueOf(getWorkPoolService().getForeign(operationsResult)),
-                            data, sourceTable, operationsResult, e);
-                    
-                    return false;
-                }
+                return deleteRecord(data, operationsResult, sourceTable, destTable);
             }
         } catch (SQLException e) {
             // Поглощаем и логгируем ошибки извлечения данных из источника
