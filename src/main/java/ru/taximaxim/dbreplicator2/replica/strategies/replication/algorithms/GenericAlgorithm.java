@@ -306,6 +306,72 @@ public class GenericAlgorithm implements Strategy {
     }
     
     /**
+     * Реплицируем данные записи в приемник
+     * 
+     * @param data
+     * @param operationsResult
+     * @param sourceTable
+     * @param destTable
+     * @param sourceResult
+     * @return
+     * @throws SQLException
+     */
+    protected boolean replicateRecord(StrategyModel data, ResultSet operationsResult,
+            TableModel sourceTable, TableModel destTable, ResultSet sourceResult)
+            throws SQLException {
+        // Извлекаем данные из приемника
+        PreparedStatement selectDestStatement = 
+                getDestDataService().getSelectStatement(
+                        destTable);
+        selectDestStatement.setLong(1, getWorkPoolService().getForeign(operationsResult));
+        try (ResultSet destResult = selectDestStatement.executeQuery();) {
+            if (destResult.next()) {
+                // Добавляем данные в целевую таблицу
+                // 0    - запись отсутствует в приемнике
+                // 1    - запись обновлена
+                // Пробуем обновить запись
+                try {
+                    replicateUpdation(sourceTable, destTable, sourceResult);
+                    getWorkPoolService().clearWorkPoolData(operationsResult);
+                    getCountSuccess().add(getWorkPoolService().getTable(operationsResult));
+                    
+                    return true;
+                } catch (SQLException e) {
+                    // Поглощаем и логгируем ошибки обновления
+                    errorsHandling("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при обновлении записи: \n[ tableName = %s  [ row = %s ] ]",
+                            Jdbc.resultSetToString(sourceResult, getSourceDataService().getAllCols(sourceTable)),
+                            data, sourceTable, operationsResult, e);
+                    
+                    return false;
+                }
+            } else {
+                try {
+                    // и если такой записи нет, то пытаемся вставить
+                    replicateInsertion(sourceTable, destTable, sourceResult);
+                    getWorkPoolService().clearWorkPoolData(operationsResult);
+                    getCountSuccess().add(getWorkPoolService().getTable(operationsResult));
+                    
+                    return true;
+                } catch (SQLException e) {
+                    // Поглощаем и логгируем ошибки вставки
+                    errorsHandling("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при вставке записи: \n[ tableName = %s  [ row = %s ] ]",
+                            Jdbc.resultSetToString(sourceResult, getSourceDataService().getAllCols(sourceTable)),
+                            data, sourceTable, operationsResult, e);
+                    
+                    return false;
+                }
+            }
+        } catch (SQLException e) {
+            // Поглощаем и логгируем ошибки извлечения данных из приемника
+            errorsHandling("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка извлечения данных из приемника: \n[ tableName = %s  [ row = %s ] ]",
+                    Jdbc.resultSetToString(sourceResult, getSourceDataService().getAllCols(sourceTable)),
+                    data, sourceTable, operationsResult, e);
+            
+            return false;
+        }
+    }
+
+    /**
      * Функция для репликации данных. Здесь вызываются подфункции репликации 
      * конкретных операций и обрабатываются исключительнык ситуации.
      * 
@@ -334,56 +400,8 @@ public class GenericAlgorithm implements Strategy {
         selectSourceStatement.setLong(1, getWorkPoolService().getForeign(operationsResult));
         try (ResultSet sourceResult = selectSourceStatement.executeQuery();) {
             if (sourceResult.next()) {
-                // Извлекаем данные из приемника
-                PreparedStatement selectDestStatement = 
-                        getDestDataService().getSelectStatement(
-                                destTable);
-                selectDestStatement.setLong(1, getWorkPoolService().getForeign(operationsResult));
-                try (ResultSet destResult = selectDestStatement.executeQuery();) {
-                    if (destResult.next()) {
-                        // Добавляем данные в целевую таблицу
-                        // 0    - запись отсутствует в приемнике
-                        // 1    - запись обновлена
-                        // Пробуем обновить запись
-                        try {
-                            replicateUpdation(sourceTable, destTable, sourceResult);
-                            getWorkPoolService().clearWorkPoolData(operationsResult);
-                            getCountSuccess().add(getWorkPoolService().getTable(operationsResult));
-                            
-                            return true;
-                        } catch (SQLException e) {
-                            // Поглощаем и логгируем ошибки обновления
-                            errorsHandling("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при обновлении записи: \n[ tableName = %s  [ row = %s ] ]",
-                                    Jdbc.resultSetToString(sourceResult, getSourceDataService().getAllCols(sourceTable)),
-                                    data, sourceTable, operationsResult, e);
-                            
-                            return false;
-                        }
-                    } else {
-                        try {
-                            // и если такой записи нет, то пытаемся вставить
-                            replicateInsertion(sourceTable, destTable, sourceResult);
-                            getWorkPoolService().clearWorkPoolData(operationsResult);
-                            getCountSuccess().add(getWorkPoolService().getTable(operationsResult));
-                            
-                            return true;
-                        } catch (SQLException e) {
-                            // Поглощаем и логгируем ошибки вставки
-                            errorsHandling("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка при вставке записи: \n[ tableName = %s  [ row = %s ] ]",
-                                    Jdbc.resultSetToString(sourceResult, getSourceDataService().getAllCols(sourceTable)),
-                                    data, sourceTable, operationsResult, e);
-                            
-                            return false;
-                        }
-                    }
-                } catch (SQLException e) {
-                    // Поглощаем и логгируем ошибки извлечения данных из приемника
-                    errorsHandling("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Поглощена ошибка извлечения данных из приемника: \n[ tableName = %s  [ row = %s ] ]",
-                            Jdbc.resultSetToString(sourceResult, getSourceDataService().getAllCols(sourceTable)),
-                            data, sourceTable, operationsResult, e);
-                    
-                    return false;
-                }
+                return replicateRecord(data, operationsResult, sourceTable, destTable,
+                        sourceResult);
             } else {
                 // Если запись фактически отсутствует, то
                 // удалем ее в приемнике
