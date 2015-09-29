@@ -203,4 +203,12 @@ public class StrategyModel {
         }
         return this.prop;
     }
+    
+    /**
+     * Получение всех параметров в виде строки
+     * @return
+     */
+    public String getParam() {
+        return param;
+    }
 }
