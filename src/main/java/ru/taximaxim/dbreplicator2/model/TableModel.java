@@ -26,16 +26,22 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.StringReader;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
 import javax.persistence.*;
 
 import org.apache.log4j.Logger;
+
+import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 
 /**
  * Таблицы, обрабатываемые в пуле соединеий.
@@ -49,6 +55,9 @@ public class TableModel implements Cloneable{
 
     private static final String IGNORED_COLUMNS = "ignoredCols";
     private static final String REQUIRED_COLUMNS = "requiredCols";
+    private static final String DEST_TABLE_NAME = "dest";
+    private static final String CAST_FROM = "castfrom.";
+    private static final String CAST_TO = "castto.";
     
     /**
      * Идентификатор таблицы
@@ -252,5 +261,52 @@ public class TableModel implements Cloneable{
         result = prime * result + ((runner == null) ? 0 : runner.hashCode());
         result = prime * result + ((param == null) ? 0 : param.hashCode());
         return result;
+    }
+    
+    /**
+     * Получение наименование таблицы-приемника
+     * @return
+     */
+    public String getDestTableName() {
+        return getParam(DEST_TABLE_NAME);
+    }
+    
+    /**
+     * Возвращает map с кастованными полями для select запроса
+     * @param data
+     * @param columns
+     * @return
+     * @throws SQLException 
+     */
+    public Map<String, String> getCastFromColumns(StrategyModel data, Connection connection) throws SQLException {
+        Map<String, String> castFromColums = new HashMap<String, String>();
+        Collection<String> columns = JdbcMetadata.getColumns(connection, getName());
+        for (String column : columns) {
+            String castStatement = data.getParam(CAST_FROM + column.toLowerCase());
+            if (castStatement != null) {
+                castFromColums.put(column, castStatement);
+            }
+        }
+        return castFromColums;
+    }
+    
+    /**
+     *  Возвращает map с кастованными полями для insert запроса
+     * @param data
+     * @param columns
+     * @return
+     * @throws SQLException 
+     */
+    public Map<String, String> getCastToColumns(StrategyModel data, Connection connection) throws SQLException {
+        Map<String, String> castToColums = new HashMap<String, String>();
+        String destTableName = getDestTableName() == null ? getName() : getDestTableName();
+        Collection<String> columns = JdbcMetadata.getColumns(connection, destTableName);
+        for (String column : columns) {
+            String castStatement = data.getParam(CAST_TO + column.toLowerCase());
+            if (castStatement != null) {
+                castToColums.put(column, castStatement);
+            }
+        }
+        return castToColums;
     }
 }
