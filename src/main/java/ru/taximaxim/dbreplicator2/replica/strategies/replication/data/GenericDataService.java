@@ -168,7 +168,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
     public PreparedStatement getInsertStatement(TableModel table, Collection<String> avaliableCals) throws SQLException {
         PreparedStatement statement = getInsertStatements().get(table);
         if (statement == null) {
-            String insertQuery = QueryConstructors.constructInsertQuery(table.getName(),
+            String insertQuery = QueryConstructors.constructInsertQuery(table.getName(), 
                     getAllAvaliableCols(table, avaliableCals));
             statement = getConnection().prepareStatement(insertQuery);
 
