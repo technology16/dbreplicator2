@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.StringReader;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,8 +39,6 @@ import java.util.Set;
 import javax.persistence.*;
 
 import org.apache.log4j.Logger;
-
-import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 
 /**
  * Таблицы, обрабатываемые в пуле соединеий.
@@ -278,11 +275,10 @@ public class TableModel implements Cloneable{
      * @return
      * @throws SQLException 
      */
-    public Map<String, String> getCastFromColumns(StrategyModel data, Connection connection) throws SQLException {
+    public Map<String, String> getCastFromColumns(Collection<String> columns) throws SQLException {
         Map<String, String> castFromColums = new HashMap<String, String>();
-        Collection<String> columns = JdbcMetadata.getColumns(connection, getName());
         for (String column : columns) {
-            String castStatement = data.getParam(CAST_FROM + column.toLowerCase());
+            String castStatement = getParam(CAST_FROM + column.toLowerCase());
             if (castStatement != null) {
                 castFromColums.put(column, castStatement);
             }
@@ -297,12 +293,10 @@ public class TableModel implements Cloneable{
      * @return
      * @throws SQLException 
      */
-    public Map<String, String> getCastToColumns(StrategyModel data, Connection connection) throws SQLException {
+    public Map<String, String> getCastToColumns(Collection<String> columns) throws SQLException {
         Map<String, String> castToColums = new HashMap<String, String>();
-        String destTableName = getDestTableName() == null ? getName() : getDestTableName();
-        Collection<String> columns = JdbcMetadata.getColumns(connection, destTableName);
         for (String column : columns) {
-            String castStatement = data.getParam(CAST_TO + column.toLowerCase());
+            String castStatement = getParam(CAST_TO + column.toLowerCase());
             if (castStatement != null) {
                 castToColums.put(column, castStatement);
             }

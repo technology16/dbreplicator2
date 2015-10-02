@@ -134,6 +134,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
             statement = getConnection().prepareStatement(QueryConstructors
                     .constructSelectQuery(table.getName(),
                             getAllCols(table),
+                            table.getCastFromColumns(getAllCols(table)),
                             getPriCols(table),
                             table.getParam(WHERE)));
 
