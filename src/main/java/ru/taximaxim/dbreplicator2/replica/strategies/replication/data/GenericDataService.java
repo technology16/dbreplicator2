@@ -154,6 +154,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
             statement = getConnection().prepareStatement(QueryConstructors
                     .constructUpdateQuery(table.getName(),
                             getAvaliableDataCols(table, avaliableCals),
+                            table.getCastToColumns(getAvaliableDataCols(table, avaliableCals)),
                             getPriCols(table)));
 
             getUpdateStatements().put(table, statement);
@@ -169,9 +170,10 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
     public PreparedStatement getInsertStatement(TableModel table, Collection<String> avaliableCals) throws SQLException {
         PreparedStatement statement = getInsertStatements().get(table);
         if (statement == null) {
-            String insertQuery = QueryConstructors.constructInsertQuery(table.getName(), 
-                    getAllAvaliableCols(table, avaliableCals));
-            statement = getConnection().prepareStatement(insertQuery);
+            statement = getConnection().prepareStatement(QueryConstructors
+                    .constructInsertQuery(table.getName(), 
+                            getAllAvaliableCols(table, avaliableCals),
+                            table.getCastToColumns(getAllAvaliableCols(table, avaliableCals))));
 
             getInsertStatements().put(table, statement);
         }
