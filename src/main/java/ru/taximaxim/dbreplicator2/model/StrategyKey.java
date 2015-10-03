@@ -23,7 +23,6 @@
 package ru.taximaxim.dbreplicator2.model;
 
 import java.io.Serializable;
-
 import javax.persistence.*;
 
 /**
@@ -32,7 +31,7 @@ import javax.persistence.*;
  *
  */
 @Embeddable
-public class StrategyKey implements Serializable{
+public class StrategyKey implements Serializable {
     
     private static final long serialVersionUID = 1L;
     
@@ -59,5 +58,23 @@ public class StrategyKey implements Serializable{
     
     public void setRunner(RunnerModel runner) {
         this.runner = runner;
+    }
+    
+    @Override
+    public boolean equals(Object key) {
+        if (this.getId() == ((StrategyKey)key).getId() &&
+                this.getRunner().equals(((StrategyKey)key).getRunner())) {
+            return true;
+        }
+        return false;
+    }
+    
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((id == null) ? 0 : id);
+        result = prime * result + ((runner == null) ? 0 : runner.hashCode());
+        return result;
     }
 }
