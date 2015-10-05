@@ -62,7 +62,10 @@ public class StrategyKey implements Serializable {
     
     @Override
     public boolean equals(Object key) {
-        if (this.getId() == ((StrategyKey)key).getId() &&
+        if (key == null) {
+            return false;
+        }
+        if (this.getId().equals(((StrategyKey)key).getId()) &&
                 this.getRunner().equals(((StrategyKey)key).getRunner())) {
             return true;
         }
