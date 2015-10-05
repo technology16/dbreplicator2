@@ -126,7 +126,7 @@ public class WorkerThread implements Runnable {
                     if (strategyModel.isEnabled()) {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug(String.format("runStrategy(%s, %s, %s);%n" +
-                                    "sourceConnection = %s;\n" +
+                                    "sourceConnection = %s;%n" +
                                     "targetConnection = %s;", 
                                     runner.getSource().getPoolId(),
                                     runner.getTarget().getPoolId(),
