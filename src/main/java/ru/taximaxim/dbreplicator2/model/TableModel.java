@@ -196,6 +196,9 @@ public class TableModel implements Cloneable{
      */
     @Override
     public boolean equals(Object tableModel) {
+        if (tableModel == null) {
+            return false;
+        }
         if (this.getName().equals(((TableModel)tableModel).getName())) {
             return true;
         }

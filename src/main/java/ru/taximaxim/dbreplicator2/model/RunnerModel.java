@@ -236,7 +236,10 @@ public class RunnerModel implements Runner {
      */
     @Override
     public boolean equals(Object runnerModel) {
-        if (this.getId() == ((RunnerModel)runnerModel).getId()) {
+        if (runnerModel == null) {
+            return false;
+        }
+        if (this.getId().equals(((RunnerModel)runnerModel).getId())) {
             return true;
         }
         return false;
