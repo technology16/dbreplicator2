@@ -114,7 +114,7 @@ public class BoneCPConnectionsFactory implements ConnectionFactory {
         synchronized (connectionPool) {
             Connection connection = connectionPool.getConnection();
             if (connection == null) {
-                throw new SQLException(String.format("java.lang.NullPointerException\n" +
+                throw new SQLException(String.format("java.lang.NullPointerException%n" +
                         "Ошибка getConnection(%s)=null", poolName));
             }
             return connection;
@@ -143,8 +143,8 @@ public class BoneCPConnectionsFactory implements ConnectionFactory {
      */
     public void close() {
         synchronized (connectionPools) {
-            for (String poolName : connectionPools.keySet()) {
-                connectionPools.get(poolName).close();
+            for (Map.Entry<String, BoneCP> entry : connectionPools.entrySet()) {
+                entry.getValue().close();
             }
             connectionPools.clear();
         }

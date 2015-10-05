@@ -80,10 +80,9 @@ public class TasksPool {
         }
 
         // Дожидаемся завершения потоков задач
-        for (TaskRunner taskRunner : taskThreads.keySet()) {
-            taskThreads.get(taskRunner).join();
+        for (Map.Entry<TaskRunner, Thread> entry : taskThreads.entrySet()) {
+            entry.getValue().join();
         }
-
         taskThreads.clear();
     }
 }

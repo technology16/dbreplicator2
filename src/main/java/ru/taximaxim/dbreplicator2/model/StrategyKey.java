@@ -40,7 +40,7 @@ public class StrategyKey implements Serializable {
     
     @ManyToOne
     @JoinColumn(name = "id_runner")
-    private RunnerModel runner;
+    private transient RunnerModel runner;
     
     public StrategyKey() {}
     
@@ -61,9 +61,13 @@ public class StrategyKey implements Serializable {
     }
     
     @Override
-    public boolean equals(Object key) {
-        if (this.getId() == ((StrategyKey)key).getId() &&
-                this.getRunner().equals(((StrategyKey)key).getRunner())) {
+    public boolean equals(Object object) {
+        if ((object == null) || !(object instanceof StrategyKey)) {
+            return false;
+        }
+        StrategyKey key = (StrategyKey) object;
+        if (this.getId().equals(key.getId()) &&
+                this.getRunner().equals(key.getRunner())) {
             return true;
         }
         return false;
