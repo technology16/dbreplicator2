@@ -195,11 +195,12 @@ public class TableModel implements Cloneable{
      * @see java.lang.Object#equals()
      */
     @Override
-    public boolean equals(Object tableModel) {
-        if (tableModel == null) {
+    public boolean equals(Object object) {
+        if ((object == null) || !(object instanceof TableModel)) {
             return false;
         }
-        if (this.getName().equals(((TableModel)tableModel).getName())) {
+        TableModel table = (TableModel) object;
+        if (this.getName().equals(table.getName())) {
             return true;
         }
         return false;

@@ -61,13 +61,13 @@ public class StrategyKey implements Serializable {
     }
     
     @Override
-    public boolean equals(Object key) {
-        if ((key == null) || key instanceof StrategyKey) {
+    public boolean equals(Object object) {
+        if ((object == null) || !(object instanceof StrategyKey)) {
             return false;
         }
-        StrategyKey strategyKey = (StrategyKey) key;
-        if (this.getId().equals(strategyKey.getId()) &&
-                this.getRunner().equals(strategyKey.getRunner())) {
+        StrategyKey key = (StrategyKey) object;
+        if (this.getId().equals(key.getId()) &&
+                this.getRunner().equals(key.getRunner())) {
             return true;
         }
         return false;

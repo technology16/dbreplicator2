@@ -235,11 +235,12 @@ public class RunnerModel implements Runner {
      * @see java.lang.Object#equals()
      */
     @Override
-    public boolean equals(Object runnerModel) {
-        if (runnerModel == null) {
+    public boolean equals(Object object) {
+        if ((object == null) || !(object instanceof RunnerModel)) {
             return false;
         }
-        if (this.getId().equals(((RunnerModel)runnerModel).getId())) {
+        RunnerModel runner = (RunnerModel) object;
+        if (this.getId().equals(runner.getId())) {
             return true;
         }
         return false;
