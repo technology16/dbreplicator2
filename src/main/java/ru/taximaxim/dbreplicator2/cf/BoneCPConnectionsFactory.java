@@ -143,8 +143,8 @@ public class BoneCPConnectionsFactory implements ConnectionFactory {
      */
     public void close() {
         synchronized (connectionPools) {
-            for (String poolName : connectionPools.keySet()) {
-                connectionPools.get(poolName).close();
+            for (Map.Entry<String, BoneCP> entry : connectionPools.entrySet()) {
+                entry.getValue().close();
             }
             connectionPools.clear();
         }
