@@ -49,7 +49,7 @@ import ru.taximaxim.dbreplicator2.replica.strategies.replication.workpool.WorkPo
  */
 public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implements Strategy {
 
-    private static final String INTEGRITY_ERROR = "Ошибка в целостности реплицированных данных [%s => %s]\n";
+    private static final String INTEGRITY_ERROR = "Ошибка в целостности реплицированных данных [%s => %s]%n";
 
     private static final Logger LOG = Logger.getLogger(IntegrityReplicatedGenericAlgorithm.class);
     

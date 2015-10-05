@@ -111,12 +111,12 @@ public class CountWatchgdog extends StrategySkeleton implements Strategy {
                     List<String> cols = new ArrayList<String>(JdbcMetadata.getColumns(errorsResult));
                     int count = 0;
                     StringBuffer rowDumpEmail = new StringBuffer(String.format(
-                            "\n\nВ %s превышен лимит в %s ошибок!\n\n", data.getRunner()
+                            "%n%nВ %s превышен лимит в %s ошибок!%n%n", data.getRunner()
                             .getSource().getPoolId(), maxErrors));
                     while (errorsResult.next() && (count < partEmail)) {
                         count++;
                         // при необходимости пишем ошибку в лог
-                        String rowDump = String.format("Ошибка %s из %s \n[ tableName = REP2_ERRORS_LOG [ row = %s ] ]%s",
+                        String rowDump = String.format("Ошибка %s из %s %n[ tableName = REP2_ERRORS_LOG [ row = %s ] ]%s",
                             count, rowCount,
                             Jdbc.resultSetToString(errorsResult, cols),
                             "\n==========================================\n");
