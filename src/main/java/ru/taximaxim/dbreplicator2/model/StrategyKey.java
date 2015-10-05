@@ -40,7 +40,7 @@ public class StrategyKey implements Serializable {
     
     @ManyToOne
     @JoinColumn(name = "id_runner")
-    private transient RunnerModel runner;
+    private RunnerModel runner;
     
     public StrategyKey() {}
     
