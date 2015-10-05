@@ -180,13 +180,9 @@ public class TableModel implements Cloneable{
      * @see java.lang.Object#clone()
      */
     @Override
-    public Object clone() {
+    public Object clone() throws CloneNotSupportedException {
         TableModel clone;
-        try {
-            clone = (TableModel) super.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new InternalError();
-        }
+        clone = (TableModel) super.clone();
         
         return clone;
     }
