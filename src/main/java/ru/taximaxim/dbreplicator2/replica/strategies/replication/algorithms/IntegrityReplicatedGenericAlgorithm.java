@@ -106,8 +106,13 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
 
         PreparedStatement selectTargetStatement = getDestDataService()
                 .getSelectStatement(destTable);
+        
+        try {
         selectTargetStatement.setLong(1, getWorkPoolService()
                 .getForeign(operationsResult));
+        } catch (SQLException e) {
+            errorsHandling(sourceTable, e);
+        }
 
         try (ResultSet targetResult = selectTargetStatement.executeQuery();) {
             if (targetResult.next()) {
@@ -160,7 +165,7 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
         PreparedStatement selectTargetStatement = getDestDataService()
                 .getSelectStatement(destTable);
         selectTargetStatement.setLong(1, getWorkPoolService().getForeign(operationsResult));
-        try (ResultSet targetResult = selectTargetStatement.executeQuery();) {            
+        try (ResultSet targetResult = selectTargetStatement.executeQuery();) {
             if(targetResult.next()) {
                 StringBuffer rowDumpHead = new StringBuffer(String.format(
                         INTEGRITY_ERROR, data

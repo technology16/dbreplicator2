@@ -302,6 +302,20 @@ public class GenericAlgorithm implements Strategy {
     }
     
     /**
+     * Обработка ошибок репликации
+     * @param sourceTable
+     * @param e
+     * @throws SQLException
+     */
+    protected void errorsHandling(TableModel sourceTable, SQLException e) throws SQLException {
+        if (getSourceDataService().getPriCols(sourceTable).isEmpty()) {
+            throw new SQLException(String.format("В таблице %s отсутствует первичный ключ!", sourceTable.getName()), e);
+        } else {
+            throw e;
+        }
+    }
+    
+    /**
      * Вывод ошибки в лог и добавление в таблицу rep2_error_logs
      * @param message
      * @param e
@@ -336,7 +350,11 @@ public class GenericAlgorithm implements Strategy {
         PreparedStatement selectDestStatement = 
                 getDestDataService().getSelectStatement(
                         destTable);
-        selectDestStatement.setLong(1, getWorkPoolService().getForeign(operationsResult));
+        try {
+            selectDestStatement.setLong(1, getWorkPoolService().getForeign(operationsResult));
+        } catch (SQLException e) {
+            errorsHandling(sourceTable, e);
+        }
         try (ResultSet destResult = selectDestStatement.executeQuery();) {
             if (destResult.next()) {
                 // Добавляем данные в целевую таблицу
@@ -413,7 +431,7 @@ public class GenericAlgorithm implements Strategy {
             return false;
         }
     }
-
+    
     /**
      * Функция для репликации данных. Здесь вызываются подфункции репликации 
      * конкретных операций и обрабатываются исключительнык ситуации.
@@ -440,7 +458,11 @@ public class GenericAlgorithm implements Strategy {
         PreparedStatement selectSourceStatement = 
                 getSourceDataService().getSelectStatement(
                         sourceTable);
-        selectSourceStatement.setLong(1, getWorkPoolService().getForeign(operationsResult));
+        try {
+            selectSourceStatement.setLong(1, getWorkPoolService().getForeign(operationsResult));
+        } catch (SQLException e) {
+            errorsHandling(sourceTable, e);
+        }
         try (ResultSet sourceResult = selectSourceStatement.executeQuery();) {
             if (sourceResult.next()) {
                 return replicateRecord(data, operationsResult, sourceTable, destTable,
