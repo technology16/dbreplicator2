@@ -39,7 +39,7 @@ import org.hibernate.annotations.FetchMode;
  */
 @Entity
 @Table(name = "runners")
-public class RunnerModel implements Runner, Serializable{
+public class RunnerModel implements Runner, Serializable {
 
     private static final long serialVersionUID = 1L;
 
