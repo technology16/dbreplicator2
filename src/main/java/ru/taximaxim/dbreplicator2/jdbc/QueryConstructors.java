@@ -29,6 +29,7 @@ package ru.taximaxim.dbreplicator2.jdbc;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -53,10 +54,34 @@ public final class QueryConstructors {
     /**
      * Сиглетон
      */
-    private QueryConstructors() {
+    private QueryConstructors() {}
 
+    public static Collection<String> listAddPostfix(Collection<?> list, Map<String, String> castCols,
+            String postfix) {
+        
+        Collection<String> newList = new ArrayList<String>();
+        for (Object val : list) {
+            if (castCols.keySet().contains(val)) {
+                newList.add(val + "=" + castCols.get(val));
+            } else {
+                newList.add(val + postfix);
+            }
+        }
+        return newList;
     }
-
+    
+    public static Collection<String> listToCastString(Collection<?> list, Map<String, String> castCols) {
+        Collection<String> newList = new ArrayList<String>();
+        for (Object val : list) {
+            if (castCols.keySet().contains(val)) {
+                newList.add(castCols.get(val));
+            } else {
+                newList.add(val.toString());
+            }
+        }
+        return newList;
+    }
+    
     /**
      * Строит строку из элементов списка, разделенных разделителем delimiter
      * 
@@ -68,7 +93,6 @@ public final class QueryConstructors {
      */
     public static String listToString(Collection<?> list, String delimiter) {
         StringBuffer result = new StringBuffer();
-
         boolean setComma = false;
         for (Object val : list) {
             if (setComma) {
@@ -78,10 +102,9 @@ public final class QueryConstructors {
             }
             result.append(val);
         }
-
         return result.toString();
     }
-
+    
     /**
      * Строит строку из элементов списка с добавленным postfix в конце и
      * разделенных разделителем delimiter
@@ -96,19 +119,23 @@ public final class QueryConstructors {
      *         разделенных разделителем delimiter
      */
     public static String listToString(Collection<?> list, String delimiter, String postfix) {
-        StringBuffer result = new StringBuffer();
-
-        boolean setComma = false;
-        for (Object val : list) {
-            if (setComma) {
-                result.append(delimiter);
-            } else {
-                setComma = true;
-            }
-            result.append(val).append(postfix);
-        }
-
-        return result.toString();
+        return listToString(listAddPostfix(list, new HashMap<String, String>(), postfix), delimiter);
+    }
+    
+    /**
+     * Строит строку из элементов списка, разделенных разделителем delimiter
+     * с заменой значений колонок выражениями из карты подстановки
+     * 
+     * @param list
+     *            список объектов
+     * @param castCols
+     *            карта подстановки вместо колонок
+     * @param delimiter
+     *            разделитель
+     * @return строка из элементов списка, разделенных разделителем delimiter
+     */
+    public static String listToString(Collection<?> list, Map<String, String> castCols, String delimiter) {
+        return listToString(listToCastString(list, castCols), delimiter);
     }
     
     /**
@@ -126,23 +153,8 @@ public final class QueryConstructors {
      */
     public static String listToString(Collection<?> list, Map<String, String> castCols,
             String delimiter, String postfix) {
-        StringBuffer result = new StringBuffer();
-
-        boolean setComma = false;
-        for (Object val : list) {
-            if (setComma) {
-                result.append(delimiter);
-            } else {
-                setComma = true;
-            }
-            if (castCols.keySet().contains(val)) {
-                result.append(val).append("=").append(castCols.get(val));
-            } else {
-                result.append(val).append(postfix);
-            }
-        }
-
-        return result.toString();
+        
+        return listToString(listAddPostfix(list, castCols, postfix), delimiter);
     }
 
     /**
@@ -153,15 +165,31 @@ public final class QueryConstructors {
      * @return список вопросов для передачи экранированых параметров
      */
     public static Collection<String> questionMarks(Collection<?> colsList) {
-        Collection<String> result = new ArrayList<String>();
-        int colsListSize = colsList.size();
-        for (int i = 0; i < colsListSize; i++) {
-            result.add(QUESTION);
-        }
-
-        return result;
+        return questionMarks(colsList, new HashMap<String, String>());
     }
 
+    /**
+     * Строит список вопросов для передачи экранированых параметров с заменой
+     * значений колонок выражениями из карты подстановки
+     * 
+     * @param colsList
+     *            список колонок
+     * @param castCols
+     *            карта подстановки вместо колонок
+     * @return список вопросов для передачи экранированых параметров
+     */
+    public static Collection<String> questionMarks(Collection<?> colsList, Map<String, String> castCols) {
+        Collection<String> result = new ArrayList<String>();
+        for (Object col : colsList) {
+            if (castCols.keySet().contains(col)) {
+                result.add(castCols.get(col));
+            } else {
+                result.add(QUESTION);
+            }
+        }
+        return result;
+    }
+    
     /**
      * Генерирует строку запроса для вставки данных
      * 
@@ -172,14 +200,30 @@ public final class QueryConstructors {
      * @return строка запроса для вставки данных
      */
     public static String constructInsertQuery(String tableName, Collection<String> colsList) {
+        return constructInsertQuery(tableName, colsList, new HashMap<String, String>());
+    }
+    
+    /**
+     * Генерирует строку запроса для вставки данных с подменой значений колонок 
+     * выражениями из карты подстановки
+     * 
+     * @param tableName
+     *            имя целевой таблицы
+     * @param colsList
+     *            список колонок
+     * @param castCols
+     *            карта подстановки вместо колонок
+     * @return строка запроса для вставки данных
+     */
+    public static String constructInsertQuery(String tableName, Collection<String> colsList, Map<String, String> castCols) {
         StringBuffer insertQuery = new StringBuffer().append(INSERT_INTO)
                 .append(tableName).append("(").append(listToString(colsList, DELIMITER))
-                .append(VALUES).append(listToString(questionMarks(colsList), DELIMITER))
+                .append(VALUES).append(listToString(questionMarks(colsList, castCols), DELIMITER))
                 .append(")");
-
+        
         return insertQuery.toString();
     }
-
+    
     /**
      * Генерирует строку запроса следующего вида: INSERT INTO
      * <table>
@@ -192,13 +236,8 @@ public final class QueryConstructors {
      *            список колонок
      * @return строка запроса вставки из запроса выборки
      */
-    public static String constructInsertSelectQuery(String tableName,
-            Collection<String> colsList) {
-        StringBuffer insertQuery = new StringBuffer().append(INSERT_INTO)
-                .append(tableName).append("(").append(listToString(colsList, DELIMITER))
-                .append(") ").append(constructSelectQuery(questionMarks(colsList)));
-
-        return insertQuery.toString();
+    public static String constructInsertSelectQuery(String tableName, Collection<String> colsList) {
+        return constructInsertSelectQuery(tableName, colsList, new HashMap<String, String>()); 
     }
 
     /**
@@ -215,13 +254,16 @@ public final class QueryConstructors {
      */
     public static String constructInsertSelectQuery(String tableName,
             Collection<String> colsList, Map<String, String> castCols) {
+        
         StringBuffer insertQuery = new StringBuffer().append(INSERT_INTO)
                 .append(tableName).append("(").append(listToString(colsList, DELIMITER))
                 .append(") ").append(constructSelectQuery(questionMarks(colsList, castCols)));
-
+        
         return insertQuery.toString();
     }
 
+    
+   
     /**
      * Создает строку запроса на выборку данных
      * 
@@ -230,10 +272,7 @@ public final class QueryConstructors {
      * @return строкf запроса на выборку данных
      */
     public static String constructSelectQuery(Collection<String> colsList) {
-        StringBuffer query = new StringBuffer().append(SELECT).append(
-                listToString(colsList, DELIMITER));
-
-        return query.toString();
+        return constructSelectQuery(colsList, new HashMap<String, String>());
     }
     
     /**
@@ -260,10 +299,7 @@ public final class QueryConstructors {
      * @return строка запроса на выборку данных из таблицы
      */
     public static String constructSelectQuery(String tableName, Collection<String> colsList) {
-        StringBuffer query = new StringBuffer(constructSelectQuery(colsList)).append(
-                FROM).append(tableName);
-
-        return query.toString();
+        return constructSelectQuery(tableName, colsList, new HashMap<String, String>());
     }
     
     /**
@@ -296,12 +332,7 @@ public final class QueryConstructors {
      */
     public static String constructSelectQuery(String tableName, Collection<String> colsList,
             Collection<String> whereList, String where) {
-        StringBuffer query = new StringBuffer(constructSelectQuery(tableName, colsList))
-                .append(WHERE).append(listToString(whereList, AND, "=?"));
-        if (where != null && !where.isEmpty()) {
-            query.append(AND).append(where);
-        }
-        return query.toString();
+        return constructSelectQuery(tableName, colsList, new HashMap<String, String>(), whereList, where);
     }
     
     /**
@@ -335,10 +366,8 @@ public final class QueryConstructors {
      */
     public static String constructSelectQuery(String tableName, Collection<String> colsList,
             Collection<String> whereList, Collection<String> orderByList, String where) {
-        StringBuffer query = new StringBuffer(constructSelectQuery(tableName, colsList, whereList, where));
-        query.append(ORDER_BY).append(listToString(orderByList, DELIMITER));
-
-        return query.toString();
+        
+        return constructSelectQuery(tableName, colsList, new HashMap<String, String>(), whereList, orderByList, where);
     }
     
     /**
@@ -354,47 +383,13 @@ public final class QueryConstructors {
      */
     public static String constructSelectQuery(String tableName, Collection<String> colsList,
             Map<String, String> castCols, Collection<String> whereList, Collection<String> orderByList, String where) {
+        
         StringBuffer query = new StringBuffer(constructSelectQuery(tableName, colsList, castCols, whereList, where));
         query.append(ORDER_BY).append(listToString(orderByList, DELIMITER));
 
         return query.toString();
     }
-
-    /**
-     * Создает строку запроса на выборку данных из таблицы с условием
-     * 
-     * @param tableName
-     *            имя целевой таблицы
-     * @param colsList
-     *            список колонок
-     * @param where
-     *            условие
-     * @return строка запроса на выборку данных из таблицы с условием
-     */
-    public static String constructSelectQuery(String tableName, Collection<String> colsList,
-            String where) {
-        StringBuffer query = new StringBuffer(constructSelectQuery(tableName, colsList))
-                .append(WHERE).append(where);
-
-        return query.toString();
-    }
-
-    /**
-     * Создает строку запроса на удаление данных из таблицы с условием
-     * 
-     * @param tableName
-     *            имя целевой таблицы
-     * @param whereList
-     *            список колонок условия
-     * @return
-     */
-    public static String constructDeleteQuery(String tableName, Collection<String> whereList) {
-        StringBuffer query = new StringBuffer().append(DELETE_FROM).append(tableName)
-                .append(WHERE).append(listToString(whereList, AND, "=?"));
-
-        return query.toString();
-    }
-
+    
     /**
      * Генерирует строку запроса для обновления данных
      * 
@@ -408,11 +403,8 @@ public final class QueryConstructors {
      */
     public static String constructUpdateQuery(String tableName, Collection<String> colsList,
             Collection<String> whereList) {
-        StringBuffer insertQuery = new StringBuffer().append(UPDATE).append(tableName)
-                .append(SET).append(listToString(colsList, DELIMITER, "=?"))
-                .append(WHERE).append(listToString(whereList, AND, "=?"));
-
-        return insertQuery.toString();
+        
+        return constructUpdateQuery(tableName, colsList, new HashMap<String, String>(), whereList);
     }
     
     /**
@@ -428,6 +420,7 @@ public final class QueryConstructors {
      */
     public static String constructUpdateQuery(String tableName, Collection<String> colsList,
             Map<String, String> castCols, Collection<String> whereList) {
+        
         StringBuffer insertQuery = new StringBuffer().append(UPDATE).append(tableName)
                 .append(SET).append(listToString(colsList, castCols, DELIMITER, "=?"))
                 .append(WHERE).append(listToString(whereList, AND, "=?"));
@@ -436,78 +429,36 @@ public final class QueryConstructors {
     }
     
     /**
-     * Генерирует строку запроса для вставки данных с подменой значений колонок 
-     * выражениями из карты подстановки
+     * Создает строку запроса на выборку данных из таблицы с условием
      * 
      * @param tableName
      *            имя целевой таблицы
      * @param colsList
      *            список колонок
-     * @param castCols
-     *            карта подстановки вместо колонок
-     * @return строка запроса для вставки данных
+     * @param where
+     *            условие
+     * @return строка запроса на выборку данных из таблицы с условием
      */
-    public static String constructInsertQuery(String tableName, Collection<String> colsList, Map<String, String> castCols) {
-        StringBuffer insertQuery = new StringBuffer().append(INSERT_INTO)
-                .append(tableName).append("(").append(listToString(colsList, DELIMITER))
-                .append(VALUES).append(listToString(questionMarks(colsList, castCols), DELIMITER))
-                .append(")");
-        
-        return insertQuery.toString();
-    }
+    public static String constructSelectQuery(String tableName, Collection<String> colsList, String where) {
+        StringBuffer query = new StringBuffer(constructSelectQuery(tableName, colsList))
+                .append(WHERE).append(where);
 
-    /**
-     * Строит список вопросов для передачи экранированых параметров с заменой
-     * значений колонок выражениями из карты подстановки
-     * 
-     * @param colsList
-     *            список колонок
-     * @param castCols
-     *            карта подстановки вместо колонок
-     * @return список вопросов для передачи экранированых параметров
-     */
-    public static Collection<String> questionMarks(Collection<?> colsList, Map<String, String> castCols) {
-        Collection<String> result = new ArrayList<String>();
-        for (Object col : colsList) {
-            if (castCols.keySet().contains(col)) {
-                result.add(castCols.get(col));
-            } else {
-                result.add(QUESTION);
-            }
-        }
-
-        return result;
+        return query.toString();
     }
     
     /**
-     * Строит строку из элементов списка, разделенных разделителем delimiter
-     * с заменой значений колонок выражениями из карты подстановки
+     * Создает строку запроса на удаление данных из таблицы с условием
      * 
-     * @param list
-     *            список объектов
-     * @param castCols
-     *            карта подстановки вместо колонок
-     * @param delimiter
-     *            разделитель
-     * @return строка из элементов списка, разделенных разделителем delimiter
+     * @param tableName
+     *            имя целевой таблицы
+     * @param whereList
+     *            список колонок условия
+     * @return
      */
-    public static String listToString(Collection<?> list, Map<String, String> castCols, String delimiter) {
-        StringBuffer result = new StringBuffer();
+    public static String constructDeleteQuery(String tableName, Collection<String> whereList) {
+        StringBuffer query = new StringBuffer().append(DELETE_FROM).append(tableName)
+                .append(WHERE).append(listToString(whereList, AND, "=?"));
 
-        boolean setComma = false;
-        for (Object val : list) {
-            if (setComma) {
-                result.append(delimiter);
-            } else {
-                setComma = true;
-            }
-            if (castCols.keySet().contains(val)) {
-                result.append(castCols.get(val));
-            } else {
-                result.append(val);
-            }
-        }
-
-        return result.toString();
+        return query.toString();
     }
 }
