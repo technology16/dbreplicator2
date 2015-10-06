@@ -202,6 +202,27 @@ public final class QueryConstructors {
     }
 
     /**
+     * Генерирует строку запроса следующего вида: INSERT INTO
+     * <table>
+     * (<cols>) SELECT (<questionsMarks>) Это позволяет создавать запросы на
+     * вставку по условию
+     * с поддержкой кастования полей
+     * @param tableName
+     *            имя целевой таблицы
+     * @param colsList
+     *            список колонок
+     * @return строка запроса вставки из запроса выборки
+     */
+    public static String constructInsertSelectQuery(String tableName,
+            Collection<String> colsList, Map<String, String> castCols) {
+        StringBuffer insertQuery = new StringBuffer().append(INSERT_INTO)
+                .append(tableName).append("(").append(listToString(colsList, DELIMITER))
+                .append(") ").append(constructSelectQuery(questionMarks(colsList, castCols)));
+
+        return insertQuery.toString();
+    }
+
+    /**
      * Создает строку запроса на выборку данных
      * 
      * @param colsList
