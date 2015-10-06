@@ -24,6 +24,7 @@ package ru.taximaxim.dbreplicator2.model;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.io.StringWriter;
 import java.io.StringReader;
 import java.sql.SQLException;
@@ -48,8 +49,10 @@ import org.apache.log4j.Logger;
  */
 @Entity
 @Table(name = "tables")
-public class TableModel implements Cloneable{
-
+public class TableModel implements Cloneable, Serializable {
+    
+    private static final long serialVersionUID = 1L;
+    
     private static final String IGNORED_COLUMNS = "ignoredCols";
     private static final String REQUIRED_COLUMNS = "requiredCols";
     private static final String DEST_TABLE_NAME = "dest";
