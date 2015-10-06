@@ -145,13 +145,13 @@ public class ReplicationTimeWatchgdog implements Strategy {
                         int count = 0;
                         StringBuffer rowDumpEmail = new StringBuffer(
                                 String.format(
-                                        "\n\nВ %s превышен лимит таймаута репликации в %s милисекунд!\n\n",
+                                        "%n%nВ %s превышен лимит таймаута репликации в %s милисекунд!%n%n",
                                         data.getRunner().getSource().getPoolId(), period));
                         while (resultSet.next() && (count < partEmail)) {
                             count++;
                             // при необходимости пишем ошибку в лог
                             String rowDump = String
-                                    .format("Запись не реплицируется!!!\nОшибка %s из %s \n[ tableName = REP2_WORKPOOL_DATA [ row = %s ] ]%s",
+                                    .format("Запись не реплицируется!!!%nОшибка %s из %s %n[ tableName = REP2_WORKPOOL_DATA [ row = %s ] ]%s",
                                             count, rowCount,
                                             Jdbc.resultSetToString(resultSet, cols),
                                             "\n==========================================\n");

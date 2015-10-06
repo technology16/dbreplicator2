@@ -22,8 +22,10 @@
  */
 package ru.taximaxim.dbreplicator2.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -43,7 +45,10 @@ import org.hibernate.annotations.FetchMode;
  */
 @Entity
 @Table(name = "bone_cp_settings")
-public class BoneCPSettingsModel implements BoneCPSettings {
+public class BoneCPSettingsModel implements BoneCPSettings, Serializable {
+    
+    private static final long serialVersionUID = 1L;
+    
     /**
      * Минимальное количество соединений в пуле
      */
