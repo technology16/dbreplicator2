@@ -56,6 +56,14 @@ public final class QueryConstructors {
      */
     private QueryConstructors() {}
 
+    /**
+     * Добавляет postfix к каждой колонке,
+     * если колонка кастуется, добавляем выражение кастования
+     * @param list
+     * @param castCols
+     * @param postfix
+     * @return
+     */
     public static Collection<String> listAddPostfix(Collection<?> list, Map<String, String> castCols,
             String postfix) {
         
@@ -70,6 +78,12 @@ public final class QueryConstructors {
         return newList;
     }
     
+    /**
+     * Заменяет в списке колонку на кастуемое выражение
+     * @param list
+     * @param castCols
+     * @return
+     */
     public static Collection<String> listToCastString(Collection<?> list, Map<String, String> castCols) {
         Collection<String> newList = new ArrayList<String>();
         for (Object val : list) {
