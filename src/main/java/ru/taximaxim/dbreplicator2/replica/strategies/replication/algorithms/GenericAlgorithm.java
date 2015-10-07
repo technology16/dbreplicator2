@@ -300,7 +300,7 @@ public class GenericAlgorithm implements Strategy {
                 data.getRunner().getId(), 
                 data.getRunner().getDescription(), 
                 data.getId(),
-                getDestTable(data, sourceTable).getName(),
+                sourceTable.getName(),
                 rowMess);
         addErrorLog(message, e, operationsResult);
     }
