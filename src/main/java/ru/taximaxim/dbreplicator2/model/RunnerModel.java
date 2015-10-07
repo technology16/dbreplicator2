@@ -22,6 +22,7 @@
  */
 package ru.taximaxim.dbreplicator2.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,8 +39,10 @@ import org.hibernate.annotations.FetchMode;
  */
 @Entity
 @Table(name = "runners")
-public class RunnerModel implements Runner {
-    
+public class RunnerModel implements Runner, Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     /**
      * Обработчики реплики
      */
@@ -235,8 +238,12 @@ public class RunnerModel implements Runner {
      * @see java.lang.Object#equals()
      */
     @Override
-    public boolean equals(Object runnerModel) {
-        if (this.getId() == ((RunnerModel)runnerModel).getId()) {
+    public boolean equals(Object object) {
+        if ((object == null) || !(object instanceof RunnerModel)) {
+            return false;
+        }
+        RunnerModel runner = (RunnerModel) object;
+        if (this.getId().equals(runner.getId())) {
             return true;
         }
         return false;

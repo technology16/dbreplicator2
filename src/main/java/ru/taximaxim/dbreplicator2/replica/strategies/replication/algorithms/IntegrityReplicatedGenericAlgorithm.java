@@ -49,7 +49,7 @@ import ru.taximaxim.dbreplicator2.replica.strategies.replication.workpool.WorkPo
  */
 public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implements Strategy {
 
-    private static final String INTEGRITY_ERROR = "Ошибка в целостности реплицированных данных [%s => %s]\n";
+    private static final String INTEGRITY_ERROR = "Ошибка в целостности реплицированных данных [%s => %s]%n";
 
     private static final Logger LOG = Logger.getLogger(IntegrityReplicatedGenericAlgorithm.class);
     
@@ -266,10 +266,14 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
                     .getTable(sourceTable.getName()).getParam("dest");
             if (destTableName != null) {
                 // Создаем копию для таблицы приемника
-                destTable = (TableModel) sourceTable.clone();
-                destTable.setName(destTableName);
-                destTable.setParam("tempKey", "tempValue");
-                destTable.setRunner(null);
+                try {
+                    destTable = (TableModel) sourceTable.clone();
+                    destTable.setName(destTableName);
+                    destTable.setParam("tempKey", "tempValue");
+                    destTable.setRunner(null);
+                } catch (CloneNotSupportedException e) {
+                    LOG.error("Ошибка при клонировании таблицы-источника:\n" + e.getMessage());
+                }
             }
             destTables.put(sourceTable, destTable);
         }

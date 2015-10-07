@@ -103,13 +103,13 @@ public class SuperlogWatchgdog implements Strategy {
                     int count = 0;
                     StringBuffer rowDumpEmail = new StringBuffer(
                             String.format(
-                                    "\n\nВ %s превышен лимит таймаута в superlog в %s миллисекунд!\n\n",
+                                    "%n%nВ %s превышен лимит таймаута в superlog в %s миллисекунд!%n%n",
                                     data.getRunner().getSource().getPoolId(), period));
                     while (resultSet.next() && (count < partEmail)) {
                         count++;
                         // при необходимости пишем ошибку в лог
                         String rowDump = String
-                                .format("Ошибка настроек %s из %s \n[ tableName = REP2_SUPERLOG [ row = %s ] ]%s",
+                                .format("Ошибка настроек %s из %s %n[ tableName = REP2_SUPERLOG [ row = %s ] ]%s",
                                         count, rowCount,
                                         Jdbc.resultSetToString(resultSet, cols),
                                         "\n==========================================\n");

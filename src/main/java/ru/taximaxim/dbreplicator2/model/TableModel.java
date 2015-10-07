@@ -24,12 +24,16 @@ package ru.taximaxim.dbreplicator2.model;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.io.StringWriter;
 import java.io.StringReader;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -45,10 +49,15 @@ import org.apache.log4j.Logger;
  */
 @Entity
 @Table(name = "tables")
-public class TableModel implements Cloneable{
-
+public class TableModel implements Cloneable, Serializable {
+    
+    private static final long serialVersionUID = 1L;
+    
     private static final String IGNORED_COLUMNS = "ignoredCols";
     private static final String REQUIRED_COLUMNS = "requiredCols";
+    private static final String DEST_TABLE_NAME = "dest";
+    private static final String CAST_FROM = "castfrom.";
+    private static final String CAST_TO = "castto.";
     
     /**
      * Идентификатор таблицы
@@ -180,13 +189,9 @@ public class TableModel implements Cloneable{
      * @see java.lang.Object#clone()
      */
     @Override
-    public Object clone() {
+    public Object clone() throws CloneNotSupportedException {
         TableModel clone;
-        try {
-            clone = (TableModel) super.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new InternalError();
-        }
+        clone = (TableModel) super.clone();
         
         return clone;
     }
@@ -195,8 +200,12 @@ public class TableModel implements Cloneable{
      * @see java.lang.Object#equals()
      */
     @Override
-    public boolean equals(Object tableModel) {
-        if (this.getName().equals(((TableModel)tableModel).getName())) {
+    public boolean equals(Object object) {
+        if ((object == null) || !(object instanceof TableModel)) {
+            return false;
+        }
+        TableModel table = (TableModel) object;
+        if (this.getName().equals(table.getName())) {
             return true;
         }
         return false;
@@ -252,5 +261,49 @@ public class TableModel implements Cloneable{
         result = prime * result + ((runner == null) ? 0 : runner.hashCode());
         result = prime * result + ((param == null) ? 0 : param.hashCode());
         return result;
+    }
+    
+    /**
+     * Получение наименование таблицы-приемника
+     * @return
+     */
+    public String getDestTableName() {
+        return getParam(DEST_TABLE_NAME);
+    }
+    
+    /**
+     * Возвращает map с кастованными полями для select запроса
+     * @param data
+     * @param columns
+     * @return
+     * @throws SQLException 
+     */
+    public Map<String, String> getCastFromColumns(Collection<String> columns) throws SQLException {
+        Map<String, String> castFromColums = new HashMap<String, String>();
+        for (String column : columns) {
+            String castStatement = getParam(CAST_FROM + column.toLowerCase());
+            if (castStatement != null) {
+                castFromColums.put(column, castStatement);
+            }
+        }
+        return castFromColums;
+    }
+    
+    /**
+     *  Возвращает map с кастованными полями для insert запроса
+     * @param data
+     * @param columns
+     * @return
+     * @throws SQLException 
+     */
+    public Map<String, String> getCastToColumns(Collection<String> columns) throws SQLException {
+        Map<String, String> castToColums = new HashMap<String, String>();
+        for (String column : columns) {
+            String castStatement = getParam(CAST_TO + column.toLowerCase());
+            if (castStatement != null) {
+                castToColums.put(column, castStatement);
+            }
+        }
+        return castToColums;
     }
 }

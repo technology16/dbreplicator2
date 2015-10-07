@@ -252,13 +252,17 @@ public class GenericAlgorithm implements Strategy {
         if (destTable == null) {
             destTable = sourceTable;
             // Проверяем, есть ли явное сопоставление имен таблиц
-            String destTableName = data.getRunner().getTable(sourceTable.getName()).getParam("dest");
+            String destTableName = data.getRunner().getTable(sourceTable.getName()).getDestTableName();
             if (destTableName != null) {
                 // Создаем копию для таблицы приемника
-                destTable = (TableModel) sourceTable.clone();
-                destTable.setName(destTableName);
-                destTable.setParam("tempKey", "tempValue");
-                destTable.setRunner(null);
+                try {
+                    destTable = (TableModel) sourceTable.clone();
+                    destTable.setName(destTableName);
+                    destTable.setParam("tempKey", "tempValue");
+                    destTable.setRunner(null);
+                } catch (CloneNotSupportedException e) {
+                    LOG.error("Ошибка при клонировании таблицы-источника:\n" + e.getMessage());
+                }
             }
             destTables.put(sourceTable, destTable);
         }
