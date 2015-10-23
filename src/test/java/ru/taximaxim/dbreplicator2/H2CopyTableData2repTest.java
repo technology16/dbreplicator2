@@ -279,12 +279,8 @@ public class H2CopyTableData2repTest extends AbstractReplicationTest {
       //Проверка вставки
         Helper.executeSqlFromFile(conn, "sql_insert.sql");
         workerRun();
-        //Helper.executeSqlFromFile(connDest, "sql_insert.sql"); 
         workerRun2();
-        
-       // Helper.executeSqlFromSql(conn, "UPDATE T_TAB SET _value = ?", "source");
-       // Helper.executeSqlFromSql(conn, "UPDATE T_TAB SET _value = ?", "dest");
-        
+
         workerRun();
         workerRun2();
         

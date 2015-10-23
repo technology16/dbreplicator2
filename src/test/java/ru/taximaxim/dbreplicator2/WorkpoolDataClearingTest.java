@@ -135,7 +135,6 @@ public class WorkpoolDataClearingTest extends AbstractReplicationTest {
             }
         }
         
-       // errorsCountWatchdogWorker.run();
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table2");

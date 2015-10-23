@@ -93,10 +93,8 @@ public class IntegrityReplicatedDataTest extends AbstractReplicationTest {
         listDest   = Helper.InfoTest(connDest, "t_table1");
         Helper.AssertEquals(listSource, listDest);
         Thread.sleep(REPLICATION_DELAY);
-        //Helper.executeSqlFromFile(connDest, "sql_insert.sql"); 
         Helper.executeSqlFromFile(connDest, "sql_update.sql"); 
         Helper.executeSqlFromFile(connDest, "sql_delete.sql"); 
-        //Helper.InfoSelect(conn, "rep2_workpool_data");
         int count_rep2_errors_log = Helper.InfoCount(conn, "rep2_errors_log");
         assertTrue(String.format("rep2_errors_log чистый [%s==0]", count_rep2_errors_log), count_rep2_errors_log== 0);
         
