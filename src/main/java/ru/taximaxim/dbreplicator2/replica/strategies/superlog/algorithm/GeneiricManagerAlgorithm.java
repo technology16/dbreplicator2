@@ -137,9 +137,7 @@ public abstract class GeneiricManagerAlgorithm extends StrategySkeleton implemen
                         insertRunnerData.executeBatch();
                         deleteSuperLog.executeBatch();
                         targetConnection.commit();
-                        
                         superLogResult = selectSuperLog.executeQuery();
-                        
                         // запускаем обработчики реплик
                         startRunners(runners);
                         runners.clear();
