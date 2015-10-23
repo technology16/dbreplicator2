@@ -148,7 +148,9 @@ public abstract class GeneiricManagerAlgorithm extends StrategySkeleton implemen
                 deleteSuperLog.executeBatch();
                 targetConnection.commit();
             } finally {
-                superLogResult.close();
+                if (superLogResult != null) {
+                    superLogResult.close();
+                }
             }
         } catch (Throwable e) {
             // В любом случае
