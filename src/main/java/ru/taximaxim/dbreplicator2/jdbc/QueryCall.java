@@ -38,7 +38,7 @@ public class QueryCall implements Callable<ResultSet> {
     
     protected PreparedStatement statement;
     
-    public QueryCall(PreparedStatement statement) {     
+    public QueryCall(PreparedStatement statement) {
         this.statement = statement;
     }
     
