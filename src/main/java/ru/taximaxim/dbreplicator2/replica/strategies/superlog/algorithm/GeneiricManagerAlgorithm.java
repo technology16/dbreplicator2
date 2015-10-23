@@ -82,7 +82,7 @@ public abstract class GeneiricManagerAlgorithm extends StrategySkeleton implemen
             sourceConnection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
             targetConnection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
             // Строим список обработчиков реплик
-
+            ResultSet superLogResult = null;
             // Переносим данные
             try (
                     PreparedStatement insertRunnerData = superlogDataService.getInsertWorkpoolStatement();
@@ -91,7 +91,7 @@ public abstract class GeneiricManagerAlgorithm extends StrategySkeleton implemen
                     ) {
                 
                 selectSuperLog.setInt(1, fetchSize);
-                ResultSet superLogResult = selectSuperLog.executeQuery();
+                superLogResult = selectSuperLog.executeQuery();
                 Collection<String> cols = new ArrayList<String>();
                 cols.add(WorkPoolService.ID_SUPERLOG);
                 cols.add(WorkPoolService.ID_POOL);
@@ -147,6 +147,8 @@ public abstract class GeneiricManagerAlgorithm extends StrategySkeleton implemen
                 insertRunnerData.executeBatch();
                 deleteSuperLog.executeBatch();
                 targetConnection.commit();
+            } finally {
+                superLogResult.close();
             }
         } catch (Throwable e) {
             // В любом случае
