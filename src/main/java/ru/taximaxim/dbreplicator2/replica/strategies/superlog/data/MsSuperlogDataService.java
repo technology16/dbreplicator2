@@ -21,33 +21,32 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ru.taximaxim.dbreplicator2.replica.strategies.superlog;
+package ru.taximaxim.dbreplicator2.replica.strategies.superlog.data;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import ru.taximaxim.dbreplicator2.model.StrategyModel;
-import ru.taximaxim.dbreplicator2.replica.Strategy;
-import ru.taximaxim.dbreplicator2.replica.StrategyException;
-import ru.taximaxim.dbreplicator2.replica.strategies.replication.StrategySkeleton;
-import ru.taximaxim.dbreplicator2.replica.strategies.superlog.algorithm.FastManagerAlgorithm;
-import ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.GenericSuperlogDataService;
-
 /**
- * Класс стратегии менеджера записей суперлог таблицы с асинхронным параллельным
- * запуском обработчиков реплик
+ * Реализация дата сервиса для обработки суперлога mssql
  * @author petrov_im
  *
  */
-public class FastManager extends StrategySkeleton implements Strategy {
+public class MsSuperlogDataService extends GenericSuperlogDataService {
+    
+    public MsSuperlogDataService(Connection sourceConnection, Connection targetConnection) {
+        super(sourceConnection, targetConnection);
+    }
     
     @Override
-    public void execute(Connection sourceConnection, Connection targetConnection,
-            StrategyModel data) throws StrategyException, SQLException, ClassNotFoundException {
-        
-        try (GenericSuperlogDataService superlogDataServise = new GenericSuperlogDataService(sourceConnection, targetConnection)) {
-            FastManagerAlgorithm strategy = new FastManagerAlgorithm(superlogDataServise);
-            strategy.execute(sourceConnection, targetConnection, data);
+    public PreparedStatement getSelectSuperlogStatement() throws SQLException {
+        if (selectSuperlogStatement == null) {
+            selectSuperlogStatement = getSourceConnection().prepareStatement(
+                    "SELECT TOP(?) * FROM rep2_superlog ORDER BY id_superlog",
+                    ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
         }
+        
+        return selectSuperlogStatement;
     }
 }

@@ -32,6 +32,7 @@ import ru.taximaxim.dbreplicator2.replica.StrategyException;
 import ru.taximaxim.dbreplicator2.replica.strategies.replication.StrategySkeleton;
 import ru.taximaxim.dbreplicator2.replica.strategies.superlog.algorithm.FastManagerAlgorithm;
 import ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.GenericSuperlogDataService;
+import ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.MsSuperlogDataService;
 
 /**
  * Класс стратегии менеджера записей суперлог таблицы с асинхронным параллельным
@@ -39,13 +40,13 @@ import ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.GenericSuperl
  * @author petrov_im
  *
  */
-public class FastManager extends StrategySkeleton implements Strategy {
+public class MsFastManager extends StrategySkeleton implements Strategy {
     
     @Override
     public void execute(Connection sourceConnection, Connection targetConnection,
             StrategyModel data) throws StrategyException, SQLException, ClassNotFoundException {
         
-        try (GenericSuperlogDataService superlogDataServise = new GenericSuperlogDataService(sourceConnection, targetConnection)) {
+        try (GenericSuperlogDataService superlogDataServise = new MsSuperlogDataService(sourceConnection, targetConnection)) {
             FastManagerAlgorithm strategy = new FastManagerAlgorithm(superlogDataServise);
             strategy.execute(sourceConnection, targetConnection, data);
         }

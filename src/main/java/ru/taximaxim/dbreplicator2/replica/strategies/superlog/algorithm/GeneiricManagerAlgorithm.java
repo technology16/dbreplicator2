@@ -21,7 +21,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ru.taximaxim.dbreplicator2.replica.strategies.superlog;
+package ru.taximaxim.dbreplicator2.replica.strategies.superlog.algorithm;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -33,6 +33,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+
 import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
@@ -44,6 +45,7 @@ import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
 import ru.taximaxim.dbreplicator2.replica.strategies.replication.StrategySkeleton;
 import ru.taximaxim.dbreplicator2.replica.strategies.replication.workpool.WorkPoolService;
+import ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.SuperlogDataService;
 
 /**
  * Класс стратегии менеджера записей суперлог таблицы
@@ -51,14 +53,17 @@ import ru.taximaxim.dbreplicator2.replica.strategies.replication.workpool.WorkPo
  * @author volodin_aa
  * 
  */
-public abstract class GeneiricManager extends StrategySkeleton implements Strategy {
+public abstract class GeneiricManagerAlgorithm extends StrategySkeleton implements Strategy {
 
-    private static final Logger LOG = Logger.getLogger(GeneiricManager.class);
+    private static final Logger LOG = Logger.getLogger(GeneiricManagerAlgorithm.class);
+    
+    protected SuperlogDataService superlogDataService;
     
     /**
      * Конструктор по умолчанию
      */
-    public GeneiricManager() {
+    public GeneiricManagerAlgorithm(SuperlogDataService superlogDataService) {
+        this.superlogDataService = superlogDataService;
     }
     
     @Override
@@ -72,26 +77,18 @@ public abstract class GeneiricManager extends StrategySkeleton implements Strate
         sourceConnection.setAutoCommit(false);
         targetConnection.setAutoCommit(false);
         BoneCPSettingsModel sourcePool = data.getRunner().getSource();
-        
-        Map<String, Collection<RunnerModel>> tableObservers = 
-                getTableObservers(sourcePool);
-        
-        String selectQuery = null;
-        if (data.getRunner().getSource().getPoolId().equals("maindb")) {
-            selectQuery = "SELECT * FROM rep2_superlog ORDER BY id_superlog limit ?";
-        } else {
-            selectQuery = "SELECT TOP(?) * FROM rep2_superlog ORDER BY id_superlog";
-        }
-        
+        Map<String, Collection<RunnerModel>> tableObservers = getTableObservers(sourcePool);
         try {
             sourceConnection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
             targetConnection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
             // Строим список обработчиков реплик
 
             // Переносим данные
-            try (PreparedStatement insertRunnerData = targetConnection.prepareStatement("INSERT INTO rep2_workpool_data (id_runner, id_superlog, id_foreign, id_table, c_operation, c_date, id_transaction) VALUES (?, ?, ?, ?, ?, ?, ?)");
-                    PreparedStatement deleteSuperLog = targetConnection.prepareStatement("DELETE FROM rep2_superlog WHERE id_superlog=?");
-                    PreparedStatement selectSuperLog = sourceConnection.prepareStatement(selectQuery, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);) {
+            try (
+                    PreparedStatement insertRunnerData = superlogDataService.getInsertWorkpoolStatement();
+                    PreparedStatement deleteSuperLog = superlogDataService.getDeleteSuperlogStatement();
+                    PreparedStatement selectSuperLog = superlogDataService.getSelectSuperlogStatement();
+                    ) {
                 
                 selectSuperLog.setInt(1, fetchSize);
                 ResultSet superLogResult = selectSuperLog.executeQuery();

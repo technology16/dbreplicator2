@@ -21,16 +21,19 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ru.taximaxim.dbreplicator2.replica.strategies.superlog;
+package ru.taximaxim.dbreplicator2.replica.strategies.superlog.algorithm;
 
-import java.sql.Connection;
 import java.sql.SQLException;
-import ru.taximaxim.dbreplicator2.model.StrategyModel;
+import java.util.Collection;
+
+import org.apache.log4j.Logger;
+
+import ru.taximaxim.dbreplicator2.model.RunnerModel;
+import ru.taximaxim.dbreplicator2.qr.RunnersQueue;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
-import ru.taximaxim.dbreplicator2.replica.strategies.replication.StrategySkeleton;
-import ru.taximaxim.dbreplicator2.replica.strategies.superlog.algorithm.QueueManagerAlgorithm;
-import ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.GenericSuperlogDataService;
+import ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.SuperlogDataService;
+import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
  * Класс стратегии менеджера записей суперлог таблицы
@@ -39,15 +42,25 @@ import ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.GenericSuperl
  * @author petrov_im
  * 
  */
-public class QueueManager extends StrategySkeleton implements Strategy {
+public class QueueManagerAlgorithm extends GeneiricManagerAlgorithm implements Strategy {
+    
+    private static final Logger LOG = Logger.getLogger(QueueManagerAlgorithm.class);
+    
+    /**
+     * Конструктор по умолчанию
+     */
+    public QueueManagerAlgorithm(SuperlogDataService superlogDataService) {
+        super(superlogDataService);
+    }
     
     @Override
-    public void execute(Connection sourceConnection, Connection targetConnection,
-            StrategyModel data) throws StrategyException, SQLException, ClassNotFoundException {
-        
-        try (GenericSuperlogDataService superlogDataServise = new GenericSuperlogDataService(sourceConnection, targetConnection)) {
-            QueueManagerAlgorithm strategy = new QueueManagerAlgorithm(superlogDataServise);
-            strategy.execute(sourceConnection, targetConnection, data);
+    protected void startRunners(Collection<RunnerModel> runners)  throws StrategyException, SQLException  {
+        try {
+            RunnersQueue runnersQueue = Core.getRunnersQueue();
+            runnersQueue.addAll(runners);
+        } catch (InterruptedException e) {
+            LOG.warn("Работа потока прервана.", e);
+            throw new StrategyException(e);
         }
     }
 }

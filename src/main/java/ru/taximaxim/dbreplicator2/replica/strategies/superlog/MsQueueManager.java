@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2013 Technologiya
+ * Copyright (c) 2014 Technologiya
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -30,23 +30,25 @@ import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
 import ru.taximaxim.dbreplicator2.replica.strategies.replication.StrategySkeleton;
-import ru.taximaxim.dbreplicator2.replica.strategies.superlog.algorithm.FastManagerAlgorithm;
+import ru.taximaxim.dbreplicator2.replica.strategies.superlog.algorithm.QueueManagerAlgorithm;
 import ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.GenericSuperlogDataService;
+import ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.MsSuperlogDataService;
 
 /**
- * Класс стратегии менеджера записей суперлог таблицы с асинхронным параллельным
- * запуском обработчиков реплик
+ * Класс стратегии менеджера записей суперлог таблицы
+ * с запуском обработчиков реплик из очереди
+ * 
  * @author petrov_im
- *
+ * 
  */
-public class FastManager extends StrategySkeleton implements Strategy {
+public class MsQueueManager extends StrategySkeleton implements Strategy {
     
     @Override
     public void execute(Connection sourceConnection, Connection targetConnection,
             StrategyModel data) throws StrategyException, SQLException, ClassNotFoundException {
         
-        try (GenericSuperlogDataService superlogDataServise = new GenericSuperlogDataService(sourceConnection, targetConnection)) {
-            FastManagerAlgorithm strategy = new FastManagerAlgorithm(superlogDataServise);
+        try (GenericSuperlogDataService superlogDataServise = new MsSuperlogDataService(sourceConnection, targetConnection)) {
+            QueueManagerAlgorithm strategy = new QueueManagerAlgorithm(superlogDataServise);
             strategy.execute(sourceConnection, targetConnection, data);
         }
     }

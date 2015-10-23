@@ -30,24 +30,27 @@ import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
 import ru.taximaxim.dbreplicator2.replica.strategies.replication.StrategySkeleton;
-import ru.taximaxim.dbreplicator2.replica.strategies.superlog.algorithm.FastManagerAlgorithm;
+import ru.taximaxim.dbreplicator2.replica.strategies.superlog.algorithm.ManagerAlgorithm;
 import ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.GenericSuperlogDataService;
+import ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.MsSuperlogDataService;
 
 /**
- * Класс стратегии менеджера записей суперлог таблицы с асинхронным параллельным
- * запуском обработчиков реплик
+ * Класс стратегии менеджера записей суперлог таблицы
  * @author petrov_im
  *
  */
-public class FastManager extends StrategySkeleton implements Strategy {
+public class MsManager extends StrategySkeleton implements Strategy {
+    
     
     @Override
     public void execute(Connection sourceConnection, Connection targetConnection,
-            StrategyModel data) throws StrategyException, SQLException, ClassNotFoundException {
+            StrategyModel data) throws StrategyException, SQLException,
+            ClassNotFoundException {
         
-        try (GenericSuperlogDataService superlogDataServise = new GenericSuperlogDataService(sourceConnection, targetConnection)) {
-            FastManagerAlgorithm strategy = new FastManagerAlgorithm(superlogDataServise);
+        try (GenericSuperlogDataService superlogDataServise = new MsSuperlogDataService(sourceConnection, targetConnection)) {
+            ManagerAlgorithm strategy = new ManagerAlgorithm(superlogDataServise);
             strategy.execute(sourceConnection, targetConnection, data);
         }
     }
+
 }

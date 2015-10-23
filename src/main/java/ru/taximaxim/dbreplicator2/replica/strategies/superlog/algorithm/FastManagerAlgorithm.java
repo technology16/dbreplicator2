@@ -21,33 +21,47 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ru.taximaxim.dbreplicator2.replica.strategies.superlog;
+package ru.taximaxim.dbreplicator2.replica.strategies.superlog.algorithm;
 
-import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collection;
 
-import ru.taximaxim.dbreplicator2.model.StrategyModel;
+import org.apache.log4j.Logger;
+
+import ru.taximaxim.dbreplicator2.model.RunnerModel;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
-import ru.taximaxim.dbreplicator2.replica.strategies.replication.StrategySkeleton;
-import ru.taximaxim.dbreplicator2.replica.strategies.superlog.algorithm.FastManagerAlgorithm;
-import ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.GenericSuperlogDataService;
+import ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.SuperlogDataService;
+import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
  * Класс стратегии менеджера записей суперлог таблицы с асинхронным параллельным
  * запуском обработчиков реплик
- * @author petrov_im
- *
+ * 
+ * @author volodin_aa
+ * 
  */
-public class FastManager extends StrategySkeleton implements Strategy {
+public class FastManagerAlgorithm extends GeneiricManagerAlgorithm implements Strategy {
+
+    private static final Logger LOG = Logger.getLogger(FastManagerAlgorithm.class);
+
+    /**
+     * Конструктор по умолчанию
+     */
+    public FastManagerAlgorithm(SuperlogDataService superlogDataService) {
+        super(superlogDataService);
+    }
     
     @Override
-    public void execute(Connection sourceConnection, Connection targetConnection,
-            StrategyModel data) throws StrategyException, SQLException, ClassNotFoundException {
-        
-        try (GenericSuperlogDataService superlogDataServise = new GenericSuperlogDataService(sourceConnection, targetConnection)) {
-            FastManagerAlgorithm strategy = new FastManagerAlgorithm(superlogDataServise);
-            strategy.execute(sourceConnection, targetConnection, data);
+    protected void startRunners(Collection<RunnerModel> runners) throws StrategyException, SQLException  {
+        try {
+            // Асинхронно запускаем обработчики реплик
+            for (RunnerModel runner : runners) {
+                Core.getThreadPool().start(runner);
+            }
+        } catch (InterruptedException e) {
+            LOG.warn("Работа потока прервана.", e);
+            throw new StrategyException(e);
         }
     }
 }
