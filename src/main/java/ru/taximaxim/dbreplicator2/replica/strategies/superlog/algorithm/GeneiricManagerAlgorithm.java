@@ -63,6 +63,8 @@ public abstract class GeneiricManagerAlgorithm extends StrategySkeleton implemen
     
     protected SuperlogDataService superlogDataService;
     
+    private Set<Runner> tRunners;
+    
     /**
      * Конструктор по умолчанию
      */
@@ -217,10 +219,12 @@ public abstract class GeneiricManagerAlgorithm extends StrategySkeleton implemen
      * @return
      */
     protected Set<Runner> getRunnersFromTask() {
-        TaskSettingsService taskSettingsService = Core.getTaskSettingsService();
-        Set<Runner> tRunners = new HashSet<>();
-        for (TaskSettings task : taskSettingsService.getTasks().values()) {
-            tRunners.add(task.getRunner());
+        if (tRunners == null) {
+            TaskSettingsService taskSettingsService = Core.getTaskSettingsService();
+            tRunners = new HashSet<>();
+            for (TaskSettings task : taskSettingsService.getTasks().values()) {
+                tRunners.add(task.getRunner());
+            }
         }
         
         return tRunners;
