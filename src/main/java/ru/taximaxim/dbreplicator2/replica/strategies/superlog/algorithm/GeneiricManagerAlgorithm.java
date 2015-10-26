@@ -38,14 +38,18 @@ import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
 import ru.taximaxim.dbreplicator2.model.BoneCPSettingsModel;
+import ru.taximaxim.dbreplicator2.model.Runner;
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.model.TableModel;
+import ru.taximaxim.dbreplicator2.model.TaskSettings;
+import ru.taximaxim.dbreplicator2.model.TaskSettingsService;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
 import ru.taximaxim.dbreplicator2.replica.strategies.replication.StrategySkeleton;
 import ru.taximaxim.dbreplicator2.replica.strategies.replication.workpool.WorkPoolService;
 import ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.SuperlogDataService;
+import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
  * Класс стратегии менеджера записей суперлог таблицы
@@ -206,6 +210,20 @@ public abstract class GeneiricManagerAlgorithm extends StrategySkeleton implemen
             }
         }
         return tableObservers;
+    }
+    
+    /**
+     * Получение списка раннеров, запускаемых из тасков
+     * @return
+     */
+    protected Set<Runner> getRunnersFromTask() {
+        TaskSettingsService taskSettingsService = Core.getTaskSettingsService();
+        Set<Runner> tRunners = new HashSet<>();
+        for (TaskSettings task : taskSettingsService.getTasks().values()) {
+            tRunners.add(task.getRunner());
+        }
+        
+        return tRunners;
     }
     
     /**
