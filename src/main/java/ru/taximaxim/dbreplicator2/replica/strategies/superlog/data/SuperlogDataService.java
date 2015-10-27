@@ -21,35 +21,33 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ru.taximaxim.dbreplicator2.replica.strategies.superlog;
+package ru.taximaxim.dbreplicator2.replica.strategies.superlog.data;
 
-import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import ru.taximaxim.dbreplicator2.model.StrategyModel;
-import ru.taximaxim.dbreplicator2.replica.Strategy;
-import ru.taximaxim.dbreplicator2.replica.StrategyException;
-import ru.taximaxim.dbreplicator2.replica.strategies.replication.StrategySkeleton;
-import ru.taximaxim.dbreplicator2.replica.strategies.superlog.algorithm.ManagerAlgorithm;
-import ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.GenericSuperlogDataService;
-
 /**
- * Класс стратегии менеджера записей суперлог таблицы
+ * Интерфейс для реализации дата сервисов обработки суперлога
  * @author petrov_im
  *
  */
-public class Manager extends StrategySkeleton implements Strategy {
+public interface SuperlogDataService extends AutoCloseable {
     
+    /**
+     * Получение PreparedStatement для выборки данных из суперлога
+     * @return
+     */
+    PreparedStatement getSelectSuperlogStatement() throws SQLException;
     
-    @Override
-    public void execute(Connection sourceConnection, Connection targetConnection,
-            StrategyModel data) throws StrategyException, SQLException,
-            ClassNotFoundException {
-        
-        try (GenericSuperlogDataService superlogDataServise = new GenericSuperlogDataService(sourceConnection, targetConnection)) {
-            ManagerAlgorithm strategy = new ManagerAlgorithm(superlogDataServise);
-            strategy.execute(sourceConnection, targetConnection, data);
-        }
-    }
-
+    /**
+     * Получение PreparedStatement для удаления записей из суперлога
+     * @return
+     */
+    PreparedStatement getDeleteSuperlogStatement() throws SQLException;
+    
+    /**
+     * Получение PreparedStatement для вставки данных в воркпул 
+     * @return
+     */
+    PreparedStatement getInsertWorkpoolStatement() throws SQLException;
 }

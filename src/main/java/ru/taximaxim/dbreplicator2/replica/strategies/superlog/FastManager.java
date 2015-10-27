@@ -23,44 +23,31 @@
 
 package ru.taximaxim.dbreplicator2.replica.strategies.superlog;
 
+import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Collection;
 
-import org.apache.log4j.Logger;
-
-import ru.taximaxim.dbreplicator2.model.RunnerModel;
+import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
-import ru.taximaxim.dbreplicator2.utils.Core;
+import ru.taximaxim.dbreplicator2.replica.strategies.replication.StrategySkeleton;
+import ru.taximaxim.dbreplicator2.replica.strategies.superlog.algorithm.FastManagerAlgorithm;
+import ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.GenericSuperlogDataService;
 
 /**
  * Класс стратегии менеджера записей суперлог таблицы с асинхронным параллельным
  * запуском обработчиков реплик
- * 
- * @author volodin_aa
- * 
+ * @author petrov_im
+ *
  */
-public class FastManager extends GeneiricManager implements Strategy {
-
-    private static final Logger LOG = Logger.getLogger(FastManager.class);
-
-    /**
-     * Конструктор по умолчанию
-     */
-    public FastManager() {
-        super();
-    }
+public class FastManager extends StrategySkeleton implements Strategy {
     
     @Override
-    protected void startRunners(Collection<RunnerModel> runners) throws StrategyException, SQLException  {
-        try {
-            // Асинхронно запускаем обработчики реплик
-            for (RunnerModel runner : runners) {
-                Core.getThreadPool().start(runner);
-            }
-        } catch (InterruptedException e) {
-            LOG.warn("Работа потока прервана.", e);
-            throw new StrategyException(e);
+    public void execute(Connection sourceConnection, Connection targetConnection,
+            StrategyModel data) throws StrategyException, SQLException, ClassNotFoundException {
+        
+        try (GenericSuperlogDataService superlogDataServise = new GenericSuperlogDataService(sourceConnection, targetConnection)) {
+            FastManagerAlgorithm strategy = new FastManagerAlgorithm(superlogDataServise);
+            strategy.execute(sourceConnection, targetConnection, data);
         }
     }
 }

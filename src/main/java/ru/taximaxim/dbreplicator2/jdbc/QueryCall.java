@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014 Technologiya
+ * Copyright (c) 2013 Technologiya
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -21,21 +21,30 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ru.taximaxim.dbreplicator2.qr;
+package ru.taximaxim.dbreplicator2.jdbc;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.concurrent.Callable;
 
 /**
- * Интерфейс для обработчика очереди раннеров (наблюдатель)
+ * Класс, выполняющий sql запрос в отдельном потоке, и возвращающий результат запроса
  * 
  * @author petrov_im
- * 
+ *
  */
-public interface Observer {
-       
-    /**
-     * Метод, запускающийся в наблюдателе при изменении наблюдаемого
-     * 
-     * @throws InterruptedException
-     */
-    void update() throws InterruptedException;
+public class QueryCall implements Callable<ResultSet> {
+    
+    protected PreparedStatement statement;
+    
+    public QueryCall(PreparedStatement statement) {
+        this.statement = statement;
+    }
+    
+    @Override
+    public ResultSet call() throws SQLException {
+        return statement.executeQuery();
+    }
 
 }

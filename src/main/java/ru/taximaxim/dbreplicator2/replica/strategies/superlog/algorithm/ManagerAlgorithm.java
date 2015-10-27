@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014 Technologiya
+ * Copyright (c) 2013 Technologiya
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -21,48 +21,38 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ru.taximaxim.dbreplicator2.qr;
+package ru.taximaxim.dbreplicator2.replica.strategies.superlog.algorithm;
 
+import java.sql.SQLException;
 import java.util.Collection;
-import java.util.LinkedHashSet;
 
-import org.apache.log4j.Logger;
-
-import ru.taximaxim.dbreplicator2.model.Runner;
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
+import ru.taximaxim.dbreplicator2.replica.Strategy;
+import ru.taximaxim.dbreplicator2.replica.StrategyException;
+import ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.SuperlogDataService;
+import ru.taximaxim.dbreplicator2.tp.WorkerThread;
 
 /**
- * Очередь раннеров ожидающих обработку
+ * Класс стратегии менеджера записей суперлог таблицы
  * 
- * @author petrov_im
+ * @author volodin_aa
  * 
  */
-public class RunnersQueue {
-    
-    private static final Logger LOG = Logger.getLogger(RunnersQueue.class);
-
-    private Collection<Runner> queueRunners = new LinkedHashSet<Runner>();
-    
+public class ManagerAlgorithm extends GeneiricManagerAlgorithm implements Strategy {
+  
     /**
-     * Добавляет поступившие из суперлога раннеры в очередь на обработку
-     * 
-     * @param runners
-     * @throws InterruptedException
+     * Конструктор по умолчанию
      */
-    public void addAll(Collection<RunnerModel> runners) throws InterruptedException {
-        synchronized (queueRunners) {
-            queueRunners.addAll(runners);
-            queueRunners.notifyAll();
-            LOG.debug("queueRunners.notifyAll()");
-        }
+    public ManagerAlgorithm(SuperlogDataService superlogDataService) {
+        super(superlogDataService);
     }
     
-    /**
-     * Возвращает очередь раннеров, ожидающих обработки
-     * 
-     * @return
-     */
-    public Collection<Runner> getQueueRunners() {
-        return queueRunners;
+    @Override
+    protected void startRunners(Collection<RunnerModel> runners) throws StrategyException, SQLException  {
+        // Запускаем обработчики реплик
+        for (RunnerModel runner : runners) {
+            WorkerThread workerThread = new WorkerThread(runner);
+            workerThread.run();
+        }
     }
 }

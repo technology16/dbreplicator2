@@ -19,7 +19,7 @@
         <property name="show_sql">true</property>
         <!-- Update the database schema on startup -->
         <property name="hbm2ddl.auto">create</property>
-        <property name="hibernate.hbm2ddl.import_files">importOffsetQueue.sql</property>
+        <property name="hibernate.hbm2ddl.import_files">importOffset.sql</property>
         <property name="hibernate.hbm2ddl.import_files_sql_extractor">org.hibernate.tool.hbm2ddl.MultipleLinesSqlCommandExtractor</property>
         <mapping class="ru.taximaxim.dbreplicator2.model.TableModel"/>
         <mapping class="ru.taximaxim.dbreplicator2.model.BoneCPSettingsModel"/>

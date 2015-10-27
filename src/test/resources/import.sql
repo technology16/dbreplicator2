@@ -19,13 +19,13 @@ insert into application_settings (key, value) values ('error.dest', 'error');
 --Runners Super Log
 insert into runners (id_runner, source, target, description) values (1, 'source', 'source', 'FastManager');
 --Strategies Add Super Log
-insert into strategies (id, className, param, isEnabled, priority, id_runner) values (1, 'ru.taximaxim.dbreplicator2.replica.strategies.superlog.Manager', 'key1=value1
+insert into strategies (id, className, param, isEnabled, priority, id_runner) values (1, 'ru.taximaxim.dbreplicator2.replica.strategies.superlog.FastManager', 'key1=value1
 key2=''value2''', true, 100, 1);
 
 --Runners Super Log 2
 insert into runners (id_runner, source, target, description) values (2, 'dest', 'dest', 'FastManager');
 --Strategies Add Super Log 2
-insert into strategies (id, className, param, isEnabled, priority, id_runner) values (2, 'ru.taximaxim.dbreplicator2.replica.strategies.superlog.Manager', 'key1=value1
+insert into strategies (id, className, param, isEnabled, priority, id_runner) values (2, 'ru.taximaxim.dbreplicator2.replica.strategies.superlog.FastManager', 'key1=value1
 key2=''value2''', true, 100, 2);
 
 --Runners Task

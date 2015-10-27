@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014 Technologiya
+ * Copyright (c) 2013 Technologiya
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -21,7 +21,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ru.taximaxim.dbreplicator2.replica.strategies.superlog;
+package ru.taximaxim.dbreplicator2.replica.strategies.superlog.algorithm;
 
 import java.sql.SQLException;
 import java.util.Collection;
@@ -29,34 +29,36 @@ import java.util.Collection;
 import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
-import ru.taximaxim.dbreplicator2.qr.RunnersQueue;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
+import ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.SuperlogDataService;
 import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
- * Класс стратегии менеджера записей суперлог таблицы
- * с запуском обработчиков реплик из очереди
+ * Класс стратегии менеджера записей суперлог таблицы с асинхронным параллельным
+ * запуском обработчиков реплик
  * 
- * @author petrov_im
+ * @author volodin_aa
  * 
  */
-public class QueueManager extends GeneiricManager implements Strategy {
-    
-    private static final Logger LOG = Logger.getLogger(QueueManager.class);
-    
+public class FastManagerAlgorithm extends GeneiricManagerAlgorithm implements Strategy {
+
+    private static final Logger LOG = Logger.getLogger(FastManagerAlgorithm.class);
+
     /**
      * Конструктор по умолчанию
      */
-    public QueueManager() {
-        super();
+    public FastManagerAlgorithm(SuperlogDataService superlogDataService) {
+        super(superlogDataService);
     }
     
     @Override
-    protected void startRunners(Collection<RunnerModel> runners)  throws StrategyException, SQLException  {
+    protected void startRunners(Collection<RunnerModel> runners) throws StrategyException, SQLException  {
         try {
-            RunnersQueue runnersQueue = Core.getRunnersQueue();
-            runnersQueue.addAll(runners);
+            // Асинхронно запускаем обработчики реплик
+            for (RunnerModel runner : runners) {
+                Core.getThreadPool().start(runner);
+            }
         } catch (InterruptedException e) {
             LOG.warn("Работа потока прервана.", e);
             throw new StrategyException(e);
