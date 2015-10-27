@@ -138,7 +138,7 @@ public final class Core {
      * @param hibernateXmlFile - путь к файлу настроек
      * @return фабрику сессий гибернейта.
      */
-    public static SessionFactory getSessionFactory(String hibernateXmlFile) {
+    public static synchronized SessionFactory getSessionFactory(String hibernateXmlFile) {
         if (sessionFactory == null) {
             configuration = getConfiguration(hibernateXmlFile);
             
