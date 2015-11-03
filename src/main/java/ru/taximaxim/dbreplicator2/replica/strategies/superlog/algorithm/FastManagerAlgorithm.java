@@ -57,7 +57,9 @@ public class FastManagerAlgorithm extends GeneiricManagerAlgorithm implements St
         try {
             // Асинхронно запускаем обработчики реплик
             for (RunnerModel runner : runners) {
-                Core.getThreadPool().start(runner);
+                if (!getRunnersFromTask().contains(runner)) {
+                    Core.getThreadPool().start(runner);
+                }
             }
         } catch (InterruptedException e) {
             LOG.warn("Работа потока прервана.", e);

@@ -51,8 +51,10 @@ public class ManagerAlgorithm extends GeneiricManagerAlgorithm implements Strate
     protected void startRunners(Collection<RunnerModel> runners) throws StrategyException, SQLException  {
         // Запускаем обработчики реплик
         for (RunnerModel runner : runners) {
-            WorkerThread workerThread = new WorkerThread(runner);
-            workerThread.run();
+            if (!getRunnersFromTask().contains(runner)) {
+                WorkerThread workerThread = new WorkerThread(runner);
+                workerThread.run();
+            }
         }
     }
 }
