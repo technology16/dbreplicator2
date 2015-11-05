@@ -28,8 +28,7 @@ import java.sql.SQLException;
 
 import org.hibernate.SessionFactory;
 
-import ru.taximaxim.dbreplicator2.model.BoneCPDataBaseSettingsStorage;
-import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
+import ru.taximaxim.dbreplicator2.model.HikariCPSettingsService;
 import ru.taximaxim.dbreplicator2.utils.Core;
 
 
@@ -42,14 +41,14 @@ import ru.taximaxim.dbreplicator2.utils.Core;
 public abstract class AbstractBoneCPTest {
     
     protected static SessionFactory sessionFactory;
-    protected static BoneCPDataBaseSettingsStorage settingStorage;
+    protected static HikariCPSettingsService settingStorage;
     
     protected static void setUp() throws ClassNotFoundException, SQLException, IOException {
         // Инициализируем Hibernate
         sessionFactory = Core.getSessionFactory();
         
         // Инициализируем хранилище настроек пулов соединений
-        settingStorage = new BoneCPSettingsService(sessionFactory);
+        settingStorage = new HikariCPSettingsService(sessionFactory);
 
     }
     
