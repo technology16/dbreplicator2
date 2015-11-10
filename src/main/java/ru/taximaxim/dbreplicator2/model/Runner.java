@@ -37,14 +37,14 @@ public interface Runner {
      *
      * @return Строковый идентификатор пула соединений базы-истончка
      */
-    BoneCPSettingsModel getSource();
+    HikariCPSettingsModel getSource();
 
     /**
      * Настройки пула соединений целевой БД
      *
      * @return Строковый идентификатор пула соединений целевой БД
      */
-    BoneCPSettingsModel getTarget();
+    HikariCPSettingsModel getTarget();
 
     /**
      * Идентификатор потока-реплики

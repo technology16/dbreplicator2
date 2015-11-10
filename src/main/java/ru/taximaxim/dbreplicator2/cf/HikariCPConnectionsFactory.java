@@ -30,13 +30,9 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import ru.taximaxim.dbreplicator2.model.BoneCPDataBaseSettingsStorage;
-import ru.taximaxim.dbreplicator2.model.BoneCPSettings;
 import ru.taximaxim.dbreplicator2.model.HikariCPSettingsModel;
 import ru.taximaxim.dbreplicator2.model.HikariCPSettingsService;
 
-import com.jolbox.bonecp.BoneCP;
-import com.jolbox.bonecp.BoneCPConfig;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -53,7 +49,7 @@ public class HikariCPConnectionsFactory implements ConnectionFactory {
     /**
      * Инициализированные именнованные пулы соединений
      */
-    private Map<String, BoneCP> connectionPools;
+    private Map<String, HikariDataSource> connectionPools;
 
     /**
      * Хранилище настроек
@@ -68,7 +64,7 @@ public class HikariCPConnectionsFactory implements ConnectionFactory {
      */
     public HikariCPConnectionsFactory(HikariCPSettingsService settingStorage) {
         this.settingStorage = settingStorage;
-        connectionPools = new HashMap<String, BoneCP>();
+        connectionPools = new HashMap<String, HikariDataSource>();
     }
 
     /*
@@ -79,7 +75,7 @@ public class HikariCPConnectionsFactory implements ConnectionFactory {
      */
     public Connection getConnection(String poolName) throws SQLException,
             ClassNotFoundException {
-        BoneCP connectionPool;
+        HikariDataSource connectionPool;
 
         synchronized (connectionPools) {
             connectionPool = connectionPools.get(poolName);
@@ -94,37 +90,20 @@ public class HikariCPConnectionsFactory implements ConnectionFactory {
 
               //  Class.forName(hikariCPSettings.getDriver());
 
-                HikariDataSource hikariDS = new HikariDataSource();
+                HikariConfig config = new HikariConfig();
                 
-                hikariDS.setPoolName(hikariCPSettings.getPoolId());
-                hikariDS.setDriverClassName(hikariCPSettings.getDriver()); 
-                hikariDS.setJdbcUrl(hikariCPSettings.getUrl());
-                hikariDS.setUsername(hikariCPSettings.getUser());
-                hikariDS.setPassword(hikariCPSettings.getPass());
-                hikariDS.setInitializationFailFast(hikariCPSettings.getInitializationFailFast());
-                hikariDS.setMaximumPoolSize(hikariCPSettings.getMaximumPoolSize());
-                hikariDS.setConnectionTimeout(hikariCPSettings.getConnectionTimeout());
-                hikariDS.setIdleTimeout(hikariCPSettings.getIdleTimeout());
-                hikariDS.setMaxLifetime(hikariCPSettings.getMaxLifetime());
-                
-
-                
-                
-               /* config.setJdbcUrl(hikariCPSettings.getUrl());
+                config.setPoolName(hikariCPSettings.getPoolId());
+                config.setDriverClassName(hikariCPSettings.getDriver()); 
+                config.setJdbcUrl(hikariCPSettings.getUrl());
                 config.setUsername(hikariCPSettings.getUser());
                 config.setPassword(hikariCPSettings.getPass());
-
-                config.setMinConnectionsPerPartition(hikariCPSettings
-                        .getMinConnectionsPerPartition());
-                config.setMaxConnectionsPerPartition(hikariCPSettings
-                        .getMaxConnectionsPerPartition());
-                config.setPartitionCount(hikariCPSettings.getPartitionCount());
-                config.setConnectionTimeoutInMs(hikariCPSettings
-                        .getConnectionTimeoutInMs());
-                config.setCloseConnectionWatchTimeoutInMs(hikariCPSettings
-                        .getCloseConnectionWatchTimeoutInMs());
-
-                connectionPool = new BoneCP(config);*/
+                config.setInitializationFailFast(hikariCPSettings.getInitializationFailFast());
+                config.setMaximumPoolSize(hikariCPSettings.getMaximumPoolSize());
+                config.setConnectionTimeout(hikariCPSettings.getConnectionTimeout());
+                config.setIdleTimeout(hikariCPSettings.getIdleTimeout());
+                config.setMaxLifetime(hikariCPSettings.getMaxLifetime());
+                
+                connectionPool = new HikariDataSource(config);
 
                 connectionPools.put(poolName, connectionPool);
             }
@@ -162,7 +141,7 @@ public class HikariCPConnectionsFactory implements ConnectionFactory {
      */
     public void close() {
         synchronized (connectionPools) {
-            for (Map.Entry<String, BoneCP> entry : connectionPools.entrySet()) {
+            for (Map.Entry<String, HikariDataSource> entry : connectionPools.entrySet()) {
                 entry.getValue().close();
             }
             connectionPools.clear();

@@ -33,8 +33,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ru.taximaxim.dbreplicator2.abstracts.AbstractBoneCPTest;
-import ru.taximaxim.dbreplicator2.model.BoneCPSettings;
-import ru.taximaxim.dbreplicator2.model.BoneCPSettingsModel;
+import ru.taximaxim.dbreplicator2.model.HikariCPSettingsModel;
 
 /**
  * Класс для тестирования пулов соединений
@@ -65,13 +64,13 @@ public class BoneCPSettingsServiceTest extends AbstractBoneCPTest {
     public void testGetDataBaseSettingsByName() throws ClassNotFoundException,
             SQLException {
         // Полуение несуществующих настроек
-        BoneCPSettingsModel boneCPSettings = settingStorage
+        HikariCPSettingsModel boneCPSettings = settingStorage
                 .getDataBaseSettingsByName("testGetDataBaseSettingsByName");
         assertNull("Ошибка при получение несуществующих настроек!",
                 boneCPSettings);
 
         // Получение существующих
-        BoneCPSettingsModel newBoneCPSettings = new BoneCPSettingsModel(
+        HikariCPSettingsModel newBoneCPSettings = new HikariCPSettingsModel(
                 "testGetDataBaseSettingsByName", "org.h2.Driver",
                 "jdbc:h2:mem://localhost/~/test", "sa", "");
 

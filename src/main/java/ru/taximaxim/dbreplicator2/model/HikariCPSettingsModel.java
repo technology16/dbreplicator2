@@ -49,6 +49,12 @@ import org.hibernate.annotations.FetchMode;
 public class HikariCPSettingsModel implements Serializable {
     
     private static final long serialVersionUID = 1L;
+    
+    private static final int MAXIMUM_POOL_SIZE = 3;
+    private static final boolean INITIALIZATION_FAIL_FAST = false;
+    private static final int CONNECTION_TIMEOUT = 30000;
+    private static final int IDLE_TIMEOUT = 600000;
+    private static final int MAX_LIFETIME = 600000;
 
     /**
      * Конструктор по умолчанию
@@ -113,7 +119,20 @@ public class HikariCPSettingsModel implements Serializable {
         this.connectionTimeout = connectionTimeout;
         this.idleTimeout = idleTimeout;
         this.maxLifetime = maxLifetime;
-        
+    }
+    
+    public HikariCPSettingsModel(String poolId, String driver, String url, String user,
+            String pass) {
+        this.poolId = poolId;
+        this.driver = driver;
+        this.url = url;
+        this.user = user;
+        this.pass = pass;
+        this.maximumPoolSize = MAXIMUM_POOL_SIZE;
+        this.initializationFailFast = INITIALIZATION_FAIL_FAST;
+        this.connectionTimeout = CONNECTION_TIMEOUT;
+        this.idleTimeout = IDLE_TIMEOUT;
+        this.maxLifetime = MAX_LIFETIME;
     }
 
     /**
@@ -351,24 +370,10 @@ public class HikariCPSettingsModel implements Serializable {
         if (obj == null) {
             return false;
         }
-        if (!(obj instanceof BoneCPSettingsModel)) {
+        if (!(obj instanceof HikariCPSettingsModel)) {
             return false;
         }
         HikariCPSettingsModel other = (HikariCPSettingsModel) obj;
-        if (driver == null) {
-            if (other.driver != null) {
-                return false;
-            }
-        } else if (!driver.equals(other.driver)) {
-            return false;
-        }
-        if (pass == null) {
-            if (other.pass != null) {
-                return false;
-            }
-        } else if (!pass.equals(other.pass)) {
-            return false;
-        }
         if (poolId == null) {
             if (other.poolId != null) {
                 return false;
@@ -381,13 +386,6 @@ public class HikariCPSettingsModel implements Serializable {
                 return false;
             }
         } else if (!url.equals(other.url)) {
-            return false;
-        }
-        if (user == null) {
-            if (other.user != null) {
-                return false;
-            }
-        } else if (!user.equals(other.user)) {
             return false;
         }
         return true;
