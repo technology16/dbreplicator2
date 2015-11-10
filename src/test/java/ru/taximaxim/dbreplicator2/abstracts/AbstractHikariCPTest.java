@@ -38,7 +38,7 @@ import ru.taximaxim.dbreplicator2.utils.Core;
  * @author petrov_im
  *
  */
-public abstract class AbstractBoneCPTest {
+public abstract class AbstractHikariCPTest {
     
     protected static SessionFactory sessionFactory;
     protected static HikariCPSettingsService settingStorage;
