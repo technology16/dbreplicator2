@@ -88,8 +88,6 @@ public class HikariCPConnectionsFactory implements ConnectionFactory {
                     return null;
                 }
 
-              //  Class.forName(hikariCPSettings.getDriver());
-
                 HikariConfig config = new HikariConfig();
                 
                 config.setPoolName(hikariCPSettings.getPoolId());
@@ -104,7 +102,6 @@ public class HikariCPConnectionsFactory implements ConnectionFactory {
                 config.setMaxLifetime(hikariCPSettings.getMaxLifetime());
                 
                 connectionPool = new HikariDataSource(config);
-
                 connectionPools.put(poolName, connectionPool);
             }
         }
