@@ -23,10 +23,7 @@
 package ru.taximaxim.dbreplicator2.tasks;
 
 import java.sql.SQLException;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.TimeZone;
-
 import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
