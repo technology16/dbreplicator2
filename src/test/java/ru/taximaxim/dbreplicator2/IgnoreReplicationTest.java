@@ -55,7 +55,7 @@ public class IgnoreReplicationTest extends AbstractReplicationTest{
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        setUp("src/test/resources/hibernateIgnoreReplication.cfg.xml", "importRep2.sql", "importSource.sql", "importDest.sql");
+        setUp("importIgnoreReplication.sql", "importRep2.sql", "importSource.sql", "importDest.sql");
         initRunners();
     }
 

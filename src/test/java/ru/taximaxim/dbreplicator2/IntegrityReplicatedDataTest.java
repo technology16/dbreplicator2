@@ -61,7 +61,7 @@ public class IntegrityReplicatedDataTest extends AbstractReplicationTest {
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        setUp("src/test/resources/hibernateIntegrityReplicatedData.cfg.xml", "importRep2.sql", "importSource.sql", "importDest.sql");
+        setUp("importIntegrityReplicatedData.sql", "importRep2.sql", "importSource.sql", "importDest.sql");
         initRunners();
     }
 
