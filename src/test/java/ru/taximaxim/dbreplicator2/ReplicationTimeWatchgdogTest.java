@@ -30,7 +30,7 @@ protected static final Logger LOG = Logger.getLogger(ReplicationTimeWatchgdogTes
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        setUp("src/test/resources/hibernateRepTimeWatch.cfg.xml", null, "importRep2.sql", "importSource.sql", "importDest.sql");
+        setUp("src/test/resources/hibernateRepTimeWatch.cfg.xml", "importRep2.sql", "importSource.sql", "importDest.sql");
         initRunners();
     }
 

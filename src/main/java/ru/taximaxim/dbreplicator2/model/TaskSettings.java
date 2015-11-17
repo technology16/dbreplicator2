@@ -113,4 +113,16 @@ public interface TaskSettings {
      * @param runner
      */
     void setRunner(RunnerModel runner);
+    
+    /**
+     * Получение времени первого запуска задачи, мс
+     * @return
+     */
+    Integer getFirstRunTime();
+
+    /**
+     * Установка времени первого запуска задачи, мс
+     * @param firstRunTime
+     */
+    void setFirstRunTime(Integer firstRunTime);
 }

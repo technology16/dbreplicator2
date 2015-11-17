@@ -59,7 +59,7 @@ public class WorkpoolDataClearingTest extends AbstractReplicationTest {
      */
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        setUp("src/test/resources/hibernateWorkpoolDataClearing.cfg.xml", null, "importRep2.sql", "importSourceOffset.sql", "importDest.sql");   
+        setUp("src/test/resources/hibernateWorkpoolDataClearing.cfg.xml", "importRep2.sql", "importSourceOffset.sql", "importDest.sql");   
         initRunners();
     }
 

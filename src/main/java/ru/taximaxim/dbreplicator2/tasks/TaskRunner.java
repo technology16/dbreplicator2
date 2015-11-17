@@ -23,7 +23,9 @@
 package ru.taximaxim.dbreplicator2.tasks;
 
 import java.sql.SQLException;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 import org.apache.log4j.Logger;
 
@@ -80,6 +82,31 @@ public class TaskRunner implements Runnable {
         LOG.info(String.format("Запуск задачи [%d] %s",
                 taskSettings.getTaskId(), taskSettings.getDescription()));
         while (enabled) {
+            
+            Integer firstRunTime = taskSettings.getFirstRunTime();
+            if (firstRunTime != null) {
+                Calendar currentTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                Calendar beginDateTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                beginDateTime.set(currentTime.get(Calendar.YEAR),
+                        currentTime.get(Calendar.MONTH), 
+                        currentTime.get(Calendar.DATE), 0, 0, 0);
+
+                long currentDateTime = currentTime.getTimeInMillis() - beginDateTime.getTimeInMillis() - currentTime.get(Calendar.MILLISECOND);
+
+                while(firstRunTime <= currentDateTime) {
+                    firstRunTime += taskSettings.getSuccessInterval();
+                }
+                try {
+                    Thread.sleep(firstRunTime - currentDateTime);
+                } catch (InterruptedException e) {
+                    LOG.error(
+                            String.format("Ошибка во время ожидания запуска задачи [id_task = %d, %s]", 
+                                    taskSettings.getTaskId(),
+                                    taskSettings.getDescription()), 
+                                    e);
+                }
+            }
+            
             long startTime = new Date().getTime();
             boolean isSuccess = false;
             

@@ -54,7 +54,7 @@ public class OffsetTest extends AbstractReplicationTest {
      */
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        setUp("src/test/resources/hibernateOffset.cfg.xml", null, "importRep2.sql", "importSourceOffset.sql", "importDest.sql");
+        setUp("src/test/resources/hibernateOffset.cfg.xml", "importRep2.sql", "importSourceOffset.sql", "importDest.sql");
         initRunners();
     }
 

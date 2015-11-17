@@ -62,7 +62,7 @@ public class H2CopyTableData2repTest extends AbstractReplicationTest {
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        setUp(null, null, "importRep2.sql", "importSource.sql", "importDest.sql"); 
+        setUp(null, "importRep2.sql", "importSource.sql", "importDest.sql"); 
         initRunners();
     }
 
@@ -287,7 +287,7 @@ public class H2CopyTableData2repTest extends AbstractReplicationTest {
         verifyTables();
         
         workerEnd();
-        workerEnd2();        
+        workerEnd2();
         int count = Helper.InfoCount(conn,  "rep2_superlog");
         assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }

@@ -41,7 +41,7 @@ import org.hibernate.annotations.FetchMode;
  */
 @Entity
 @Table( name = "tasks" )
-public class TaskSettingsModel implements TaskSettings{
+public class TaskSettingsModel implements TaskSettings {
 
     /**
      * Идентификатор задачи
@@ -56,6 +56,12 @@ public class TaskSettingsModel implements TaskSettings{
     @Column(name = "enabled")
     private boolean enabled;
 
+    /**
+     * Время первого запуска задачи, мс
+     */
+    @Column(name = "first_run_time")
+    private Integer firstRunTime;
+    
     /**
      * Интервал после успешного выполнения задачи, мс
      */
@@ -147,4 +153,14 @@ public class TaskSettingsModel implements TaskSettings{
     public void setRunner(RunnerModel runner) {
         this.runner = runner;
     }
+    
+    @Override
+   public Integer getFirstRunTime() {
+       return firstRunTime;
+   }
+
+   @Override
+   public void setFirstRunTime(Integer firstRunTime) {
+       this.firstRunTime = firstRunTime;
+   }
 }

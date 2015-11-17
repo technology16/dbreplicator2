@@ -56,7 +56,7 @@ public abstract class AbstractReplicationTest {
     protected static Runnable worker2 = null;
     protected static Runnable errorsCountWatchdogWorker = null;
 
-    protected static void setUp(String xmlForConfig, String xmlForSession, String sqlRep2, String sqlSourse, String sqlDest) throws ClassNotFoundException, SQLException, IOException {   
+    protected static void setUp(String xmlForConfig, String sqlRep2, String sqlSourse, String sqlDest) throws ClassNotFoundException, SQLException, IOException {   
         Core.configurationClose();
         if(xmlForConfig != null){
             Core.getConfiguration(xmlForConfig);
@@ -64,12 +64,8 @@ public abstract class AbstractReplicationTest {
         else {
             Core.getConfiguration();
         }       
-        if(xmlForSession != null){
-            sessionFactory = Core.getSessionFactory(xmlForSession);
-        }
-        else {
-            sessionFactory = Core.getSessionFactory();
-        }      
+
+        sessionFactory = Core.getSessionFactory();
         session = sessionFactory.openSession();
         connectionFactory = Core.getConnectionFactory();
         errorsLog = Core.getErrorsLog();
