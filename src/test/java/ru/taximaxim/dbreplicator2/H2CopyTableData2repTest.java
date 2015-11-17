@@ -62,7 +62,7 @@ public class H2CopyTableData2repTest extends AbstractReplicationTest {
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        setUp(null, "importRep2.sql", "importSource.sql", "importDest.sql"); 
+        setUp(null, "init_db/importRep2.sql", "init_db/importSource.sql", "init_db/importDest.sql"); 
         initRunners();
     }
 
@@ -99,10 +99,10 @@ public class H2CopyTableData2repTest extends AbstractReplicationTest {
         Thread.sleep(REPLICATION_DELAY);
         //Проверка внешних ключей
         LOG.info("Проверка внешних ключей");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 20);
+        Helper.executeSqlFromFile(conn, "sql_query/sql_foreign_key.sql", 20);
         
         workerRun();
-        Helper.executeSqlFromFile(connDest,  "sql_foreign_key2.sql", 20);
+        Helper.executeSqlFromFile(connDest,  "sql_query/sql_foreign_key2.sql", 20);
         workerRun2();
         
         workerRun();
@@ -173,9 +173,9 @@ public class H2CopyTableData2repTest extends AbstractReplicationTest {
         testInsert();
         //Проверка обновления
         LOG.info("Проверка обновления");
-        Helper.executeSqlFromFile(conn, "sql_update.sql");   
+        Helper.executeSqlFromFile(conn, "sql_query/sql_update.sql");
         workerRun();
-        Helper.executeSqlFromFile(connDest,  "sql_update2.sql");     
+        Helper.executeSqlFromFile(connDest, "sql_query/sql_update2.sql");
         workerRun2();
         
         workerRun();
@@ -199,9 +199,9 @@ public class H2CopyTableData2repTest extends AbstractReplicationTest {
         testInsert();
         LOG.info("Проверка удаления");
         //Проверка удаления
-        Helper.executeSqlFromFile(conn, "sql_delete.sql");   
+        Helper.executeSqlFromFile(conn, "sql_query/sql_delete.sql");
         workerRun();
-        Helper.executeSqlFromFile(connDest, "sql_delete.sql");    
+        Helper.executeSqlFromFile(connDest, "sql_query/sql_delete.sql");
         workerRun2();
         
         workerRun();
@@ -224,11 +224,10 @@ public class H2CopyTableData2repTest extends AbstractReplicationTest {
     public void testInsertUpdate() throws Exception {
       //Проверка вставки и обновления
         LOG.info("Проверка вставки и обновления");
-        Helper.executeSqlFromFile(conn, "sql_insert.sql");   
-        Helper.executeSqlFromFile(conn, "sql_update.sql");   
+        Helper.executeSqlFromFile(conn, "sql_query/sql_insert.sql");
+        Helper.executeSqlFromFile(conn, "sql_query/sql_update.sql");
         workerRun();
-        //Helper.executeSqlFromFile(connDest, "sql_insert.sql");   
-        Helper.executeSqlFromFile(connDest, "sql_update2.sql");  
+        Helper.executeSqlFromFile(connDest, "sql_query/sql_update2.sql");
         workerRun2();
         
         workerRun();
@@ -251,11 +250,11 @@ public class H2CopyTableData2repTest extends AbstractReplicationTest {
     public void testInsertDelete() throws Exception {
         LOG.info("Проверка вставки и удаления");
       //Проверка вставки и удаления
-        Helper.executeSqlFromFile(conn, "sql_insert.sql");   
-        Helper.executeSqlFromFile(conn, "sql_delete.sql");   
+        Helper.executeSqlFromFile(conn, "sql_query/sql_insert.sql");
+        Helper.executeSqlFromFile(conn, "sql_query/sql_delete.sql");
         workerRun();
-        Helper.executeSqlFromFile(connDest, "sql_insert.sql");   
-        Helper.executeSqlFromFile(connDest, "sql_delete.sql");   
+        Helper.executeSqlFromFile(connDest, "sql_query/sql_insert.sql");
+        Helper.executeSqlFromFile(connDest, "sql_query/sql_delete.sql");
         workerRun2();
         
         workerRun();
@@ -277,7 +276,7 @@ public class H2CopyTableData2repTest extends AbstractReplicationTest {
     @Test
     public void testInsert() throws Exception {
       //Проверка вставки
-        Helper.executeSqlFromFile(conn, "sql_insert.sql");
+        Helper.executeSqlFromFile(conn, "sql_query/sql_insert.sql");
         workerRun();
         workerRun2();
 

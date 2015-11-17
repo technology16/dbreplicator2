@@ -40,7 +40,7 @@ public class TriggerH2Test extends AbstractSettingTest {
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        setUp("importRep2.sql", "importSource.sql", "importSourceData.sql");
+        setUp("init_db/importRep2.sql", "init_db/importSource.sql", "init_db/importSourceData.sql");
     }
 
     @AfterClass

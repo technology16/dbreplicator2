@@ -46,7 +46,7 @@ public class StatsServiceTest extends AbstractSettingTest {
      */
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        setUp("importRep2.sql", null, null);     
+        setUp("init_db/importRep2.sql", null, null);     
         initialization();
     }
 

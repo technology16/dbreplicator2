@@ -55,7 +55,7 @@ public class IgnoreReplicationTest extends AbstractReplicationTest{
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        setUp("importIgnoreReplication.sql", "importRep2.sql", "importSource.sql", "importDest.sql");
+        setUp("importIgnoreReplication.sql", "init_db/importRep2.sql", "init_db/importSource.sql", "init_db/importDest.sql");
         initRunners();
     }
 
@@ -74,7 +74,7 @@ public class IgnoreReplicationTest extends AbstractReplicationTest{
     @Test
     public void testUpdate() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
       //Проверка вставки
-        Helper.executeSqlFromFile(conn, "sql_update_ignore_replication.sql");
+        Helper.executeSqlFromFile(conn, "sql_query/sql_update_ignore_replication.sql");
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");

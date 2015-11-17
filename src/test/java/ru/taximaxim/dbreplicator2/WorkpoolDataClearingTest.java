@@ -59,7 +59,7 @@ public class WorkpoolDataClearingTest extends AbstractReplicationTest {
      */
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        setUp("importWorkpoolDataClearing.sql", "importRep2.sql", "importSourceOffset.sql", "importDest.sql");   
+        setUp("importWorkpoolDataClearing.sql", "init_db/importRep2.sql", "init_db/importSourceOffset.sql", "init_db/importDest.sql");
         initRunners();
     }
 
@@ -109,7 +109,7 @@ public class WorkpoolDataClearingTest extends AbstractReplicationTest {
         
         //Проверка внешних ключей
         LOG.info("Проверка внешних ключей");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key_error.sql");
+        Helper.executeSqlFromFile(conn, "sql_query/sql_foreign_key_error.sql");
         
         worker.run();
         Thread.sleep(REPLICATION_DELAY);

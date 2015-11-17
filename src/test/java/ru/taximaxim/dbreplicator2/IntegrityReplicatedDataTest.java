@@ -61,7 +61,7 @@ public class IntegrityReplicatedDataTest extends AbstractReplicationTest {
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        setUp("importIntegrityReplicatedData.sql", "importRep2.sql", "importSource.sql", "importDest.sql");
+        setUp("importIntegrityReplicatedData.sql", "init_db/importRep2.sql", "init_db/importSource.sql", "init_db/importDest.sql");
         initRunners();
     }
 
@@ -80,9 +80,9 @@ public class IntegrityReplicatedDataTest extends AbstractReplicationTest {
     @Test
     public void testInsert() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
       //Проверка вставки
-        Helper.executeSqlFromFile(conn, "sql_insert.sql");
+        Helper.executeSqlFromFile(conn, "sql_query/sql_insert.sql");
         worker.run();
-        Helper.executeSqlFromFile(conn, "sql_update.sql"); 
+        Helper.executeSqlFromFile(conn, "sql_query/sql_update.sql"); 
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
@@ -93,8 +93,8 @@ public class IntegrityReplicatedDataTest extends AbstractReplicationTest {
         listDest   = Helper.InfoTest(connDest, "t_table1");
         Helper.AssertEquals(listSource, listDest);
         Thread.sleep(REPLICATION_DELAY);
-        Helper.executeSqlFromFile(connDest, "sql_update.sql"); 
-        Helper.executeSqlFromFile(connDest, "sql_delete.sql"); 
+        Helper.executeSqlFromFile(connDest, "sql_query/sql_update.sql"); 
+        Helper.executeSqlFromFile(connDest, "sql_query/sql_delete.sql"); 
         int count_rep2_errors_log = Helper.InfoCount(conn, "rep2_errors_log");
         assertTrue(String.format("rep2_errors_log чистый [%s==0]", count_rep2_errors_log), count_rep2_errors_log== 0);
         
@@ -106,9 +106,9 @@ public class IntegrityReplicatedDataTest extends AbstractReplicationTest {
         count_rep2_errors_log = Helper.InfoCount(conn, "rep2_errors_log where c_status = 0");
         assertTrue(String.format("Должны быть ошибки rep2_errors_log [%s!=0]", count_rep2_errors_log), count_rep2_errors_log!= 0);
 
-        Helper.executeSqlFromFile(conn, "sql_delete.sql");     
+        Helper.executeSqlFromFile(conn, "sql_query/sql_delete.sql");
         worker.run();
-        Helper.executeSqlFromFile(conn, "sql_update.sql"); 
+        Helper.executeSqlFromFile(conn, "sql_query/sql_update.sql");
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
         
