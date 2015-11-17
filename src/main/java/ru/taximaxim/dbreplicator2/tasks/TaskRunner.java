@@ -24,6 +24,7 @@ package ru.taximaxim.dbreplicator2.tasks;
 
 import java.sql.SQLException;
 import java.util.Date;
+
 import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.replica.StrategyException;

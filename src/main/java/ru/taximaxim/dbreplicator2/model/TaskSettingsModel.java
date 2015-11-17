@@ -41,7 +41,7 @@ import org.hibernate.annotations.FetchMode;
  */
 @Entity
 @Table( name = "tasks" )
-public class TaskSettingsModel implements TaskSettings {
+public class TaskSettingsModel implements TaskSettings{
 
     /**
      * Идентификатор задачи
