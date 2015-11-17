@@ -57,12 +57,6 @@ public class TaskSettingsModel implements TaskSettings {
     private boolean enabled;
 
     /**
-     * Время первого запуска задачи, мс
-     */
-    @Column(name = "first_run_time")
-    private Integer firstRunTime;
-    
-    /**
      * Интервал после успешного выполнения задачи, мс
      */
     @Column(name = "success_interval")
@@ -153,14 +147,4 @@ public class TaskSettingsModel implements TaskSettings {
     public void setRunner(RunnerModel runner) {
         this.runner = runner;
     }
-    
-    @Override
-   public Integer getFirstRunTime() {
-       return firstRunTime;
-   }
-
-   @Override
-   public void setFirstRunTime(Integer firstRunTime) {
-       this.firstRunTime = firstRunTime;
-   }
 }
