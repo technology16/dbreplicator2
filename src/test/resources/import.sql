@@ -112,7 +112,7 @@ insert into strategies (id, className, param, isEnabled, priority, id_runner) va
 partEmail=10', true, 100, 10);
 
 -- Задача с ошибочной стратегией
-insert into tasks (id_task, id_runner, enabled, success_interval, fail_interval, description) values (16, 16, true, 10000, 300000, 'ru.taximaxim.dbreplicator2.utils.OutOfMemoryErrorStrategy');
+insert into tasks (id_task, id_runner, enabled, cron_trigger, cron_string, description) values (16, 16, true, false, null, 'ru.taximaxim.dbreplicator2.utils.OutOfMemoryErrorStrategy');
 
 --Tables
 insert into tables (name, id_runner, param) values ('T_TABLE', 3, 'ignoredCols=_STRING');

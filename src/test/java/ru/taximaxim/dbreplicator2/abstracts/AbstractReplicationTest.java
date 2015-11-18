@@ -77,7 +77,6 @@ public abstract class AbstractReplicationTest {
         }
         connectionFactory = Core.getConnectionFactory();
         session = sessionFactory.openSession();
-        session = sessionFactory.openSession();
         errorsLog = Core.getErrorsLog();
         initialization(sqlRep2, sqlSourse, sqlDest);
     }
