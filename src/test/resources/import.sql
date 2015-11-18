@@ -111,9 +111,6 @@ insert into runners (id_runner, source, target, description) values (10, 'source
 insert into strategies (id, className, param, isEnabled, priority, id_runner) values (11, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.ReplicationTimeWatchgdog', 'period=0
 partEmail=10', true, 100, 10);
 
--- Задача с ошибочной стратегией
-insert into tasks (id_task, id_runner, enabled, cron_trigger, cron_string, description) values (16, 16, true, false, null, 'ru.taximaxim.dbreplicator2.utils.OutOfMemoryErrorStrategy');
-
 --Tables
 insert into tables (name, id_runner, param) values ('T_TABLE', 3, 'ignoredCols=_STRING');
 insert into tables (name, id_runner, param) values ('T_TABLE1', 25, 'ignoredCols=_STRING

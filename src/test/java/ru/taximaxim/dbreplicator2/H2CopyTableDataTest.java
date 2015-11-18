@@ -460,7 +460,9 @@ public class H2CopyTableDataTest extends AbstractReplicationTest {
     @Test
     public void exceptionInTaskTest() throws InterruptedException, SQLException{
         // Запускаем задачи
-        Core.getTasksPool().start();
+        RunnerService runnerService = new RunnerService(sessionFactory);
+        
+        Core.getThreadPool().start(runnerService.getRunner(16));
         Thread.sleep(REPLICATION_DELAY);
         
         checkErrorInRunner(16);
