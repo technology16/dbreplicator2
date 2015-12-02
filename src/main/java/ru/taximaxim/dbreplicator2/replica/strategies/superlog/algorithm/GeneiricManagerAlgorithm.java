@@ -80,8 +80,8 @@ public abstract class GeneiricManagerAlgorithm extends StrategySkeleton implemen
         lastAutoCommit = sourceConnection.getAutoCommit();
         lastTargetAutoCommit = targetConnection.getAutoCommit();
         // Начинаем транзакцию
-        sourceConnection.setAutoCommit(false);
-        targetConnection.setAutoCommit(false);
+        sourceConnection.setAutoCommit(true);
+        targetConnection.setAutoCommit(true);
         BoneCPSettingsModel sourcePool = data.getRunner().getSource();
         Map<String, Collection<RunnerModel>> tableObservers = getTableObservers(sourcePool);
         try {
@@ -142,7 +142,6 @@ public abstract class GeneiricManagerAlgorithm extends StrategySkeleton implemen
                     if ((rowsCount % fetchSize) == 0) {
                         insertRunnerData.executeBatch();
                         deleteSuperLog.executeBatch();
-                        targetConnection.commit();
                         superLogResult = selectSuperLog.executeQuery();
                         // запускаем обработчики реплик
                         startRunners(runners);
@@ -152,7 +151,6 @@ public abstract class GeneiricManagerAlgorithm extends StrategySkeleton implemen
                 }
                 insertRunnerData.executeBatch();
                 deleteSuperLog.executeBatch();
-                targetConnection.commit();
             } finally {
                 if (superLogResult != null) {
                     superLogResult.close();
@@ -160,7 +158,6 @@ public abstract class GeneiricManagerAlgorithm extends StrategySkeleton implemen
             }
         } catch (Throwable e) {
             // В любом случае
-            targetConnection.rollback();
             // Пробрасываем ошибку на уровень выше
             throw e;
         }
