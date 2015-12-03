@@ -114,10 +114,13 @@ public class WorkerThread implements Runnable {
 
         // Инициализируем два соединения. Используем try-with-resources для
         // каждого.
-        try (Connection sourceConnection =
-                connectionsFactory.getConnection(runner.getSource().getPoolId());
+        boolean isSourceRequired = runner.getSource() != null ? true : false;
+        boolean isTargetRequired = runner.getTarget() != null ? true : false;
+        try (
+                Connection sourceConnection =
+                    (isSourceRequired ? connectionsFactory.getConnection(runner.getSource().getPoolId()) : null);
                 Connection targetConnection =
-                        connectionsFactory.getConnection(runner.getTarget().getPoolId())
+                    (isTargetRequired ? connectionsFactory.getConnection(runner.getTarget().getPoolId()) : null)
                 ) {
             List<StrategyModel> strategies = runner.getStrategyModels();
 
@@ -128,11 +131,11 @@ public class WorkerThread implements Runnable {
                             LOG.debug(String.format("runStrategy(%s, %s, %s);%n" +
                                     "sourceConnection = %s;%n" +
                                     "targetConnection = %s;", 
-                                    runner.getSource().getPoolId(),
-                                    runner.getTarget().getPoolId(),
+                                    isSourceRequired ? runner.getSource().getPoolId() : null,
+                                    isTargetRequired ? runner.getTarget().getPoolId() : null,
                                     strategyModel.getId(),
-                                    sourceConnection.hashCode(),
-                                    targetConnection.hashCode()));
+                                    isSourceRequired ? sourceConnection.hashCode() : null,
+                                    isTargetRequired ? targetConnection.hashCode() : null));
                         }
                         runStrategy(sourceConnection, targetConnection, strategyModel);
                     }
