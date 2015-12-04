@@ -19,8 +19,7 @@ insert into strategies (id, className, param, isEnabled, priority, id_runner) va
 --Runner Table 1,2
 insert into runners (id_runner, source, target, description) values (2, 'source', 'dest', 'ReplicaRunner');
 --Strategy  Table 1,2
-insert into strategies (id, className, param, isEnabled, priority, id_runner) values (2, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Generic', 'fetchSize=1
-batchSize=1', true, 100, 2);
+insert into strategies (id, className, param, isEnabled, priority, id_runner) values (2, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Generic', 'fetchSize=1', true, 100, 2);
 
 -------
 
