@@ -78,14 +78,14 @@ insert into runners (id_runner, source, target, description) values (25, 'source
 -------
 
 --Runner CountWatchgdog
-insert into runners (id_runner, source, target, description) values (7, 'source', 'source', 'ErrorsCountWatchgdogStrategy');
+insert into runners (id_runner, source, target, description) values (7, 'source', null, 'ErrorsCountWatchgdogStrategy');
 --Strategy  CountWatchgdog
 insert into strategies (id, className, param, isEnabled, priority, id_runner) values (7, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.CountWatchgdog', 'maxErrors=0
 partEmail=10', true, 100, 7);
 insert into strategies (id, className, param, isEnabled, priority, id_runner) values (10, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.CountWatchgdog', null, true, 100, 7);
 
 --Runner SuperlogWatchgdog
-insert into runners (id_runner, source, target, description) values (15, 'source', 'source', 'ErrorsSuperlogWatchgdog');
+insert into runners (id_runner, source, target, description) values (15, 'source', null, 'ErrorsSuperlogWatchgdog');
 --Strategy  SuperlogWatchgdog
 insert into strategies (id, className, param, isEnabled, priority, id_runner) values (15, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.SuperlogWatchgdog', 'period=1000
 partEmail=10', true, 100, 15);
