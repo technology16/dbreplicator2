@@ -37,7 +37,7 @@ import java.util.TreeMap;
 import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
-import ru.taximaxim.dbreplicator2.model.BoneCPSettingsModel;
+import ru.taximaxim.dbreplicator2.model.HikariCPSettingsModel;
 import ru.taximaxim.dbreplicator2.model.Runner;
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
@@ -82,7 +82,7 @@ public abstract class GeneiricManagerAlgorithm extends StrategySkeleton implemen
         // Начинаем транзакцию
         sourceConnection.setAutoCommit(true);
         targetConnection.setAutoCommit(true);
-        BoneCPSettingsModel sourcePool = data.getRunner().getSource();
+        HikariCPSettingsModel sourcePool = data.getRunner().getSource();
         Map<String, Collection<RunnerModel>> tableObservers = getTableObservers(sourcePool);
 
         sourceConnection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
@@ -190,7 +190,7 @@ public abstract class GeneiricManagerAlgorithm extends StrategySkeleton implemen
      * 
      * @return
      */
-    public Map<String, Collection<RunnerModel>> getTableObservers(BoneCPSettingsModel sourcePool) {
+    public Map<String, Collection<RunnerModel>> getTableObservers(HikariCPSettingsModel sourcePool) {
         Map<String, Collection<RunnerModel>> tableObservers = 
                 new TreeMap<String, Collection<RunnerModel>>(String.CASE_INSENSITIVE_ORDER);
         for (RunnerModel runner : sourcePool.getRunners()) {

@@ -22,7 +22,7 @@
         <property name="hibernate.hbm2ddl.import_files">importRepTimeWatch.sql</property>
         <property name="hibernate.hbm2ddl.import_files_sql_extractor">org.hibernate.tool.hbm2ddl.MultipleLinesSqlCommandExtractor</property>
         <mapping class="ru.taximaxim.dbreplicator2.model.TableModel"/>
-        <mapping class="ru.taximaxim.dbreplicator2.model.BoneCPSettingsModel"/>
+        <mapping class="ru.taximaxim.dbreplicator2.model.HikariCPSettingsModel"/>
         <mapping class="ru.taximaxim.dbreplicator2.model.TaskSettingsModel"/>
         <mapping class="ru.taximaxim.dbreplicator2.model.StrategyModel"/>
         <mapping class="ru.taximaxim.dbreplicator2.model.RunnerModel"/>

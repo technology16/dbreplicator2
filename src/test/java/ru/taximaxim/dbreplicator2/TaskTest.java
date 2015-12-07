@@ -32,16 +32,15 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ru.taximaxim.dbreplicator2.abstracts.AbstractBoneCPTest;
-import ru.taximaxim.dbreplicator2.model.BoneCPSettings;
-import ru.taximaxim.dbreplicator2.model.BoneCPSettingsModel;
+import ru.taximaxim.dbreplicator2.abstracts.AbstractHikariCPTest;
+import ru.taximaxim.dbreplicator2.model.HikariCPSettingsModel;
 /**
  * Класс для тестирования пулов соединений
  * 
  * @author volodin_aa
  *
  */
-public class TaskTest extends AbstractBoneCPTest  {
+public class TaskTest extends AbstractHikariCPTest  {
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -64,38 +63,32 @@ public class TaskTest extends AbstractBoneCPTest  {
     @Test 
     public void testGetTask() throws ClassNotFoundException, SQLException {
         // Полуение несуществующих настроек
-        BoneCPSettingsModel boneCPSettings = settingStorage.getDataBaseSettingsByName("testGetDataBaseSettingsByName");
-        assertNull("Ошибка при получение несуществующих настроек!", boneCPSettings);
+        HikariCPSettingsModel hikariCPSettings = settingStorage.getDataBaseSettingsByName("testGetDataBaseSettingsByName");
+        assertNull("Ошибка при получение несуществующих настроек!", hikariCPSettings);
         
         // Получение существующих
-        BoneCPSettingsModel newBoneCPSettings = new BoneCPSettingsModel("testGetDataBaseSettingsByName", 
+        HikariCPSettingsModel newHikariCPSettings = new HikariCPSettingsModel("testGetDataBaseSettingsByName", 
                 "org.h2.Driver",
                 "jdbc:h2:mem://localhost/~/test", 
                 "sa", 
                 "");
         
-        settingStorage.setDataBaseSettings(newBoneCPSettings);
-        boneCPSettings = settingStorage.getDataBaseSettingsByName("testGetDataBaseSettingsByName");
-        assertEquals("Ошибка при получение существующих настроек по умолчанию!", newBoneCPSettings, boneCPSettings);
+        settingStorage.setDataBaseSettings(newHikariCPSettings);
+        hikariCPSettings = settingStorage.getDataBaseSettingsByName("testGetDataBaseSettingsByName");
+        assertEquals("Ошибка при получение существующих настроек по умолчанию!", newHikariCPSettings, hikariCPSettings);
         
         // Получение существующих
-        newBoneCPSettings = new BoneCPSettingsModel("testGetDataBaseSettingsByName2", 
+        newHikariCPSettings = new HikariCPSettingsModel("testGetDataBaseSettingsByName2", 
                 "org.h2.Driver",
                 "jdbc:h2:mem://localhost/~/test", 
-                "sa", 
-                "",
-                1,
-                2,
-                3,
-                4,
-                5);
+                "sa", "", 5, false, 10000, 10000, 10000);
         
-        settingStorage.setDataBaseSettings(newBoneCPSettings);
-        boneCPSettings = settingStorage.getDataBaseSettingsByName("testGetDataBaseSettingsByName2");
-        assertEquals("Ошибка при получение существующих настроек!", newBoneCPSettings, boneCPSettings);
+        settingStorage.setDataBaseSettings(newHikariCPSettings);
+        hikariCPSettings = settingStorage.getDataBaseSettingsByName("testGetDataBaseSettingsByName2");
+        assertEquals("Ошибка при получение существующих настроек!", newHikariCPSettings, hikariCPSettings);
         
-        boneCPSettings = settingStorage.getDataBaseSettingsByName("testGetDataBaseSettingsByName");
-        assertFalse("Ошибка при получение существующих настроек!", newBoneCPSettings.equals(boneCPSettings));
+        hikariCPSettings = settingStorage.getDataBaseSettingsByName("testGetDataBaseSettingsByName");
+        assertFalse("Ошибка при получение существующих настроек!", newHikariCPSettings.equals(hikariCPSettings));
     }
 
     /** 
@@ -107,31 +100,25 @@ public class TaskTest extends AbstractBoneCPTest  {
     @Test 
     public void testGetTasks() throws ClassNotFoundException, SQLException {
         // Создание настроек
-        BoneCPSettingsModel newBoneCPSettings1 = new BoneCPSettingsModel("testGetDataBaseSettings1", 
+        HikariCPSettingsModel newHikariCPSettings1 = new HikariCPSettingsModel("testGetDataBaseSettings1", 
                 "org.h2.Driver",
                 "jdbc:h2:mem://localhost/~/test", 
                 "sa", 
                 "");
-        settingStorage.setDataBaseSettings(newBoneCPSettings1);
+        settingStorage.setDataBaseSettings(newHikariCPSettings1);
         
-        BoneCPSettingsModel newBoneCPSettings2 = new BoneCPSettingsModel("testGetDataBaseSettings2", 
+        HikariCPSettingsModel newHikariCPSettings2 = new HikariCPSettingsModel("testGetDataBaseSettings2", 
                 "org.postgresql.Driver", 
                 "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", 
-                "ags", 
-                "",
-                1,
-                2,
-                3,
-                4,
-                5);
+                "ags", "", 5, false, 10000, 10000, 10000);
         
-        settingStorage.setDataBaseSettings(newBoneCPSettings2);
+        settingStorage.setDataBaseSettings(newHikariCPSettings2);
         
-        Map<String, BoneCPSettingsModel> settingsMap = settingStorage.getDataBaseSettings();
+        Map<String, HikariCPSettingsModel> settingsMap = settingStorage.getDataBaseSettings();
         assertEquals("Ошибка при получение существующих настроек по умолчанию!", 
-                newBoneCPSettings1, settingsMap.get("testGetDataBaseSettings1"));
+                newHikariCPSettings1, settingsMap.get("testGetDataBaseSettings1"));
         assertEquals("Ошибка при получение существующих настроек!", 
-                newBoneCPSettings2, settingsMap.get("testGetDataBaseSettings2"));
+                newHikariCPSettings2, settingsMap.get("testGetDataBaseSettings2"));
 
     }
 
@@ -144,31 +131,31 @@ public class TaskTest extends AbstractBoneCPTest  {
     @Test 
     public void testSetTask() throws ClassNotFoundException, SQLException {
         // Создание настроек
-        BoneCPSettingsModel newBoneCPSettings = new BoneCPSettingsModel("testSetDataBaseSettings", 
+        HikariCPSettingsModel newHikariCPSettings = new HikariCPSettingsModel("testSetDataBaseSettings", 
                 "org.h2.Driver",
                 "jdbc:h2:mem://localhost/~/test", 
                 "sa", 
                 "");
         
-        settingStorage.setDataBaseSettings(newBoneCPSettings);
-        BoneCPSettingsModel boneCPSettings = settingStorage.getDataBaseSettingsByName("testSetDataBaseSettings");
-        assertEquals("Ошибка при получение существующих настроек по умолчанию!", newBoneCPSettings, boneCPSettings);
+        settingStorage.setDataBaseSettings(newHikariCPSettings);
+        HikariCPSettingsModel hikariCPSettings = settingStorage.getDataBaseSettingsByName("testSetDataBaseSettings");
+        assertEquals("Ошибка при получение существующих настроек по умолчанию!", newHikariCPSettings, hikariCPSettings);
         
         // Обновление настроек
-        boneCPSettings.setMinConnectionsPerPartition(1);
-        boneCPSettings.setMaxConnectionsPerPartition(2);
-        boneCPSettings.setPartitionCount(3);
-        boneCPSettings.setConnectionTimeoutInMs(4);
-        boneCPSettings.setCloseConnectionWatchTimeoutInMs(5);
-        settingStorage.setDataBaseSettings(boneCPSettings);
-        BoneCPSettings updatedBoneCPSettings = settingStorage.getDataBaseSettingsByName("testSetDataBaseSettings");
-        assertEquals("Ошибка при получение обновленных настроек!", updatedBoneCPSettings, boneCPSettings);
+        hikariCPSettings.setMaximumPoolSize(5);
+        hikariCPSettings.setInitializationFailFast(false);
+        hikariCPSettings.setConnectionTimeout(10000);
+        hikariCPSettings.setIdleTimeout(10000);
+        hikariCPSettings.setMaxLifetime(10000);
+        settingStorage.setDataBaseSettings(hikariCPSettings);
+        HikariCPSettingsModel updatedBoneCPSettings = settingStorage.getDataBaseSettingsByName("testSetDataBaseSettings");
+        assertEquals("Ошибка при получение обновленных настроек!", updatedBoneCPSettings, hikariCPSettings);
         
         // Обновление идентификатора
-        boneCPSettings.setPoolId("testSetDataBaseSettings2");
-        settingStorage.setDataBaseSettings(boneCPSettings);
+        hikariCPSettings.setPoolId("testSetDataBaseSettings2");
+        settingStorage.setDataBaseSettings(hikariCPSettings);
         updatedBoneCPSettings = settingStorage.getDataBaseSettingsByName("testSetDataBaseSettings2");
-        assertEquals("Ошибка при получение настроек с новым идентификатором!", updatedBoneCPSettings, boneCPSettings);
+        assertEquals("Ошибка при получение настроек с новым идентификатором!", updatedBoneCPSettings, hikariCPSettings);
         
         //updatedBoneCPSettings = settingStorage.getDataBaseSettingsByName("testSetDataBaseSettings");
         //assertNull("Существуют настройки со старым идентификатором!", updatedBoneCPSettings);
@@ -183,20 +170,20 @@ public class TaskTest extends AbstractBoneCPTest  {
     @Test 
     public void testDelTask() throws ClassNotFoundException, SQLException {
         // Создание настроек
-        BoneCPSettingsModel newBoneCPSettings = new BoneCPSettingsModel("testDelDataBaseSettings", 
+        HikariCPSettingsModel newHikariCPSettings = new HikariCPSettingsModel("testDelDataBaseSettings", 
                 "org.h2.Driver",
                 "jdbc:h2:mem://localhost/~/test", 
                 "sa", 
                 "");
         
-        settingStorage.setDataBaseSettings(newBoneCPSettings);
-        BoneCPSettingsModel boneCPSettings = settingStorage.getDataBaseSettingsByName("testDelDataBaseSettings");
-        assertEquals("Ошибка при получение существующих настроек по умолчанию!", newBoneCPSettings, boneCPSettings);
+        settingStorage.setDataBaseSettings(newHikariCPSettings);
+        HikariCPSettingsModel hikariCPSettings = settingStorage.getDataBaseSettingsByName("testDelDataBaseSettings");
+        assertEquals("Ошибка при получение существующих настроек по умолчанию!", newHikariCPSettings, hikariCPSettings);
         
         // Удаляем настройки
-        settingStorage.delDataBaseSettings(boneCPSettings);
-        boneCPSettings = settingStorage.getDataBaseSettingsByName("testDelDataBaseSettings");
-        assertNull("Существуют удаленные настройки!", boneCPSettings);
+        settingStorage.delDataBaseSettings(hikariCPSettings);
+        hikariCPSettings = settingStorage.getDataBaseSettingsByName("testDelDataBaseSettings");
+        assertNull("Существуют удаленные настройки!", hikariCPSettings);
 
     }
     
