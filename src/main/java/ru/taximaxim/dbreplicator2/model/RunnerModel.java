@@ -69,14 +69,14 @@ public class RunnerModel implements Runner, Serializable {
      */
     @ManyToOne
     @JoinColumn(name = "source")
-    private BoneCPSettingsModel source;
+    private HikariCPSettingsModel source;
 
     /**
      * Именованный целевой пул
      */
     @ManyToOne
     @JoinColumn(name = "target")
-    private BoneCPSettingsModel target;
+    private HikariCPSettingsModel target;
 
     /**
      * Описание потока исполнителя
@@ -107,12 +107,12 @@ public class RunnerModel implements Runner, Serializable {
     }
 
     @Override
-    public BoneCPSettingsModel getSource() {
+    public HikariCPSettingsModel getSource() {
         return source;
     }
 
     @Override
-    public BoneCPSettingsModel getTarget() {
+    public HikariCPSettingsModel getTarget() {
         return target;
     }
 
@@ -161,7 +161,7 @@ public class RunnerModel implements Runner, Serializable {
      * 
      * @param source источник
      */
-    public void setSource(BoneCPSettingsModel source) {
+    public void setSource(HikariCPSettingsModel source) {
         this.source = source;
     }
 
@@ -170,7 +170,7 @@ public class RunnerModel implements Runner, Serializable {
      * 
      * @param target приемник
      */
-    public void setTarget(BoneCPSettingsModel target) {
+    public void setTarget(HikariCPSettingsModel target) {
         this.target = target;
     }
 

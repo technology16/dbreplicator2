@@ -31,7 +31,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ru.taximaxim.dbreplicator2.abstracts.AbstractSettingTest;
-import ru.taximaxim.dbreplicator2.model.BoneCPSettingsModel;
+import ru.taximaxim.dbreplicator2.model.HikariCPSettingsModel;
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 
@@ -57,7 +57,7 @@ public class StrategiesTest extends AbstractSettingTest {
 
         session.beginTransaction();
 
-        RunnerModel runner = createRunner(new BoneCPSettingsModel(), new BoneCPSettingsModel(), "Описание исполняемого потока");
+        RunnerModel runner = createRunner(new HikariCPSettingsModel(), new HikariCPSettingsModel(), "Описание исполняемого потока");
         StrategyModel strategy = createStrategy(1, "ru.taximaxim.Class", "key", "value", true, 100);
 
         Assert.assertNull(runner.getId());
@@ -75,7 +75,7 @@ public class StrategiesTest extends AbstractSettingTest {
         LOG.debug("Идентификатор потока после его восстановления: " + runner_compare.getId());
         Assert.assertEquals(runner.getId(), runner_compare.getId());
 
-        RunnerModel runner2 = createRunner(new BoneCPSettingsModel(), new BoneCPSettingsModel(), "Описание исполняемого потока (2)");
+        RunnerModel runner2 = createRunner(new HikariCPSettingsModel(), new HikariCPSettingsModel(), "Описание исполняемого потока (2)");
         StrategyModel strategy2 = createStrategy(2, "ru.taximaxim.Class", "key", "value", true, 100);
         addStrategy(runner2, strategy2);
 
@@ -96,7 +96,7 @@ public class StrategiesTest extends AbstractSettingTest {
         
     }
 
-    public RunnerModel createRunner(BoneCPSettingsModel source, BoneCPSettingsModel target, String description) {
+    public RunnerModel createRunner(HikariCPSettingsModel source, HikariCPSettingsModel target, String description) {
 
         RunnerModel runner = new RunnerModel();
 

@@ -30,10 +30,10 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 import org.hibernate.service.ServiceRegistryBuilder;
 
-import ru.taximaxim.dbreplicator2.cf.BoneCPConnectionsFactory;
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
+import ru.taximaxim.dbreplicator2.cf.HikariCPConnectionsFactory;
 import ru.taximaxim.dbreplicator2.model.ApplicatonSettingsService;
-import ru.taximaxim.dbreplicator2.model.BoneCPSettingsService;
+import ru.taximaxim.dbreplicator2.model.HikariCPSettingsService;
 import ru.taximaxim.dbreplicator2.model.TaskSettingsService;
 import ru.taximaxim.dbreplicator2.el.ErrorsLog;
 import ru.taximaxim.dbreplicator2.stats.StatsService;
@@ -172,8 +172,8 @@ public final class Core {
         // инициализация.
         
         if (connectionFactory == null) {
-            connectionFactory = new BoneCPConnectionsFactory(
-                    new BoneCPSettingsService(getSessionFactory()));
+            connectionFactory = new HikariCPConnectionsFactory(
+                    new HikariCPSettingsService(getSessionFactory()));
         }
 
         return connectionFactory;

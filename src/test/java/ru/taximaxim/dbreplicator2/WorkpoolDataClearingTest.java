@@ -44,7 +44,7 @@ import ru.taximaxim.dbreplicator2.tp.WorkerThread;
  * Тест очистки rep2_workpool_data в случае если есть записи об операциях над 
  * несуществующими записями.
  * 
- * Тест расчитан на настройки стратегии репликации  batchSize=1 и fetchSize=1 
+ * Тест расчитан на настройки стратегии репликации fetchSize=1 
  * 
  * @author volodin_aa
  *

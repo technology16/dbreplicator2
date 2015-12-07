@@ -131,7 +131,7 @@ public class TableModel implements Cloneable, Serializable {
      * Получение пула соединений, к которому принадлежит таблица
      * @return
      */
-    public BoneCPSettingsModel getPool() {
+    public HikariCPSettingsModel getPool() {
         return runner.getSource();
     }
 
