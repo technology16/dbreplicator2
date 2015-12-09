@@ -39,7 +39,7 @@ partEmail=10', true, 100, 7);
 insert into tables (name, id_runner, param) values ('T_TABLE2', 2, 'ignoredCols=_STRING');
 insert into tables (name, id_runner, param) values ('T_TABLE3', 3, 'ignoredCols=_STRING');
 
-insert into tasks (id_task, id_runner, enabled, cron_trigger, cron_string, description) values (1, 1, true, false, null, 'test');
+insert into tasks (id_task, id_runner, enabled, cron_string, description) values (1, 1, true, null, 'test');
 
-insert into tasks (id_task, id_runner, enabled, cron_trigger, cron_string, description) values (2, 3, true, true, '0/2 * * * * ?', 'test');
+insert into tasks (id_task, id_runner, enabled, cron_string, description) values (2, 3, true, '0/2 * * * * ?', 'test');
 

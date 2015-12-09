@@ -85,19 +85,6 @@ public interface TaskSettings {
      * @param runner
      */
     void setRunner(RunnerModel runner);
-    
-    /**
-     * Проверка, используется ли CronTrigger
-     * (true = CronTrigger, false = SimpleTrigger)
-     * @return
-     */
-    boolean isCronTrigger();
-
-    /**
-     * Установка используемого триггера
-     * @param cronTrigger
-     */
-    void setCronTrigger(boolean cronTrigger);
 
     /**
      * Получение cron строки с описанием периодичночти запуска задачи

@@ -57,13 +57,6 @@ public class TaskSettingsModel implements TaskSettings{
     private boolean enabled;
 
     /**
-     * Исполльзуемый триггер для выполнения задачи
-     * (true = CronTrigger, false = SimpleTrigger)
-     */
-    @Column(name = "cron_trigger")
-    private boolean cronTrigger;
-
-    /**
      * Cron строка, описывающая периодичность запуска задачи.
      * (В случае использования simple триггера будет равно null)
      */
@@ -108,16 +101,6 @@ public class TaskSettingsModel implements TaskSettings{
     @Override
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
-    }
-
-    @Override
-    public boolean isCronTrigger() {
-        return cronTrigger;
-    }
-
-    @Override
-    public void setCronTrigger(boolean cronTrigger) {
-        this.cronTrigger = cronTrigger;
     }
 
      @Override

@@ -71,10 +71,11 @@ public class TasksPool {
                     JobDetail jobDetail = JobBuilder.newJob(TaskRunner.class).build();
                     jobDetail.getJobDataMap().put("task", task);
                     Trigger trigger = null;
-                    if (task.isCronTrigger()) {
+                    String cronString = task.getCronString();
+                    if (cronString != null && !cronString.isEmpty()) {
                         trigger = TriggerBuilder.newTrigger()
                                 .withSchedule(CronScheduleBuilder
-                                        .cronSchedule(task.getCronString())).build();
+                                        .cronSchedule(cronString)).build();
                     } else {
                         trigger = TriggerBuilder.newTrigger()
                                 .startNow().build();
