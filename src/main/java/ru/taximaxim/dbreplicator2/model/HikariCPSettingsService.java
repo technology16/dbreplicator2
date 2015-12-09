@@ -34,11 +34,11 @@ import org.hibernate.SessionFactory;
 import ru.taximaxim.dbreplicator2.utils.Utils;
 
 /**
- * Хранилище настроек именнованных соединений к BoneCP на основе Hibernate
+ * Хранилище настроек именнованных соединений к HikariCP на основе Hibernate
  *
- * @author volodin_aa
+ * @author petrov_im
  */
-public class BoneCPSettingsService implements BoneCPDataBaseSettingsStorage {
+public class HikariCPSettingsService {
 
     /**
      * Хранилище настроек
@@ -51,31 +51,29 @@ public class BoneCPSettingsService implements BoneCPDataBaseSettingsStorage {
      * @param sessionFactory
      *            - фабрика сессий Hibernate
      */
-    public BoneCPSettingsService(SessionFactory sessionFactory) {
+    public HikariCPSettingsService(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
 
-    @Override
-    public BoneCPSettingsModel getDataBaseSettingsByName(String poolName) {
+    public HikariCPSettingsModel getDataBaseSettingsByName(String poolName) {
         Session session = sessionFactory.openSession();
         try {
-            return (BoneCPSettingsModel) session.get(BoneCPSettingsModel.class, poolName);
+            return (HikariCPSettingsModel) session.get(HikariCPSettingsModel.class, poolName);
         } finally {
             session.close();
         }
     }
 
-    @Override
-    public Map<String, BoneCPSettingsModel> getDataBaseSettings() {
-        Map<String, BoneCPSettingsModel> result = new HashMap<String, BoneCPSettingsModel>();
+    public Map<String, HikariCPSettingsModel> getDataBaseSettings() {
+        Map<String, HikariCPSettingsModel> result = new HashMap<String, HikariCPSettingsModel>();
 
         Session session = sessionFactory.openSession();
         try {
-            List<BoneCPSettingsModel> settingsList =
-                    Utils.castList(BoneCPSettingsModel.class,
-                            session.createCriteria(BoneCPSettingsModel.class).list());
+            List<HikariCPSettingsModel> settingsList =
+                    Utils.castList(HikariCPSettingsModel.class,
+                            session.createCriteria(HikariCPSettingsModel.class).list());
 
-            for (BoneCPSettingsModel settings : settingsList) {
+            for (HikariCPSettingsModel settings : settingsList) {
                 result.put(settings.getPoolId(), settings);
             }
         } finally {
@@ -85,8 +83,7 @@ public class BoneCPSettingsService implements BoneCPDataBaseSettingsStorage {
         return result;
     }
 
-    @Override
-    public void setDataBaseSettings(BoneCPSettingsModel dataBaseSettings) {
+    public void setDataBaseSettings(HikariCPSettingsModel dataBaseSettings) {
         Session session = sessionFactory.openSession();
         session.beginTransaction();
         try {
@@ -100,8 +97,7 @@ public class BoneCPSettingsService implements BoneCPDataBaseSettingsStorage {
         }
     }
 
-    @Override
-    public void delDataBaseSettings(BoneCPSettingsModel dataBaseSettings) {
+    public void delDataBaseSettings(HikariCPSettingsModel dataBaseSettings) {
         Session session = sessionFactory.openSession();
         session.beginTransaction();
         try {

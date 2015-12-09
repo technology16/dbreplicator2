@@ -30,10 +30,10 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ru.taximaxim.dbreplicator2.abstracts.AbstractBoneCPTest;
-import ru.taximaxim.dbreplicator2.cf.BoneCPConnectionsFactory;
+import ru.taximaxim.dbreplicator2.abstracts.AbstractHikariCPTest;
+import ru.taximaxim.dbreplicator2.cf.HikariCPConnectionsFactory;
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
-import ru.taximaxim.dbreplicator2.model.BoneCPSettingsModel;
+import ru.taximaxim.dbreplicator2.model.HikariCPSettingsModel;
 
 /**
  * Класс для тестирования пулов соединений
@@ -41,7 +41,7 @@ import ru.taximaxim.dbreplicator2.model.BoneCPSettingsModel;
  * @author volodin_aa
  *
  */
-public class MaxConnectionsTest extends AbstractBoneCPTest {
+public class MaxConnectionsTest extends AbstractHikariCPTest {
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -58,22 +58,22 @@ public class MaxConnectionsTest extends AbstractBoneCPTest {
      * Инициализация
      */
     public static void initialization() {
-        settingStorage.setDataBaseSettings(new BoneCPSettingsModel("1",
+        settingStorage.setDataBaseSettings(new HikariCPSettingsModel("1",
                 "org.h2.Driver",
                 "jdbc:h2:mem://localhost/~/test", "sa", ""));
 
-        settingStorage.setDataBaseSettings(new BoneCPSettingsModel("2",
+        settingStorage.setDataBaseSettings(new HikariCPSettingsModel("2",
                 "org.h2.Driver",
                 "jdbc:h2:mem://localhost/~/test", "sa", ""));
 
-        settingStorage.setDataBaseSettings(new BoneCPSettingsModel("3",
+        settingStorage.setDataBaseSettings(new HikariCPSettingsModel("3",
                 "org.h2.Driver",
                 "jdbc:h2:mem://localhost/~/test", "sa", ""));
 
-        settingStorage.setDataBaseSettings(new BoneCPSettingsModel("4",
+        settingStorage.setDataBaseSettings(new HikariCPSettingsModel("4",
                 "org.h2.Driver",
                 "jdbc:h2:mem://localhost/~/test", "sa", "",
-                1, 3, 1, 10000, 0));
+                5, false, 10000, 10000, 10000));
     }
     
     /**
@@ -85,7 +85,7 @@ public class MaxConnectionsTest extends AbstractBoneCPTest {
     @Test
     public void testMaxConnections() throws ClassNotFoundException,
             SQLException {
-        ConnectionFactory connectionsFactory = new BoneCPConnectionsFactory(
+        ConnectionFactory connectionsFactory = new HikariCPConnectionsFactory(
                 settingStorage);
         try {
             Connection connection1 = connectionsFactory.getConnection("1");

@@ -16,7 +16,7 @@
         <property name="cache.provider_class">org.hibernate.cache.internal.NoCacheProvider</property>
         <!-- Don't echo all executed SQL to stdout -->
         <property name="show_sql">false</property>
-        <mapping class="ru.taximaxim.dbreplicator2.model.BoneCPSettingsModel"/>
+        <mapping class="ru.taximaxim.dbreplicator2.model.HikariCPSettingsModel"/>
         <mapping class="ru.taximaxim.dbreplicator2.model.TaskSettingsModel"/>
         <mapping class="ru.taximaxim.dbreplicator2.model.StrategyModel"/>
         <mapping class="ru.taximaxim.dbreplicator2.model.RunnerModel"/>

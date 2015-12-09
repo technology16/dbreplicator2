@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>ru.taximaxim.dbreplicator2</groupId>
     <artifactId>dbreplicator2</artifactId>
-    <version>1.1.0.7066a</version>
+    <version>1.2.0.7066a</version>
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
@@ -21,9 +21,10 @@
             <version>1.2</version>
         </dependency>
         <dependency>
-            <groupId>com.jolbox</groupId>
-            <artifactId>bonecp</artifactId>
-            <version>0.7.1.RELEASE</version>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>2.4.1</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>

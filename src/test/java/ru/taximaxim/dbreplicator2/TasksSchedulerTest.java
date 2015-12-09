@@ -86,14 +86,12 @@ public class TasksSchedulerTest extends AbstractReplicationTest {
         Core.getTasksPool().start();
         Thread.sleep(REPLICATION_DELAY);
 
-        System.err.println("table_2");
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table2");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table2");
         Helper.AssertEquals(listSource, listDest);
-        
-        System.err.println("table_3");
+
         listSource = Helper.InfoTest(conn, "t_table3");
         listDest   = Helper.InfoTest(connDest, "t_table3");
         Helper.AssertEquals(listSource, listDest);
-    }   
+    }
 }
