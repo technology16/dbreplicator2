@@ -46,7 +46,7 @@ public class Manager extends StrategySkeleton implements Strategy {
             StrategyModel data) throws StrategyException, SQLException,
             ClassNotFoundException {
         
-        try (GenericSuperlogDataService superlogDataServise = new GenericSuperlogDataService(sourceConnection, targetConnection)) {
+        try (GenericSuperlogDataService superlogDataServise = new GenericSuperlogDataService(sourceConnection, targetConnection, getFetchSize(data))) {
             ManagerAlgorithm strategy = new ManagerAlgorithm(superlogDataServise);
             strategy.execute(sourceConnection, targetConnection, data);
         }

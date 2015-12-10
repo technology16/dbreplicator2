@@ -34,7 +34,14 @@ import java.sql.SQLException;
 public interface SuperlogDataService extends AutoCloseable {
     
     /**
-     * Получение PreparedStatement для выборки данных из суперлога
+     * Получение PreparedStatement для первоначальной выборки данных из суперлога
+     * @return
+     * @throws SQLException
+     */
+    PreparedStatement getInitSelectSuperlogStatement() throws SQLException;
+    
+    /**
+     * Получение PreparedStatement для последующих выборок данных из суперлога
      * @return
      */
     PreparedStatement getSelectSuperlogStatement() throws SQLException;
