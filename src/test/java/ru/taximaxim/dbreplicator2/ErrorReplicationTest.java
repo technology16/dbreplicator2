@@ -57,7 +57,7 @@ public class ErrorReplicationTest extends AbstractReplicationTest{
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        setUp("src/test/resources/hibernateIgnoreReplication.cfg.xml", null, "importRep2.sql", "importSource.sql", "importDest.sql");
+        setUp("importIgnoreReplication.sql", "init_db/importRep2.sql", "init_db/importSource.sql", "init_db/importDest.sql");
         initRunners();
     }
 
@@ -79,7 +79,7 @@ public class ErrorReplicationTest extends AbstractReplicationTest{
     @Test
     public void testErroReplicated() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
       //Проверка вставки
-        Helper.executeSqlFromFile(conn, "sql_insert_error.sql");
+        Helper.executeSqlFromFile(conn, "sql_query/sql_insert_error.sql");
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table1");

@@ -30,7 +30,7 @@ protected static final Logger LOG = Logger.getLogger(ReplicationTimeWatchgdogTes
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        setUp("src/test/resources/hibernateRepTimeWatch.cfg.xml", null, "importRep2.sql", "importSource.sql", "importDest.sql");
+        setUp("importRepTimeWatch.sql", "init_db/importRep2.sql", "init_db/importSource.sql", "init_db/importDest.sql");
         initRunners();
     }
 
@@ -60,8 +60,8 @@ protected static final Logger LOG = Logger.getLogger(ReplicationTimeWatchgdogTes
     public void testErrorsReplicationTimeWatchgdog() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
         //Проверка внешних ключей
         LOG.info("Проверка внешних ключей");
-        Helper.executeSqlFromFile(conn, "sql_insert.sql");
-        Helper.executeSqlFromFile(conn, "sql_update.sql");
+        Helper.executeSqlFromFile(conn, "sql_query/sql_insert.sql");
+        Helper.executeSqlFromFile(conn, "sql_query/sql_update.sql");
         
         worker.run();
         Thread.sleep(REPLICATION_DELAY);

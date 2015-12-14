@@ -65,7 +65,7 @@ public class H2CopyTableDataTest extends AbstractReplicationTest {
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        setUp(null, null, "importRep2.sql", "importSource.sql", "importDest.sql"); 
+        setUp(null, null, "init_db/importRep2.sql", "init_db/importSource.sql", "init_db/importDest.sql"); 
         initRunners();
     }
 
@@ -133,7 +133,7 @@ public class H2CopyTableDataTest extends AbstractReplicationTest {
     public void testNull() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
         //Проверка null
         LOG.info("Проверка null");
-        Helper.executeSqlFromFile(conn, "sql_null.sql");   
+        Helper.executeSqlFromFile(conn, "sql_query/sql_null.sql");
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
         Helper.InfoSelect(conn, "rep2_errors_log");
@@ -284,20 +284,20 @@ public class H2CopyTableDataTest extends AbstractReplicationTest {
     public void testForeignKey() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
         //Проверка внешних ключей
         LOG.info("Проверка внешних ключей");
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 50);
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 51);
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 52);
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 53);
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 54);
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 55);
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 56);
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 57);
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 58);
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 59);
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 60);
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 61);
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 62);
-        Helper.executeSqlFromFile(conn, "sql_foreign_key.sql", 63);
+        Helper.executeSqlFromFile(conn, "sql_query/sql_foreign_key.sql", 50);
+        Helper.executeSqlFromFile(conn, "sql_query/sql_foreign_key.sql", 51);
+        Helper.executeSqlFromFile(conn, "sql_query/sql_foreign_key.sql", 52);
+        Helper.executeSqlFromFile(conn, "sql_query/sql_foreign_key.sql", 53);
+        Helper.executeSqlFromFile(conn, "sql_query/sql_foreign_key.sql", 54);
+        Helper.executeSqlFromFile(conn, "sql_query/sql_foreign_key.sql", 55);
+        Helper.executeSqlFromFile(conn, "sql_query/sql_foreign_key.sql", 56);
+        Helper.executeSqlFromFile(conn, "sql_query/sql_foreign_key.sql", 57);
+        Helper.executeSqlFromFile(conn, "sql_query/sql_foreign_key.sql", 58);
+        Helper.executeSqlFromFile(conn, "sql_query/sql_foreign_key.sql", 59);
+        Helper.executeSqlFromFile(conn, "sql_query/sql_foreign_key.sql", 60);
+        Helper.executeSqlFromFile(conn, "sql_query/sql_foreign_key.sql", 61);
+        Helper.executeSqlFromFile(conn, "sql_query/sql_foreign_key.sql", 62);
+        Helper.executeSqlFromFile(conn, "sql_query/sql_foreign_key.sql", 63);
         worker.run();
         
         // Данные должны реплицироваться за 1 проход, т.к. в случае наличия
@@ -326,7 +326,7 @@ public class H2CopyTableDataTest extends AbstractReplicationTest {
     @Test
     public void testInsert() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
       //Проверка вставки
-        Helper.executeSqlFromFile(conn, "sql_insert.sql");  
+        Helper.executeSqlFromFile(conn, "sql_query/sql_insert.sql");
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
       
@@ -348,7 +348,7 @@ public class H2CopyTableDataTest extends AbstractReplicationTest {
         testInsert();
         //Проверка обновления
         LOG.info("Проверка обновления");
-        Helper.executeSqlFromFile(conn, "sql_update.sql");   
+        Helper.executeSqlFromFile(conn, "sql_query/sql_update.sql");
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
         
@@ -370,7 +370,7 @@ public class H2CopyTableDataTest extends AbstractReplicationTest {
         testInsert();
         LOG.info("Проверка удаления");
         //Проверка удаления
-        Helper.executeSqlFromFile(conn, "sql_delete.sql");   
+        Helper.executeSqlFromFile(conn, "sql_query/sql_delete.sql");
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
         
@@ -391,8 +391,8 @@ public class H2CopyTableDataTest extends AbstractReplicationTest {
     public void testInsertUpdate() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
       //Проверка вставки и обновления
         LOG.info("Проверка вставки и обновления");
-        Helper.executeSqlFromFile(conn, "sql_insert.sql");   
-        Helper.executeSqlFromFile(conn, "sql_update.sql");   
+        Helper.executeSqlFromFile(conn, "sql_query/sql_insert.sql");
+        Helper.executeSqlFromFile(conn, "sql_query/sql_update.sql");
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
         
@@ -413,8 +413,8 @@ public class H2CopyTableDataTest extends AbstractReplicationTest {
     public void testInsertDelete() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
         LOG.info("Проверка вставки и удаления");
       //Проверка вставки и удаления
-        Helper.executeSqlFromFile(conn, "sql_insert.sql");   
-        Helper.executeSqlFromFile(conn, "sql_delete.sql");   
+        Helper.executeSqlFromFile(conn, "sql_query/sql_insert.sql");
+        Helper.executeSqlFromFile(conn, "sql_query/sql_delete.sql");
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
         
@@ -460,7 +460,9 @@ public class H2CopyTableDataTest extends AbstractReplicationTest {
     @Test
     public void exceptionInTaskTest() throws InterruptedException, SQLException{
         // Запускаем задачи
-        Core.getTasksPool().start();
+        RunnerService runnerService = new RunnerService(sessionFactory);
+        
+        Core.getThreadPool().start(runnerService.getRunner(16));
         Thread.sleep(REPLICATION_DELAY);
         
         checkErrorInRunner(16);

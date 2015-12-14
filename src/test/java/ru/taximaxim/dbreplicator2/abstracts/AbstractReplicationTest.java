@@ -30,6 +30,7 @@ import java.sql.SQLException;
 import org.apache.log4j.Logger;
 import org.hibernate.SessionFactory;
 import org.hibernate.Session;
+import org.hibernate.cfg.Configuration;
 
 import ru.taximaxim.dbreplicator2.Helper;
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
@@ -56,22 +57,26 @@ public abstract class AbstractReplicationTest {
     protected static Runnable worker2 = null;
     protected static Runnable errorsCountWatchdogWorker = null;
 
-    protected static void setUp(String xmlForConfig, String xmlForSession, String sqlRep2, String sqlSourse, String sqlDest) throws ClassNotFoundException, SQLException, IOException {   
+    protected static void setUp(String importSql, String sqlRep2, String sqlSourse, String sqlDest) throws ClassNotFoundException, SQLException, IOException {
+        setUp("src/test/resources/hibernate.cfg.xml", importSql, sqlRep2, sqlSourse, sqlDest);
+
+    }
+    
+    protected static void setUp(String xmlForConfig, String importSql, String sqlRep2, String sqlSourse, String sqlDest) throws ClassNotFoundException, SQLException, IOException {
         Core.configurationClose();
+        
         if(xmlForConfig != null){
-            Core.getConfiguration(xmlForConfig);
-        }
-        else {
-            Core.getConfiguration();
-        }       
-        if(xmlForSession != null){
-            sessionFactory = Core.getSessionFactory(xmlForSession);
+            Configuration configuration = Core.getConfiguration(xmlForConfig);
+            if (importSql != null) {
+                configuration.setProperty("hibernate.hbm2ddl.import_files", importSql);
+            }
+            sessionFactory = Core.getSessionFactory(configuration);
         }
         else {
             sessionFactory = Core.getSessionFactory();
-        }      
-        session = sessionFactory.openSession();
+        }
         connectionFactory = Core.getConnectionFactory();
+        session = sessionFactory.openSession();
         errorsLog = Core.getErrorsLog();
         initialization(sqlRep2, sqlSourse, sqlDest);
     }

@@ -23,9 +23,6 @@
 
 package ru.taximaxim.dbreplicator2;
 
-
-import java.io.IOException;
-import java.sql.SQLException;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -36,54 +33,37 @@ import org.junit.Test;
 import ru.taximaxim.dbreplicator2.abstracts.AbstractReplicationTest;
 import ru.taximaxim.dbreplicator2.model.RunnerService;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
+import ru.taximaxim.dbreplicator2.utils.Core;
+
 /**
- * Тест репликации данных между базами H2-H2. 
+ * Тест очистки rep2_workpool_data в случае если есть записи об операциях над 
+ * несуществующими записями.
  * 
- * Данный тест использует асинхронный менеджер записей супер лог таблицы, 
- * поэтому после каждого цикла репликации вызывается инструкция 
- * Thread.sleep(REPLICATION_DELAY); Тест может некорректно работать на медленных 
- * машинах, при необходимости подгонять величину задержки вручную!
+ * Тест расчитан на настройки стратегии репликации  batchSize=1 и fetchSize=1 
  * 
  * @author volodin_aa
  *
  */
-public class IgnoreReplicationTest extends AbstractReplicationTest{
-    protected static final Logger LOG = Logger.getLogger(IgnoreReplicationTest.class);
-    
+public class TasksSchedulerTest extends AbstractReplicationTest {
     // Задержка между циклами репликации
-    private static final int REPLICATION_DELAY = 1500;
-    
+    private static final int REPLICATION_DELAY = 5000;
+    protected static final Logger LOG = Logger.getLogger(TasksSchedulerTest.class);
+
+    /**
+     * @throws java.lang.Exception
+     */
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        setUp("importIgnoreReplication.sql", "init_db/importRep2.sql", "init_db/importSource.sql", "init_db/importDest.sql");
+        setUp("importTasksScheduler.sql", "init_db/importRep2.sql", "init_db/importSource.sql", "init_db/importDest.sql");
         initRunners();
     }
 
-    @AfterClass
-    public static void setUpAfterClass() throws Exception {
-        close();
-    }
-    
     /**
-     * Проверка вставки 
-     * @throws SQLException
-     * @throws ClassNotFoundException
-     * @throws IOException
-     * @throws InterruptedException 
+     * @throws java.lang.Exception
      */
-    @Test
-    public void testUpdate() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
-      //Проверка вставки
-        Helper.executeSqlFromFile(conn, "sql_query/sql_update_ignore_replication.sql");
-        worker.run();
-        Thread.sleep(REPLICATION_DELAY);
-        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
-        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
-        Helper.AssertEqualsIgnoreReplication(listSource, listDest);
-
-        listSource = Helper.InfoTest(conn, "t_table1");
-        listDest   = Helper.InfoTest(connDest, "t_table1");
-        Helper.AssertEqualsIgnoreReplication(listSource, listDest);
+    @AfterClass
+    public static void tearDownAfterClass() throws Exception {
+        close();
     }
     
     /**
@@ -94,5 +74,24 @@ public class IgnoreReplicationTest extends AbstractReplicationTest{
 
         worker = new WorkerThread(runnerService.getRunner(1));
         errorsCountWatchdogWorker = new WorkerThread(runnerService.getRunner(7));
+    }
+    
+    @Test
+    public void testTaskScheduler() throws Exception {
+        //Проверка внешних ключей
+        LOG.info("Проверка внешних ключей");
+        Helper.executeSqlFromFile(conn, "sql_query/sql_insert.sql");
+
+        // Запуск всех тасков
+        Core.getTasksPool().start();
+        Thread.sleep(REPLICATION_DELAY);
+
+        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table2");
+        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table2");
+        Helper.AssertEquals(listSource, listDest);
+
+        listSource = Helper.InfoTest(conn, "t_table3");
+        listDest   = Helper.InfoTest(connDest, "t_table3");
+        Helper.AssertEquals(listSource, listDest);
     }
 }

@@ -32,7 +32,7 @@ protected static final Logger LOG = Logger.getLogger(SuperlogWatchgdogTest.class
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        setUp("src/test/resources/hibernateIntegrityReplicatedData.cfg.xml", null, "importRep2.sql", "importSource.sql", "importDest.sql");
+        setUp("importIntegrityReplicatedData.sql", "init_db/importRep2.sql", "init_db/importSource.sql", "init_db/importDest.sql");
         initRunners();
     }
 
@@ -51,7 +51,7 @@ protected static final Logger LOG = Logger.getLogger(SuperlogWatchgdogTest.class
     @Test
     public void testInsert() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
       //Проверка вставки
-        Helper.executeSqlFromFile(conn, "sql_insert_error_tab.sql");   
+        Helper.executeSqlFromFile(conn, "sql_query/sql_insert_error_tab.sql");
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
         errorsSuperlogWatchgdog.run();
