@@ -22,7 +22,6 @@
  */
 package ru.taximaxim.dbreplicator2.model;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,12 +38,8 @@ import ru.taximaxim.dbreplicator2.utils.Utils;
  * @author volodin_aa
  *
  */
-public class TaskSettingsService implements Serializable {
+public class TaskSettingsService {
 
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
     /**
      * Хранилище настроек
      */

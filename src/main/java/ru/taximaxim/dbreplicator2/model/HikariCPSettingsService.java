@@ -38,7 +38,7 @@ import ru.taximaxim.dbreplicator2.utils.Utils;
  *
  * @author petrov_im
  */
-public class HikariCPSettingsService implements HikariCPSettingsServiceMBean {
+public class HikariCPSettingsService {
 
     /**
      * Хранилище настроек
@@ -110,13 +110,4 @@ public class HikariCPSettingsService implements HikariCPSettingsServiceMBean {
             session.close();
         }
     }
-
-    public SessionFactory getSessionFactory() {
-        return sessionFactory;
-    }
-
-    public void setSessionFactory(SessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
-    }
-
 }
