@@ -21,7 +21,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ru.taximaxim.dbreplicator2.mbeans;
+package ru.taximaxim.dbreplicator2.jmx.mbeans;
 
 import java.util.Map;
 

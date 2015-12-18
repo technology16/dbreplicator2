@@ -32,10 +32,10 @@ import javax.management.ObjectName;
 
 import org.apache.log4j.Logger;
 
+import ru.taximaxim.dbreplicator2.jmx.mbeans.DbrepSettings;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
-import ru.taximaxim.dbreplicator2.mbeans.DbrepSettings;
 import ru.taximaxim.dbreplicator2.replica.strategies.replication.StrategySkeleton;
 
 /**
@@ -53,7 +53,7 @@ public class MBeanInit extends StrategySkeleton implements Strategy {
             StrategyModel data) throws StrategyException, SQLException, ClassNotFoundException {
         try {
             MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer(); 
-            ObjectName objectName = new ObjectName("ru.taximaxim.dbreplicator2.mbeans:type=DbrepSettings"); 
+            ObjectName objectName = new ObjectName("ru.taximaxim.dbreplicator2.jmx.mbeans:type=DbrepSettings"); 
             DbrepSettings dbrepSettings = new DbrepSettings(); 
             mbeanServer.registerMBean(dbrepSettings, objectName);
         } catch (Exception e) {
