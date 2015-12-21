@@ -23,6 +23,8 @@
 
 package ru.taximaxim.dbreplicator2.model;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -34,8 +36,10 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "application_settings")
-public class ApplicatonSettingsModel {
+public class ApplicatonSettingsModel implements Serializable {
     
+    private static final long serialVersionUID = 1L;
+
     /**
      * Конструктор по умолчанию
      */

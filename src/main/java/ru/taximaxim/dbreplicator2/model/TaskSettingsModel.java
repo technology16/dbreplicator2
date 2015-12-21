@@ -22,6 +22,8 @@
  */
 package ru.taximaxim.dbreplicator2.model;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -41,7 +43,9 @@ import org.hibernate.annotations.FetchMode;
  */
 @Entity
 @Table( name = "tasks" )
-public class TaskSettingsModel implements TaskSettings{
+public class TaskSettingsModel implements TaskSettings, Serializable{
+
+    private static final long serialVersionUID = 1L;
 
     /**
      * Идентификатор задачи

@@ -23,7 +23,10 @@
 
 package ru.taximaxim.dbreplicator2.jmx.mbeans;
 
+import ru.taximaxim.dbreplicator2.model.ApplicatonSettingsModel;
 import ru.taximaxim.dbreplicator2.model.HikariCPSettingsModel;
+import ru.taximaxim.dbreplicator2.model.RunnerModel;
+import ru.taximaxim.dbreplicator2.model.TaskSettingsModel;
 
 /**
  * Интерфейс Mbean класс для передачи настроек репликатора через jmx
@@ -37,4 +40,22 @@ public interface DbrepSettingsMBean {
      * @return
      */
     public HikariCPSettingsModel[] getHikariCPSettingsModels();
+    
+    /**
+     * Получение массива настроек приложения
+     * @return
+     */
+    public ApplicatonSettingsModel[] getApplicatonSettingsModels();
+    
+    /**
+     * Получение массива настроек раннеров
+     * @return
+     */
+    public RunnerModel[] getRunnerModels();
+    
+    /**
+     * Получение массива настроек задач
+     * @return
+     */
+    public TaskSettingsModel[] getTaskSettingsModels();
 }

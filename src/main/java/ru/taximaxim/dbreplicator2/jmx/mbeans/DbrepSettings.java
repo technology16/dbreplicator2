@@ -23,10 +23,18 @@
 
 package ru.taximaxim.dbreplicator2.jmx.mbeans;
 
+import java.util.List;
 import java.util.Map;
 
+import ru.taximaxim.dbreplicator2.model.ApplicatonSettingsModel;
+import ru.taximaxim.dbreplicator2.model.ApplicatonSettingsService;
 import ru.taximaxim.dbreplicator2.model.HikariCPSettingsModel;
 import ru.taximaxim.dbreplicator2.model.HikariCPSettingsService;
+import ru.taximaxim.dbreplicator2.model.RunnerModel;
+import ru.taximaxim.dbreplicator2.model.RunnerService;
+import ru.taximaxim.dbreplicator2.model.TaskSettings;
+import ru.taximaxim.dbreplicator2.model.TaskSettingsModel;
+import ru.taximaxim.dbreplicator2.model.TaskSettingsService;
 import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
@@ -38,14 +46,49 @@ public class DbrepSettings implements DbrepSettingsMBean {
 
     @Override
     public HikariCPSettingsModel[] getHikariCPSettingsModels() {
-        Map<String, HikariCPSettingsModel> hikariCPSettingsMap = new HikariCPSettingsService(Core.getSessionFactory()).getDataBaseSettings();
-        HikariCPSettingsModel[] hikariCPSettingsArray = new HikariCPSettingsModel[hikariCPSettingsMap.keySet().size()];
+        Map<String, HikariCPSettingsModel> hikariCPSettings = new HikariCPSettingsService(Core.getSessionFactory()).getDataBaseSettings();
+        HikariCPSettingsModel[] hikariCPSettingsArray = new HikariCPSettingsModel[hikariCPSettings.size()];
         int i = 0;
-        for (String key : hikariCPSettingsMap.keySet()) {
-            hikariCPSettingsArray[i] = hikariCPSettingsMap.get(key);
+        for (String key : hikariCPSettings.keySet()) {
+            hikariCPSettingsArray[i] = hikariCPSettings.get(key);
             i++;
         }
-
         return hikariCPSettingsArray;
+    }
+
+    @Override
+    public ApplicatonSettingsModel[] getApplicatonSettingsModels() {
+        List<ApplicatonSettingsModel> appSettings = new ApplicatonSettingsService(Core.getSessionFactory()).getApplicatonSettings();
+        ApplicatonSettingsModel[] appSettingsArray = new ApplicatonSettingsModel[appSettings.size()];
+        int i = 0;
+        for (ApplicatonSettingsModel setting : appSettings) {
+            appSettingsArray[i] = setting;
+            i++;
+        }
+        return appSettingsArray;
+    }
+
+    @Override
+    public RunnerModel[] getRunnerModels() {
+        List<RunnerModel> runnerSettings = new RunnerService(Core.getSessionFactory()).getRunners();
+        RunnerModel[] runnerSettingsArray = new RunnerModel[runnerSettings.size()];
+        int i = 0;
+        for (RunnerModel setting : runnerSettings) {
+            runnerSettingsArray[i] = setting;
+            i++;
+        }
+        return runnerSettingsArray;
+    }
+
+    @Override
+    public TaskSettingsModel[] getTaskSettingsModels() {
+        Map<Integer, TaskSettings> taskSettings = new TaskSettingsService(Core.getSessionFactory()).getTasks();
+        TaskSettingsModel[] taskSettingsArray = new TaskSettingsModel[taskSettings.size()];
+        int i = 0;
+        for (Integer id : taskSettings.keySet()) {
+            taskSettingsArray[i] = (TaskSettingsModel)taskSettings.get(id);
+            i++;
+        }
+        return taskSettingsArray;
     }
 }
