@@ -142,10 +142,10 @@ public abstract class GeneiricManagerAlgorithm extends StrategySkeleton implemen
                 if ((rowsCount % fetchSize) == 0) {
                     try {
                         insertRunnerData.executeBatch();
+                        deleteSuperLog.executeBatch();
                     } catch (SQLException e) {
                         LOG.warn(String.format("Ошибка вставки записей в rep2_workpool_data:%n%s", e));
                     }
-                    deleteSuperLog.executeBatch();
                     selectSuperLog.setLong(1, superLogResult.getLong(WorkPoolService.ID_SUPERLOG));
                     superLogResult = selectSuperLog.executeQuery();
                     // запускаем обработчики реплик
@@ -156,10 +156,10 @@ public abstract class GeneiricManagerAlgorithm extends StrategySkeleton implemen
             }
             try {
                 insertRunnerData.executeBatch();
+                deleteSuperLog.executeBatch();
             } catch (SQLException e) {
                 LOG.warn(String.format("Ошибка вставки записей в rep2_workpool_data:%n%s", e));
             }
-            deleteSuperLog.executeBatch();
         } finally {
             if (superLogResult != null) {
                 superLogResult.close();
