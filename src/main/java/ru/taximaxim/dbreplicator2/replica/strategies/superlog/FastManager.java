@@ -45,7 +45,7 @@ public class FastManager extends StrategySkeleton implements Strategy {
     public void execute(Connection sourceConnection, Connection targetConnection,
             StrategyModel data) throws StrategyException, SQLException, ClassNotFoundException {
         
-        try (GenericSuperlogDataService superlogDataServise = new GenericSuperlogDataService(sourceConnection, targetConnection)) {
+        try (GenericSuperlogDataService superlogDataServise = new GenericSuperlogDataService(sourceConnection, targetConnection, getFetchSize(data))) {
             FastManagerAlgorithm strategy = new FastManagerAlgorithm(superlogDataServise);
             strategy.execute(sourceConnection, targetConnection, data);
         }

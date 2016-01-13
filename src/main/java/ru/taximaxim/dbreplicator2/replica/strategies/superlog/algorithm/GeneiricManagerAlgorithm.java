@@ -94,10 +94,10 @@ public abstract class GeneiricManagerAlgorithm extends StrategySkeleton implemen
                 PreparedStatement insertRunnerData = superlogDataService.getInsertWorkpoolStatement();
                 PreparedStatement deleteSuperLog = superlogDataService.getDeleteSuperlogStatement();
                 PreparedStatement selectSuperLog = superlogDataService.getSelectSuperlogStatement();
+                PreparedStatement initSelectSuperLog = superlogDataService.getInitSelectSuperlogStatement();
                 ) {
 
-            selectSuperLog.setInt(1, fetchSize);
-            superLogResult = selectSuperLog.executeQuery();
+            superLogResult = initSelectSuperLog.executeQuery();
             Collection<String> cols = new ArrayList<String>();
             cols.add(WorkPoolService.ID_SUPERLOG);
             cols.add(WorkPoolService.ID_POOL);
@@ -142,6 +142,7 @@ public abstract class GeneiricManagerAlgorithm extends StrategySkeleton implemen
                 if ((rowsCount % fetchSize) == 0) {
                     insertRunnerData.executeBatch();
                     deleteSuperLog.executeBatch();
+                    selectSuperLog.setLong(1, superLogResult.getLong(WorkPoolService.ID_SUPERLOG));
                     superLogResult = selectSuperLog.executeQuery();
                     // запускаем обработчики реплик
                     startRunners(runners);

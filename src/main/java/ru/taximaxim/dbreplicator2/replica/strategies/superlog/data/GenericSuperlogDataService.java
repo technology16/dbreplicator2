@@ -38,13 +38,16 @@ public class GenericSuperlogDataService implements SuperlogDataService {
     protected PreparedStatement selectSuperlogStatement;
     protected PreparedStatement deleteSuperlogStatement;
     protected PreparedStatement insertWorkpoolStatement;
+    protected PreparedStatement selectInitSuperlogStatement;
     
     protected Connection sourceConnection;
     protected Connection targetConnection;
+    protected int fetchSize;
     
-    public GenericSuperlogDataService(Connection sourceConnection, Connection targetConnection) {
+    public GenericSuperlogDataService(Connection sourceConnection, Connection targetConnection, int fetchSize) {
         this.sourceConnection = sourceConnection;
         this.targetConnection = targetConnection;
+        this.fetchSize = fetchSize;
     }
     
     protected Connection getSourceConnection() {
@@ -56,10 +59,21 @@ public class GenericSuperlogDataService implements SuperlogDataService {
     }
 
     @Override
+    public PreparedStatement getInitSelectSuperlogStatement() throws SQLException {
+        if (selectInitSuperlogStatement == null) {
+            selectInitSuperlogStatement = getSourceConnection().prepareStatement(
+                    String.format("SELECT * FROM rep2_superlog ORDER BY id_superlog limit %s", fetchSize),
+                    ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+        }
+        
+        return selectInitSuperlogStatement;
+    }
+
+    @Override
     public PreparedStatement getSelectSuperlogStatement() throws SQLException {
         if (selectSuperlogStatement == null) {
             selectSuperlogStatement = getSourceConnection().prepareStatement(
-                    "SELECT * FROM rep2_superlog ORDER BY id_superlog limit ?",
+                    String.format("SELECT * FROM rep2_superlog where id_superlog > ? ORDER BY id_superlog limit %s", fetchSize),
                     ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
         }
         
@@ -91,7 +105,8 @@ public class GenericSuperlogDataService implements SuperlogDataService {
     public void close() throws SQLException {
         getInsertWorkpoolStatement().close();
         getDeleteSuperlogStatement().close();
-        getSelectSuperlogStatement();
+        getSelectSuperlogStatement().close();
+        getInitSelectSuperlogStatement().close();
     }
 
 }
