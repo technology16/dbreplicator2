@@ -25,6 +25,7 @@ package ru.taximaxim.dbreplicator2.tasks;
 import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -42,6 +43,7 @@ import ru.taximaxim.dbreplicator2.model.TaskSettings;
  * @author volodin_aa
  *
  */
+@DisallowConcurrentExecution
 public class TaskRunner implements Job {
 
     public static final Logger LOG = Logger.getLogger(TaskRunner.class);
