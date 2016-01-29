@@ -35,7 +35,7 @@ import ru.taximaxim.dbreplicator2.replica.StrategyException;
 import ru.taximaxim.dbreplicator2.el.ErrorsLog;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
 import ru.taximaxim.dbreplicator2.utils.Core;
-import ru.taximaxim.dbreplicator2.model.TaskSettings;
+import ru.taximaxim.dbreplicator2.model.CronSettings;
 
 /**
  * Класс потока циклического запуска выполнения обработчика записей
@@ -51,35 +51,35 @@ public class CronRunner implements Job {
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
         JobDataMap jobDataMap = context.getJobDetail().getJobDataMap();
-        TaskSettings taskSettings = (TaskSettings) jobDataMap.get("task");
-        WorkerThread workerThread = new WorkerThread(taskSettings.getRunner());
+        CronSettings cronSettings = (CronSettings) jobDataMap.get("task");
+        WorkerThread workerThread = new WorkerThread(cronSettings.getRunner());
 
         LOG.info(String.format("Запуск задачи [%d] %s",
-                taskSettings.getTaskId(), taskSettings.getDescription()));
+                cronSettings.getTaskId(), cronSettings.getDescription()));
 
         try (ErrorsLog errorsLog = Core.getErrorsLog();){
             workerThread.processCommand();
         } catch (InstantiationException | IllegalAccessException e) {
             LOG.error(
                     String.format("Ошибка при создании объекта-стратегии раннера задачи [id_task = %d, %s]", 
-                            taskSettings.getTaskId(),
-                            taskSettings.getDescription()), 
+                            cronSettings.getTaskId(),
+                            cronSettings.getDescription()), 
                             e);
         } catch (ClassNotFoundException e) {
             LOG.error(
                     String.format("Ошибка инициализации при выполнении задачи [id_task = %d, %s]",
-                            taskSettings.getTaskId(),
-                            taskSettings.getDescription()), e);
+                            cronSettings.getTaskId(),
+                            cronSettings.getDescription()), e);
         } catch (StrategyException e) {
             LOG.error(
                     String.format("Ошибка при выполнении стратегии из задачи [id_task = %d, %s]",
-                            taskSettings.getTaskId(),
-                            taskSettings.getDescription()), e);
+                            cronSettings.getTaskId(),
+                            cronSettings.getDescription()), e);
         } catch (SQLException e) {
             LOG.error(
                     String.format("Ошибка БД при выполнении стратегии из задачи [id_task = %d, %s]",
-                            taskSettings.getTaskId(),
-                            taskSettings.getDescription()), e);
+                            cronSettings.getTaskId(),
+                            cronSettings.getDescription()), e);
             SQLException nextEx = e.getNextException();
             while (nextEx!=null){
                 LOG.error("Подробности:", nextEx);
@@ -88,8 +88,8 @@ public class CronRunner implements Job {
         } catch (Exception e) {
             LOG.error(
                     String.format("Ошибка при выполнении задачи [id_task = %d, %s]",
-                            taskSettings.getTaskId(),
-                            taskSettings.getDescription()), e);
+                            cronSettings.getTaskId(),
+                            cronSettings.getDescription()), e);
         }
     }
 }

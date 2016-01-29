@@ -44,17 +44,17 @@ import ru.taximaxim.dbreplicator2.utils.Core;
  * @author volodin_aa
  *
  */
-public class TasksSchedulerTest extends AbstractReplicationTest {
+public class CronSchedulerTest extends AbstractReplicationTest {
     // Задержка между циклами репликации
     private static final int REPLICATION_DELAY = 5000;
-    protected static final Logger LOG = Logger.getLogger(TasksSchedulerTest.class);
+    protected static final Logger LOG = Logger.getLogger(CronSchedulerTest.class);
 
     /**
      * @throws java.lang.Exception
      */
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        setUp("importTasksScheduler.sql", "init_db/importRep2.sql", "init_db/importSource.sql", "init_db/importDest.sql");
+        setUp("importCronScheduler.sql", "init_db/importRep2.sql", "init_db/importSource.sql", "init_db/importDest.sql");
         initRunners();
     }
 
@@ -83,7 +83,7 @@ public class TasksSchedulerTest extends AbstractReplicationTest {
         Helper.executeSqlFromFile(conn, "sql_query/sql_insert.sql");
 
         // Запуск всех тасков
-        Core.getTasksPool().start();
+        Core.getCronPool().start();
         Thread.sleep(REPLICATION_DELAY);
 
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table2");

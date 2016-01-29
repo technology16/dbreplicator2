@@ -19,14 +19,21 @@ insert into strategies (id, className, param, isEnabled, priority, id_runner) va
 --Runner Table 2
 insert into runners (id_runner, source, target, description) values (2, 'source', 'dest', 'ReplicaRunner');
 --Strategy  Table 2
-insert into strategies (id, className, param, isEnabled, priority, id_runner) values (2, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Generic', 'fetchSize=1
-batchSize=1', true, 100, 2);
+insert into strategies (id_runner, id, className, param, isEnabled, priority) 
+values (2, 2, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Generic', 'fetchSize=1
+batchSize=1', true, 100);
+insert into tables (id_runner, name, param) 
+values (2, 'T_TABLE2', 'ignoredCols=_STRING');
 
 --Runner Table 3
 insert into runners (id_runner, source, target, description) values (3, 'source', 'dest', 'ReplicaRunner');
 --Strategy  Table 3
-insert into strategies (id, className, param, isEnabled, priority, id_runner) values (3, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Generic', 'fetchSize=1
-batchSize=1', true, 100, 3);
+insert into strategies (id_runner, id, className, param, isEnabled, priority) 
+values (3, 3, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Generic', 'fetchSize=1
+batchSize=1', true, 100);
+insert into tables (id_runner, name, param) 
+values (3, 'T_TABLE3', 'ignoredCols=_STRING');
+
 -------
 
 --Runner CountWatchgdog
@@ -35,11 +42,8 @@ insert into runners (id_runner, source, target, description) values (7, 'source'
 insert into strategies (id, className, param, isEnabled, priority, id_runner) values (7, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.CountWatchgdog', 'maxErrors=0
 partEmail=10', true, 100, 7);
 
---Tables
-insert into tables (name, id_runner, param) values ('T_TABLE2', 2, 'ignoredCols=_STRING');
-insert into tables (name, id_runner, param) values ('T_TABLE3', 3, 'ignoredCols=_STRING');
+-- Cron
+insert into cron (id_task, id_runner, enabled, cron_string, description) values (1, 1, true, null, 'test');
 
-insert into tasks (id_task, id_runner, enabled, cron_string, description) values (1, 1, true, null, 'test');
-
-insert into tasks (id_task, id_runner, enabled, cron_string, description) values (2, 3, true, '0/2 * * * * ?', 'test');
+insert into cron (id_task, id_runner, enabled, cron_string, description) values (2, 3, true, '0/2 * * * * ?', 'test');
 
