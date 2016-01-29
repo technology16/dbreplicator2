@@ -32,7 +32,9 @@ import org.hibernate.service.ServiceRegistryBuilder;
 
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 import ru.taximaxim.dbreplicator2.cf.HikariCPConnectionsFactory;
+import ru.taximaxim.dbreplicator2.cron.CronPool;
 import ru.taximaxim.dbreplicator2.model.ApplicatonSettingsService;
+import ru.taximaxim.dbreplicator2.model.CronSettingsService;
 import ru.taximaxim.dbreplicator2.model.HikariCPSettingsService;
 import ru.taximaxim.dbreplicator2.model.TaskSettingsService;
 import ru.taximaxim.dbreplicator2.el.ErrorsLog;
@@ -58,6 +60,10 @@ public final class Core {
     private static SessionFactory sessionFactory;
 
     private static ConnectionFactory connectionFactory;
+    
+    private static CronSettingsService cronSettingsService;
+    
+    private static CronPool cronPool;
     
     private static TaskSettingsService taskSettingsService;
     
@@ -224,6 +230,43 @@ public final class Core {
         }
 
         return tasksPool;
+    }
+    
+    /**
+     * Возвращает сервис настройки соединений
+     * 
+     * @return сервис настройки соединений
+     */
+    public static synchronized CronSettingsService getCronSettingsService() {
+        // Чтение настроек о зарегистрированных пулах соединений и их
+        // инициализация.
+        if (cronSettingsService == null) {
+            cronSettingsService = new CronSettingsService(getSessionFactory());
+        }
+
+        return cronSettingsService;
+    }
+    
+    /**
+     * Закрываем сервис настройки соединений
+     */
+    public static void cronSettingsServiceClose() {
+        cronSettingsService = null;
+    }
+    
+    /**
+     * Возвращает пул задач
+     * 
+     * @return пул задач
+     */
+    public static synchronized CronPool getCronPool() {
+        // Чтение настроек о зарегистрированных пулах соединений и их
+        // инициализация.
+        if (cronPool == null) {
+            cronPool = new CronPool(getCronSettingsService());
+        }
+
+        return cronPool;
     }
     
     /**

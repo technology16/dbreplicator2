@@ -41,7 +41,7 @@ import org.hibernate.annotations.FetchMode;
  */
 @Entity
 @Table( name = "cron" )
-public class CronSettingsModel implements TaskSettings{
+public class CronSettingsModel implements CronSettings{
 
     /**
      * Идентификатор задачи

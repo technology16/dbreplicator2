@@ -57,11 +57,16 @@ public class TaskSettingsModel implements TaskSettings{
     private boolean enabled;
 
     /**
-     * Cron строка, описывающая периодичность запуска задачи.
-     * (В случае использования simple триггера будет равно null)
+     * Интервал после успешного выполнения задачи, мс
      */
-    @Column(name = "cron_string")
-    private String cronString;
+    @Column(name = "success_interval")
+    private Integer successInterval;
+
+    /**
+     * Интервал после ошибочного выполнения задачи
+     */
+    @Column(name = "fail_interval")
+    private Integer failInterval;
 
     /**
      * Интервал после ошибочного выполнения задачи
@@ -103,14 +108,24 @@ public class TaskSettingsModel implements TaskSettings{
         this.enabled = enabled;
     }
 
-     @Override
-    public String getCronString() {
-        return cronString;
+    @Override
+    public Integer getSuccessInterval() {
+        return successInterval;
     }
 
     @Override
-    public void setCronString(String cronString) {
-        this.cronString = cronString;
+    public void setSuccessInterval(Integer successInterval) {
+        this.successInterval = successInterval;
+    }
+
+     @Override
+    public Integer getFailInterval() {
+        return failInterval;
+    }
+
+    @Override
+    public void setFailInterval(Integer failInterval) {
+        this.failInterval = failInterval;
     }
 
     @Override

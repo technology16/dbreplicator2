@@ -44,9 +44,9 @@ import ru.taximaxim.dbreplicator2.model.TaskSettings;
  *
  */
 @DisallowConcurrentExecution
-public class TaskRunner implements Job {
+public class CronRunner implements Job {
 
-    public static final Logger LOG = Logger.getLogger(TaskRunner.class);
+    public static final Logger LOG = Logger.getLogger(CronRunner.class);
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {

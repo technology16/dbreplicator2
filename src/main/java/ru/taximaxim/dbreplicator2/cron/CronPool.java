@@ -34,8 +34,8 @@ import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.impl.StdSchedulerFactory;
 
-import ru.taximaxim.dbreplicator2.model.TaskSettings;
-import ru.taximaxim.dbreplicator2.model.TaskSettingsService;
+import ru.taximaxim.dbreplicator2.model.CronSettings;
+import ru.taximaxim.dbreplicator2.model.CronSettingsService;
 
 /**
  * Пул задач по расписанию
@@ -43,19 +43,19 @@ import ru.taximaxim.dbreplicator2.model.TaskSettingsService;
  * @author volodin_aa
  * 
  */
-public class TasksPool {
+public class CronPool {
 
-    private static final Logger LOG = Logger.getLogger(TasksPool.class);
+    private static final Logger LOG = Logger.getLogger(CronPool.class);
 
-    private TaskSettingsService taskSettingsService;
+    private CronSettingsService cronSettingsService;
 
     /**
      * Конструктор на основе сервиса настроек задач по расписанию
      * 
-     * @param taskSettingsService
+     * @param cronSettingsService
      */
-    public TasksPool(TaskSettingsService taskSettingsService) {
-        this.taskSettingsService = taskSettingsService;
+    public CronPool(CronSettingsService cronSettingsService) {
+        this.cronSettingsService = cronSettingsService;
     }
 
     /**
@@ -65,10 +65,10 @@ public class TasksPool {
         try {
             Scheduler scheduler = new StdSchedulerFactory().getScheduler();
             scheduler.start();
-            Map<Integer, TaskSettings> taskSettings = taskSettingsService.getTasks();
-            for (TaskSettings task : taskSettings.values()) {
+            Map<Integer, CronSettings> taskSettings = cronSettingsService.getTasks();
+            for (CronSettings task : taskSettings.values()) {
                 if (task.getEnabled()) {
-                    JobDetail jobDetail = JobBuilder.newJob(TaskRunner.class).build();
+                    JobDetail jobDetail = JobBuilder.newJob(CronRunner.class).build();
                     jobDetail.getJobDataMap().put("task", task);
                     Trigger trigger = null;
                     String cronString = task.getCronString();

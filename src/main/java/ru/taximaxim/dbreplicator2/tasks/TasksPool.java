@@ -22,18 +22,10 @@
  */
 package ru.taximaxim.dbreplicator2.tasks;
 
+import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
-import org.quartz.CronScheduleBuilder;
-import org.quartz.JobBuilder;
-import org.quartz.JobDetail;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.Trigger;
-import org.quartz.TriggerBuilder;
-import org.quartz.impl.StdSchedulerFactory;
-
+import ru.taximaxim.dbreplicator2.el.DefaultUncaughtExceptionHandler;
 import ru.taximaxim.dbreplicator2.model.TaskSettings;
 import ru.taximaxim.dbreplicator2.model.TaskSettingsService;
 
@@ -45,7 +37,7 @@ import ru.taximaxim.dbreplicator2.model.TaskSettingsService;
  */
 public class TasksPool {
 
-    private static final Logger LOG = Logger.getLogger(TasksPool.class);
+    private Map<TaskRunner, Thread> taskThreads = new HashMap<TaskRunner, Thread>();
 
     private TaskSettingsService taskSettingsService;
 
@@ -62,34 +54,36 @@ public class TasksPool {
      * Запускаем потоки задач
      */
     public void start() {
-        try {
-            Scheduler scheduler = new StdSchedulerFactory().getScheduler();
-            scheduler.start();
-            Map<Integer, TaskSettings> taskSettings = taskSettingsService.getTasks();
-            for (TaskSettings task : taskSettings.values()) {
-                if (task.getEnabled()) {
-                    JobDetail jobDetail = JobBuilder.newJob(TaskRunner.class).build();
-                    jobDetail.getJobDataMap().put("task", task);
-                    Trigger trigger = null;
-                    String cronString = task.getCronString();
-                    if (cronString != null && !cronString.isEmpty()) {
-                        trigger = TriggerBuilder.newTrigger()
-                                .withSchedule(CronScheduleBuilder
-                                        .cronSchedule(cronString)).build();
-                    } else {
-                        trigger = TriggerBuilder.newTrigger()
-                                .startNow().build();
-                    }
+        Map<Integer, TaskSettings> taskSettings = taskSettingsService.getTasks();
 
-                    try {
-                        scheduler.scheduleJob(jobDetail, trigger);
-                    } catch (SchedulerException e) {
-                        LOG.error(String.format("Ошибка при старте задачи task[id = %s]!", task.getTaskId()), e);
-                    }
-                }
+        for (TaskSettings task : taskSettings.values()) {
+            if (task.getEnabled()) {
+                TaskRunner taskRunner = new TaskRunner(task);
+                Thread thread = new Thread(taskRunner);
+                thread.setUncaughtExceptionHandler(
+                        new DefaultUncaughtExceptionHandler(task.getRunner().getId()));
+                thread.start();
+                taskThreads.put(taskRunner, thread);
             }
-        } catch (SchedulerException e) {
-            LOG.error("Ошибка при старте планировщика задач!", e);
         }
+    }
+
+    /**
+     * Останливаем потоки задач
+     * 
+     * @throws InterruptedException
+     */
+    public void stop() throws InterruptedException {
+        // Сигнализируем обработчикам задач что надо остановиться
+        for (TaskRunner taskRunner : taskThreads.keySet()) {
+            taskRunner.stop();
+        }
+
+        // Дожидаемся завершения потоков задач
+        for (TaskRunner taskRunner : taskThreads.keySet()) {
+            taskThreads.get(taskRunner).join();
+        }
+
+        taskThreads.clear();
     }
 }
