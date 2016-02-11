@@ -46,7 +46,7 @@ import ru.taximaxim.dbreplicator2.utils.Core;
  */
 public class CronSchedulerTest extends AbstractReplicationTest {
     // Задержка между циклами репликации
-    private static final int REPLICATION_DELAY = 10000;
+    private static final int REPLICATION_DELAY = 20000;
     protected static final Logger LOG = Logger.getLogger(CronSchedulerTest.class);
 
     /**
