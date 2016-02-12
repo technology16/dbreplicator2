@@ -26,5 +26,6 @@
         <mapping class="ru.taximaxim.dbreplicator2.model.StrategyModel"/>
         <mapping class="ru.taximaxim.dbreplicator2.model.RunnerModel"/>
         <mapping class="ru.taximaxim.dbreplicator2.model.ApplicatonSettingsModel"/>
+        <mapping class="ru.taximaxim.dbreplicator2.model.CronSettingsModel"/>
     </session-factory>
 </hibernate-configuration>

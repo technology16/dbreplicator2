@@ -40,8 +40,8 @@ import org.hibernate.annotations.FetchMode;
  *
  */
 @Entity
-@Table( name = "tasks" )
-public class TaskSettingsModel implements TaskSettings{
+@Table( name = "cron" )
+public class CronSettingsModel implements CronSettings{
 
     /**
      * Идентификатор задачи
@@ -57,16 +57,11 @@ public class TaskSettingsModel implements TaskSettings{
     private boolean enabled;
 
     /**
-     * Интервал после успешного выполнения задачи, мс
+     * Cron строка, описывающая периодичность запуска задачи.
+     * (В случае использования simple триггера будет равно null)
      */
-    @Column(name = "success_interval")
-    private Integer successInterval;
-
-    /**
-     * Интервал после ошибочного выполнения задачи
-     */
-    @Column(name = "fail_interval")
-    private Integer failInterval;
+    @Column(name = "cron_string")
+    private String cronString;
 
     /**
      * Интервал после ошибочного выполнения задачи
@@ -108,24 +103,14 @@ public class TaskSettingsModel implements TaskSettings{
         this.enabled = enabled;
     }
 
-    @Override
-    public Integer getSuccessInterval() {
-        return successInterval;
-    }
-
-    @Override
-    public void setSuccessInterval(Integer successInterval) {
-        this.successInterval = successInterval;
-    }
-
      @Override
-    public Integer getFailInterval() {
-        return failInterval;
+    public String getCronString() {
+        return cronString;
     }
 
     @Override
-    public void setFailInterval(Integer failInterval) {
-        this.failInterval = failInterval;
+    public void setCronString(String cronString) {
+        this.cronString = cronString;
     }
 
     @Override

@@ -61,7 +61,7 @@ import ru.taximaxim.dbreplicator2.utils.Core;
 public class H2CopyTableDataTest extends AbstractReplicationTest {
     protected static final Logger LOG = Logger.getLogger(H2CopyTableDataTest.class);
     // Задержка между циклами репликации
-    private static final int REPLICATION_DELAY = 2000;
+    private static final int REPLICATION_DELAY = 8000;
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -299,6 +299,7 @@ public class H2CopyTableDataTest extends AbstractReplicationTest {
         Helper.executeSqlFromFile(conn, "sql_query/sql_foreign_key.sql", 62);
         Helper.executeSqlFromFile(conn, "sql_query/sql_foreign_key.sql", 63);
         worker.run();
+        Thread.sleep(REPLICATION_DELAY);
         
         // Данные должны реплицироваться за 1 проход, т.к. в случае наличия
         // ошибок стратегия начнет их заново реплицировать
