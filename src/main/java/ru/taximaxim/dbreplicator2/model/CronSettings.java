@@ -28,7 +28,7 @@ package ru.taximaxim.dbreplicator2.model;
  * @author volodin_aa
  *
  */
-public interface TaskSettings {
+public interface CronSettings {
 
     /**
      * Получение идентификатора задачи
@@ -59,34 +59,6 @@ public interface TaskSettings {
     void setEnabled(boolean enabled);
 
     /**
-     * Получение интервала ожидания после корректного завершения задачи, мс
-     *
-     * @return
-     */
-    Integer getSuccessInterval();
-
-    /**
-     * Установка интервала ожидания после корректного завершения задачи, мс
-     *
-     * @param successInterval
-     */
-    void setSuccessInterval(Integer successInterval);
-
-    /**
-     * Получение интервала ожидания после ошибочного завершения задачи, мс
-     *
-     * @return
-     */
-    Integer getFailInterval();
-
-    /**
-     * Установка интервала ожидания после ошибочного завершения задачи, мс
-     *
-     * @param failInterval
-     */
-    void setFailInterval(Integer failInterval);
-
-    /**
      * Описание задачи
      *
      * @return Описание задачи
@@ -113,4 +85,16 @@ public interface TaskSettings {
      * @param runner
      */
     void setRunner(RunnerModel runner);
+
+    /**
+     * Получение cron строки с описанием периодичночти запуска задачи
+     * @return
+     */
+    String getCronString();
+
+    /**
+     * Установка cron строки с описанием периодичночти запуска задачи
+     * @param cronString
+     */
+    void setCronString(String cronString);
 }

@@ -150,6 +150,7 @@ public final class Application extends AbstractCommandLineParser {
         
         if(coreGetTasksPoolStart) {
             Core.getTasksPool().start();
+            Core.getCronPool().start();
         }
     }
     
