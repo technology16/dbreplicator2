@@ -23,9 +23,13 @@
 
 package ru.taximaxim.dbreplicator2.model;
 
+import java.util.List;
+
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+
+import ru.taximaxim.dbreplicator2.utils.Utils;
 
 /**
  * @author mardanov_rm
@@ -104,4 +108,19 @@ public class ApplicatonSettingsService {
         }
     }
     
+    /**
+     * Получение списка настроек
+     * @return
+     */
+    public List<ApplicatonSettingsModel> getApplicatonSettings() {
+        Session session = sessionFactory.openSession();
+        List<ApplicatonSettingsModel> settingsList = null;
+        try {
+            settingsList = Utils.castList(ApplicatonSettingsModel.class,
+                            session.createCriteria(ApplicatonSettingsModel.class).list());
+        } finally {
+            session.close();
+        }
+        return settingsList;
+    }
 }
