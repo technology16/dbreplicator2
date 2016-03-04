@@ -84,6 +84,8 @@ public class CronPool {
             // Запускаем если только у нас есть задания
             if (hasTasks) {
                 scheduler.start();
+            } else {
+                scheduler.shutdown();
             }
         } catch (SchedulerException e) {
             LOG.error("Ошибка при старте планировщика задач!", e);
