@@ -43,7 +43,5 @@ insert into strategies (id, className, param, isEnabled, priority, id_runner) va
 partEmail=10', true, 100, 7);
 
 -- Cron
-insert into cron (id_task, id_runner, enabled, cron_string, description) values (1, 1, true, null, 'test');
-
-insert into cron (id_task, id_runner, enabled, cron_string, description) values (2, 3, true, '*/1 * * * * ?', 'test');
+insert into cron (id_task, id_runner, enabled, cron_string, description) values (1, 1, true, '* * * * * ?', 'test');
 
