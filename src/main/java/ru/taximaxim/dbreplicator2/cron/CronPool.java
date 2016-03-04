@@ -64,29 +64,26 @@ public class CronPool {
     public void start() {
         try {
             Scheduler scheduler = new StdSchedulerFactory().getScheduler();
-            scheduler.start();
             Map<Integer, CronSettings> taskSettings = cronSettingsService.getTasks();
+            boolean hasTasks = false;
             for (CronSettings task : taskSettings.values()) {
                 if (task.getEnabled()) {
                     JobDetail jobDetail = JobBuilder.newJob(CronRunner.class).build();
                     jobDetail.getJobDataMap().put("task", task);
-                    Trigger trigger = null;
-                    String cronString = task.getCronString();
-                    if (cronString != null && !cronString.isEmpty()) {
-                        trigger = TriggerBuilder.newTrigger()
-                                .withSchedule(CronScheduleBuilder
-                                        .cronSchedule(cronString)).build();
-                    } else {
-                        trigger = TriggerBuilder.newTrigger()
-                                .startNow().build();
-                    }
-
+                    Trigger trigger = TriggerBuilder.newTrigger()
+                            .withSchedule(CronScheduleBuilder
+                                    .cronSchedule(task.getCronString())).build();
                     try {
                         scheduler.scheduleJob(jobDetail, trigger);
+                        hasTasks = true;
                     } catch (SchedulerException e) {
                         LOG.error(String.format("Ошибка при старте задачи task[id = %s]!", task.getTaskId()), e);
                     }
                 }
+            }
+            // Запускаем если только у нас есть задания
+            if (hasTasks) {
+                scheduler.start();
             }
         } catch (SchedulerException e) {
             LOG.error("Ошибка при старте планировщика задач!", e);
