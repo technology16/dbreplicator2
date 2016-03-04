@@ -25,6 +25,7 @@ package ru.taximaxim.dbreplicator2.jmx.mbeans;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import ru.taximaxim.dbreplicator2.model.ApplicatonSettingsModel;
 import ru.taximaxim.dbreplicator2.model.ApplicatonSettingsService;
@@ -49,8 +50,8 @@ public class DbrepSettings implements DbrepSettingsMBean {
         Map<String, HikariCPSettingsModel> hikariCPSettings = new HikariCPSettingsService(Core.getSessionFactory()).getDataBaseSettings();
         HikariCPSettingsModel[] hikariCPSettingsArray = new HikariCPSettingsModel[hikariCPSettings.size()];
         int i = 0;
-        for (String key : hikariCPSettings.keySet()) {
-            hikariCPSettingsArray[i] = hikariCPSettings.get(key);
+        for (Entry<String, HikariCPSettingsModel> entry : hikariCPSettings.entrySet()) {
+            hikariCPSettingsArray[i] = entry.getValue();
             i++;
         }
         return hikariCPSettingsArray;
@@ -85,8 +86,8 @@ public class DbrepSettings implements DbrepSettingsMBean {
         Map<Integer, TaskSettings> taskSettings = new TaskSettingsService(Core.getSessionFactory()).getTasks();
         TaskSettingsModel[] taskSettingsArray = new TaskSettingsModel[taskSettings.size()];
         int i = 0;
-        for (Integer id : taskSettings.keySet()) {
-            taskSettingsArray[i] = (TaskSettingsModel)taskSettings.get(id);
+        for (Entry<Integer, TaskSettings> entry : taskSettings.entrySet()) {
+            taskSettingsArray[i] = (TaskSettingsModel) entry.getValue();
             i++;
         }
         return taskSettingsArray;

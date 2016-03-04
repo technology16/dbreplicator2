@@ -39,23 +39,23 @@ public interface DbrepSettingsMBean {
      * Получение массива настроек hikariCP
      * @return
      */
-    public HikariCPSettingsModel[] getHikariCPSettingsModels();
+    HikariCPSettingsModel[] getHikariCPSettingsModels();
     
     /**
      * Получение массива настроек приложения
      * @return
      */
-    public ApplicatonSettingsModel[] getApplicatonSettingsModels();
+    ApplicatonSettingsModel[] getApplicatonSettingsModels();
     
     /**
      * Получение массива настроек раннеров
      * @return
      */
-    public RunnerModel[] getRunnerModels();
+    RunnerModel[] getRunnerModels();
     
     /**
      * Получение массива настроек задач
      * @return
      */
-    public TaskSettingsModel[] getTaskSettingsModels();
+    TaskSettingsModel[] getTaskSettingsModels();
 }
