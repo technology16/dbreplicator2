@@ -32,9 +32,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
-import ru.taximaxim.dbreplicator2.el.ErrorsLog;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
-import ru.taximaxim.dbreplicator2.utils.Core;
 import ru.taximaxim.dbreplicator2.model.CronSettings;
 
 /**
@@ -57,7 +55,7 @@ public class CronRunner implements Job {
         LOG.info(String.format("Запуск задачи [%d] %s",
                 cronSettings.getTaskId(), cronSettings.getDescription()));
 
-        try (ErrorsLog errorsLog = Core.getErrorsLog();){
+        try {
             workerThread.processCommand();
         } catch (InstantiationException | IllegalAccessException e) {
             LOG.error(

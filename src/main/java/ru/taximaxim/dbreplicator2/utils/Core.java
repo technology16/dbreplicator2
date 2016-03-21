@@ -26,10 +26,9 @@ import java.io.File;
 
 import org.apache.log4j.Logger;
 import org.hibernate.SessionFactory;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
-import org.hibernate.service.ServiceRegistryBuilder;
-
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 import ru.taximaxim.dbreplicator2.cf.HikariCPConnectionsFactory;
 import ru.taximaxim.dbreplicator2.cron.CronPool;
@@ -120,9 +119,9 @@ public final class Core {
         LOG.debug("Запрошено создание новой фабрики сессий hibernate");
 
         if (sessionFactory == null) {
-            ServiceRegistry serviceRegistry = new ServiceRegistryBuilder()
+            ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
                     .applySettings(configuration.getProperties())
-                    .buildServiceRegistry();
+                    .build();
             sessionFactory = configuration.buildSessionFactory(serviceRegistry);
 
             LOG.info("Создана новая фабрика сессий hibernate");
