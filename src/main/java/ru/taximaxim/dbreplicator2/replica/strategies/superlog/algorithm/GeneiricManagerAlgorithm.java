@@ -33,10 +33,16 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.apache.log4j.Logger;
 
+import ru.taximaxim.dbreplicator2.jdbc.BatchCall;
 import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
+import ru.taximaxim.dbreplicator2.jdbc.QueryCall;
 import ru.taximaxim.dbreplicator2.model.HikariCPSettingsModel;
 import ru.taximaxim.dbreplicator2.model.Runner;
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
@@ -79,16 +85,19 @@ public abstract class GeneiricManagerAlgorithm extends StrategySkeleton implemen
         Boolean lastTargetAutoCommit = null;
         lastAutoCommit = sourceConnection.getAutoCommit();
         lastTargetAutoCommit = targetConnection.getAutoCommit();
-        // Начинаем транзакцию
+        // Работаем в режиме автокоммита
         sourceConnection.setAutoCommit(true);
-        targetConnection.setAutoCommit(true);
-        HikariCPSettingsModel sourcePool = data.getRunner().getSource();
-        Map<String, Collection<RunnerModel>> tableObservers = getTableObservers(sourcePool);
-
         sourceConnection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+        targetConnection.setAutoCommit(true);
         targetConnection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+
         // Строим список обработчиков реплик
+        Map<String, Collection<RunnerModel>> tableObservers = 
+                getTableObservers(data.getRunner().getSource());
+
         ResultSet superLogResult = null;
+        // Выборку данных будем выполнять в отдельном потоке
+        ExecutorService service = Executors.newSingleThreadExecutor();
         // Переносим данные
         try (
                 PreparedStatement insertRunnerData = superlogDataService.getInsertWorkpoolStatement();
@@ -97,7 +106,7 @@ public abstract class GeneiricManagerAlgorithm extends StrategySkeleton implemen
                 PreparedStatement initSelectSuperLog = superlogDataService.getInitSelectSuperlogStatement();
                 ) {
 
-            superLogResult = initSelectSuperLog.executeQuery();
+            Future<ResultSet> future = service.submit(new QueryCall(initSelectSuperLog));
             Collection<String> cols = new ArrayList<String>();
             cols.add(WorkPoolService.ID_SUPERLOG);
             cols.add(WorkPoolService.ID_POOL);
@@ -107,6 +116,8 @@ public abstract class GeneiricManagerAlgorithm extends StrategySkeleton implemen
             cols.add(WorkPoolService.C_DATE);
             cols.add(WorkPoolService.ID_TRANSACTION);
             Set<RunnerModel> runners = new HashSet<RunnerModel>();
+            
+            superLogResult = future.get();
             for (int rowsCount = 1; superLogResult.next(); rowsCount++) {
                 // Выводим данные из rep2_superlog_table
                 if (LOG.isDebugEnabled()) {
@@ -140,18 +151,27 @@ public abstract class GeneiricManagerAlgorithm extends StrategySkeleton implemen
 
                 // Периодически сбрасываем батч в БД
                 if ((rowsCount % fetchSize) == 0) {
+                    // Пишем данные в воркпул параллельно с чтением новой выборки
+                    selectSuperLog.setLong(1, superLogResult.getLong(WorkPoolService.ID_SUPERLOG));
+                    future = service.submit(new QueryCall(selectSuperLog));
+                    Future<int[]> deleteSuperLogResult = null;
                     try {
                         insertRunnerData.executeBatch();
-                        deleteSuperLog.executeBatch();
+                        // Удаляем данные в очереди с выборкой новой порции
+                        deleteSuperLogResult = service.submit(new BatchCall(deleteSuperLog));
                     } catch (SQLException e) {
                         LOG.warn(String.format("Ошибка вставки записей в rep2_workpool_data:%n%s", e));
                     }
-                    selectSuperLog.setLong(1, superLogResult.getLong(WorkPoolService.ID_SUPERLOG));
-                    superLogResult = selectSuperLog.executeQuery();
                     // запускаем обработчики реплик
                     startRunners(runners);
                     runners.clear();
                     LOG.info(String.format("Обработано %s строк...", rowsCount));
+                    // Дожидаемся выборки
+                    superLogResult = future.get();
+                    // Дожидаемся удаления
+                    if (deleteSuperLogResult != null) {
+                        deleteSuperLogResult.get();
+                    }
                 }
             }
             try {
@@ -160,6 +180,11 @@ public abstract class GeneiricManagerAlgorithm extends StrategySkeleton implemen
             } catch (SQLException e) {
                 LOG.warn(String.format("Ошибка вставки записей в rep2_workpool_data:%n%s", e));
             }
+        } catch (InterruptedException e) {
+            LOG.warn("Прервано получение данных из rep2_superlog!", e);
+            Thread.currentThread().interrupt();
+        } catch (ExecutionException e) {
+            LOG.warn("Ошибка получения данных из rep2_superlog!", e);
         } finally {
             if (superLogResult != null) {
                 superLogResult.close();
