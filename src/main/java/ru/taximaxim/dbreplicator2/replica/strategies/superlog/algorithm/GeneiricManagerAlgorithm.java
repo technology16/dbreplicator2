@@ -135,7 +135,7 @@ public abstract class GeneiricManagerAlgorithm {
         superlogDataService.getTargetConnection()
                 .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 
-        ResultSet superLogResult = null;
+        ResultSet superLogResult;
         // Выборку данных будем выполнять в отдельном потоке
         ExecutorService selectService = Executors.newSingleThreadExecutor();
         // Переносим данные
@@ -177,6 +177,7 @@ public abstract class GeneiricManagerAlgorithm {
                     // запускаем чтение новых данных
                     if (rowsCount > 0) {
                         selectSuperLog.setLong(1, idSuperLog);
+                        superLog = selectService.submit(new QueryCall(selectSuperLog));
                     }
 
                     // Сбрасываем данные в базу

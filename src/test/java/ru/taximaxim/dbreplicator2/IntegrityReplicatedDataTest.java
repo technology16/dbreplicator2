@@ -24,6 +24,7 @@
 package ru.taximaxim.dbreplicator2;
 
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -55,7 +56,7 @@ public class IntegrityReplicatedDataTest extends AbstractReplicationTest {
     protected static final Logger LOG = Logger.getLogger(IntegrityReplicatedDataTest.class);
     
     // Задержка между циклами репликации
-    private static final int REPLICATION_DELAY = 200;
+    private static final int REPLICATION_DELAY = 100;
     
     protected static Runnable errorsIntegrityReplicatedData = null;
     
@@ -92,11 +93,11 @@ public class IntegrityReplicatedDataTest extends AbstractReplicationTest {
         listSource = Helper.InfoTest(conn, "t_table1");
         listDest   = Helper.InfoTest(connDest, "t_table1");
         Helper.AssertEquals(listSource, listDest);
-        Thread.sleep(REPLICATION_DELAY);
         Helper.executeSqlFromFile(connDest, "sql_query/sql_update.sql"); 
         Helper.executeSqlFromFile(connDest, "sql_query/sql_delete.sql"); 
         int count_rep2_errors_log = Helper.InfoCount(conn, "rep2_errors_log");
-        assertTrue(String.format("rep2_errors_log чистый [%s==0]", count_rep2_errors_log), count_rep2_errors_log== 0);
+        Helper.InfoSelect(conn, "rep2_errors_log");
+        assertEquals("rep2_errors_log чистый", 0, count_rep2_errors_log);
         
         errorsIntegrityReplicatedData.run();
         Thread.sleep(REPLICATION_DELAY);
