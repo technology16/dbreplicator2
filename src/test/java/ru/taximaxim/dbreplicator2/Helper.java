@@ -48,7 +48,7 @@ import org.junit.Assert;
 public class Helper {
 
     // Задержка между циклами репликации
-    private static final int REPLICATION_DELAY = 500;
+    private static final int REPLICATION_DELAY = 100;
     protected static final Logger LOG = Logger.getLogger(Helper.class);
     
     /**

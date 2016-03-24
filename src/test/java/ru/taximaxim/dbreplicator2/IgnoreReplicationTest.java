@@ -51,7 +51,7 @@ public class IgnoreReplicationTest extends AbstractReplicationTest{
     protected static final Logger LOG = Logger.getLogger(IgnoreReplicationTest.class);
     
     // Задержка между циклами репликации
-    private static final int REPLICATION_DELAY = 1500;
+    private static final int REPLICATION_DELAY = 100;
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {

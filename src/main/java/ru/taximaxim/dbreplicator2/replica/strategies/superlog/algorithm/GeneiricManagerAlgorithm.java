@@ -37,7 +37,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
 import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.jdbc.BatchCall;
@@ -134,22 +133,27 @@ public abstract class GeneiricManagerAlgorithm extends StrategySkeleton
 
         ResultSet superLogResult = null;
         // Выборку данных будем выполнять в отдельном потоке
-        ExecutorService service = Executors.newSingleThreadExecutor();
+        ExecutorService selectService = Executors.newSingleThreadExecutor();
         // Переносим данные
         try (PreparedStatement initSelectSuperLog = superlogDataService
                 .getInitSelectSuperlogStatement();
-                PreparedStatement deleteSuperLog = superlogDataService
-                        .getDeleteSuperlogStatement();
                 PreparedStatement selectSuperLog = superlogDataService
                         .getSelectSuperlogStatement();) {
-            Future<ResultSet> future = service.submit(new QueryCall(initSelectSuperLog));
+            Future<ResultSet> future = selectService.submit(new QueryCall(initSelectSuperLog));
 
             // Строим список обработчиков реплик
             Map<String, Collection<RunnerModel>> tableObservers = getTableObservers(
                     data.getRunner().getSource());
 
-            try (PreparedStatement insertRunnerData = superlogDataService
-                    .getInsertWorkpoolStatement();) {
+            // Выборку данных будем выполнять в отдельном потоке
+            ExecutorService deleteService = Executors.newSingleThreadExecutor();
+            // Получаем соединение для удаления записей
+            try (Connection deleteConnection = Core.getConnectionFactory()
+                    .getConnection(data.getRunner().getSource().getPoolId());
+                    PreparedStatement deleteSuperLog = superlogDataService
+                            .getDeleteSuperlogStatement();
+                    PreparedStatement insertRunnerData = superlogDataService
+                            .getInsertWorkpoolStatement();) {
                 Set<RunnerModel> runners = new HashSet<RunnerModel>();
 
                 int fetchSize = getFetchSize(data);
@@ -162,18 +166,18 @@ public abstract class GeneiricManagerAlgorithm extends StrategySkeleton
 
                     // Периодически сбрасываем батч в БД
                     if ((rowsCount % fetchSize) == 0) {
-                        // Пишем данные в воркпул параллельно с чтением новой
-                        // выборки
+                        // Пишем данные в воркпул параллельно с чтением
+                        // новой выборки
                         selectSuperLog.setLong(1,
                                 superLogResult.getLong(WorkPoolService.ID_SUPERLOG));
-                        future = service.submit(new QueryCall(selectSuperLog));
+                        future = selectService.submit(new QueryCall(selectSuperLog));
                         // Закрываем ресурсы
-                        service.submit(new ResultSetCloseCall(superLogResult));
-                        
+                        selectService.submit(new ResultSetCloseCall(superLogResult));
+
                         // Сбрасываем данные в базу
-                        Future<int[]> deleteSuperLogResult = executeBatches(service,
+                        Future<int[]> deleteSuperLogResult = executeBatches(deleteService,
                                 deleteSuperLog, insertRunnerData);
-                        
+
                         // запускаем обработчики реплик
                         startRunners(runners);
                         runners.clear();
@@ -186,8 +190,18 @@ public abstract class GeneiricManagerAlgorithm extends StrategySkeleton
                         }
                     }
                 }
-                executeBatches(service,
-                        deleteSuperLog, insertRunnerData);
+                Future<int[]> deleteSuperLogResult = executeBatches(deleteService, deleteSuperLog, insertRunnerData);
+                // Дожидаемся удаления
+                if (deleteSuperLogResult != null) {
+                    deleteSuperLogResult.get();
+                }
+            } catch (ClassNotFoundException e) {
+                LOG.error(
+                        String.format("Ошибка получения дополнительного соединения [%s]!",
+                                data.getRunner().getSource()),
+                        e);
+            } finally {
+                deleteService.shutdown();
             }
 
             // запускаем все обработчики реплик
@@ -203,15 +217,15 @@ public abstract class GeneiricManagerAlgorithm extends StrategySkeleton
             LOG.warn("Ошибка получения данных из rep2_superlog!", e);
         } finally {
             if (superLogResult != null) {
-                service.submit(new ResultSetCloseCall(superLogResult));
+                selectService.submit(new ResultSetCloseCall(superLogResult));
             }
-            service.shutdown();
+            selectService.shutdown();
         }
     }
 
     /**
-     * Сбрасываем данные в базу
-     * Метод удаляет данные из суперлога в отдельном потоке
+     * Сбрасываем данные в базу Метод удаляет данные из суперлога в отдельном
+     * потоке
      * 
      * @param service
      * @param deleteSuperLog
@@ -224,12 +238,10 @@ public abstract class GeneiricManagerAlgorithm extends StrategySkeleton
         try {
             insertRunnerData.executeBatch();
             // Удаляем данные в очереди с выборкой новой порции
-            deleteSuperLogResult = service
-                    .submit(new BatchCall(deleteSuperLog));
+            deleteSuperLogResult = service.submit(new BatchCall(deleteSuperLog));
         } catch (SQLException e) {
-            LOG.warn(String.format(
-                    "Ошибка вставки записей в rep2_workpool_data:%n%s",
-                    e));
+            LOG.warn(
+                    String.format("Ошибка вставки записей в rep2_workpool_data:%n%s", e));
         }
         return deleteSuperLogResult;
     }

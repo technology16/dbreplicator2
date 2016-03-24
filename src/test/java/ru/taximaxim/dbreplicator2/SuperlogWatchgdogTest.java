@@ -26,7 +26,7 @@ public class SuperlogWatchgdogTest extends AbstractReplicationTest {
 protected static final Logger LOG = Logger.getLogger(SuperlogWatchgdogTest.class);
     
     // Задержка между циклами репликации
-    private static final int REPLICATION_DELAY = 4000;
+    private static final int REPLICATION_DELAY = 100;
 
     protected static Runnable errorsSuperlogWatchgdog = null;
     
