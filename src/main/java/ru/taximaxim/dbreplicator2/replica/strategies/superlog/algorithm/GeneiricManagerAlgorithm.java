@@ -152,6 +152,7 @@ public abstract class GeneiricManagerAlgorithm {
 
             // Выборку данных будем выполнять в отдельном потоке
             ExecutorService deleteService = Executors.newSingleThreadExecutor();
+            Future<int[]> deleteSuperLogResult = null;
             // Получаем соединение для удаления записей
             try (PreparedStatement deleteSuperLog = superlogDataService
                     .getDeleteSuperlogStatement();
@@ -161,11 +162,18 @@ public abstract class GeneiricManagerAlgorithm {
 
                 int rowsCount = 0;
                 long idSuperLog = 0;
-                Future<int[]> deleteSuperLogResult = null;
                 do {
                     // Дожидаемся выборки
                     rowsCount = 0;
+
+                    // Извлекаем очередную порцию данных
                     superLogResult = superLog.get();
+
+                    // Дожидаемся удаления
+                    if (deleteSuperLogResult != null) {
+                        deleteSuperLogResult.get();
+                    }
+
                     while (superLogResult.next()) {
                         // Копируем записи
                         idSuperLog = insertRunnersData(superLogResult, insertRunnerData,
@@ -191,22 +199,21 @@ public abstract class GeneiricManagerAlgorithm {
 
                     // Закрываем ресурсы
                     selectService.submit(new ResultSetCloseCall(superLogResult));
-
-                    // Дожидаемся удаления
-                    if (deleteSuperLogResult != null) {
-                        deleteSuperLogResult.get();
-                    }
                 } while (rowsCount > 0);
+
+                // запускаем все обработчики реплик
+                for (Collection<RunnerModel> observers : tableObservers.values()) {
+                    runners.addAll(observers);
+                }
+                startRunners(runners);
             } finally {
+                // Дожидаемся удаления
+                if (deleteSuperLogResult != null) {
+                    deleteSuperLogResult.get();
+                }
+
                 deleteService.shutdown();
             }
-
-            // запускаем все обработчики реплик
-            Set<RunnerModel> runners = new HashSet<RunnerModel>();
-            for (Collection<RunnerModel> observers : tableObservers.values()) {
-                runners.addAll(observers);
-            }
-            startRunners(runners);
         } catch (InterruptedException e) {
             LOG.warn("Прервано получение данных из rep2_superlog!", e);
             Thread.currentThread().interrupt();
