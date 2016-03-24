@@ -49,9 +49,7 @@ import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.model.TableModel;
 import ru.taximaxim.dbreplicator2.model.TaskSettings;
 import ru.taximaxim.dbreplicator2.model.TaskSettingsService;
-import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
-import ru.taximaxim.dbreplicator2.replica.strategies.replication.StrategySkeleton;
 import ru.taximaxim.dbreplicator2.replica.strategies.replication.workpool.WorkPoolService;
 import ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.SuperlogDataService;
 import ru.taximaxim.dbreplicator2.utils.Core;
@@ -62,8 +60,7 @@ import ru.taximaxim.dbreplicator2.utils.Core;
  * @author volodin_aa
  * 
  */
-public abstract class GeneiricManagerAlgorithm extends StrategySkeleton
-        implements Strategy {
+public abstract class GeneiricManagerAlgorithm {
 
     private static final Logger LOG = Logger.getLogger(GeneiricManagerAlgorithm.class);
 
@@ -89,47 +86,54 @@ public abstract class GeneiricManagerAlgorithm extends StrategySkeleton
      * @param observers
      * @throws SQLException
      */
-    protected void insertRunnersData(ResultSet superLogResult,
+    protected long insertRunnersData(ResultSet superLogResult,
             PreparedStatement insertRunnerData, PreparedStatement deleteSuperLog,
             Map<String, Collection<RunnerModel>> tableObservers, Set<RunnerModel> runners)
             throws SQLException {
+        long idSuperLog = superLogResult.getLong(WorkPoolService.ID_SUPERLOG);
         String tableName = superLogResult.getString(WorkPoolService.ID_TABLE);
         Collection<RunnerModel> observers = tableObservers.get(tableName);
         if (observers != null) {
+            // Заполняем "константы"
+            insertRunnerData.setLong(2, idSuperLog);
+            insertRunnerData.setInt(3,
+                    superLogResult.getInt(WorkPoolService.ID_FOREIGN));
+            insertRunnerData.setString(4, tableName);
+            insertRunnerData.setString(5,
+                    superLogResult.getString(WorkPoolService.C_OPERATION));
+            insertRunnerData.setTimestamp(6,
+                    superLogResult.getTimestamp(WorkPoolService.C_DATE));
+            insertRunnerData.setString(7,
+                    superLogResult.getString(WorkPoolService.ID_TRANSACTION));
+
+            // Раскладываем данные по раннерам
             for (RunnerModel runner : observers) {
+                // Игнорим данные у которых владелец совпадает с приемником
                 if (!superLogResult.getString(WorkPoolService.ID_POOL)
                         .equals(runner.getTarget().getPoolId())) {
                     insertRunnerData.setInt(1, runner.getId());
-                    insertRunnerData.setLong(2,
-                            superLogResult.getLong(WorkPoolService.ID_SUPERLOG));
-                    insertRunnerData.setInt(3,
-                            superLogResult.getInt(WorkPoolService.ID_FOREIGN));
-                    insertRunnerData.setString(4, tableName);
-                    insertRunnerData.setString(5,
-                            superLogResult.getString(WorkPoolService.C_OPERATION));
-                    insertRunnerData.setTimestamp(6,
-                            superLogResult.getTimestamp(WorkPoolService.C_DATE));
-                    insertRunnerData.setString(7,
-                            superLogResult.getString(WorkPoolService.ID_TRANSACTION));
                     insertRunnerData.addBatch();
                     runners.add(runner);
                 }
-                // Удаляем исходную запись
-                deleteSuperLog.setLong(1,
-                        superLogResult.getLong(WorkPoolService.ID_SUPERLOG));
-                deleteSuperLog.addBatch();
             }
+            // Удаляем исходную запись
+            deleteSuperLog.setLong(1, idSuperLog);
+            deleteSuperLog.addBatch();
         }
+        return idSuperLog;
     }
 
-    @Override
-    public void execute(Connection sourceConnection, Connection targetConnection,
-            StrategyModel data) throws StrategyException, SQLException {
+    public void execute(StrategyModel data) throws StrategyException, SQLException {
         // Работаем в режиме автокоммита
-        sourceConnection.setAutoCommit(true);
-        sourceConnection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-        targetConnection.setAutoCommit(true);
-        targetConnection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+        superlogDataService.getSelectConnection().setAutoCommit(true);
+        superlogDataService.getSelectConnection()
+                .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+        superlogDataService.getDeleteConnection().setAutoCommit(true);
+        superlogDataService.getDeleteConnection()
+                .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+        superlogDataService.getTargetConnection().setAutoCommit(true);
+        superlogDataService.getTargetConnection()
+                .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 
         ResultSet superLogResult = null;
         // Выборку данных будем выполнять в отдельном потоке
@@ -139,7 +143,8 @@ public abstract class GeneiricManagerAlgorithm extends StrategySkeleton
                 .getInitSelectSuperlogStatement();
                 PreparedStatement selectSuperLog = superlogDataService
                         .getSelectSuperlogStatement();) {
-            Future<ResultSet> future = selectService.submit(new QueryCall(initSelectSuperLog));
+            Future<ResultSet> superLog = selectService
+                    .submit(new QueryCall(initSelectSuperLog));
 
             // Строим список обработчиков реплик
             Map<String, Collection<RunnerModel>> tableObservers = getTableObservers(
@@ -149,50 +154,48 @@ public abstract class GeneiricManagerAlgorithm extends StrategySkeleton
             ExecutorService deleteService = Executors.newSingleThreadExecutor();
             // Получаем соединение для удаления записей
             try (PreparedStatement deleteSuperLog = superlogDataService
-                            .getDeleteSuperlogStatement();
+                    .getDeleteSuperlogStatement();
                     PreparedStatement insertRunnerData = superlogDataService
                             .getInsertWorkpoolStatement();) {
                 Set<RunnerModel> runners = new HashSet<RunnerModel>();
 
-                int fetchSize = getFetchSize(data);
-
-                superLogResult = future.get();
-                for (int rowsCount = 1; superLogResult.next(); rowsCount++) {
-                    // Копируем записи
-                    insertRunnersData(superLogResult, insertRunnerData, deleteSuperLog,
-                            tableObservers, runners);
-
-                    // Периодически сбрасываем батч в БД
-                    if ((rowsCount % fetchSize) == 0) {
-                        // Пишем данные в воркпул параллельно с чтением
-                        // новой выборки
-                        selectSuperLog.setLong(1,
-                                superLogResult.getLong(WorkPoolService.ID_SUPERLOG));
-                        future = selectService.submit(new QueryCall(selectSuperLog));
-                        // Закрываем ресурсы
-                        selectService.submit(new ResultSetCloseCall(superLogResult));
-
-                        // Сбрасываем данные в базу
-                        Future<int[]> deleteSuperLogResult = executeBatches(deleteService,
-                                deleteSuperLog, insertRunnerData);
-
-                        // запускаем обработчики реплик
-                        startRunners(runners);
-                        runners.clear();
-                        LOG.info(String.format("Обработано %s строк...", rowsCount));
-                        // Дожидаемся выборки
-                        superLogResult = future.get();
-                        // Дожидаемся удаления
-                        if (deleteSuperLogResult != null) {
-                            deleteSuperLogResult.get();
-                        }
+                int rowsCount = 0;
+                long idSuperLog = 0;
+                Future<int[]> deleteSuperLogResult;
+                do {
+                    // Дожидаемся выборки
+                    rowsCount = 0;
+                    superLogResult = superLog.get();
+                    while (superLogResult.next()) {
+                        // Копируем записи
+                        idSuperLog = insertRunnersData(superLogResult, insertRunnerData,
+                                deleteSuperLog, tableObservers, runners);
+                        rowsCount++;
                     }
-                }
-                Future<int[]> deleteSuperLogResult = executeBatches(deleteService, deleteSuperLog, insertRunnerData);
-                // Дожидаемся удаления
-                if (deleteSuperLogResult != null) {
-                    deleteSuperLogResult.get();
-                }
+
+                    // Если в выборке были данные, то в параллельном потоке
+                    // запускаем чтение новых данных
+                    if (rowsCount > 0) {
+                        selectSuperLog.setLong(1, idSuperLog);
+                    }
+
+                    // Сбрасываем данные в базу
+                    deleteSuperLogResult = executeBatches(deleteService,
+                            deleteSuperLog, insertRunnerData);
+
+                    // Закрываем ресурсы
+                    selectService.submit(new ResultSetCloseCall(superLogResult));
+
+                    // запускаем обработчики реплик
+                    startRunners(runners);
+                    runners.clear();
+                    LOG.info(String.format("Обработано %s строк...", rowsCount));
+
+                    // Дожидаемся удаления
+                    if (deleteSuperLogResult != null) {
+                        deleteSuperLogResult.get();
+                    }
+                } while (rowsCount > 0);
             } finally {
                 deleteService.shutdown();
             }
@@ -209,9 +212,6 @@ public abstract class GeneiricManagerAlgorithm extends StrategySkeleton
         } catch (ExecutionException e) {
             LOG.warn("Ошибка получения данных из rep2_superlog!", e);
         } finally {
-            if (superLogResult != null) {
-                selectService.submit(new ResultSetCloseCall(superLogResult));
-            }
             selectService.shutdown();
         }
     }

@@ -27,7 +27,6 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
-import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
 import ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.SuperlogDataService;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
@@ -38,7 +37,7 @@ import ru.taximaxim.dbreplicator2.tp.WorkerThread;
  * @author volodin_aa
  * 
  */
-public class ManagerAlgorithm extends GeneiricManagerAlgorithm implements Strategy {
+public class ManagerAlgorithm extends GeneiricManagerAlgorithm {
   
     /**
      * Конструктор по умолчанию

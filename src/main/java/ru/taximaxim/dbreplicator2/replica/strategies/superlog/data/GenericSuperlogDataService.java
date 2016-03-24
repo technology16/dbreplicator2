@@ -54,15 +54,18 @@ public class GenericSuperlogDataService implements SuperlogDataService {
         this.fetchSize = fetchSize;
     }
 
-    protected Connection getSelectConnection() {
+    @Override
+    public Connection getSelectConnection() {
         return selectConnection;
     }
 
-    protected Connection getDeleteConnection() {
+    @Override
+    public Connection getDeleteConnection() {
         return deleteConnection;
     }
 
-    protected Connection getTargetConnection() {
+    @Override
+    public Connection getTargetConnection() {
         return targetConnection;
     }
 

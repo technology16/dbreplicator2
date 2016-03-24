@@ -54,7 +54,7 @@ public class FastManager extends StrategySkeleton implements Strategy {
                         sourceConnection, deleteConnection, targetConnection,
                         getFetchSize(data))) {
             FastManagerAlgorithm strategy = new FastManagerAlgorithm(superlogDataServise);
-            strategy.execute(sourceConnection, targetConnection, data);
+            strategy.execute(data);
         }
     }
 }

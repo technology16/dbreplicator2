@@ -51,7 +51,7 @@ public class Manager extends StrategySkeleton implements Strategy {
                 .getConnection(data.getRunner().getSource().getPoolId());
                 GenericSuperlogDataService superlogDataServise = new GenericSuperlogDataService(sourceConnection, deleteConnection, targetConnection, getFetchSize(data))) {
             ManagerAlgorithm strategy = new ManagerAlgorithm(superlogDataServise);
-            strategy.execute(sourceConnection, targetConnection, data);
+            strategy.execute(data);
         }
     }
 
