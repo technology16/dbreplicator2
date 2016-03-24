@@ -161,7 +161,7 @@ public abstract class GeneiricManagerAlgorithm {
 
                 int rowsCount = 0;
                 long idSuperLog = 0;
-                Future<int[]> deleteSuperLogResult;
+                Future<int[]> deleteSuperLogResult = null;
                 do {
                     // Дожидаемся выборки
                     rowsCount = 0;
@@ -178,19 +178,19 @@ public abstract class GeneiricManagerAlgorithm {
                     if (rowsCount > 0) {
                         selectSuperLog.setLong(1, idSuperLog);
                         superLog = selectService.submit(new QueryCall(selectSuperLog));
-                    }
 
-                    // Сбрасываем данные в базу
-                    deleteSuperLogResult = executeBatches(deleteService,
-                            deleteSuperLog, insertRunnerData);
+                        // Сбрасываем данные в базу
+                        deleteSuperLogResult = executeBatches(deleteService,
+                                deleteSuperLog, insertRunnerData);
+
+                        // запускаем обработчики реплик
+                        startRunners(runners);
+                        runners.clear();
+                        LOG.info(String.format("Обработано %s строк...", rowsCount));
+                    }
 
                     // Закрываем ресурсы
                     selectService.submit(new ResultSetCloseCall(superLogResult));
-
-                    // запускаем обработчики реплик
-                    startRunners(runners);
-                    runners.clear();
-                    LOG.info(String.format("Обработано %s строк...", rowsCount));
 
                     // Дожидаемся удаления
                     if (deleteSuperLogResult != null) {
