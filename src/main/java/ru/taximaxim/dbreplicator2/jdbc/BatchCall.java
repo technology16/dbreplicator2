@@ -23,6 +23,7 @@
 
 package ru.taximaxim.dbreplicator2.jdbc;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.concurrent.Callable;
@@ -35,15 +36,24 @@ import java.util.concurrent.Callable;
  */
 public class BatchCall implements Callable<int[]> {
     
+    protected Connection connection;
     protected PreparedStatement statement;
     
-    public BatchCall(PreparedStatement statement) {
+    public BatchCall(Connection connection, PreparedStatement statement) {
+        this.connection = connection;
         this.statement = statement;
     }
     
     @Override
     public int[] call() throws SQLException {
-        return statement.executeBatch();
+        try {
+            int[] result = statement.executeBatch();
+            connection.commit();
+            return result;
+        } catch (SQLException e) {
+            connection.rollback();
+            throw e;
+        }
     }
 
 }

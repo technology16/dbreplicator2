@@ -96,8 +96,7 @@ public abstract class GeneiricManagerAlgorithm {
         if (observers != null) {
             // Заполняем "константы"
             insertRunnerData.setLong(2, idSuperLog);
-            insertRunnerData.setInt(3,
-                    superLogResult.getInt(WorkPoolService.ID_FOREIGN));
+            insertRunnerData.setInt(3, superLogResult.getInt(WorkPoolService.ID_FOREIGN));
             insertRunnerData.setString(4, tableName);
             insertRunnerData.setString(5,
                     superLogResult.getString(WorkPoolService.C_OPERATION));
@@ -128,10 +127,10 @@ public abstract class GeneiricManagerAlgorithm {
         superlogDataService.getSelectConnection().setAutoCommit(true);
         superlogDataService.getSelectConnection()
                 .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-        superlogDataService.getDeleteConnection().setAutoCommit(true);
+        superlogDataService.getDeleteConnection().setAutoCommit(false);
         superlogDataService.getDeleteConnection()
                 .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-        superlogDataService.getTargetConnection().setAutoCommit(true);
+        superlogDataService.getTargetConnection().setAutoCommit(false);
         superlogDataService.getTargetConnection()
                 .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 
@@ -170,10 +169,7 @@ public abstract class GeneiricManagerAlgorithm {
                     // Извлекаем очередную порцию данных
                     superLogResult = superLog.get();
 
-                    // Дожидаемся удаления
-                    if (deleteSuperLogResult != null) {
-                        deleteSuperLogResult.get();
-                    }
+                    waitDeleteSuperlog(deleteSuperLogResult);
 
                     while (superLogResult.next()) {
                         // Копируем записи
@@ -207,11 +203,9 @@ public abstract class GeneiricManagerAlgorithm {
                     runners.addAll(observers);
                 }
                 startRunners(runners);
-                
+
                 // Дожидаемся удаления
-                if (deleteSuperLogResult != null) {
-                    deleteSuperLogResult.get();
-                }
+                waitDeleteSuperlog(deleteSuperLogResult);
             } finally {
                 deleteService.shutdown();
             }
@@ -227,6 +221,19 @@ public abstract class GeneiricManagerAlgorithm {
     }
 
     /**
+     * @param deleteSuperLogResult
+     * @throws InterruptedException
+     * @throws ExecutionException
+     * @throws SQLException
+     */
+    protected void waitDeleteSuperlog(Future<int[]> deleteSuperLogResult)
+            throws InterruptedException, ExecutionException {
+        if (deleteSuperLogResult != null) {
+            deleteSuperLogResult.get();
+        }
+    }
+
+    /**
      * Сбрасываем данные в базу Метод удаляет данные из суперлога в отдельном
      * потоке
      * 
@@ -234,17 +241,21 @@ public abstract class GeneiricManagerAlgorithm {
      * @param deleteSuperLog
      * @param insertRunnerData
      * @return
+     * @throws SQLException
      */
     protected Future<int[]> executeBatches(ExecutorService service,
-            PreparedStatement deleteSuperLog, PreparedStatement insertRunnerData) {
+            PreparedStatement deleteSuperLog, PreparedStatement insertRunnerData)
+            throws SQLException {
         Future<int[]> deleteSuperLogResult = null;
         try {
             insertRunnerData.executeBatch();
+            superlogDataService.getTargetConnection().commit();
             // Удаляем данные в очереди с выборкой новой порции
-            deleteSuperLogResult = service.submit(new BatchCall(deleteSuperLog));
+            deleteSuperLogResult = service.submit(new BatchCall(
+                    superlogDataService.getDeleteConnection(), deleteSuperLog));
         } catch (SQLException e) {
-            LOG.warn(
-                    String.format("Ошибка вставки записей в rep2_workpool_data:%n%s", e));
+            LOG.warn("Ошибка вставки записей в rep2_workpool_data:", e);
+            superlogDataService.getTargetConnection().rollback();
         }
         return deleteSuperLogResult;
     }
