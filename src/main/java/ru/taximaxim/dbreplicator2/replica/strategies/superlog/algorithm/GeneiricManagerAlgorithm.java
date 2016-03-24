@@ -148,9 +148,7 @@ public abstract class GeneiricManagerAlgorithm extends StrategySkeleton
             // Выборку данных будем выполнять в отдельном потоке
             ExecutorService deleteService = Executors.newSingleThreadExecutor();
             // Получаем соединение для удаления записей
-            try (Connection deleteConnection = Core.getConnectionFactory()
-                    .getConnection(data.getRunner().getSource().getPoolId());
-                    PreparedStatement deleteSuperLog = superlogDataService
+            try (PreparedStatement deleteSuperLog = superlogDataService
                             .getDeleteSuperlogStatement();
                     PreparedStatement insertRunnerData = superlogDataService
                             .getInsertWorkpoolStatement();) {
@@ -195,11 +193,6 @@ public abstract class GeneiricManagerAlgorithm extends StrategySkeleton
                 if (deleteSuperLogResult != null) {
                     deleteSuperLogResult.get();
                 }
-            } catch (ClassNotFoundException e) {
-                LOG.error(
-                        String.format("Ошибка получения дополнительного соединения [%s]!",
-                                data.getRunner().getSource()),
-                        e);
             } finally {
                 deleteService.shutdown();
             }
