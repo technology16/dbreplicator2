@@ -153,6 +153,7 @@ public abstract class GeneiricManagerAlgorithm {
             // Выборку данных будем выполнять в отдельном потоке
             ExecutorService deleteService = Executors.newSingleThreadExecutor();
             Future<int[]> deleteSuperLogResult = null;
+            Future<Void> closed = null;
             // Получаем соединение для удаления записей
             try (PreparedStatement deleteSuperLog = superlogDataService
                     .getDeleteSuperlogStatement();
@@ -198,7 +199,7 @@ public abstract class GeneiricManagerAlgorithm {
                     }
 
                     // Закрываем ресурсы
-                    selectService.submit(new ResultSetCloseCall(superLogResult));
+                    closed = selectService.submit(new ResultSetCloseCall(superLogResult));
                 } while (rowsCount > 0);
 
                 // запускаем все обработчики реплик
@@ -206,14 +207,15 @@ public abstract class GeneiricManagerAlgorithm {
                     runners.addAll(observers);
                 }
                 startRunners(runners);
-            } finally {
+                
                 // Дожидаемся удаления
                 if (deleteSuperLogResult != null) {
                     deleteSuperLogResult.get();
                 }
-
+            } finally {
                 deleteService.shutdown();
             }
+            closed.get();
         } catch (InterruptedException e) {
             LOG.warn("Прервано получение данных из rep2_superlog!", e);
             Thread.currentThread().interrupt();
