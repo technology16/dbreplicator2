@@ -239,7 +239,7 @@ public class TableModel implements Cloneable, Serializable {
      */
     protected Collection<String> str2upperList(String str) {
         Collection<String> list = new ArrayList<String>();
-        if (str != null) {       
+        if (str != null && !str.isEmpty()) {       
             list = Arrays.asList(str.toUpperCase().split(","));
         }
         return list;
