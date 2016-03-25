@@ -47,17 +47,36 @@ import org.apache.log4j.Logger;
  * @author volodin_aa
  *
  */
+/**
+ * @author volodin_aa
+ *
+ */
 @Entity
 @Table(name = "tables")
 public class TableModel implements Cloneable, Serializable {
     
     private static final long serialVersionUID = 1L;
     
-    private static final String IGNORED_COLUMNS = "ignoredCols";
-    private static final String REQUIRED_COLUMNS = "requiredCols";
-    private static final String DEST_TABLE_NAME = "dest";
-    private static final String CAST_FROM = "castfrom.";
-    private static final String CAST_TO = "castto.";
+    /**
+     * Название параметра списка игнорируемых колонок
+     */
+    public static final String IGNORED_COLUMNS = "ignoredCols";
+    /**
+     * Название параметра списка обязательных колонок
+     */
+    public static final String REQUIRED_COLUMNS = "requiredCols";
+    /**
+     * Название параметра имени таблицы в приемнике
+     */
+    public static final String DEST_TABLE_NAME = "dest";
+    /**
+     * Название параметра кастования колонки при извлечении данных 
+     */
+    public static final String CAST_FROM = "castfrom.";
+    /**
+     * Название параметра кастования колонки при репликации данных 
+     */
+    public static final String CAST_TO = "castto.";
     
     /**
      * Идентификатор таблицы
