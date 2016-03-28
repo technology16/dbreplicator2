@@ -45,35 +45,33 @@ public class IntegrityReplicatedData extends StrategySkeleton implements Strateg
     public static final Logger LOG = Logger.getLogger(IntegrityReplicatedData.class);
     private static final String PERIOD = "period";
     private static final int DEFAULT_PERIOD = 300000;
-    
+
     /**
      * Конструктор по умолчанию
      */
     public IntegrityReplicatedData() {
     }
-    
+
     @Override
-    public void execute(Connection sourceConnection, Connection targetConnection, StrategyModel data) 
+    public void execute(Connection sourceConnection, Connection targetConnection,
+            StrategyModel data)
             throws StrategyException, SQLException, ClassNotFoundException {
         int period = DEFAULT_PERIOD;
         if (data.getParam(PERIOD) != null) {
             period = Integer.parseInt(data.getParam(PERIOD));
         }
-        
+
         try (ErrorsLog errorsLog = Core.getErrorsLog();
-                DelayGenericWorkPoolService workPoolService = 
-                        new DelayGenericWorkPoolService(sourceConnection, errorsLog, period);
-                GenericDataTypeService genericDataServiceSourceConnection = 
-                        new GenericDataTypeService(sourceConnection);
-                GenericDataTypeService genericDataServiceTargetConnection = 
-                        new GenericDataTypeService(targetConnection);) {
-            IntegrityReplicatedGenericAlgorithm strategy = 
-                    new IntegrityReplicatedGenericAlgorithm(
-                            getFetchSize(data),
-                            workPoolService, 
-                            genericDataServiceSourceConnection, 
-                            genericDataServiceTargetConnection);
-               strategy.execute(sourceConnection, targetConnection, data);
-           }
+                DelayGenericWorkPoolService workPoolService = new DelayGenericWorkPoolService(
+                        sourceConnection, errorsLog, period);
+                GenericDataTypeService genericDataServiceSourceConnection = new GenericDataTypeService(
+                        sourceConnection);
+                GenericDataTypeService genericDataServiceTargetConnection = new GenericDataTypeService(
+                        targetConnection);) {
+            new IntegrityReplicatedGenericAlgorithm(getFetchSize(data), workPoolService,
+                    genericDataServiceSourceConnection,
+                    genericDataServiceTargetConnection).execute(sourceConnection,
+                            targetConnection, data);
+        }
     }
 }

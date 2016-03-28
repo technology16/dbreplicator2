@@ -1,5 +1,5 @@
 /*
- * The MIT License (MIT)
+// * The MIT License (MIT)
  *
  * Copyright (c) 2013 Technologiya
  *
@@ -23,6 +23,7 @@
 
 package ru.taximaxim.dbreplicator2.replica.strategies.superlog.data;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -57,4 +58,22 @@ public interface SuperlogDataService extends AutoCloseable {
      * @return
      */
     PreparedStatement getInsertWorkpoolStatement() throws SQLException;
+
+    /**
+     * Получение коннекшена выборки из суперлога
+     * @return
+     */
+    Connection getSelectConnection();
+
+    /**
+     * Получение коннекшена удаления из суперлога
+     * @return
+     */
+    Connection getDeleteConnection();
+
+    /**
+     * Получение коннекшена вставки данных в воркпул 
+     * @return
+     */
+    Connection getTargetConnection();
 }

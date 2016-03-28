@@ -26,7 +26,7 @@ import ru.taximaxim.dbreplicator2.stats.StatsService;
  */
 public class StatsServiceTest extends AbstractSettingTest {
     // Задержка между циклами репликации
-    private static final int REPLICATION_DELAY = 500;
+    private static final int REPLICATION_DELAY = 100;
     protected static final Logger LOG = Logger.getLogger(StatsServiceTest.class);
 
     protected static Timestamp dateStart = null;

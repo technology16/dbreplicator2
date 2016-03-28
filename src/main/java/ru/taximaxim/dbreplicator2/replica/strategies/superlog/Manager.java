@@ -32,23 +32,27 @@ import ru.taximaxim.dbreplicator2.replica.StrategyException;
 import ru.taximaxim.dbreplicator2.replica.strategies.replication.StrategySkeleton;
 import ru.taximaxim.dbreplicator2.replica.strategies.superlog.algorithm.ManagerAlgorithm;
 import ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.GenericSuperlogDataService;
+import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
  * Класс стратегии менеджера записей суперлог таблицы
+ * 
  * @author petrov_im
  *
  */
 public class Manager extends StrategySkeleton implements Strategy {
-    
-    
+
     @Override
     public void execute(Connection sourceConnection, Connection targetConnection,
-            StrategyModel data) throws StrategyException, SQLException,
-            ClassNotFoundException {
-        
-        try (GenericSuperlogDataService superlogDataServise = new GenericSuperlogDataService(sourceConnection, targetConnection, getFetchSize(data))) {
-            ManagerAlgorithm strategy = new ManagerAlgorithm(superlogDataServise);
-            strategy.execute(sourceConnection, targetConnection, data);
+            StrategyModel data)
+            throws StrategyException, SQLException, ClassNotFoundException {
+
+        try (Connection deleteConnection = Core.getConnectionFactory()
+                .getConnection(data.getRunner().getSource().getPoolId());
+                GenericSuperlogDataService superlogDataServise = new GenericSuperlogDataService(
+                        sourceConnection, deleteConnection, targetConnection,
+                        getFetchSize(data))) {
+            new ManagerAlgorithm(superlogDataServise).execute(data);
         }
     }
 

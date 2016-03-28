@@ -46,7 +46,7 @@ import ru.taximaxim.dbreplicator2.tp.WorkerThread;
  */
 public class OffsetTest extends AbstractReplicationTest {
     // Задержка между циклами репликации
-    private static final int REPLICATION_DELAY = 500;
+    private static final int REPLICATION_DELAY = 100;
     protected static final Logger LOG = Logger.getLogger(OffsetTest.class);
 
     /**

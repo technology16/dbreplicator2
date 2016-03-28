@@ -573,11 +573,7 @@ public class GenericAlgorithm implements Strategy {
      */
     public void execute(Connection sourceConnection, Connection targetConnection,
             StrategyModel data) throws StrategyException, SQLException, ClassNotFoundException {
-        Boolean lastAutoCommit = null;
-        Boolean lastTargetAutoCommit = null;
         try {
-            lastAutoCommit = sourceConnection.getAutoCommit();
-            lastTargetAutoCommit = targetConnection.getAutoCommit();
             // Начинаем транзакцию
             sourceConnection.setAutoCommit(true);
             sourceConnection
@@ -594,26 +590,6 @@ public class GenericAlgorithm implements Strategy {
             // Сбрасываем флаг текущего владельца записей
             getSourceDataService().setRepServerName(null);
             getDestDataService().setRepServerName(null);
-
-            try {
-                if (lastAutoCommit != null) {
-                    sourceConnection.setAutoCommit(lastAutoCommit);
-                }
-            } catch(SQLException sqlException){
-                // Ошибка может возникнуть если во время операции упало соединение к БД
-                LOG.warn(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Ошибка при возврате автокомита в исходное состояние.", 
-                        data.getRunner().getId(), data.getRunner().getDescription(), data.getId()), sqlException);
-            }
-
-            try {
-                if (lastTargetAutoCommit != null) {
-                    targetConnection.setAutoCommit(lastTargetAutoCommit);
-                }
-            } catch(SQLException sqlException){
-                // Ошибка может возникнуть если во время операции упало соединение к БД
-                LOG.warn(String.format("Раннер [id_runner = %s, %s] Стратегия [id = %s]: Ошибка при возврате автокомита в исходное состояние.", 
-                        data.getRunner().getId(), data.getRunner().getDescription(), data.getId()), sqlException);
-            }
         }
     }
 }
