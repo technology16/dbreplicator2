@@ -29,7 +29,6 @@ import java.util.Collection;
 import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
-import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.StrategyException;
 import ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.SuperlogDataService;
 import ru.taximaxim.dbreplicator2.utils.Core;
@@ -41,7 +40,7 @@ import ru.taximaxim.dbreplicator2.utils.Core;
  * @author volodin_aa
  * 
  */
-public class FastManagerAlgorithm extends GeneiricManagerAlgorithm implements Strategy {
+public class FastManagerAlgorithm extends GeneiricManagerAlgorithm {
 
     private static final Logger LOG = Logger.getLogger(FastManagerAlgorithm.class);
 

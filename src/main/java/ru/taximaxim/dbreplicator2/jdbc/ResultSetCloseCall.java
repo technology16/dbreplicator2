@@ -21,39 +21,30 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ru.taximaxim.dbreplicator2.replica.strategies.superlog.algorithm;
+package ru.taximaxim.dbreplicator2.jdbc;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
-
-import ru.taximaxim.dbreplicator2.model.RunnerModel;
-import ru.taximaxim.dbreplicator2.replica.StrategyException;
-import ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.SuperlogDataService;
-import ru.taximaxim.dbreplicator2.tp.WorkerThread;
+import java.util.concurrent.Callable;
 
 /**
- * Класс стратегии менеджера записей суперлог таблицы
+ * Класс, выполняющий sql запрос в отдельном потоке, и возвращающий результат запроса
  * 
- * @author volodin_aa
- * 
+ * @author petrov_im
+ *
  */
-public class ManagerAlgorithm extends GeneiricManagerAlgorithm {
-  
-    /**
-     * Конструктор по умолчанию
-     */
-    public ManagerAlgorithm(SuperlogDataService superlogDataService) {
-        super(superlogDataService);
+public class ResultSetCloseCall implements Callable<Void> {
+    
+    protected ResultSet resultSet;
+    
+    public ResultSetCloseCall(ResultSet resultSet) {
+        this.resultSet = resultSet;
     }
     
     @Override
-    protected void startRunners(Collection<RunnerModel> runners) throws StrategyException, SQLException  {
-        // Запускаем обработчики реплик
-        for (RunnerModel runner : runners) {
-            if (!getRunnersFromTask().contains(runner)) {
-                WorkerThread workerThread = new WorkerThread(runner);
-                workerThread.run();
-            }
-        }
+    public Void call() throws SQLException {
+        resultSet.close();
+        return null;
     }
+
 }

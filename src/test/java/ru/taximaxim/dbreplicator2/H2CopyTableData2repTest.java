@@ -56,7 +56,7 @@ import ru.taximaxim.dbreplicator2.tp.WorkerThread;
  */
 public class H2CopyTableData2repTest extends AbstractReplicationTest {
     // Задержка между циклами репликации
-    private static final int REPLICATION_DELAY = 1000;
+    private static final int REPLICATION_DELAY = 200;
     
     protected static final Logger LOG = Logger.getLogger(H2CopyTableDataTest.class);
     

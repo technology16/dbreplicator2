@@ -21,39 +21,39 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package ru.taximaxim.dbreplicator2.replica.strategies.superlog.algorithm;
+package ru.taximaxim.dbreplicator2.jdbc;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Collection;
-
-import ru.taximaxim.dbreplicator2.model.RunnerModel;
-import ru.taximaxim.dbreplicator2.replica.StrategyException;
-import ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.SuperlogDataService;
-import ru.taximaxim.dbreplicator2.tp.WorkerThread;
+import java.util.concurrent.Callable;
 
 /**
- * Класс стратегии менеджера записей суперлог таблицы
+ * Класс, выполняющий sql запрос в отдельном потоке, и возвращающий результат запроса
  * 
- * @author volodin_aa
- * 
+ * @author petrov_im
+ *
  */
-public class ManagerAlgorithm extends GeneiricManagerAlgorithm {
-  
-    /**
-     * Конструктор по умолчанию
-     */
-    public ManagerAlgorithm(SuperlogDataService superlogDataService) {
-        super(superlogDataService);
+public class BatchCall implements Callable<int[]> {
+    
+    protected Connection connection;
+    protected PreparedStatement statement;
+    
+    public BatchCall(Connection connection, PreparedStatement statement) {
+        this.connection = connection;
+        this.statement = statement;
     }
     
     @Override
-    protected void startRunners(Collection<RunnerModel> runners) throws StrategyException, SQLException  {
-        // Запускаем обработчики реплик
-        for (RunnerModel runner : runners) {
-            if (!getRunnersFromTask().contains(runner)) {
-                WorkerThread workerThread = new WorkerThread(runner);
-                workerThread.run();
-            }
+    public int[] call() throws SQLException {
+        try {
+            int[] result = statement.executeBatch();
+            connection.commit();
+            return result;
+        } catch (SQLException e) {
+            connection.rollback();
+            throw e;
         }
     }
+
 }

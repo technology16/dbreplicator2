@@ -30,6 +30,7 @@ import java.sql.SQLException;
 
 /**
  * Реализация дата сервиса для обработки суперлога postgresql (H2)
+ * 
  * @author petrov_im
  *
  */
@@ -39,65 +40,79 @@ public class GenericSuperlogDataService implements SuperlogDataService {
     protected PreparedStatement deleteSuperlogStatement;
     protected PreparedStatement insertWorkpoolStatement;
     protected PreparedStatement selectInitSuperlogStatement;
-    
-    protected Connection sourceConnection;
+
+    protected Connection selectConnection;
+    protected Connection deleteConnection;
     protected Connection targetConnection;
     protected int fetchSize;
-    
-    public GenericSuperlogDataService(Connection sourceConnection, Connection targetConnection, int fetchSize) {
-        this.sourceConnection = sourceConnection;
+
+    public GenericSuperlogDataService(Connection selectConnection,
+            Connection deleteConnection, Connection targetConnection, int fetchSize) {
+        this.selectConnection = selectConnection;
+        this.deleteConnection = deleteConnection;
         this.targetConnection = targetConnection;
         this.fetchSize = fetchSize;
     }
-    
-    protected Connection getSourceConnection() {
-        return sourceConnection;
+
+    @Override
+    public Connection getSelectConnection() {
+        return selectConnection;
     }
-    
-    protected Connection getTargetConnection() {
+
+    @Override
+    public Connection getDeleteConnection() {
+        return deleteConnection;
+    }
+
+    @Override
+    public Connection getTargetConnection() {
         return targetConnection;
     }
 
     @Override
     public PreparedStatement getInitSelectSuperlogStatement() throws SQLException {
         if (selectInitSuperlogStatement == null) {
-            selectInitSuperlogStatement = getSourceConnection().prepareStatement(
-                    String.format("SELECT * FROM rep2_superlog ORDER BY id_superlog limit %s", fetchSize),
+            selectInitSuperlogStatement = getSelectConnection().prepareStatement(
+                    String.format(
+                            "SELECT * FROM rep2_superlog ORDER BY id_superlog limit %s",
+                            fetchSize),
                     ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
         }
-        
+
         return selectInitSuperlogStatement;
     }
 
     @Override
     public PreparedStatement getSelectSuperlogStatement() throws SQLException {
         if (selectSuperlogStatement == null) {
-            selectSuperlogStatement = getSourceConnection().prepareStatement(
-                    String.format("SELECT * FROM rep2_superlog where id_superlog > ? ORDER BY id_superlog limit %s", fetchSize),
+            selectSuperlogStatement = getSelectConnection().prepareStatement(
+                    String.format(
+                            "SELECT * FROM rep2_superlog where id_superlog > ? ORDER BY id_superlog limit %s",
+                            fetchSize),
                     ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
         }
-        
+
         return selectSuperlogStatement;
     }
 
     @Override
     public PreparedStatement getDeleteSuperlogStatement() throws SQLException {
-        if(deleteSuperlogStatement == null) {
-            deleteSuperlogStatement = getTargetConnection().prepareStatement(
-                    "DELETE FROM rep2_superlog WHERE id_superlog=?");
+        if (deleteSuperlogStatement == null) {
+            deleteSuperlogStatement = getDeleteConnection()
+                    .prepareStatement("DELETE FROM rep2_superlog WHERE id_superlog=?");
         }
-        
+
         return deleteSuperlogStatement;
     }
 
     @Override
     public PreparedStatement getInsertWorkpoolStatement() throws SQLException {
-        if(insertWorkpoolStatement == null) {
+        if (insertWorkpoolStatement == null) {
             insertWorkpoolStatement = getTargetConnection().prepareStatement(
                     "INSERT INTO rep2_workpool_data (id_runner, id_superlog, id_foreign, "
-                    + "id_table, c_operation, c_date, id_transaction) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                            + "id_table, c_operation, c_date, id_transaction) VALUES (?, ?, ?, ?, ?, ?, ?)");
         }
-        
+
         return insertWorkpoolStatement;
     }
 
