@@ -55,7 +55,7 @@ import org.apache.log4j.Logger;
 @Table(name = "tables")
 public class TableModel implements Cloneable, Serializable {
     
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
     
     /**
      * Название параметра списка игнорируемых колонок
@@ -211,6 +211,9 @@ public class TableModel implements Cloneable, Serializable {
     public Object clone() throws CloneNotSupportedException {
         TableModel clone;
         clone = (TableModel) super.clone();
+        if (properties != null) {
+            clone.properties = (Properties) properties.clone();
+        }
         
         return clone;
     }
