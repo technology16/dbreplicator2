@@ -246,6 +246,9 @@ public class TableModelTest extends AbstractSettingTest {
     public void testCloneTable() throws CloneNotSupportedException {
         TableModel table = (TableModel) session.get(TableModel.class, 2);
 
+        // Проверяем таблицу перед клонированием
+        checkTable(table);
+        
         // Клонируем таблицу
         TableModel clone = (TableModel) table.clone();
         clone.setName("clone_" + table.getName());
@@ -253,7 +256,24 @@ public class TableModelTest extends AbstractSettingTest {
         clone.setParam(TableModel.REQUIRED_COLUMNS, "");
         clone.setParam(TableModel.IGNORED_COLUMNS, "");
 
-        // Проверяем таблицу
+        // Проверяем таблицу после клонированием
+        checkTable(table);
+
+        // Проверяем корректность клона
+        assertEquals("У клона не верное имя!", "clone_" + table.getName(),
+                clone.getName());
+        assertEquals("У клона остались игнорируемые колонки!", 0,
+                clone.getIgnoredColumns().size());
+        assertEquals("У клона остались обязательные колонки!", 0,
+                clone.getRequiredColumns().size());
+    }
+
+    /**
+     * Проверка корректности настроек
+     * 
+     * @param table
+     */
+    protected void checkTable(TableModel table) {
         assertEquals("У таблицы " + table.getName() + " не верное имя!", 
                 "T_TABLE1", table.getName());
         for (String ignoredColumn : table.getIgnoredColumns()) {
@@ -267,13 +287,5 @@ public class TableModelTest extends AbstractSettingTest {
                 0, table.getIgnoredColumns().size());
         assertNotEquals("У таблицы " + table.getName() + " пропали обязательные колонки!",
                 0, table.getIgnoredColumns().size());
-
-        // ПРоверяем корректность клона
-        assertEquals("У клона не верное имя!", "clone_" + table.getName(),
-                clone.getName());
-        assertEquals("У клона остались игнорируемые колонки!", 0,
-                clone.getIgnoredColumns().size());
-        assertEquals("У клона остались обязательные колонки!", 0,
-                clone.getRequiredColumns().size());
     }
 }
