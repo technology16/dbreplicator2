@@ -46,7 +46,7 @@ import ru.taximaxim.dbreplicator2.utils.Core;
  */
 public class CronSchedulerTest extends AbstractReplicationTest {
     // Задержка между циклами репликации
-    private static final int REPLICATION_DELAY = 3000;
+    private static final int REPLICATION_DELAY = 2000;
     protected static final Logger LOG = Logger.getLogger(CronSchedulerTest.class);
 
     /**
@@ -86,6 +86,8 @@ public class CronSchedulerTest extends AbstractReplicationTest {
         Core.getCronPool().start();
         Thread.sleep(REPLICATION_DELAY);
 
+        Helper.InfoSelect(conn, "rep2_errors_log");
+        
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table2");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table2");
         Helper.AssertEquals(listSource, listDest);

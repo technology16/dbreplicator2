@@ -42,6 +42,14 @@ insert into runners (id_runner, source, target, description) values (7, 'source'
 insert into strategies (id, className, param, isEnabled, priority, id_runner) values (7, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.CountWatchgdog', 'maxErrors=0
 partEmail=10', true, 100, 7);
 
--- Cron
-insert into cron (id_task, id_runner, enabled, cron_string, description) values (1, 1, true, '* * * * * ?', 'test');
+-- Проверка реакции на ошибку настроек
+insert into cron (id_task, id_runner, enabled, cron_string, description) 
+values (1, 1, true, '* 57 3 0/1 * ?', 'Error test');
 
+-- Промежуточный таск
+insert into cron (id_task, id_runner, enabled, cron_string, description) 
+values (2, 7, true, '* * * * * ?', 'CountWatchgdog');
+
+-- Рабочий таск
+insert into cron (id_task, id_runner, enabled, cron_string, description) 
+values (3, 1, true, '* * * * * ?', 'Test');
