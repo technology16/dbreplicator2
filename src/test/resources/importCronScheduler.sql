@@ -45,3 +45,6 @@ partEmail=10', true, 100, 7);
 -- Cron
 insert into cron (id_task, id_runner, enabled, cron_string, description) values (1, 1, true, '* * * * * ?', 'test');
 
+-- Проверка реакции на ошибку настроек
+insert into cron (id_task, id_runner, enabled, cron_string, description) 
+values (2, 1, true, '0 57 3 0/1 * ?', 'Error test');

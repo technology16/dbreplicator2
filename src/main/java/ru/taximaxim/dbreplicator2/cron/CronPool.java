@@ -22,6 +22,7 @@
  */
 package ru.taximaxim.dbreplicator2.cron;
 
+import java.text.ParseException;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -68,16 +69,28 @@ public class CronPool {
             boolean hasTasks = false;
             for (CronSettings task : taskSettings.values()) {
                 if (task.getEnabled()) {
-                    JobDetail jobDetail = JobBuilder.newJob(CronRunner.class).build();
-                    jobDetail.getJobDataMap().put("task", task);
-                    Trigger trigger = TriggerBuilder.newTrigger()
-                            .withSchedule(CronScheduleBuilder
-                                    .cronSchedule(task.getCronString())).build();
                     try {
+                        Trigger trigger = TriggerBuilder.newTrigger().withSchedule(
+                                CronScheduleBuilder.cronSchedule(task.getCronString()))
+                                .build();
+                        JobDetail jobDetail = JobBuilder.newJob(CronRunner.class).build();
+                        jobDetail.getJobDataMap().put("task", task);
                         scheduler.scheduleJob(jobDetail, trigger);
                         hasTasks = true;
                     } catch (SchedulerException e) {
-                        LOG.error(String.format("Ошибка при старте задачи task[id = %s]!", task.getTaskId()), e);
+                        // Игнорим ошибки кварца
+                        LOG.error(String.format(
+                                "Ошибка при старте задачи cron [id = %s, %s]!",
+                                task.getTaskId(), task.getDescription()), e);
+                    } catch (RuntimeException e) {
+                        // Игнорим ошибки парсера
+                        if (e.getCause() instanceof ParseException) {
+                            LOG.error(String.format(
+                                    "Ошибка настройки задачи cron [id = %s, %s]!",
+                                    task.getTaskId(), task.getDescription()), e);
+                        } else {
+                            throw e;
+                        }
                     }
                 }
             }
@@ -88,7 +101,12 @@ public class CronPool {
                 scheduler.shutdown();
             }
         } catch (SchedulerException e) {
+            // Игнорим ошибку планировщика
             LOG.error("Ошибка при старте планировщика задач!", e);
+        } catch (Throwable e) {
+            // Пытаемся отправить сообщение об ошибке
+            LOG.error("Непредвиденная ошибка при старте планировщика задач!", e);
+            throw e;
         }
     }
 }
