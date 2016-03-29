@@ -68,31 +68,7 @@ public class CronPool {
             Map<Integer, CronSettings> taskSettings = cronSettingsService.getTasks();
             boolean hasTasks = false;
             for (CronSettings task : taskSettings.values()) {
-                if (task.getEnabled()) {
-                    try {
-                        Trigger trigger = TriggerBuilder.newTrigger().withSchedule(
-                                CronScheduleBuilder.cronSchedule(task.getCronString()))
-                                .build();
-                        JobDetail jobDetail = JobBuilder.newJob(CronRunner.class).build();
-                        jobDetail.getJobDataMap().put("task", task);
-                        scheduler.scheduleJob(jobDetail, trigger);
-                        hasTasks = true;
-                    } catch (SchedulerException e) {
-                        // Игнорим ошибки кварца
-                        LOG.error(String.format(
-                                "Ошибка при старте задачи cron [id = %s, %s]!",
-                                task.getTaskId(), task.getDescription()), e);
-                    } catch (RuntimeException e) {
-                        // Игнорим ошибки парсера
-                        if (e.getCause() instanceof ParseException) {
-                            LOG.error(String.format(
-                                    "Ошибка настройки задачи cron [id = %s, %s]!",
-                                    task.getTaskId(), task.getDescription()), e);
-                        } else {
-                            throw e;
-                        }
-                    }
-                }
+                hasTasks = hasTasks || addTask(scheduler, task);
             }
             // Запускаем если только у нас есть задания
             if (hasTasks) {
@@ -108,5 +84,45 @@ public class CronPool {
             LOG.error("Непредвиденная ошибка при старте планировщика задач!", e);
             throw e;
         }
+    }
+
+    /**
+     * Добавляем задание в планировщик
+     * 
+     * @param scheduler
+     * @param hasTasks
+     * @param task
+     * @return
+     * @throws RuntimeException
+     */
+    protected boolean addTask(Scheduler scheduler, CronSettings task) {
+        if (task.getEnabled()) {
+            try {
+                Trigger trigger = TriggerBuilder.newTrigger().withSchedule(
+                        CronScheduleBuilder.cronSchedule(task.getCronString()))
+                        .build();
+                JobDetail jobDetail = JobBuilder.newJob(CronRunner.class).build();
+                jobDetail.getJobDataMap().put("task", task);
+                scheduler.scheduleJob(jobDetail, trigger);
+
+                return true;
+            } catch (SchedulerException e) {
+                // Игнорим ошибки кварца
+                LOG.error(String.format(
+                        "Ошибка при старте задачи cron [id = %s, %s]!",
+                        task.getTaskId(), task.getDescription()), e);
+            } catch (RuntimeException e) {
+                // Игнорим ошибки парсера
+                if (e.getCause() instanceof ParseException) {
+                    LOG.error(String.format(
+                            "Ошибка настройки задачи cron [id = %s, %s]!",
+                            task.getTaskId(), task.getDescription()), e);
+                } else {
+                    throw e;
+                }
+            }
+        }
+
+        return false;
     }
 }
