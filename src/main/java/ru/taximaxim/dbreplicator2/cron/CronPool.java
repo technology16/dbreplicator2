@@ -68,7 +68,7 @@ public class CronPool {
             Map<Integer, CronSettings> taskSettings = cronSettingsService.getTasks();
             boolean hasTasks = false;
             for (CronSettings task : taskSettings.values()) {
-                hasTasks = hasTasks || addTask(scheduler, task);
+                hasTasks = addTask(scheduler, task) || hasTasks;
             }
             // Запускаем если только у нас есть задания
             if (hasTasks) {
