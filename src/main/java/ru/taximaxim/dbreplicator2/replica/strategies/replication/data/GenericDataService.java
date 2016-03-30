@@ -23,7 +23,6 @@
 
 package ru.taximaxim.dbreplicator2.replica.strategies.replication.data;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -31,6 +30,8 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+
+import javax.sql.DataSource;
 
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.jdbc.QueryConstructors;
@@ -72,8 +73,8 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
     /**
      * 
      */
-    public GenericDataService(Connection connection) {
-        super(connection);
+    public GenericDataService(DataSource dataSource) {
+        super(dataSource);
     }
 
     /* (non-Javadoc)
@@ -359,5 +360,6 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
         close(selectStatements);
         close(updateStatements);
         close(insertStatements);
+        super.close();
     }
 }

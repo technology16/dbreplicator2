@@ -23,12 +23,13 @@
 
 package ru.taximaxim.dbreplicator2.replica.strategies.replication.workpool;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Calendar;
+
+import javax.sql.DataSource;
 
 import ru.taximaxim.dbreplicator2.el.ErrorsLogService;
 
@@ -50,9 +51,9 @@ public class DelayGenericWorkPoolService extends GenericWorkPoolService implemen
      * @param connection
      * @param errorsLog
      */
-    public DelayGenericWorkPoolService(Connection connection, 
+    public DelayGenericWorkPoolService(DataSource dataSource, 
             ErrorsLogService errorsLog, int period) {
-        super(connection, errorsLog);
+        super(dataSource, errorsLog);
         this.period = period;
     }
     

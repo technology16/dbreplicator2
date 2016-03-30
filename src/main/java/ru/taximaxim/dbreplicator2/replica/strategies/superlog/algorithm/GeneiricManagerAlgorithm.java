@@ -23,7 +23,6 @@
 
 package ru.taximaxim.dbreplicator2.replica.strategies.superlog.algorithm;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -122,26 +121,14 @@ public abstract class GeneiricManagerAlgorithm {
         return idSuperLog;
     }
 
-    public void execute(StrategyModel data) throws StrategyException, SQLException {
-        // Работаем в режиме автокоммита
-        superlogDataService.getSelectConnection().setAutoCommit(true);
-        superlogDataService.getSelectConnection()
-                .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-        superlogDataService.getDeleteConnection().setAutoCommit(false);
-        superlogDataService.getDeleteConnection()
-                .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-        superlogDataService.getTargetConnection().setAutoCommit(false);
-        superlogDataService.getTargetConnection()
-                .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-
+    public void execute(StrategyModel data) throws SQLException {
         ResultSet superLogResult;
         // Выборку данных будем выполнять в отдельном потоке
         ExecutorService selectService = Executors.newSingleThreadExecutor();
         // Переносим данные
-        try (PreparedStatement initSelectSuperLog = superlogDataService
-                .getInitSelectSuperlogStatement();
-                PreparedStatement selectSuperLog = superlogDataService
-                        .getSelectSuperlogStatement();) {
+        try {
+            PreparedStatement initSelectSuperLog = superlogDataService
+                    .getInitSelectSuperlogStatement();
             Future<ResultSet> superLog = selectService
                     .submit(new QueryCall(initSelectSuperLog));
 
@@ -154,10 +141,11 @@ public abstract class GeneiricManagerAlgorithm {
             Future<int[]> deleteSuperLogResult = null;
             Future<Void> closed = null;
             // Получаем соединение для удаления записей
-            try (PreparedStatement deleteSuperLog = superlogDataService
-                    .getDeleteSuperlogStatement();
-                    PreparedStatement insertRunnerData = superlogDataService
-                            .getInsertWorkpoolStatement();) {
+            try {
+                PreparedStatement deleteSuperLog = superlogDataService
+                        .getDeleteSuperlogStatement();
+                PreparedStatement insertRunnerData = superlogDataService
+                        .getInsertWorkpoolStatement();
                 Set<RunnerModel> runners = new HashSet<RunnerModel>();
 
                 int rowsCount = 0;
@@ -181,6 +169,8 @@ public abstract class GeneiricManagerAlgorithm {
                     // Если в выборке были данные, то в параллельном потоке
                     // запускаем чтение новых данных
                     if (rowsCount > 0) {
+                        PreparedStatement selectSuperLog = superlogDataService
+                                .getSelectSuperlogStatement();
                         selectSuperLog.setLong(1, idSuperLog);
                         superLog = selectService.submit(new QueryCall(selectSuperLog));
 
@@ -308,5 +298,5 @@ public abstract class GeneiricManagerAlgorithm {
      * @throws SQLException
      */
     protected abstract void startRunners(Collection<RunnerModel> runners)
-            throws StrategyException, SQLException;
+            throws SQLException;
 }

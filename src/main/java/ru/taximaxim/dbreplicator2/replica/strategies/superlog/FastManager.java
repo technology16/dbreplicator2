@@ -23,16 +23,16 @@
 
 package ru.taximaxim.dbreplicator2.replica.strategies.superlog;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 
+import javax.sql.DataSource;
+
+import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
-import ru.taximaxim.dbreplicator2.replica.StrategyException;
 import ru.taximaxim.dbreplicator2.replica.strategies.replication.StrategySkeleton;
 import ru.taximaxim.dbreplicator2.replica.strategies.superlog.algorithm.FastManagerAlgorithm;
 import ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.GenericSuperlogDataService;
-import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
  * Класс стратегии менеджера записей суперлог таблицы с асинхронным параллельным
@@ -44,15 +44,14 @@ import ru.taximaxim.dbreplicator2.utils.Core;
 public class FastManager extends StrategySkeleton implements Strategy {
 
     @Override
-    public void execute(Connection sourceConnection, Connection targetConnection,
-            StrategyModel data)
-            throws StrategyException, SQLException, ClassNotFoundException {
-
-        try (Connection deleteConnection = Core.getConnectionFactory()
-                .getConnection(data.getRunner().getSource().getPoolId());
-                GenericSuperlogDataService superlogDataServise = new GenericSuperlogDataService(
-                        sourceConnection, deleteConnection, targetConnection,
-                        getFetchSize(data))) {
+    public void execute(ConnectionFactory connectionsFactory, StrategyModel data)
+            throws SQLException {
+        DataSource source = connectionsFactory
+                .get(data.getRunner().getSource().getPoolId());
+        DataSource target = connectionsFactory
+                .get(data.getRunner().getTarget().getPoolId());
+        try (GenericSuperlogDataService superlogDataServise = new GenericSuperlogDataService(
+                source, target, getFetchSize(data));) {
             new FastManagerAlgorithm(superlogDataServise).execute(data);
         }
     }

@@ -23,23 +23,25 @@
 
 package ru.taximaxim.dbreplicator2.replica.strategies.replication.workpool;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import javax.sql.DataSource;
+
 import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.el.ErrorsLogService;
+import ru.taximaxim.dbreplicator2.replica.strategies.replication.data.DataServiceSkeleton;
 
 
 /**
  * @author volodin_aa
  *
  */
-public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
+public class GenericWorkPoolService extends DataServiceSkeleton implements WorkPoolService, AutoCloseable {
     private static final Logger LOG = Logger.getLogger(GenericWorkPoolService.class);
 
-    private Connection connection;
     private ErrorsLogService errorsLog;
     
     /**
@@ -52,18 +54,11 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
     /**
      * Конструктор на основе соединения к БД 
      */
-    public GenericWorkPoolService(Connection connection, ErrorsLogService errorsLog) {
-        this.connection = connection;
+    public GenericWorkPoolService(DataSource dataSource, ErrorsLogService errorsLog) {
+        super(dataSource);
         this.errorsLog = errorsLog;
     }
     
-    /**
-     * @return the connection
-     */
-    protected Connection getConnection() {
-        return connection;
-    }
-
     private PreparedStatement clearWorkPoolDataStatement;
 
     private PreparedStatement lastOperationsStatement;
@@ -177,6 +172,8 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
     public void close() throws SQLException {
         close(clearWorkPoolDataStatement);
         close(lastOperationsStatement);
+
+        super.close();
     }
     
     /**

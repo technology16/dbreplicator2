@@ -23,13 +23,11 @@
 
 package ru.taximaxim.dbreplicator2.replica.strategies;
 
-import java.sql.Connection;
-
 import org.apache.log4j.Logger;
 
+import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
-import ru.taximaxim.dbreplicator2.replica.StrategyException;
 
 /**
  * Класс стратегии заглушки, она только пишет лог то что была запущена
@@ -48,8 +46,8 @@ public class Dummy implements Strategy {
     }
 
     @Override
-    public void execute(Connection sourceConnection, Connection targetConnection,
-            StrategyModel data) throws StrategyException {
+    public void execute(ConnectionFactory connectionsFactory,
+            StrategyModel data) {
         LOG.info("Запущена стратегия-заглушка!");
     }
 

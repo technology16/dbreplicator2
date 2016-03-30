@@ -26,10 +26,7 @@ package ru.taximaxim.dbreplicator2.replica.strategies.superlog.algorithm;
 import java.sql.SQLException;
 import java.util.Collection;
 
-import org.apache.log4j.Logger;
-
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
-import ru.taximaxim.dbreplicator2.replica.StrategyException;
 import ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.SuperlogDataService;
 import ru.taximaxim.dbreplicator2.utils.Core;
 
@@ -42,8 +39,6 @@ import ru.taximaxim.dbreplicator2.utils.Core;
  */
 public class FastManagerAlgorithm extends GeneiricManagerAlgorithm {
 
-    private static final Logger LOG = Logger.getLogger(FastManagerAlgorithm.class);
-
     /**
      * Конструктор по умолчанию
      */
@@ -52,17 +47,12 @@ public class FastManagerAlgorithm extends GeneiricManagerAlgorithm {
     }
     
     @Override
-    protected void startRunners(Collection<RunnerModel> runners) throws StrategyException, SQLException  {
-        try {
+    protected void startRunners(Collection<RunnerModel> runners) throws SQLException  {
             // Асинхронно запускаем обработчики реплик
             for (RunnerModel runner : runners) {
                 if (!getRunnersFromTask().contains(runner)) {
                     Core.getThreadPool().start(runner);
                 }
             }
-        } catch (InterruptedException e) {
-            LOG.warn("Работа потока прервана.", e);
-            throw new StrategyException(e);
-        }
     }
 }

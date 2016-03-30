@@ -27,6 +27,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+
+import javax.sql.DataSource;
 
 /**
  * Реализация дата сервиса для обработки суперлога postgresql (H2)
@@ -44,28 +47,45 @@ public class GenericSuperlogDataService implements SuperlogDataService {
     protected Connection selectConnection;
     protected Connection deleteConnection;
     protected Connection targetConnection;
+
+    protected DataSource source;
+    protected DataSource target;
     protected int fetchSize;
 
-    public GenericSuperlogDataService(Connection selectConnection,
-            Connection deleteConnection, Connection targetConnection, int fetchSize) {
-        this.selectConnection = selectConnection;
-        this.deleteConnection = deleteConnection;
-        this.targetConnection = targetConnection;
+    public GenericSuperlogDataService(DataSource source,
+            DataSource target, int fetchSize) {
+        this.source = source;
+        this.target = target;
         this.fetchSize = fetchSize;
     }
 
     @Override
-    public Connection getSelectConnection() {
+    public Connection getSelectConnection() throws SQLException {
+        if (selectConnection == null) {
+            selectConnection = source.getConnection();
+            selectConnection.setAutoCommit(true);
+            selectConnection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+        }
         return selectConnection;
     }
 
     @Override
-    public Connection getDeleteConnection() {
+    public Connection getDeleteConnection() throws SQLException {
+        if (deleteConnection == null) {
+            deleteConnection = source.getConnection();
+            deleteConnection.setAutoCommit(false);
+            deleteConnection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+        }
         return deleteConnection;
     }
 
     @Override
-    public Connection getTargetConnection() {
+    public Connection getTargetConnection() throws SQLException {
+        if (targetConnection == null) {
+            targetConnection = target.getConnection();
+            targetConnection.setAutoCommit(false);
+            targetConnection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+        }
         return targetConnection;
     }
 
@@ -118,10 +138,32 @@ public class GenericSuperlogDataService implements SuperlogDataService {
 
     @Override
     public void close() throws SQLException {
-        getInsertWorkpoolStatement().close();
-        getDeleteSuperlogStatement().close();
-        getSelectSuperlogStatement().close();
-        getInitSelectSuperlogStatement().close();
+        close(insertWorkpoolStatement);
+        close(deleteSuperlogStatement);
+        close(selectSuperlogStatement);
+        close(selectInitSuperlogStatement);
+        
+        close(selectConnection);
+        close(deleteConnection);
+        close(targetConnection);
+    }
+
+    /**
+     * @throws SQLException
+     */
+    protected void close(Connection connection) throws SQLException {
+        if (connection != null && !connection.isClosed()) {
+            connection.close();
+        }
+    }
+
+    /**
+     * @throws SQLException
+     */
+    protected void close(Statement statement) throws SQLException {
+        if (statement != null && !statement.isClosed()) {
+            statement.close();
+        }
     }
 
 }

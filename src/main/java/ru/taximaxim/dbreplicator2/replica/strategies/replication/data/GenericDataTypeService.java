@@ -23,12 +23,13 @@
 
 package ru.taximaxim.dbreplicator2.replica.strategies.replication.data;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import javax.sql.DataSource;
 
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.model.TableModel;
@@ -47,8 +48,8 @@ public class GenericDataTypeService extends GenericDataService implements DataSe
     /**
      * Конструктор на основе подключения к БД
      */
-    public GenericDataTypeService(Connection connection) {
-        super(connection);        
+    public GenericDataTypeService(DataSource dataSource) {
+        super(dataSource);        
     }
     
     /**

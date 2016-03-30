@@ -23,6 +23,7 @@
 
 package ru.taximaxim.dbreplicator2.replica.strategies.replication.workpool;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -184,4 +185,11 @@ public interface WorkPoolService {
      * @throws SQLException
      */
     int getRecordsCount(ResultSet resultSet) throws SQLException;
+
+    /**
+     * Получение текущего соединения
+     * 
+     * @return
+     */
+    Connection getConnection() throws SQLException;
 }

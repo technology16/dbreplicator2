@@ -33,9 +33,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import javax.sql.DataSource;
 
-import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
+import org.apache.log4j.Logger;
 
 /**
  * Класс реализации механизма логирования ошибок
@@ -48,17 +48,15 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
     private static final Logger LOG = Logger.getLogger(ErrorsLog.class);
 
     /**
-     * Имя подключения
+     * Источник коннекшенов
      */
-    private String baseConnName = null;
-    
-    private ConnectionFactory connectionFactory;
+    private DataSource dataSource;
 
     /**
      * @return the connectionFactory
      */
-    protected ConnectionFactory getConnectionFactory() {
-        return connectionFactory;
+    protected DataSource getDataSource() {
+        return dataSource;
     }
 
     /**
@@ -105,9 +103,8 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
     /**
      * Конструктор на основе соединения к БД 
      */
-    public ErrorsLog(String baseConnName, ConnectionFactory connectionFactory) {
-        this.baseConnName = baseConnName;
-        this.connectionFactory = connectionFactory;
+    public ErrorsLog(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     /**
@@ -117,7 +114,7 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
      */
     protected Connection getConnection() throws ClassNotFoundException, SQLException {
         if(connection==null) {
-            connection = getConnectionFactory().getConnection(baseConnName);
+            connection = getDataSource().getConnection();
         }
         return connection;
     }

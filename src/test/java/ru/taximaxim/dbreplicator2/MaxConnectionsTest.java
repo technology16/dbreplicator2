@@ -88,31 +88,31 @@ public class MaxConnectionsTest extends AbstractHikariCPTest {
         ConnectionFactory connectionsFactory = new HikariCPConnectionsFactory(
                 settingStorage);
         try {
-            Connection connection1 = connectionsFactory.getConnection("1");
+            Connection connection1 = connectionsFactory.get("1").getConnection();
             connection1.setAutoCommit(false);
             connection1.commit();
 
-            Connection connection2 = connectionsFactory.getConnection("2");
+            Connection connection2 = connectionsFactory.get("2").getConnection();
             connection2.setAutoCommit(false);
             connection2.commit();
 
-            Connection connection3 = connectionsFactory.getConnection("3");
+            Connection connection3 = connectionsFactory.get("3").getConnection();
             connection3.setAutoCommit(false);
             connection3.commit();
 
-            Connection connection4 = connectionsFactory.getConnection("4");
+            Connection connection4 = connectionsFactory.get("4").getConnection();
             connection4.setAutoCommit(false);
             connection4.commit();
 
-            Connection connection42 = connectionsFactory.getConnection("4");
+            Connection connection42 = connectionsFactory.get("4").getConnection();
             connection42.setAutoCommit(false);
             connection42.commit();
 
-            Connection connection43 = connectionsFactory.getConnection("4");
+            Connection connection43 = connectionsFactory.get("4").getConnection();
             connection43.setAutoCommit(false);
             connection43.commit();
 
-            Connection connection44 = connectionsFactory.getConnection("4");
+            Connection connection44 = connectionsFactory.get("4").getConnection();
             connection44.setAutoCommit(false);
             connection44.commit();
 
