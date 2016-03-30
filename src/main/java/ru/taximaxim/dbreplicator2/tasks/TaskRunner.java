@@ -27,7 +27,6 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 
-import ru.taximaxim.dbreplicator2.replica.StrategyException;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
 import ru.taximaxim.dbreplicator2.model.TaskSettings;
 
@@ -95,11 +94,6 @@ public class TaskRunner implements Runnable {
                         String.format("Ошибка инициализации при выполнении задачи [id_task = %d, %s]",
                                 taskSettings.getTaskId(),
                                 taskSettings.getDescription()), e);
-            } catch (StrategyException e) {
-                LOG.error(
-                        String.format("Ошибка при выполнении стратегии из задачи [id_task = %d, %s]",
-                        taskSettings.getTaskId(),
-                        taskSettings.getDescription()), e);
             } catch (SQLException e) {
                 LOG.error(
                         String.format("Ошибка БД при выполнении стратегии из задачи [id_task = %d, %s]",

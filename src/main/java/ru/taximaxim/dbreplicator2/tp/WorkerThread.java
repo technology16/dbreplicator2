@@ -30,7 +30,6 @@ import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 import ru.taximaxim.dbreplicator2.model.Runner;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
-import ru.taximaxim.dbreplicator2.replica.StrategyException;
 import ru.taximaxim.dbreplicator2.el.DefaultUncaughtExceptionHandler;
 import ru.taximaxim.dbreplicator2.el.ErrorsLog;
 import ru.taximaxim.dbreplicator2.utils.Core;
@@ -79,12 +78,6 @@ public class WorkerThread implements Runnable {
                                 "Ошибка при инициализации данных раннера [id_runner = %d, %s]",
                                 runner.getId(), runner.getDescription()),
                         e);
-            } catch (StrategyException e) {
-                errorsLog.add(runner.getId(), null, null,
-                        String.format(
-                                "Ошибка при выполнении стратегии раннера [id_runner = %d, %s]",
-                                runner.getId(), runner.getDescription()),
-                        e);
             } catch (SQLException e) {
                 errorsLog.add(runner.getId(), null, null,
                         String.format(
@@ -112,7 +105,7 @@ public class WorkerThread implements Runnable {
      * @throws InstantiationException
      */
     public void processCommand() throws ClassNotFoundException, SQLException,
-            StrategyException, InstantiationException, IllegalAccessException {
+            InstantiationException, IllegalAccessException {
 
         ConnectionFactory connectionsFactory = Core.getConnectionFactory();
         for (StrategyModel strategyModel : runner.getStrategyModels()) {
@@ -144,9 +137,8 @@ public class WorkerThread implements Runnable {
      * @throws SQLException
      */
     protected void runStrategy(ConnectionFactory connectionsFactory,
-            StrategyModel strategyModel)
-            throws ClassNotFoundException, InstantiationException, IllegalAccessException,
-            StrategyException, SQLException {
+            StrategyModel strategyModel) throws SQLException, ClassNotFoundException,
+            InstantiationException, IllegalAccessException {
 
         Class<?> clazz = Class.forName(strategyModel.getClassName());
         Strategy strategy = (Strategy) clazz.newInstance();

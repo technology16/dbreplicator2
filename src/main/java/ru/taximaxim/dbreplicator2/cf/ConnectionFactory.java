@@ -26,8 +26,6 @@
  */
 package ru.taximaxim.dbreplicator2.cf;
 
-import java.sql.SQLException;
-
 import javax.sql.DataSource;
 
 /**
