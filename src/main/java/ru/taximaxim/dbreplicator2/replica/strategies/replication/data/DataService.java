@@ -27,6 +27,7 @@
  */
 package ru.taximaxim.dbreplicator2.replica.strategies.replication.data;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -167,4 +168,9 @@ public interface DataService {
     void setRepServerName(String repServerName)
             throws SQLException;
 
-}
+    /**
+     * Получение текущего соединения
+     * 
+     * @return
+     */
+    Connection getConnection() throws SQLException;}
