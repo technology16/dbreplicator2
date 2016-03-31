@@ -99,6 +99,7 @@ public class HikariCPConnectionsFactory implements ConnectionFactory {
                 config.setConnectionTimeout(hikariCPSettings.getConnectionTimeout());
                 config.setIdleTimeout(hikariCPSettings.getIdleTimeout());
                 config.setMaxLifetime(hikariCPSettings.getMaxLifetime());
+                config.setRegisterMbeans(true);
                 
                 connectionPool = new HikariDataSource(config);
                 connectionPools.put(poolName, connectionPool);
