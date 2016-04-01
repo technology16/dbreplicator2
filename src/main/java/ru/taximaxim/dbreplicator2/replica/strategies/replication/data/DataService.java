@@ -41,7 +41,7 @@ import ru.taximaxim.dbreplicator2.model.TableModel;
  * @author volodin_aa
  *
  */
-public interface DataService {
+public interface DataService extends AutoCloseable {
 
     /**
      * Инициализация с кешированием подготовленного запроса для удаления лог
