@@ -141,10 +141,6 @@ public abstract class GeneiricManagerAlgorithm {
             Future<Void> closed = null;
             // Получаем соединение для удаления записей
             try {
-                PreparedStatement deleteSuperLog = superlogDataService
-                        .getDeleteSuperlogStatement();
-                PreparedStatement insertRunnerData = superlogDataService
-                        .getInsertWorkpoolStatement();
                 Set<RunnerModel> runners = new HashSet<RunnerModel>();
 
                 int rowsCount = 0;
@@ -160,27 +156,28 @@ public abstract class GeneiricManagerAlgorithm {
 
                     while (superLogResult.next()) {
                         // Копируем записи
-                        idSuperLog = insertRunnersData(superLogResult, insertRunnerData,
-                                deleteSuperLog, tableObservers, runners);
+                        idSuperLog = insertRunnersData(superLogResult,
+                                getInsertWorkpoolStatement(),
+                                getDeleteSuperlogStatement(), tableObservers, runners);
                         rowsCount++;
                     }
 
                     // Если в выборке были данные, то в параллельном потоке
                     // запускаем чтение новых данных
                     if (rowsCount > 0) {
-                        PreparedStatement selectSuperLog = superlogDataService
-                                .getSelectSuperlogStatement();
-                        selectSuperLog.setLong(1, idSuperLog);
-                        superLog = selectService.submit(new QueryCall(selectSuperLog));
+                        getSelectSuperlogStatement().setLong(1, idSuperLog);
+                        superLog = selectService
+                                .submit(new QueryCall(getSelectSuperlogStatement()));
 
                         // Сбрасываем данные в базу
                         deleteSuperLogResult = executeBatches(deleteService,
-                                deleteSuperLog, insertRunnerData);
+                                getDeleteSuperlogStatement(),
+                                getInsertWorkpoolStatement());
 
                         // запускаем обработчики реплик
                         startRunners(runners);
                         runners.clear();
-                        LOG.info(String.format("Обработано %s строк...", rowsCount));
+                        LOG.info(String.format("Стратегией [id = %d] обработано %d строк...", data.getId(), rowsCount));
                     }
 
                     // Закрываем ресурсы
@@ -207,6 +204,30 @@ public abstract class GeneiricManagerAlgorithm {
         } finally {
             selectService.shutdown();
         }
+    }
+
+    /**
+     * @return
+     * @throws SQLException
+     */
+    protected PreparedStatement getSelectSuperlogStatement() throws SQLException {
+        return superlogDataService.getSelectSuperlogStatement();
+    }
+
+    /**
+     * @return
+     * @throws SQLException
+     */
+    protected PreparedStatement getInsertWorkpoolStatement() throws SQLException {
+        return superlogDataService.getInsertWorkpoolStatement();
+    }
+
+    /**
+     * @return
+     * @throws SQLException
+     */
+    protected PreparedStatement getDeleteSuperlogStatement() throws SQLException {
+        return superlogDataService.getDeleteSuperlogStatement();
     }
 
     /**
