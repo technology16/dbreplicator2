@@ -1,7 +1,7 @@
 /**
  * 
  */
-package ru.taximaxim.dbreplicator2.utils;
+package ru.taximaxim.dbreplicator2.jdbc;
 
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -46,7 +46,7 @@ public class StatementsHashMap<K, V extends Statement> extends HashMap<K, V> imp
         for (Statement statement : values()) {
             // Пытаемся закрыть каждый 
             try {
-                if (statement != null && statement.isClosed()) {
+                if (statement != null && !statement.isClosed()) {
                     statement.close();
                 }
             } catch (SQLException e) {

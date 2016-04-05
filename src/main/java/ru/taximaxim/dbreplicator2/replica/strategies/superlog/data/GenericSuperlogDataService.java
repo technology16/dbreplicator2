@@ -27,8 +27,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-
 import javax.sql.DataSource;
 
 /**
@@ -52,8 +50,8 @@ public class GenericSuperlogDataService implements SuperlogDataService {
     protected DataSource target;
     protected int fetchSize;
 
-    public GenericSuperlogDataService(DataSource source,
-            DataSource target, int fetchSize) {
+    public GenericSuperlogDataService(DataSource source, DataSource target,
+            int fetchSize) {
         this.source = source;
         this.target = target;
         this.fetchSize = fetchSize;
@@ -64,7 +62,8 @@ public class GenericSuperlogDataService implements SuperlogDataService {
         if (selectConnection == null) {
             selectConnection = source.getConnection();
             selectConnection.setAutoCommit(true);
-            selectConnection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+            selectConnection
+                    .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
         }
         return selectConnection;
     }
@@ -74,7 +73,8 @@ public class GenericSuperlogDataService implements SuperlogDataService {
         if (deleteConnection == null) {
             deleteConnection = source.getConnection();
             deleteConnection.setAutoCommit(false);
-            deleteConnection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+            deleteConnection
+                    .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
         }
         return deleteConnection;
     }
@@ -84,7 +84,8 @@ public class GenericSuperlogDataService implements SuperlogDataService {
         if (targetConnection == null) {
             targetConnection = target.getConnection();
             targetConnection.setAutoCommit(false);
-            targetConnection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+            targetConnection
+                    .setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
         }
         return targetConnection;
     }
@@ -138,32 +139,13 @@ public class GenericSuperlogDataService implements SuperlogDataService {
 
     @Override
     public void close() throws SQLException {
-        close(insertWorkpoolStatement);
-        close(deleteSuperlogStatement);
-        close(selectSuperlogStatement);
-        close(selectInitSuperlogStatement);
-        
-        close(selectConnection);
-        close(deleteConnection);
-        close(targetConnection);
-    }
-
-    /**
-     * @throws SQLException
-     */
-    protected void close(Connection connection) throws SQLException {
-        if (connection != null && !connection.isClosed()) {
-            connection.close();
+        try (Connection selectConnection = this.selectConnection;
+                Connection deleteConnection = this.deleteConnection;
+                Connection targetConnection = this.targetConnection;
+                PreparedStatement insertWorkpoolStatement = this.insertWorkpoolStatement;
+                PreparedStatement deleteSuperlogStatement = this.deleteSuperlogStatement;
+                PreparedStatement selectSuperlogStatement = this.selectSuperlogStatement;
+                PreparedStatement selectInitSuperlogStatement = this.selectInitSuperlogStatement;) {
         }
     }
-
-    /**
-     * @throws SQLException
-     */
-    protected void close(Statement statement) throws SQLException {
-        if (statement != null && !statement.isClosed()) {
-            statement.close();
-        }
-    }
-
 }

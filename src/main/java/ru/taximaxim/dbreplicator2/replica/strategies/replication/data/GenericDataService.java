@@ -35,8 +35,8 @@ import javax.sql.DataSource;
 
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.jdbc.QueryConstructors;
+import ru.taximaxim.dbreplicator2.jdbc.StatementsHashMap;
 import ru.taximaxim.dbreplicator2.model.TableModel;
-import ru.taximaxim.dbreplicator2.utils.StatementsHashMap;
 
 /**
  * @author volodin_aa
