@@ -121,7 +121,6 @@ public abstract class GeneiricManagerAlgorithm {
     }
 
     public void execute(StrategyModel data) throws SQLException {
-        ResultSet superLogResult;
         // Выборку данных будем выполнять в отдельном потоке
         ExecutorService selectService = Executors.newSingleThreadExecutor();
         // Переносим данные
@@ -138,7 +137,6 @@ public abstract class GeneiricManagerAlgorithm {
             // Выборку данных будем выполнять в отдельном потоке
             ExecutorService deleteService = Executors.newSingleThreadExecutor();
             Future<int[]> deleteSuperLogResult = null;
-            Future<Void> closed = null;
             // Получаем соединение для удаления записей
             try {
                 Set<RunnerModel> runners = new HashSet<RunnerModel>();
@@ -150,16 +148,18 @@ public abstract class GeneiricManagerAlgorithm {
                     rowsCount = 0;
 
                     // Извлекаем очередную порцию данных
-                    superLogResult = superLog.get();
+                    try (ResultSet superLogResult = superLog.get()) {
 
-                    waitDeleteSuperlog(deleteSuperLogResult);
+                        waitDeleteSuperlog(deleteSuperLogResult);
 
-                    while (superLogResult.next()) {
-                        // Копируем записи
-                        idSuperLog = insertRunnersData(superLogResult,
-                                getInsertWorkpoolStatement(),
-                                getDeleteSuperlogStatement(), tableObservers, runners);
-                        rowsCount++;
+                        while (superLogResult.next()) {
+                            // Копируем записи
+                            idSuperLog = insertRunnersData(superLogResult,
+                                    getInsertWorkpoolStatement(),
+                                    getDeleteSuperlogStatement(), tableObservers,
+                                    runners);
+                            rowsCount++;
+                        }
                     }
 
                     // Если в выборке были данные, то в параллельном потоке
@@ -177,11 +177,10 @@ public abstract class GeneiricManagerAlgorithm {
                         // запускаем обработчики реплик
                         startRunners(runners);
                         runners.clear();
-                        LOG.info(String.format("Стратегией [id = %d] обработано %d строк...", data.getId(), rowsCount));
+                        LOG.info(String.format(
+                                "Стратегией [id = %d] обработано %d строк...",
+                                data.getId(), rowsCount));
                     }
-
-                    // Закрываем ресурсы
-                    closed = selectService.submit(new ResultSetCloseCall(superLogResult));
                 } while (rowsCount > 0);
 
                 // запускаем все обработчики реплик
@@ -195,7 +194,6 @@ public abstract class GeneiricManagerAlgorithm {
             } finally {
                 deleteService.shutdown();
             }
-            closed.get();
         } catch (InterruptedException e) {
             LOG.warn("Прервано получение данных из rep2_superlog!", e);
             Thread.currentThread().interrupt();
