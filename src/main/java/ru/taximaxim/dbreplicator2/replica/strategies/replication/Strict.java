@@ -46,8 +46,7 @@ import ru.taximaxim.dbreplicator2.utils.Core;
 public class Strict extends Generic implements Strategy {
 
     @Override
-    public void execute(ConnectionFactory connectionsFactory, StrategyModel data)
-            throws SQLException {
+    public void execute(ConnectionFactory connectionsFactory, StrategyModel data) throws SQLException {
         DataSource source = connectionsFactory
                 .get(data.getRunner().getSource().getPoolId());
         DataSource target = connectionsFactory

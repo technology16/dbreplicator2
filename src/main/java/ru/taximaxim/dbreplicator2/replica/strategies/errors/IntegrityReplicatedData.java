@@ -54,8 +54,7 @@ public class IntegrityReplicatedData extends StrategySkeleton implements Strateg
     }
 
     @Override
-    public void execute(ConnectionFactory connectionsFactory, StrategyModel data)
-            throws SQLException {
+    public void execute(ConnectionFactory connectionsFactory, StrategyModel data) throws SQLException {
         int period = DEFAULT_PERIOD;
         if (data.getParam(PERIOD) != null) {
             period = Integer.parseInt(data.getParam(PERIOD));

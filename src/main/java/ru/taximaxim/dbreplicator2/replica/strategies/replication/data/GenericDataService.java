@@ -36,6 +36,7 @@ import javax.sql.DataSource;
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.jdbc.QueryConstructors;
 import ru.taximaxim.dbreplicator2.model.TableModel;
+import ru.taximaxim.dbreplicator2.utils.StatementsHashMap;
 
 /**
  * @author volodin_aa
@@ -45,19 +46,19 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
     /**
      * Кешированные запросы удаления данных в приемнике
      */
-    private Map<TableModel, PreparedStatement> deleteStatements = new HashMap<TableModel, PreparedStatement>();
+    private StatementsHashMap<TableModel, PreparedStatement> deleteStatements = new StatementsHashMap<TableModel, PreparedStatement>();
     /**
      * Кешированные запросы получения данных из источника
      */
-    private Map<TableModel, PreparedStatement> selectStatements = new HashMap<TableModel, PreparedStatement>();
+    private StatementsHashMap<TableModel, PreparedStatement> selectStatements = new StatementsHashMap<TableModel, PreparedStatement>();
     /**
      * Кешированные запросы обновления данных в приемнике
      */
-    private Map<TableModel, PreparedStatement> updateStatements = new HashMap<TableModel, PreparedStatement>();
+    private StatementsHashMap<TableModel, PreparedStatement> updateStatements = new StatementsHashMap<TableModel, PreparedStatement>();
     /**
      * Кешировнные запросы вставки данных в приемник
      */
-    private Map<TableModel, PreparedStatement> insertStatements = new HashMap<TableModel, PreparedStatement>();
+    private StatementsHashMap<TableModel, PreparedStatement> insertStatements = new StatementsHashMap<TableModel, PreparedStatement>();
 
     private Map<TableModel, Set<String>> priCols = new HashMap<TableModel, Set<String>>();
     private Map<TableModel, Set<String>> allAvaliableCols = new HashMap<TableModel, Set<String>>();
@@ -69,7 +70,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
     private Map<TableModel, Set<String>> requiredCols = new HashMap<TableModel, Set<String>>();
 
     protected static final String WHERE = "where";
-    
+
     /**
      * 
      */
@@ -77,16 +78,19 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
         super(dataSource);
     }
 
-    /* (non-Javadoc)
-     * @see ru.taximaxim.dbreplicator2.replica.DataService2#getDeleteStatement(ru.taximaxim.dbreplicator2.model.TableModel)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * ru.taximaxim.dbreplicator2.replica.DataService2#getDeleteStatement(ru.
+     * taximaxim.dbreplicator2.model.TableModel)
      */
     @Override
     public PreparedStatement getDeleteStatement(TableModel table) throws SQLException {
         PreparedStatement statement = getDeleteStatements().get(table);
         if (statement == null) {
             statement = getConnection().prepareStatement(QueryConstructors
-                    .constructDeleteQuery(table.getName(),
-                            getPriCols(table)));
+                    .constructDeleteQuery(table.getName(), getPriCols(table)));
             getDeleteStatements().put(table, statement);
         }
 
@@ -125,18 +129,20 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
         return insertStatements;
     }
 
-    /* (non-Javadoc)
-     * @see ru.taximaxim.dbreplicator2.replica.DataService2#getSelectStatement(ru.taximaxim.dbreplicator2.model.TableModel)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * ru.taximaxim.dbreplicator2.replica.DataService2#getSelectStatement(ru.
+     * taximaxim.dbreplicator2.model.TableModel)
      */
     @Override
     public PreparedStatement getSelectStatement(TableModel table) throws SQLException {
         PreparedStatement statement = getSelectStatements().get(table);
         if (statement == null) {
-            statement = getConnection().prepareStatement(QueryConstructors
-                    .constructSelectQuery(table.getName(),
-                            getAllCols(table),
-                            getPriCols(table),
-                            table.getParam(WHERE)));
+            statement = getConnection().prepareStatement(
+                    QueryConstructors.constructSelectQuery(table.getName(),
+                            getAllCols(table), getPriCols(table), table.getParam(WHERE)));
 
             getSelectStatements().put(table, statement);
         }
@@ -144,15 +150,20 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
         return statement;
     }
 
-    /* (non-Javadoc)
-     * @see ru.taximaxim.dbreplicator2.replica.DataService2#getUpdateStatement(ru.taximaxim.dbreplicator2.model.TableModel)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * ru.taximaxim.dbreplicator2.replica.DataService2#getUpdateStatement(ru.
+     * taximaxim.dbreplicator2.model.TableModel)
      */
     @Override
-    public PreparedStatement getUpdateStatement(TableModel table, Collection<String> avaliableCals) throws SQLException {
+    public PreparedStatement getUpdateStatement(TableModel table,
+            Collection<String> avaliableCals) throws SQLException {
         PreparedStatement statement = getUpdateStatements().get(table);
         if (statement == null) {
-            statement = getConnection().prepareStatement(QueryConstructors
-                    .constructUpdateQuery(table.getName(),
+            statement = getConnection().prepareStatement(
+                    QueryConstructors.constructUpdateQuery(table.getName(),
                             getAvaliableDataCols(table, avaliableCals),
                             getPriCols(table)));
 
@@ -162,14 +173,19 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
         return statement;
     }
 
-    /* (non-Javadoc)
-     * @see ru.taximaxim.dbreplicator2.replica.DataService2#getInsertStatement(ru.taximaxim.dbreplicator2.model.TableModel)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * ru.taximaxim.dbreplicator2.replica.DataService2#getInsertStatement(ru.
+     * taximaxim.dbreplicator2.model.TableModel)
      */
     @Override
-    public PreparedStatement getInsertStatement(TableModel table, Collection<String> avaliableCals) throws SQLException {
+    public PreparedStatement getInsertStatement(TableModel table,
+            Collection<String> avaliableCals) throws SQLException {
         PreparedStatement statement = getInsertStatements().get(table);
         if (statement == null) {
-            String insertQuery = QueryConstructors.constructInsertQuery(table.getName(), 
+            String insertQuery = QueryConstructors.constructInsertQuery(table.getName(),
                     getAllAvaliableCols(table, avaliableCals));
             statement = getConnection().prepareStatement(insertQuery);
 
@@ -187,8 +203,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * @return
      * @throws SQLException
      */
-    public Set<String> getPriCols(TableModel table)
-            throws SQLException {
+    public Set<String> getPriCols(TableModel table) throws SQLException {
         Set<String> cols = priCols.get(table);
         if (cols == null) {
             cols = JdbcMetadata.getPrimaryColumns(getConnection(), table.getName());
@@ -205,21 +220,20 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * @return
      * @throws SQLException
      */
-    public Set<String> getAllCols(TableModel table)
-            throws SQLException {
+    public Set<String> getAllCols(TableModel table) throws SQLException {
         Set<String> cols = allCols.get(table);
         if (cols == null) {
             cols = JdbcMetadata.getColumns(getConnection(), table.getName());
-            
+
             // Удаляем игнорируемые колонки
             cols.removeAll(getIgnoredCols(table));
-            
+
             // Оставляем обязательные колонки
-            if(getRequiredCols(table).size() != 0) {
+            if (getRequiredCols(table).size() != 0) {
                 cols.retainAll(getRequiredCols(table));
                 cols.addAll(getPriCols(table));
             }
-            
+
             allCols.put(table, cols);
         }
 
@@ -233,21 +247,21 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * @return
      * @throws SQLException
      */
-    public Set<String> getAllAvaliableCols(TableModel table, Collection<String> avaliableCals)
-            throws SQLException {
+    public Set<String> getAllAvaliableCols(TableModel table,
+            Collection<String> avaliableCals) throws SQLException {
         Set<String> cols = allAvaliableCols.get(table);
         if (cols == null) {
             cols = new LinkedHashSet<String>(getAllCols(table));
-            
+
             // Оставляем только доступные колонки
             cols.retainAll(avaliableCals);
-            
+
             allAvaliableCols.put(table, cols);
         }
 
         return cols;
     }
-    
+
     /**
      * Кешированное получение списка колонок с данными
      * 
@@ -256,8 +270,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * @return
      * @throws SQLException
      */
-    public Set<String> getDataCols(TableModel table)
-            throws SQLException {
+    public Set<String> getDataCols(TableModel table) throws SQLException {
         Set<String> cols = dataCols.get(table);
         if (cols == null) {
             cols = new LinkedHashSet<String>(getAllCols(table));
@@ -268,7 +281,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
 
         return cols;
     }
-    
+
     /**
      * Кешированное получение списка доступных колонок с данными
      * 
@@ -277,12 +290,12 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * @return
      * @throws SQLException
      */
-    public Set<String> getAvaliableDataCols(TableModel table, Collection<String> avaliableCals)
-            throws SQLException {
+    public Set<String> getAvaliableDataCols(TableModel table,
+            Collection<String> avaliableCals) throws SQLException {
         Set<String> cols = avaliableDataCols.get(table);
         if (cols == null) {
             cols = new LinkedHashSet<String>(getDataCols(table));
-            
+
             // Оставляем только доступные колонки
             cols.retainAll(avaliableCals);
         }
@@ -325,7 +338,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
 
         return cols;
     }
-    
+
     /**
      * Кешированное получение списка реплицуруеммых колонок
      * 
@@ -343,7 +356,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
 
         return cols;
     }
-    
+
     /**
      * Устанавливает сессионную переменную с именем текущей подписки или
      * публикации
@@ -351,15 +364,16 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * @throws Exception
      */
     public void setRepServerName(String repServerName) throws SQLException {
-        
+
     }
-    
+
     @Override
     public void close() throws SQLException {
-        close(deleteStatements);
-        close(selectStatements);
-        close(updateStatements);
-        close(insertStatements);
-        super.close();
+        try (StatementsHashMap<TableModel, PreparedStatement> deleteStatements = this.deleteStatements;
+                StatementsHashMap<TableModel, PreparedStatement> selectStatements = this.selectStatements;
+                StatementsHashMap<TableModel, PreparedStatement> updateStatements = this.updateStatements;
+                StatementsHashMap<TableModel, PreparedStatement> insertStatements = this.insertStatements;) {
+            super.close();
+        }
     }
 }

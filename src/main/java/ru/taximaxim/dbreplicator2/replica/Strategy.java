@@ -40,6 +40,7 @@ public interface Strategy {
      * @param connectionsFactory connectionsFactory
      * @param data Модель данных описывающая стратегию.
      * @throws SQLException 
+     * @throws Exception 
      * @throws ClassNotFoundException 
      */
     void execute(ConnectionFactory connectionsFactory,

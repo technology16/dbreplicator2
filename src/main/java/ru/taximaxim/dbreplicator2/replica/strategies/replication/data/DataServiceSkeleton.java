@@ -28,11 +28,7 @@
 package ru.taximaxim.dbreplicator2.replica.strategies.replication.data;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Map;
-
 import javax.sql.DataSource;
 
 /**
@@ -77,31 +73,6 @@ public class DataServiceSkeleton implements AutoCloseable {
     public void close() throws SQLException {
         if (connection != null && !connection.isClosed()) {
             connection.close();
-        }
-    }
-
-    /**
-     * Закрыть Map<?, PreparedStatement>
-     * 
-     * @param sqlStatements
-     * @throws SQLException
-     */
-    public void close(Map<?, PreparedStatement> sqlStatements) throws SQLException {
-        for (PreparedStatement statement : sqlStatements.values()) {
-            close(statement);
-        }
-        sqlStatements.clear();
-    }
-
-    /**
-     * Закрыть PreparedStatement
-     * 
-     * @param statement
-     * @throws SQLException
-     */
-    public void close(Statement statement) throws SQLException {
-        if (statement != null && !statement.isClosed()) {
-            statement.close();
         }
     }
 }

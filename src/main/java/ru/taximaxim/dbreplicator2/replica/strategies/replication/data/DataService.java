@@ -169,7 +169,7 @@ public interface DataService extends AutoCloseable {
             throws SQLException;
 
     /**
-     * Получение текущего соединения
+     * Получение кешированного соединения
      * 
      * @return
      */
