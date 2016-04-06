@@ -40,7 +40,6 @@ import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.jdbc.BatchCall;
 import ru.taximaxim.dbreplicator2.jdbc.QueryCall;
-import ru.taximaxim.dbreplicator2.jdbc.ResultSetCloseCall;
 import ru.taximaxim.dbreplicator2.model.HikariCPSettingsModel;
 import ru.taximaxim.dbreplicator2.model.Runner;
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
