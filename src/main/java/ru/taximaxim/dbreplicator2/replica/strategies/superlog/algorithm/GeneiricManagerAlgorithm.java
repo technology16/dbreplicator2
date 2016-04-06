@@ -28,6 +28,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -124,8 +125,7 @@ public abstract class GeneiricManagerAlgorithm {
         ExecutorService selectService = Executors.newSingleThreadExecutor();
         // Переносим данные
         try {
-            PreparedStatement initSelectSuperLog = superlogDataService
-                    .getInitSelectSuperlogStatement();
+            PreparedStatement initSelectSuperLog = getInitSelectSuperlogStatement();
             Future<ResultSet> superLog = selectService
                     .submit(new QueryCall(initSelectSuperLog));
 
@@ -136,15 +136,27 @@ public abstract class GeneiricManagerAlgorithm {
             // Выборку данных будем выполнять в отдельном потоке
             ExecutorService deleteService = Executors.newSingleThreadExecutor();
             Future<int[]> deleteSuperLogResult = null;
+
+            String delayParam = data.getParam("delay");
+            if (delayParam == null) {
+                delayParam = "0";
+            }
+            long delay = Long.parseLong(delayParam);
+            Date date = new Date();
+            boolean initLoop = false;
+            long startTime;
+
+            Set<RunnerModel> runners = new HashSet<RunnerModel>();
+
+            int rowsCount = 0;
+            long idSuperLog = 0;
             // Получаем соединение для удаления записей
             try {
-                Set<RunnerModel> runners = new HashSet<RunnerModel>();
-
-                int rowsCount = 0;
-                long idSuperLog = 0;
                 do {
                     // Дожидаемся выборки
                     rowsCount = 0;
+
+                    startTime = date.getTime();
 
                     // Извлекаем очередную порцию данных
                     try (ResultSet superLogResult = superLog.get()) {
@@ -179,8 +191,18 @@ public abstract class GeneiricManagerAlgorithm {
                         LOG.info(String.format(
                                 "Стратегией [id = %d] обработано %d строк...",
                                 data.getId(), rowsCount));
+                        
+                        initLoop = false;
+                    } else if (!initLoop) {
+                        long sleepTime = startTime + delay - date.getTime();
+                        if (sleepTime > 0) {
+                            Thread.sleep(sleepTime);
+                        }
+                        superLog = selectService
+                                .submit(new QueryCall(getInitSelectSuperlogStatement()));
+                        initLoop = true;
                     }
-                } while (rowsCount > 0);
+                } while (rowsCount > 0 || initLoop);
 
                 // запускаем все обработчики реплик
                 for (Collection<RunnerModel> observers : tableObservers.values()) {
@@ -201,6 +223,14 @@ public abstract class GeneiricManagerAlgorithm {
         } finally {
             selectService.shutdown();
         }
+    }
+
+    /**
+     * @return
+     * @throws SQLException
+     */
+    protected PreparedStatement getInitSelectSuperlogStatement() throws SQLException {
+        return superlogDataService.getInitSelectSuperlogStatement();
     }
 
     /**
