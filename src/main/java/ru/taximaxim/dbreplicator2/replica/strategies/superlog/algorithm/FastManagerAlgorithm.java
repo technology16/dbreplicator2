@@ -27,6 +27,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
+import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.SuperlogDataService;
 import ru.taximaxim.dbreplicator2.utils.Core;
 
@@ -42,8 +43,9 @@ public class FastManagerAlgorithm extends GeneiricManagerAlgorithm {
     /**
      * Конструктор по умолчанию
      */
-    public FastManagerAlgorithm(SuperlogDataService superlogDataService) {
-        super(superlogDataService);
+    public FastManagerAlgorithm(SuperlogDataService superlogDataService,
+            StrategyModel data) {
+        super(superlogDataService, data);
     }
     
     @Override
