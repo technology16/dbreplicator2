@@ -69,8 +69,6 @@ public abstract class GeneiricManagerAlgorithm {
 
     private Set<Runner> tRunners;
 
-    private final Watch superLogWatch;
-    private final Watch startAllRunnersWatch;
     private final StrategyModel data;
 
     /**
@@ -80,9 +78,6 @@ public abstract class GeneiricManagerAlgorithm {
             StrategyModel data) {
         this.superlogDataService = superlogDataService;
         this.data = data;
-
-        this.superLogWatch = new Watch(getSuperLogPeriod());
-        this.startAllRunnersWatch = new Watch(getStartAllRunnersPeriod());
     }
 
     /**
@@ -163,8 +158,8 @@ public abstract class GeneiricManagerAlgorithm {
             Future<ResultSet> superLog = selectService
                     .submit(new QueryCall(initSelectSuperLog));
             // Начинаем отсчет времени
-            superLogWatch.start();
-            startAllRunnersWatch.start();
+            Watch superLogWatch = new Watch(getSuperLogPeriod());
+            Watch startAllRunnersWatch = new Watch(getStartAllRunnersPeriod());
 
             // Строим список обработчиков реплик
             Map<String, Collection<RunnerModel>> tableObservers = getTableObservers(
@@ -180,13 +175,13 @@ public abstract class GeneiricManagerAlgorithm {
             try {
                 do {
                     totalRowsCount = writeToWorkPool(superLog, tableObservers,
-                            selectService, deleteService);
+                            selectService, deleteService, startAllRunnersWatch);
 
                     // Если на предыдущей итерации была обработана хотя бы одна
                     // строка, то делаем мягкую задержку
                     if (totalRowsCount > 0) {
                         superLogWatch.sleep();
-                        // и звлекаем данные с начала
+                        // и извлекаем данные с начала
                         superLog = selectService
                                 .submit(new QueryCall(initSelectSuperLog));
                     }
@@ -219,7 +214,8 @@ public abstract class GeneiricManagerAlgorithm {
      */
     protected int writeToWorkPool(Future<ResultSet> superLog,
             Map<String, Collection<RunnerModel>> tableObservers,
-            ExecutorService selectService, ExecutorService deleteService)
+            ExecutorService selectService, ExecutorService deleteService,
+            Watch startAllRunnersWatch)
             throws SQLException, InterruptedException, ExecutionException {
         int totalRows = 0;
         int rowsCount = 0;
