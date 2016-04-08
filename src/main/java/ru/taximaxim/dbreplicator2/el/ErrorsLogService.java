@@ -29,7 +29,7 @@ import java.sql.SQLException;
  * @author mardanov_rm
  *
  */
-public interface ErrorsLogService {
+public interface ErrorsLogService extends AutoCloseable{
     
     /**
      * Функция добавления записи в лог ошибок
