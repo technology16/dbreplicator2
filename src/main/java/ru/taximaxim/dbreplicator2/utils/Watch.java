@@ -42,6 +42,7 @@ public class Watch {
      */
     public Watch() {
         this.date = new Date();
+        startTime = date.getTime();
     }
 
     /**
