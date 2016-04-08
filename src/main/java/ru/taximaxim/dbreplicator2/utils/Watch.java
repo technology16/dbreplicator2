@@ -35,41 +35,45 @@ import java.util.Date;
 public class Watch {
 
     private final Date date;
-    private long interval;
     private long startTime;
 
     /**
-     * Конструктор с интервалом
-     * 
-     * @param interval
-     *            отслеживаемый интервал, мс
+     * Конструктор 
      */
-    public Watch(long interval) {
+    public Watch() {
         this.date = new Date();
-        this.interval = interval;
     }
 
     /**
      * Вычисляем время до окончания интервала
+     *
+     * @param interval
+     *            отслеживаемый интервал, мс
      */
-    public long remaining() {
+    public long remaining(long interval) {
         return startTime + interval - date.getTime();
     }
 
     /**
      * Проверяем окончание интервала
+     *
+     * @param interval
+     *            отслеживаемый интервал, мс
      */
-    public boolean timeOut() {
-        return remaining() < 1;
+    public boolean timeOut(long interval) {
+        return remaining(interval) < 1;
     }
 
     /**
      * Засыпаем до окончания выделенного интервала времени
      * 
+     *
+     * @param interval
+     *            отслеживаемый интервал, мс
      * @throws InterruptedException
      */
-    public void sleep() throws InterruptedException {
-        long sleepTime = remaining();
+    public void sleep(long interval) throws InterruptedException {
+        long sleepTime = remaining(interval);
         if (sleepTime > 0) {
             Thread.sleep(sleepTime);
         }

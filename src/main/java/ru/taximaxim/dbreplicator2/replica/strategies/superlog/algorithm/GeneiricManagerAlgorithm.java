@@ -158,8 +158,11 @@ public abstract class GeneiricManagerAlgorithm {
             Future<ResultSet> superLog = selectService
                     .submit(new QueryCall(initSelectSuperLog));
             // Начинаем отсчет времени
-            Watch superLogWatch = new Watch(getSuperLogPeriod());
-            Watch startAllRunnersWatch = new Watch(getStartAllRunnersPeriod());
+            Watch superLogWatch = new Watch();
+            Watch startAllRunnersWatch = new Watch();
+
+            long superLogPeriod = getSuperLogPeriod();
+            long startAllRunnersPeriod = getStartAllRunnersPeriod();
 
             // Строим список обработчиков реплик
             Map<String, Collection<RunnerModel>> tableObservers = getTableObservers(
@@ -175,12 +178,13 @@ public abstract class GeneiricManagerAlgorithm {
             try {
                 do {
                     totalRowsCount = writeToWorkPool(superLog, tableObservers,
-                            selectService, deleteService, startAllRunnersWatch);
+                            selectService, deleteService, startAllRunnersWatch,
+                            startAllRunnersPeriod);
 
                     // Если на предыдущей итерации была обработана хотя бы одна
                     // строка, то делаем мягкую задержку
                     if (totalRowsCount > 0) {
-                        superLogWatch.sleep();
+                        superLogWatch.sleep(superLogPeriod);
                         // и извлекаем данные с начала
                         superLog = selectService
                                 .submit(new QueryCall(initSelectSuperLog));
@@ -215,7 +219,7 @@ public abstract class GeneiricManagerAlgorithm {
     protected int writeToWorkPool(Future<ResultSet> superLog,
             Map<String, Collection<RunnerModel>> tableObservers,
             ExecutorService selectService, ExecutorService deleteService,
-            Watch startAllRunnersWatch)
+            Watch startAllRunnersWatch, long startAllRunnersPeriod)
             throws SQLException, InterruptedException, ExecutionException {
         int totalRows = 0;
         int rowsCount = 0;
@@ -251,7 +255,7 @@ public abstract class GeneiricManagerAlgorithm {
                         getDeleteSuperlogStatement(), getInsertWorkpoolStatement());
 
                 // запускаем обработчики реплик
-                if (startAllRunnersWatch.timeOut()) {
+                if (startAllRunnersWatch.timeOut(startAllRunnersPeriod)) {
                     startAllRunners(tableObservers);
                     startAllRunnersWatch.start();
                 } else {
