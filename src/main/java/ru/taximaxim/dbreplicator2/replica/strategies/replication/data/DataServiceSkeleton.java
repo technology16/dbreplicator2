@@ -39,7 +39,7 @@ import javax.sql.DataSource;
  */
 public class DataServiceSkeleton implements AutoCloseable {
 
-    private DataSource dataSource;
+    private final DataSource dataSource;
     private Connection connection;
 
     /**
@@ -75,4 +75,12 @@ public class DataServiceSkeleton implements AutoCloseable {
             connection.close();
         }
     }
+    
+    /**
+     * @return the connectionFactory
+     */
+    protected DataSource getDataSource() {
+        return dataSource;
+    }
+
 }

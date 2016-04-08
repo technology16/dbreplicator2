@@ -25,17 +25,16 @@ package ru.taximaxim.dbreplicator2.el;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
+
+import ru.taximaxim.dbreplicator2.jdbc.StatementsHashMap;
+import ru.taximaxim.dbreplicator2.replica.strategies.replication.data.DataServiceSkeleton;
 
 /**
  * Класс реализации механизма логирования ошибок
@@ -43,84 +42,44 @@ import org.apache.log4j.Logger;
  * @author volodin_aa
  *
  */
-public class ErrorsLog implements ErrorsLogService, AutoCloseable{
+public class ErrorsLog extends DataServiceSkeleton
+        implements ErrorsLogService {
 
     private static final Logger LOG = Logger.getLogger(ErrorsLog.class);
 
     /**
-     * Источник коннекшенов
-     */
-    private DataSource dataSource;
-
-    /**
-     * @return the connectionFactory
-     */
-    protected DataSource getDataSource() {
-        return dataSource;
-    }
-
-    /**
-     * Подключение
-     */
-    private Connection connection; 
-
-    /**
      * кешированный запрос обновления
      */
-    private Map<String, PreparedStatement> statementsCache;
-    
-    /**
-     * @return the statementsCash
-     */
-    protected synchronized Map<String, PreparedStatement> getStatementsCache() {
-        if (statementsCache == null) {
-            statementsCache = new HashMap<String, PreparedStatement>();
-        }
-
-        return statementsCache;
-    }
+    private final StatementsHashMap<String, PreparedStatement> statementsCache = new StatementsHashMap<String, PreparedStatement>();
 
     /**
-     * Получение выражения на основе текста запроса.
-     * Выражения кешируются.
+     * Получение выражения на основе текста запроса. Выражения кешируются.
      * 
      * @param query
      * @return
      * @throws ClassNotFoundException
      * @throws SQLException
      */
-    private PreparedStatement getStatement(String query) 
-            throws ClassNotFoundException, SQLException {
-        PreparedStatement statement = getStatementsCache().get(query); 
+    private PreparedStatement getStatement(String query) throws SQLException {
+        PreparedStatement statement = statementsCache.get(query);
         if (statement == null) {
             statement = getConnection().prepareStatement(query);
-            getStatementsCache().put(query, statement);
+            statementsCache.put(query, statement);
         }
 
         return statement;
     }
 
     /**
-     * Конструктор на основе соединения к БД 
+     * Конструктор на основе соединения к БД
      */
     public ErrorsLog(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
-
-    /**
-     * @return the connection
-     * @throws SQLException 
-     * @throws ClassNotFoundException 
-     */
-    protected Connection getConnection() throws ClassNotFoundException, SQLException {
-        if(connection==null) {
-            connection = getDataSource().getConnection();
-        }
-        return connection;
+        super(dataSource);
     }
 
     @Override
-    public void add(Integer runnerId, String tableId, Long foreignId, String error, Throwable e) {
+    public void add(Integer runnerId, String tableId, Long foreignId, String error,
+            Throwable e) {
         StringWriter writer = new StringWriter();
         PrintWriter printWriter = new PrintWriter(writer);
         printWriter.println("Подробности: ");
@@ -130,14 +89,15 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
     }
 
     @Override
-    public void add(Integer runnerId, String tableId, Long foreignId, String error, SQLException e) {
+    public void add(Integer runnerId, String tableId, Long foreignId, String error,
+            SQLException e) {
         Writer writer = new StringWriter();
         PrintWriter printWriter = new PrintWriter(writer);
         printWriter.println("Подробности: ");
         e.printStackTrace(printWriter);
 
         SQLException nextEx = e.getNextException();
-        while (nextEx!=null){
+        while (nextEx != null) {
             printWriter.println("Подробности: ");
             nextEx.printStackTrace(printWriter);
             nextEx = nextEx.getNextException();
@@ -148,20 +108,20 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
     @Override
     public void add(Integer runnerId, String tableId, Long foreignId, String error) {
         try {
-            PreparedStatement statement = 
-                    getStatement("INSERT INTO rep2_errors_log (id_runner, id_table, id_foreign, c_date, c_error, c_status) values (?, ?, ?, ?, ?, 0)");
+            PreparedStatement statement = getStatement(
+                    "INSERT INTO rep2_errors_log (id_runner, id_table, id_foreign, c_date, c_error, c_status) values (?, ?, ?, ?, ?, 0)");
             statement.setObject(1, runnerId);
             statement.setObject(2, tableId);
             statement.setObject(3, foreignId);
             statement.setTimestamp(4, new Timestamp(new Date().getTime()));
             statement.setString(5, error);
-            statement.execute(); 
+            statement.execute();
         } catch (Throwable e) {
             LOG.fatal("Ошибка записи в rep2_errors_log:", e);
             LOG.error(error);
-        }     
+        }
     }
-    
+
     protected int addIsNull(StringBuffer query, Object value) {
         if (value == null) {
             query.append(" IS NULL");
@@ -169,85 +129,53 @@ public class ErrorsLog implements ErrorsLogService, AutoCloseable{
         } else {
             query.append("=?");
             return 1;
-        }   
+        }
     }
-    
+
     @Override
     public void setStatus(Integer runnerId, String tableId, Long foreignId, int status) {
-        StringBuffer updateQuery = new StringBuffer("UPDATE rep2_errors_log SET c_status = ? WHERE c_status<> ?  AND id_runner");
+        StringBuffer updateQuery = new StringBuffer(
+                "UPDATE rep2_errors_log SET c_status = ? WHERE c_status<> ?  AND id_runner");
         try {
             int runnerIdPos = addIsNull(updateQuery, runnerId);
-            
+
             updateQuery.append(" AND id_table");
             int tableIdPos = addIsNull(updateQuery, tableId);
-            
+
             updateQuery.append(" AND id_foreign");
             int foreignIdPos = addIsNull(updateQuery, foreignId);
 
             PreparedStatement statement = getStatement(updateQuery.toString());
-            
+
             statement.setInt(1, status);
             statement.setInt(2, status);
-            
+
             if (runnerIdPos != 0) {
                 statement.setInt(2 + runnerIdPos, runnerId);
             }
-            
+
             if (tableIdPos != 0) {
                 statement.setString(2 + runnerIdPos + tableIdPos, tableId);
             }
-            
+
             if (foreignIdPos != 0) {
                 statement.setLong(2 + runnerIdPos + tableIdPos + foreignIdPos, foreignId);
             }
 
             statement.execute();
         } catch (Throwable e) {
-            LOG.fatal(
-                    String.format(
-                            "Ошибка при установки статуса в rep2_errors_log: runnerId=[%s], tableId=[%s], foreignId=[%s], c_status=%s", 
-                            runnerId, tableId, foreignId, status), 
-                    e);
-        }       
+            LOG.fatal(String.format(
+                    "Ошибка при установки статуса в rep2_errors_log: runnerId=[%s], tableId=[%s], foreignId=[%s], c_status=%s",
+                    runnerId, tableId, foreignId, status), e);
+        }
     }
-    
+
     @Override
     public void close() {
-        for (PreparedStatement statement: getStatementsCache().values()) {
-            close(statement);
-        }
-        getStatementsCache().clear();
-
-        close(connection);
-    }
-    
-    /**
-     * Закрыть PreparedStatement
-     * @param statement
-     * @throws SQLException
-     */
-    private void close(PreparedStatement statement) {
-        if (statement != null) {
-            try {
-                statement.close();
-            } catch (SQLException e) {
-                LOG.warn("Ошибка при попытке закрыть 'statement.close()': ", e);
-            }
-        }
-    }
-    
-    /**
-     * Закрыть PreparedStatement
-     * @param statement
-     * @throws SQLException
-     */
-    private void close(Connection conn) {
-        if (conn!=null) {
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                LOG.warn("Ошибка при попытке закрыть 'connection.close()': ", e);
-            }
+        try (StatementsHashMap<String, PreparedStatement> statementsCache = this.statementsCache) {
+            super.close();
+        } catch (SQLException e) {
+            LOG.fatal("Ошибка закрытия ресурсов!", e);
         }
     }
 }
