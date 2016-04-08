@@ -49,12 +49,12 @@ public class HikariCPConnectionsFactory implements ConnectionFactory {
     /**
      * Инициализированные именнованные пулы соединений
      */
-    private Map<String, HikariDataSource> connectionPools;
+    private final Map<String, HikariDataSource> connectionPools;
 
     /**
      * Хранилище настроек
      */
-    private HikariCPSettingsService settingStorage;
+    private final HikariCPSettingsService settingStorage;
 
     /**
      * Конструктор фабрики
