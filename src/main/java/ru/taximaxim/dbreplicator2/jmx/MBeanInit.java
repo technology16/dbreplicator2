@@ -24,19 +24,15 @@
 package ru.taximaxim.dbreplicator2.jmx;
 
 import java.lang.management.ManagementFactory;
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
 import org.apache.log4j.Logger;
 
+import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 import ru.taximaxim.dbreplicator2.jmx.mbeans.DbrepSettings;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
-import ru.taximaxim.dbreplicator2.replica.StrategyException;
-import ru.taximaxim.dbreplicator2.replica.strategies.replication.StrategySkeleton;
 
 /**
  * Класс регистрации MBean объектов на сервере jmx
@@ -44,13 +40,13 @@ import ru.taximaxim.dbreplicator2.replica.strategies.replication.StrategySkeleto
  * @author petrov_im
  * 
  */
-public class MBeanInit extends StrategySkeleton implements Strategy {
+public class MBeanInit implements Strategy {
     
     private static final Logger LOG = Logger.getLogger(MBeanInit.class);
 
     @Override
-    public void execute(Connection sourceConnection, Connection targetConnection,
-            StrategyModel data) throws StrategyException, SQLException, ClassNotFoundException {
+    public void execute(ConnectionFactory connectionsFactory,
+            StrategyModel data) {
         try {
             MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer(); 
             ObjectName objectName = new ObjectName("ru.taximaxim.dbreplicator2.jmx.mbeans:type=DbrepSettings"); 

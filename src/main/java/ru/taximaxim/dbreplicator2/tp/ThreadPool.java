@@ -54,7 +54,7 @@ public class ThreadPool {
      * @param count - максимальное количество активных потоков
      * @throws InterruptedException
      */
-    public ThreadPool(int count) throws InterruptedException { 
+    public ThreadPool(int count) { 
         executor = Executors.newFixedThreadPool(count);
 
         LOG.info(String.format("Создание и запуск пула потоков (%s)", count));

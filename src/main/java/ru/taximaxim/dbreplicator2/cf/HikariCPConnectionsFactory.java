@@ -23,10 +23,10 @@
 
 package ru.taximaxim.dbreplicator2.cf;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
 
@@ -49,12 +49,12 @@ public class HikariCPConnectionsFactory implements ConnectionFactory {
     /**
      * Инициализированные именнованные пулы соединений
      */
-    private Map<String, HikariDataSource> connectionPools;
+    private final Map<String, HikariDataSource> connectionPools;
 
     /**
      * Хранилище настроек
      */
-    private HikariCPSettingsService settingStorage;
+    private final HikariCPSettingsService settingStorage;
 
     /**
      * Конструктор фабрики
@@ -73,8 +73,7 @@ public class HikariCPConnectionsFactory implements ConnectionFactory {
      * @see ru.taximaxim.dbreplicator2.cf.ConnectionFactory#
      * getConnection(java.lang.String)
      */
-    public Connection getConnection(String poolName) throws SQLException,
-            ClassNotFoundException {
+    public DataSource get(String poolName) {
         HikariDataSource connectionPool;
 
         synchronized (connectionPools) {
@@ -107,14 +106,7 @@ public class HikariCPConnectionsFactory implements ConnectionFactory {
             }
         }
         
-        synchronized (connectionPool) {
-            Connection connection = connectionPool.getConnection();
-            if (connection == null) {
-                throw new SQLException(String.format("java.lang.NullPointerException%n" +
-                        "Ошибка getConnection(%s)=null", poolName));
-            }
-            return connection;
-        }
+        return connectionPool;
     }
 
     /*

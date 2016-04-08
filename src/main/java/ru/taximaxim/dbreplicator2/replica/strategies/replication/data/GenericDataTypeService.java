@@ -23,14 +23,16 @@
 
 package ru.taximaxim.dbreplicator2.replica.strategies.replication.data;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import javax.sql.DataSource;
+
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
+import ru.taximaxim.dbreplicator2.jdbc.StatementsHashMap;
 import ru.taximaxim.dbreplicator2.model.TableModel;
 
 /**
@@ -41,16 +43,16 @@ public class GenericDataTypeService extends GenericDataService implements DataSe
     /**
      * Кешированные запросы получения данных из источника и приемника
      */
-    private Map<TableModel, PreparedStatement> selectStatementsAll = new HashMap<TableModel, PreparedStatement>();    
+    private StatementsHashMap<TableModel, PreparedStatement> selectStatementsAll = new StatementsHashMap<TableModel, PreparedStatement>();
     private Map<TableModel, Map<String, Integer>> allColsTypes = new HashMap<TableModel, Map<String, Integer>>();
-    
+
     /**
      * Конструктор на основе подключения к БД
      */
-    public GenericDataTypeService(Connection connection) {
-        super(connection);        
+    public GenericDataTypeService(DataSource dataSource) {
+        super(dataSource);
     }
-    
+
     /**
      * Получение кеша запросов на выборку данных из источника и приемника
      * 
@@ -72,30 +74,31 @@ public class GenericDataTypeService extends GenericDataService implements DataSe
         Map<String, Integer> colsTypes = allColsTypes.get(table);
         if (colsTypes == null) {
             colsTypes = JdbcMetadata.getColumnsTypes(getConnection(), table.getName());
-            
+
             // Удаляем игнорируемые колонки
-            for (String ignoredCol: getIgnoredCols(table)) {
+            for (String ignoredCol : getIgnoredCols(table)) {
                 colsTypes.remove(ignoredCol);
             }
-            
+
             // Оставляем обязательно реплицируемые колонки
             Set<String> requiredColsSet = getRequiredCols(table);
-            if(requiredColsSet.size() != 0) {
-                for (String colName: colsTypes.keySet()) {
-                    if(!requiredColsSet.contains(colName)) {
+            if (requiredColsSet.size() != 0) {
+                for (String colName : colsTypes.keySet()) {
+                    if (!requiredColsSet.contains(colName)) {
                         colsTypes.remove(colName);
                     }
                 }
             }
-            
+
             allColsTypes.put(table, colsTypes);
         }
         return colsTypes;
     }
-    
+
     @Override
     public void close() throws SQLException {
-        close(selectStatementsAll);
-        super.close();
+        try (StatementsHashMap<TableModel, PreparedStatement>  selectStatementsAll = this.selectStatementsAll) {
+            super.close();
+        }
     }
 }

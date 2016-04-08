@@ -23,25 +23,24 @@
 
 package ru.taximaxim.dbreplicator2.replica.strategies.replication.workpool;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.apache.log4j.Logger;
+
+import javax.sql.DataSource;
 
 import ru.taximaxim.dbreplicator2.el.ErrorsLogService;
-
+import ru.taximaxim.dbreplicator2.replica.strategies.replication.data.DataServiceSkeleton;
 
 /**
  * @author volodin_aa
  *
  */
-public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
-    private static final Logger LOG = Logger.getLogger(GenericWorkPoolService.class);
+public class GenericWorkPoolService extends DataServiceSkeleton
+        implements WorkPoolService, AutoCloseable {
 
-    private Connection connection;
     private ErrorsLogService errorsLog;
-    
+
     /**
      * @return the errorsLog
      */
@@ -50,76 +49,70 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
     }
 
     /**
-     * Конструктор на основе соединения к БД 
+     * Конструктор на основе соединения к БД
      */
-    public GenericWorkPoolService(Connection connection, ErrorsLogService errorsLog) {
-        this.connection = connection;
+    public GenericWorkPoolService(DataSource dataSource, ErrorsLogService errorsLog) {
+        super(dataSource);
         this.errorsLog = errorsLog;
-    }
-    
-    /**
-     * @return the connection
-     */
-    protected Connection getConnection() {
-        return connection;
     }
 
     private PreparedStatement clearWorkPoolDataStatement;
 
     private PreparedStatement lastOperationsStatement;
+
     @Override
     public PreparedStatement getLastOperationsStatement() throws SQLException {
         if (lastOperationsStatement == null) {
-            lastOperationsStatement = 
-                    getConnection().prepareStatement("SELECT MIN(id_superlog) AS id_superlog_min, MAX(id_superlog) AS id_superlog_max, id_foreign, id_table, COUNT(*) AS records_count, ? AS id_runner " +
-                            "  FROM ( " +
-                            "  SELECT id_superlog, id_foreign, id_table " +
-                            "    FROM rep2_workpool_data " +
-                            "    WHERE id_runner=? " +
-                            "    ORDER BY id_superlog " +
-                            "    LIMIT ? OFFSET ? " +
-                            "  ) AS part_rep2_workpool_data " +
-                            "GROUP BY id_foreign, id_table " +
-                            "ORDER BY id_superlog_max",
-                            ResultSet.TYPE_FORWARD_ONLY,
-                            ResultSet.CONCUR_READ_ONLY);
+            lastOperationsStatement = getConnection().prepareStatement(
+                    "SELECT MIN(id_superlog) AS id_superlog_min, MAX(id_superlog) AS id_superlog_max, id_foreign, id_table, COUNT(*) AS records_count, ? AS id_runner "
+                            + "  FROM ( " + "  SELECT id_superlog, id_foreign, id_table "
+                            + "    FROM rep2_workpool_data " + "    WHERE id_runner=? "
+                            + "    ORDER BY id_superlog " + "    LIMIT ? OFFSET ? "
+                            + "  ) AS part_rep2_workpool_data "
+                            + "GROUP BY id_foreign, id_table "
+                            + "ORDER BY id_superlog_max",
+                    ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
         }
-        
+
         return lastOperationsStatement;
     }
 
-    /* (non-Javadoc)
-     * @see ru.taximaxim.dbreplicator2.replica.WorkPoolService#getLastOperations(int, int, int)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * ru.taximaxim.dbreplicator2.replica.WorkPoolService#getLastOperations(int,
+     * int, int)
      */
     @Override
     public ResultSet getLastOperations(int runnerId, int fetchSize, int offset)
             throws SQLException {
         PreparedStatement statement = getLastOperationsStatement();
-        
+
         statement.setInt(1, runnerId);
         statement.setInt(2, runnerId);
-        // Извлекаем частями равными fetchSize 
+        // Извлекаем частями равными fetchSize
         statement.setFetchSize(fetchSize);
-        
+
         // По задаче #2327
         // Задаем первоначальное смещение выборки равное 0.
         // При появлении ошибочных записей будем его увеличивать на 1.
         statement.setInt(3, fetchSize);
         statement.setInt(4, offset);
-        
+
         return statement.executeQuery();
     }
 
     @Override
     public PreparedStatement getClearWorkPoolDataStatement() throws SQLException {
         if (clearWorkPoolDataStatement == null) {
-            clearWorkPoolDataStatement = 
-                    getConnection().prepareStatement("DELETE FROM rep2_workpool_data WHERE id_runner=? AND id_foreign=? AND id_table=? AND id_superlog>=? AND id_superlog<=?");
+            clearWorkPoolDataStatement = getConnection().prepareStatement(
+                    "DELETE FROM rep2_workpool_data WHERE id_runner=? AND id_foreign=? AND id_table=? AND id_superlog>=? AND id_superlog<=?");
         }
-        
+
         return clearWorkPoolDataStatement;
     }
-    
+
     /**
      * Функция удаления данных об операциях успешно реплицированной записи
      * 
@@ -136,28 +129,31 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
         deleteWorkPoolData.setLong(4, getSuperlogMin(operationsResult));
         deleteWorkPoolData.setLong(5, getSuperlogMax(operationsResult));
         deleteWorkPoolData.addBatch();
-        getErrorsLog().setStatus(getRunner(operationsResult), getTable(operationsResult), getForeign(operationsResult), 1);
+        getErrorsLog().setStatus(getRunner(operationsResult), getTable(operationsResult),
+                getForeign(operationsResult), 1);
     }
-    
+
     /**
      * Функция записи информации об ошибке
-     * @throws SQLException 
+     * 
+     * @throws SQLException
      */
-    public void trackError(String message, SQLException e, ResultSet operation) 
-            throws SQLException{
-        getErrorsLog().add(getRunner(operation), getTable(operation), getForeign(operation), message, e);
+    public void trackError(String message, SQLException e, ResultSet operation)
+            throws SQLException {
+        getErrorsLog().add(getRunner(operation), getTable(operation),
+                getForeign(operation), message, e);
     }
-    
+
     @Override
     public String getTable(ResultSet resultSet) throws SQLException {
         return resultSet.getString(ID_TABLE);
     }
-    
+
     @Override
     public Long getForeign(ResultSet resultSet) throws SQLException {
         return resultSet.getLong(ID_FOREIGN);
     }
-    
+
     @Override
     public int getRunner(ResultSet resultSet) throws SQLException {
         return resultSet.getInt(ID_RUNNER);
@@ -175,27 +171,14 @@ public class GenericWorkPoolService implements WorkPoolService, AutoCloseable {
 
     @Override
     public void close() throws SQLException {
-        close(clearWorkPoolDataStatement);
-        close(lastOperationsStatement);
-    }
-    
-    /**
-     * Закрыть PreparedStatement
-     * @param statement
-     * @throws SQLException
-     */
-    public void close(PreparedStatement statement) {
-        if (statement != null) {
-            try {
-                statement.close();
-            } catch (SQLException e) {
-                LOG.warn("Ошибка при попытке закрыть 'statement.close()': ", e);
-            }
+        try (PreparedStatement clearWorkPoolDataStatement = this.clearWorkPoolDataStatement;
+                PreparedStatement lastOperationsStatement = this.lastOperationsStatement) {
+            super.close();
         }
     }
 
     @Override
     public int getRecordsCount(ResultSet resultSet) throws SQLException {
         return resultSet.getInt(RECORDS_COUNT);
-    } 
+    }
 }

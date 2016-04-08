@@ -62,18 +62,21 @@ public interface SuperlogDataService extends AutoCloseable {
     /**
      * Получение коннекшена выборки из суперлога
      * @return
+     * @throws SQLException 
      */
-    Connection getSelectConnection();
+    Connection getSelectConnection() throws SQLException;
 
     /**
      * Получение коннекшена удаления из суперлога
      * @return
+     * @throws SQLException 
      */
-    Connection getDeleteConnection();
+    Connection getDeleteConnection() throws SQLException;
 
     /**
      * Получение коннекшена вставки данных в воркпул 
      * @return
+     * @throws SQLException 
      */
-    Connection getTargetConnection();
+    Connection getTargetConnection() throws SQLException;
 }

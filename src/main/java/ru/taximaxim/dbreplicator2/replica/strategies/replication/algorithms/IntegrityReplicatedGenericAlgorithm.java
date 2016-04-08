@@ -22,7 +22,6 @@
  */
 package ru.taximaxim.dbreplicator2.replica.strategies.replication.algorithms;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -38,7 +37,6 @@ import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.model.TableModel;
-import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.strategies.replication.data.GenericDataTypeService;
 import ru.taximaxim.dbreplicator2.replica.strategies.replication.workpool.WorkPoolService;
 /**
@@ -47,7 +45,7 @@ import ru.taximaxim.dbreplicator2.replica.strategies.replication.workpool.WorkPo
  * @author volodin_aa
  *
  */
-public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implements Strategy {
+public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm {
 
     private static final String INTEGRITY_ERROR = "Ошибка в целостности реплицированных данных [%s => %s]%n";
 
@@ -69,7 +67,8 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
      */
     public IntegrityReplicatedGenericAlgorithm(int fetchSize, 
             WorkPoolService workPoolService,
-            GenericDataTypeService sourceDataService, GenericDataTypeService destDataService) {
+            GenericDataTypeService sourceDataService,
+            GenericDataTypeService destDataService) {
         super(fetchSize, false, workPoolService, sourceDataService, destDataService);
         this.sourceDataService = sourceDataService;
         this.destDataService = destDataService;
@@ -199,8 +198,7 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm implem
      * @throws ClassNotFoundException 
      */
     @Override
-    protected void selectLastOperations(Connection sourceConnection, 
-            Connection targetConnection, StrategyModel data) throws SQLException, ClassNotFoundException {
+    protected void selectLastOperations(StrategyModel data) throws SQLException {
         int runnerId = Integer.parseInt(data.getParam(ID_RUNNER));
         // Задаем первоначальное смещение выборки равное 0.
         // При появлении ошибочных записей будем его увеличивать на 1.

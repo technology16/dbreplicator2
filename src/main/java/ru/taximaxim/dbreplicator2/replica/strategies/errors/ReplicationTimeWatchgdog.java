@@ -35,11 +35,11 @@ import java.util.StringTokenizer;
 
 import org.apache.log4j.Logger;
 
+import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
-import ru.taximaxim.dbreplicator2.replica.StrategyException;
 
 /**
  * @author mardanov_rm
@@ -49,9 +49,9 @@ public class ReplicationTimeWatchgdog implements Strategy {
 
     private static final Logger LOG = Logger.getLogger(ReplicationTimeWatchgdog.class);
 
-    private static final int DEFAULT_PERIOD = 1800000; 
-    private static final int DEFAULT_PART_EMAIL = 10; 
-    
+    private static final int DEFAULT_PERIOD = 1800000;
+    private static final int DEFAULT_PART_EMAIL = 10;
+
     private static final String PERIOD = "period";
     private static final String RUNNERS = "runners";
     private static final String PART_EMAIL = "partEmail";
@@ -62,67 +62,73 @@ public class ReplicationTimeWatchgdog implements Strategy {
      */
     public ReplicationTimeWatchgdog() {
     }
-    
+
     /**
      * Последний символ
+     * 
      * @param s
      * @return
      */
-    public String removeLastChar(String s) {    
-        if (s == null || s.length() == 0) {        
-            return s;    
-        }   
-        return s.substring(0, s.length()-1); 
-     }   
-    
+    public String removeLastChar(String s) {
+        if (s == null || s.length() == 0) {
+            return s;
+        }
+        return s.substring(0, s.length() - 1);
+    }
+
     @Override
-    public void execute(Connection sourceConnection, Connection targetConnection,
-            StrategyModel data) throws StrategyException, SQLException,
-            ClassNotFoundException {
+    public void execute(ConnectionFactory connectionsFactory, StrategyModel data)
+            throws SQLException {
+        StringBuffer runIgSql = new StringBuffer();
+        int period = DEFAULT_PERIOD;
+        int partEmail = DEFAULT_PART_EMAIL;
+
         try {
-            int period = DEFAULT_PERIOD;
             if (data.getParam(PERIOD) != null) {
                 period = Integer.parseInt(data.getParam(PERIOD));
             }
-    
-            Timestamp date = new Timestamp(Calendar.getInstance().getTimeInMillis() - period);
-    
-            int partEmail = DEFAULT_PART_EMAIL;
+
             if (data.getParam(PART_EMAIL) != null) {
                 partEmail = Integer.parseInt(data.getParam(PART_EMAIL));
             }
-            
-            StringBuffer runIgSql = new StringBuffer();
+
             if (data.getParam(RUNNERS) != null) {
                 StringBuffer runnerIgnore = new StringBuffer();
                 StringBuffer runnerAktiv = new StringBuffer();
-                StringTokenizer totoken = new StringTokenizer(data.getParam(RUNNERS).toString(), ",");
+                StringTokenizer totoken = new StringTokenizer(
+                        data.getParam(RUNNERS).toString(), ",");
                 while (totoken.hasMoreTokens()) {
                     String str = totoken.nextToken();
-                    if(Integer.parseInt(str) < 0) {
+                    if (Integer.parseInt(str) < 0) {
                         runnerIgnore.append(str).append(",");
                     } else {
                         runnerAktiv.append(str).append(",");
                     }
                 }
-                if(runnerIgnore.length()>0) {
-                    runIgSql.append(String.format(" AND id_runner NOT IN (%s)", 
+                if (runnerIgnore.length() > 0) {
+                    runIgSql.append(String.format(" AND id_runner NOT IN (%s)",
                             removeLastChar(runnerIgnore.toString()).replace("-", "")));
                 }
-                if(runnerAktiv.length()>0){
-                    runIgSql.append(String.format(" AND id_runner IN (%s)", 
+                if (runnerAktiv.length() > 0) {
+                    runIgSql.append(String.format(" AND id_runner IN (%s)",
                             removeLastChar(runnerAktiv.toString())));
                 }
-               
             }
-            
-            int rowCount = 0;
-            String selectErrorsCountQuery = 
-                    "SELECT count(*) as count FROM rep2_workpool_data WHERE c_date <= ?"
-                    + runIgSql;
-            try (PreparedStatement selectErrorsCount = 
-                    sourceConnection.prepareStatement(selectErrorsCountQuery);) {
-    
+        } catch (NumberFormatException e) {
+            LOG.error(String.format(
+                    "Ошибка в преобразование строки в число стратегия: ReplicationTimeWatchgdog: [%s] runner:[%s]",
+                    data.getId(), data.getRunner().getId()), e);
+        }
+
+        int rowCount = 0;
+        String selectErrorsCountQuery = "SELECT count(*) as count FROM rep2_workpool_data WHERE c_date <= ?"
+                + runIgSql;
+        Timestamp date = new Timestamp(Calendar.getInstance().getTimeInMillis() - period);
+        try (Connection sourceConnection = connectionsFactory
+                .get(data.getRunner().getSource().getPoolId()).getConnection();) {
+            try (PreparedStatement selectErrorsCount = sourceConnection
+                    .prepareStatement(selectErrorsCountQuery);) {
+
                 selectErrorsCount.setTimestamp(1, date);
                 try (ResultSet countResult = selectErrorsCount.executeQuery();) {
                     if (countResult.next()) {
@@ -132,43 +138,38 @@ public class ReplicationTimeWatchgdog implements Strategy {
             }
             // Если нет ошибок то смысл в запуске данного кода бессмыслен
             if (rowCount != 0) {
-                String selectQuery = 
-                        "SELECT * FROM rep2_workpool_data WHERE c_date <= ? " + runIgSql + " ORDER BY id_superlog";
+                String selectQuery = "SELECT * FROM rep2_workpool_data WHERE c_date <= ? "
+                        + runIgSql + " ORDER BY id_superlog";
                 try (PreparedStatement selectPreparedStatement = sourceConnection
-                      .prepareStatement(selectQuery,
-                                ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);) {
+                        .prepareStatement(selectQuery, ResultSet.TYPE_FORWARD_ONLY,
+                                ResultSet.CONCUR_READ_ONLY);) {
                     selectPreparedStatement.setTimestamp(1, date);
                     selectPreparedStatement.setFetchSize(partEmail);
                     try (ResultSet resultSet = selectPreparedStatement.executeQuery();) {
                         List<String> cols = new ArrayList<String>(
                                 JdbcMetadata.getColumns(resultSet));
                         int count = 0;
-                        StringBuffer rowDumpEmail = new StringBuffer(
-                                String.format(
-                                        "%n%nВ %s превышен лимит таймаута репликации в %s милисекунд!%n%n",
-                                        data.getRunner().getSource().getPoolId(), period));
+                        StringBuffer rowDumpEmail = new StringBuffer(String.format(
+                                "%n%nВ %s превышен лимит таймаута репликации в %s милисекунд!%n%n",
+                                data.getRunner().getSource().getPoolId(), period));
                         while (resultSet.next() && (count < partEmail)) {
                             count++;
                             // при необходимости пишем ошибку в лог
-                            String rowDump = String
-                                    .format("Запись не реплицируется!!!%nОшибка %s из %s %n[ tableName = REP2_WORKPOOL_DATA [ row = %s ] ]%s",
-                                            count, rowCount,
-                                            Jdbc.resultSetToString(resultSet, cols),
-                                            "\n==========================================\n");
+                            String rowDump = String.format(
+                                    "Запись не реплицируется!!!%nОшибка %s из %s %n[ tableName = REP2_WORKPOOL_DATA [ row = %s ] ]%s",
+                                    count, rowCount,
+                                    Jdbc.resultSetToString(resultSet, cols),
+                                    "\n==========================================\n");
                             rowDumpEmail.append(rowDump);
                         }
                         rowDumpEmail.append("Всего ");
                         rowDumpEmail.append(rowCount);
-                        rowDumpEmail
-                                .append(" ошибочных записей. Полный список ошибок не реплицируеммых записей доступен в таблице rep2_workpool_data.");
+                        rowDumpEmail.append(
+                                " ошибочных записей. Полный список ошибок не реплицируеммых записей доступен в таблице rep2_workpool_data.");
                         LOG.error(rowDumpEmail.toString());
                     }
                 }
             }
-        } catch (NumberFormatException e) {
-            LOG.error(String.format(
-               "Ошибка в преобразование строки в число стратегия: ReplicationTimeWatchgdog: [%s] runner:[%s]",
-               data.getId(),data.getRunner().getId()),e);
         }
     }
 }

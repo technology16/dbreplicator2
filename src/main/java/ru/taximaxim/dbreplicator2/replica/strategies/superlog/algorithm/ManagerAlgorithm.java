@@ -27,7 +27,6 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
-import ru.taximaxim.dbreplicator2.replica.StrategyException;
 import ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.SuperlogDataService;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
 
@@ -47,7 +46,7 @@ public class ManagerAlgorithm extends GeneiricManagerAlgorithm {
     }
     
     @Override
-    protected void startRunners(Collection<RunnerModel> runners) throws StrategyException, SQLException  {
+    protected void startRunners(Collection<RunnerModel> runners) throws SQLException  {
         // Запускаем обработчики реплик
         for (RunnerModel runner : runners) {
             if (!getRunnersFromTask().contains(runner)) {

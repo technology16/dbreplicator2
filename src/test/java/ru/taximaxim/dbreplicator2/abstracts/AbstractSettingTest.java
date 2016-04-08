@@ -59,7 +59,7 @@ public abstract class AbstractSettingTest {
         statsService = Core.getStatsService();
         
         String source = "source";
-        conn = connectionFactory.getConnection(source);
+        conn = connectionFactory.get(source).getConnection();
         
         if (sqlRep2 != null)
             Helper.executeSqlFromFile(conn, sqlRep2);

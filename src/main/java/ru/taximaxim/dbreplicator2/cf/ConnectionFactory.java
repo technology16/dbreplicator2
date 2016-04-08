@@ -26,8 +26,7 @@
  */
 package ru.taximaxim.dbreplicator2.cf;
 
-import java.sql.Connection;
-import java.sql.SQLException;
+import javax.sql.DataSource;
 
 /**
  * Фабрика соединений. Возвращает соединения из именованных пулов.
@@ -46,8 +45,7 @@ public interface ConnectionFactory {
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    Connection getConnection(String poolName) throws SQLException,
-            ClassNotFoundException;
+    DataSource get(String poolName);
 
     /**
      * Закрытие именованного пула соединений

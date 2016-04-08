@@ -24,6 +24,7 @@
 package ru.taximaxim.dbreplicator2;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -75,8 +76,7 @@ public class Helper {
                 assertTrue(String.format("Ошибка в поле _long [%s == %s]", listSource.get(i)._long, listDest.get(i)._long), 
                         listSource.get(i)._long.equals(listDest.get(i)._long));
                 
-                assertTrue(String.format("Ошибка в поле _decimal [%s == %s]", listSource.get(i)._decimal, listDest.get(i)._decimal), 
-                        listSource.get(i)._decimal == listDest.get(i)._decimal);
+                assertEquals("Ошибка в поле _decimal", listSource.get(i)._decimal, listDest.get(i)._decimal);
                 
                 //==============================
                 // игнорируемая колонка

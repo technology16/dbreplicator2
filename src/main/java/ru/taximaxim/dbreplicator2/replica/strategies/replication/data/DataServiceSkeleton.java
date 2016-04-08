@@ -28,11 +28,8 @@
 package ru.taximaxim.dbreplicator2.replica.strategies.replication.data;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Map;
-
-import org.apache.log4j.Logger;
+import javax.sql.DataSource;
 
 /**
  * Заготовка класса для работы с реплицируемыми данными
@@ -42,60 +39,48 @@ import org.apache.log4j.Logger;
  */
 public class DataServiceSkeleton implements AutoCloseable {
 
-    private static final Logger LOG = Logger.getLogger(DataServiceSkeleton.class);
+    private final DataSource dataSource;
     private Connection connection;
 
     /**
      * Конструктор на основе подключения к БД
      * 
-     * @param connection подключение к БД
+     * @param connection
+     *            подключение к БД
      */
-    public DataServiceSkeleton(Connection connection) {
-        this.connection = connection;
+    public DataServiceSkeleton(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     /**
-     * Функция получение подключения к БД
+     * Функция получения и настройки подключения к БД По умолчанию настраивается
+     * AutoCommit и TRANSACTION_READ_COMMITTED
      * 
      * @return the connection
+     * @throws SQLException
      */
-    protected Connection getConnection() {
+    public Connection getConnection() throws SQLException {
+        if (connection == null) {
+            connection = dataSource.getConnection();
+            // Настраиваем соединение
+            connection.setAutoCommit(true);
+            connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+        }
         return connection;
     }
 
     @Override
     public void close() throws SQLException {
-        
+        if (connection != null && !connection.isClosed()) {
+            connection.close();
+        }
     }
     
     /**
-     * Закрыть  Map<?, PreparedStatement>
-     * 
-     * @param sqlStatements
-     * @throws SQLException
+     * @return the connectionFactory
      */
-    public void close(Map<?, PreparedStatement> sqlStatements) {
-        for (PreparedStatement statement : sqlStatements.values()) {
-            if (statement != null) {
-                close(statement);
-            }
-        }
-        sqlStatements.clear();
+    protected DataSource getDataSource() {
+        return dataSource;
     }
-    
-    /**
-     * Закрыть PreparedStatement
-     * 
-     * @param statement
-     * @throws SQLException
-     */
-    public void close(PreparedStatement statement) {
-        if (statement != null) {
-            try {
-                statement.close();
-            } catch (SQLException e) {
-                LOG.warn("Ошибка при попытке закрыть 'statement.close()': ", e);
-            }
-        }
-    } 
+
 }

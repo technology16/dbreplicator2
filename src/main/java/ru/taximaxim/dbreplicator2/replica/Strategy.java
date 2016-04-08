@@ -23,9 +23,9 @@
 
 package ru.taximaxim.dbreplicator2.replica;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 
+import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 
 /**
@@ -37,16 +37,13 @@ public interface Strategy {
     /**
      * Отрабатывает стратегию кода.
      * 
-     * @param sourceConnection
-     *            Источник БД
-     * @param targetConnection
-     *            Целевая БД
-     * @param data
-     *            Модель данных описывающая стратегию.
+     * @param connectionsFactory connectionsFactory
+     * @param data Модель данных описывающая стратегию.
      * @throws SQLException 
+     * @throws Exception 
      * @throws ClassNotFoundException 
      */
-    void execute(Connection sourceConnection, Connection targetConnection,
-            StrategyModel data) throws StrategyException, SQLException, ClassNotFoundException;
+    void execute(ConnectionFactory connectionsFactory,
+            StrategyModel data) throws SQLException;
 
 }

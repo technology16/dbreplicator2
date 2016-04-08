@@ -23,6 +23,7 @@
 package ru.taximaxim.dbreplicator2.utils;
 
 import java.io.File;
+import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
 import org.hibernate.SessionFactory;
@@ -281,7 +282,7 @@ public final class Core {
      * @return пул потоков
      * @throws InterruptedException 
      */
-    public static synchronized ThreadPool getThreadPool() throws InterruptedException {
+    public static synchronized ThreadPool getThreadPool() {
         if (threadPool == null) {
             ApplicatonSettingsService aService = new ApplicatonSettingsService(sessionFactory);
             int count = Integer.parseInt(aService.getValue("tp.threads"));
@@ -306,12 +307,14 @@ public final class Core {
      * Получаем сервис статистики
      * 
      * @return сервис статистики
+     * @throws SQLException 
+     * @throws ClassNotFoundException 
      */
-    public static synchronized StatsService getStatsService() {
+    public static synchronized StatsService getStatsService() throws SQLException {
         if (statsService == null) {
             ApplicatonSettingsService aService = new ApplicatonSettingsService(getSessionFactory());
             String baseConnName = aService.getValue("stats.dest");
-            statsService = new StatsService(baseConnName);
+            statsService = new StatsService(getConnectionFactory().get(baseConnName));
         }
 
         return statsService;
@@ -328,11 +331,13 @@ public final class Core {
      * Получаем сервис ErrorsLog
      * 
      * @return сервис ErrorsLog
+     * @throws SQLException 
+     * @throws ClassNotFoundException 
      */
     public static synchronized ErrorsLog getErrorsLog() {
         ApplicatonSettingsService aService = new ApplicatonSettingsService(getSessionFactory());
         String baseConnName = aService.getValue("error.dest");
-        ErrorsLog errorLog = new ErrorsLog(baseConnName, getConnectionFactory());
+        ErrorsLog errorLog = new ErrorsLog(getConnectionFactory().get(baseConnName));
 
         return errorLog;
     }

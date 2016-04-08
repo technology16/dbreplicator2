@@ -111,14 +111,12 @@ public abstract class AbstractReplicationTest {
      */
     public static void initialization(String sqlRep2, String sqlSourse, String sqlDest) throws ClassNotFoundException, SQLException, IOException{
         LOG.info("initialization");
-        String source = "source";
-        conn = connectionFactory.getConnection(source);
+        conn = connectionFactory.get("source").getConnection();
 
         Helper.executeSqlFromFile(conn, sqlRep2);
         Helper.executeSqlFromFile(conn, sqlSourse);
 
-        String dest = "dest";
-        connDest = connectionFactory.getConnection(dest);
+        connDest = connectionFactory.get("dest").getConnection();
         Helper.executeSqlFromFile(connDest, sqlRep2);
         Helper.executeSqlFromFile(connDest, sqlDest);
     }

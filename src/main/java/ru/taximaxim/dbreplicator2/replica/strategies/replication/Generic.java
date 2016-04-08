@@ -23,12 +23,13 @@
 
 package ru.taximaxim.dbreplicator2.replica.strategies.replication;
 
-import java.sql.Connection;
 import java.sql.SQLException;
+
+import javax.sql.DataSource;
 
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
-import ru.taximaxim.dbreplicator2.replica.StrategyException;
+import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 import ru.taximaxim.dbreplicator2.el.ErrorsLog;
 import ru.taximaxim.dbreplicator2.replica.strategies.replication.algorithms.GenericAlgorithm;
 import ru.taximaxim.dbreplicator2.replica.strategies.replication.data.GenericDataService;
@@ -45,17 +46,20 @@ import ru.taximaxim.dbreplicator2.utils.Core;
 public class Generic extends StrategySkeleton implements Strategy {
 
     @Override
-    public void execute(Connection sourceConnection, Connection targetConnection,
-            StrategyModel data) throws StrategyException, SQLException, ClassNotFoundException {
+    public void execute(ConnectionFactory connectionsFactory, StrategyModel data) throws SQLException {
+        DataSource source = connectionsFactory
+                .get(data.getRunner().getSource().getPoolId());
+        DataSource dest = connectionsFactory
+                .get(data.getRunner().getTarget().getPoolId());
         try (ErrorsLog errorsLog = Core.getErrorsLog();
-                GenericWorkPoolService genericWorkPoolService = new GenericWorkPoolService(sourceConnection, errorsLog);
-                GenericDataService genericDataServiceSourceConnection = new GenericDataService(sourceConnection);
-                GenericDataService genericDataServiceTargetConnection = new GenericDataService(targetConnection);) {
+                GenericWorkPoolService workPoolService = new GenericWorkPoolService(source, errorsLog);
+                GenericDataService sourceDataService = new GenericDataService(source);
+                GenericDataService destDataService = new GenericDataService(dest);) {
             new GenericAlgorithm(getFetchSize(data), 
                     false, 
-                    genericWorkPoolService, 
-                    genericDataServiceSourceConnection, 
-                    genericDataServiceTargetConnection).execute(sourceConnection, targetConnection, data);
+                    workPoolService, 
+                    sourceDataService, 
+                    destDataService).execute(data);
         }
     }
 

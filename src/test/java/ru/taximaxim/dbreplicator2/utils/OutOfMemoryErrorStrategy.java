@@ -23,12 +23,11 @@
 
 package ru.taximaxim.dbreplicator2.utils;
 
-import java.sql.Connection;
 import java.util.ArrayList;
 
+import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
-import ru.taximaxim.dbreplicator2.replica.StrategyException;
 
 /**
  * Класс который генерирует необрабатываемое исключение
@@ -45,8 +44,8 @@ public class OutOfMemoryErrorStrategy implements Strategy {
     }
 
     @Override
-    public void execute(Connection sourceConnection, Connection targetConnection,
-            StrategyModel data) throws StrategyException {
+    public void execute(ConnectionFactory connectionsFactory,
+            StrategyModel data) {
         // Пробуем выделить очень много памяти
         new ArrayList<String>(Integer.MAX_VALUE);
     }

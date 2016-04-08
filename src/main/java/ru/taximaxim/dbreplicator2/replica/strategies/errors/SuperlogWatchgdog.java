@@ -33,11 +33,11 @@ import java.util.Calendar;
 import java.util.List;
 import org.apache.log4j.Logger;
 
+import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
-import ru.taximaxim.dbreplicator2.replica.StrategyException;
 
 /**
  * @author mardanov_rm
@@ -46,10 +46,10 @@ import ru.taximaxim.dbreplicator2.replica.StrategyException;
 public class SuperlogWatchgdog implements Strategy {
 
     private static final Logger LOG = Logger.getLogger(SuperlogWatchgdog.class);
-    
+
     private static final int DEFAULT_PERIOD = 1800000;
     private static final int DEFAULT_PART_EMAIL = 10;
-    
+
     private static final String PERIOD = "period";
     private static final String PART_EMAIL = "partEmail";
     private static final String COUNT = "count";
@@ -61,10 +61,8 @@ public class SuperlogWatchgdog implements Strategy {
     }
 
     @Override
-    public void execute(Connection sourceConnection, Connection targetConnection,
-            StrategyModel data) throws StrategyException, SQLException,
-            ClassNotFoundException {
-        
+    public void execute(ConnectionFactory connectionsFactory, StrategyModel data)
+            throws SQLException {
         int period = DEFAULT_PERIOD;
         if (data.getParam(PERIOD) != null) {
             period = Integer.parseInt(data.getParam(PERIOD));
@@ -79,47 +77,51 @@ public class SuperlogWatchgdog implements Strategy {
 
         int rowCount = 0;
 
-        try (PreparedStatement selectErrorsCount = sourceConnection
-                .prepareStatement("SELECT count(*) as count FROM rep2_superlog where c_date <= ?");) {
+        try (Connection sourceConnection = connectionsFactory
+                .get(data.getRunner().getSource().getPoolId()).getConnection();) {
+            try (PreparedStatement selectErrorsCount = sourceConnection.prepareStatement(
+                    "SELECT count(*) as count FROM rep2_superlog where c_date <= ?");) {
 
-            selectErrorsCount.setTimestamp(1, date);
-            try (ResultSet countResult = selectErrorsCount.executeQuery();) {
-                if (countResult.next()) {
-                    rowCount = countResult.getInt(COUNT);
+                selectErrorsCount.setTimestamp(1, date);
+                try (ResultSet countResult = selectErrorsCount.executeQuery();) {
+                    if (countResult.next()) {
+                        rowCount = countResult.getInt(COUNT);
+                    }
                 }
             }
-        }
-        // Если нет ошибок то смысл в запуске данного кода бессмыслен
-        if (rowCount != 0) {
-            try (PreparedStatement selectPreparedStatement = sourceConnection
-                    .prepareStatement("SELECT * FROM rep2_superlog where c_date <= ? ORDER BY id_superlog",
-                            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);) {
-                selectPreparedStatement.setTimestamp(1, date);
-                selectPreparedStatement.setFetchSize(partEmail);
+            // Если нет ошибок то смысл в запуске данного кода бессмыслен
+            if (rowCount != 0) {
+                try (PreparedStatement selectPreparedStatement = sourceConnection
+                        .prepareStatement(
+                                "SELECT * FROM rep2_superlog where c_date <= ? ORDER BY id_superlog",
+                                ResultSet.TYPE_FORWARD_ONLY,
+                                ResultSet.CONCUR_READ_ONLY);) {
+                    selectPreparedStatement.setTimestamp(1, date);
+                    selectPreparedStatement.setFetchSize(partEmail);
 
-                try (ResultSet resultSet = selectPreparedStatement.executeQuery();) {
-                    List<String> cols = new ArrayList<String>(
-                            JdbcMetadata.getColumns(resultSet));
-                    int count = 0;
-                    StringBuffer rowDumpEmail = new StringBuffer(
-                            String.format(
-                                    "%n%nВ %s превышен лимит таймаута в superlog в %s миллисекунд!%n%n",
-                                    data.getRunner().getSource().getPoolId(), period));
-                    while (resultSet.next() && (count < partEmail)) {
-                        count++;
-                        // при необходимости пишем ошибку в лог
-                        String rowDump = String
-                                .format("Ошибка настроек %s из %s %n[ tableName = REP2_SUPERLOG [ row = %s ] ]%s",
-                                        count, rowCount,
-                                        Jdbc.resultSetToString(resultSet, cols),
-                                        "\n==========================================\n");
-                        rowDumpEmail.append(rowDump);
+                    try (ResultSet resultSet = selectPreparedStatement.executeQuery();) {
+                        List<String> cols = new ArrayList<String>(
+                                JdbcMetadata.getColumns(resultSet));
+                        int count = 0;
+                        StringBuffer rowDumpEmail = new StringBuffer(String.format(
+                                "%n%nВ %s превышен лимит таймаута в superlog в %s миллисекунд!%n%n",
+                                data.getRunner().getSource().getPoolId(), period));
+                        while (resultSet.next() && (count < partEmail)) {
+                            count++;
+                            // при необходимости пишем ошибку в лог
+                            String rowDump = String.format(
+                                    "Ошибка настроек %s из %s %n[ tableName = REP2_SUPERLOG [ row = %s ] ]%s",
+                                    count, rowCount,
+                                    Jdbc.resultSetToString(resultSet, cols),
+                                    "\n==========================================\n");
+                            rowDumpEmail.append(rowDump);
+                        }
+                        rowDumpEmail.append("Всего ");
+                        rowDumpEmail.append(rowCount);
+                        rowDumpEmail.append(
+                                " ошибочных записей. Полный список ошибок доступен в таблице REP2_SUPERLOG.");
+                        LOG.error(rowDumpEmail.toString());
                     }
-                    rowDumpEmail.append("Всего ");
-                    rowDumpEmail.append(rowCount);
-                    rowDumpEmail
-                            .append(" ошибочных записей. Полный список ошибок доступен в таблице REP2_SUPERLOG.");
-                    LOG.error(rowDumpEmail.toString());
                 }
             }
         }

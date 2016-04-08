@@ -24,7 +24,7 @@
 package ru.taximaxim.dbreplicator2;
 
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -82,13 +82,11 @@ public class ErrorReplicationTest extends AbstractReplicationTest{
         Helper.executeSqlFromFile(conn, "sql_query/sql_insert_error.sql");
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
+        Helper.InfoSelect(conn, "rep2_errors_log");
         List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table1");
         List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table1");
-        assertTrue(String.format("Количество записей не равны [%s != 5]", listSource.size()),
-                listSource.size() == 5);
-        assertTrue(String.format("Количество записей не равны [%s != 2]", listDest.size()),
-                listDest.size() == 2);
-
+        assertEquals("Количество записей в источнике не верно!", 5, listSource.size());
+        assertEquals("Количество записей в приемнике не верно!", 2, listDest.size());
     }
     
     /**

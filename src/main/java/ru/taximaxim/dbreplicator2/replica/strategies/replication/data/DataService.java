@@ -27,6 +27,7 @@
  */
 package ru.taximaxim.dbreplicator2.replica.strategies.replication.data;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -40,7 +41,7 @@ import ru.taximaxim.dbreplicator2.model.TableModel;
  * @author volodin_aa
  *
  */
-public interface DataService {
+public interface DataService extends AutoCloseable {
 
     /**
      * Инициализация с кешированием подготовленного запроса для удаления лог
@@ -167,4 +168,9 @@ public interface DataService {
     void setRepServerName(String repServerName)
             throws SQLException;
 
-}
+    /**
+     * Получение кешированного соединения
+     * 
+     * @return
+     */
+    Connection getConnection() throws SQLException;}

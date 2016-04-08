@@ -31,7 +31,6 @@ import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
-import ru.taximaxim.dbreplicator2.replica.StrategyException;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
 import ru.taximaxim.dbreplicator2.model.CronSettings;
 
@@ -66,11 +65,6 @@ public class CronRunner implements Job {
         } catch (ClassNotFoundException e) {
             LOG.error(
                     String.format("Ошибка инициализации при выполнении задачи [id_task = %d, %s]",
-                            cronSettings.getTaskId(),
-                            cronSettings.getDescription()), e);
-        } catch (StrategyException e) {
-            LOG.error(
-                    String.format("Ошибка при выполнении стратегии из задачи [id_task = %d, %s]",
                             cronSettings.getTaskId(),
                             cronSettings.getDescription()), e);
         } catch (SQLException e) {
