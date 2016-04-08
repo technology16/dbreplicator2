@@ -84,7 +84,7 @@ public abstract class GeneiricManagerAlgorithm {
      * @return
      */
     protected long getSuperLogPeriod() {
-        String superLogPeriod = data.getParam("delay");
+        String superLogPeriod = data.getParam("superLogPeriod");
         if (superLogPeriod == null) {
             return SUPER_LOG_PERIOD;
         }
@@ -95,7 +95,7 @@ public abstract class GeneiricManagerAlgorithm {
      * @return
      */
     protected long getStartAllRunnersPeriod() {
-        String superLogWatchParam = data.getParam("delay");
+        String superLogWatchParam = data.getParam("startAllRunnersPeriod");
         if (superLogWatchParam == null) {
             return START_ALL_RUNNERS_PERIOD;
         }
