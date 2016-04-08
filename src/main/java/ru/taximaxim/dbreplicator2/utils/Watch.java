@@ -61,7 +61,7 @@ public class Watch {
      *            отслеживаемый интервал, мс
      */
     public boolean timeOut(long interval) {
-        return remaining(interval) < 1;
+        return remaining(interval) <= 0;
     }
 
     /**

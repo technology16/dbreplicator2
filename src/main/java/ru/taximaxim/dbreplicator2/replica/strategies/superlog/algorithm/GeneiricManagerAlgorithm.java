@@ -216,7 +216,7 @@ public abstract class GeneiricManagerAlgorithm {
      * @throws InterruptedException
      * @throws ExecutionException
      */
-    protected int writeToWorkPool(Future<ResultSet> superLog,
+    protected int writeToWorkPool(Future<ResultSet> initSuperLog,
             Map<String, Collection<RunnerModel>> tableObservers,
             ExecutorService selectService, ExecutorService deleteService,
             Watch startAllRunnersWatch, long startAllRunnersPeriod)
@@ -226,7 +226,8 @@ public abstract class GeneiricManagerAlgorithm {
         long idSuperLog = 0;
         Set<RunnerModel> runners = new HashSet<RunnerModel>();
         Future<int[]> deleteSuperLogResult = null;
-
+        Future<ResultSet> superLog = initSuperLog;
+        
         do {
             rowsCount = 0;
             // Извлекаем очередную порцию данных
