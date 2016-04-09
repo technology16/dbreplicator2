@@ -149,6 +149,11 @@ public abstract class GeneiricManagerAlgorithm {
         return idSuperLog;
     }
 
+    /**
+     * Запуск алгоритма обработки супер лога
+     * 
+     * @throws SQLException
+     */
     public void execute() throws SQLException {
         // Выборку данных будем выполнять в отдельном потоке
         ExecutorService selectService = Executors.newSingleThreadExecutor();
@@ -355,8 +360,7 @@ public abstract class GeneiricManagerAlgorithm {
             insertRunnerData.executeBatch();
             superlogDataService.getTargetConnection().commit();
             // Удаляем данные в очереди с выборкой новой порции
-            deleteSuperLogResult = service.submit(new BatchCall(
-                    superlogDataService.getDeleteConnection(), deleteSuperLog));
+            deleteSuperLogResult = service.submit(new BatchCall(deleteSuperLog));
         } catch (SQLException e) {
             LOG.warn("Ошибка вставки записей в rep2_workpool_data:", e);
             superlogDataService.getTargetConnection().rollback();

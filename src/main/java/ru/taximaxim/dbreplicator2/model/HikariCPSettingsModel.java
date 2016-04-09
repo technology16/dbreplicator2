@@ -106,6 +106,20 @@ public class HikariCPSettingsModel implements Serializable {
 
     private boolean initializationFailFast;
 
+    /**
+     * Инициализация настроек HikariCP
+     * 
+     * @param poolId имя пула
+     * @param driver драйвер БД
+     * @param url путь к БД
+     * @param user пользователь
+     * @param pass пароль
+     * @param maximumPoolSize максимальное количество соединений
+     * @param initializationFailFast проверка доступность БД при старте
+     * @param connectionTimeout время ожидания свободного соединения, мс
+     * @param idleTimeout время удержания в пуле простаивающего соединения, мс
+     * @param maxLifetime время жизни коннекшена в базе, мс
+     */
     public HikariCPSettingsModel(String poolId, String driver, String url, String user,
             String pass, int maximumPoolSize, boolean initializationFailFast, 
             int connectionTimeout, int idleTimeout, int maxLifetime) {
@@ -121,6 +135,15 @@ public class HikariCPSettingsModel implements Serializable {
         this.maxLifetime = maxLifetime;
     }
     
+    /**
+     * Инициализация минимальных настроек HikariCP
+     * 
+     * @param poolId имя пула
+     * @param driver драйвер БД
+     * @param url путь к БД
+     * @param user пользователь
+     * @param pass пароль
+     */
     public HikariCPSettingsModel(String poolId, String driver, String url, String user,
             String pass) {
         this.poolId = poolId;
@@ -324,6 +347,12 @@ public class HikariCPSettingsModel implements Serializable {
     }
     
     
+    /**
+     * Получение конкретного раннера пула
+     *  
+     * @param runnerId идентификатор раннера
+     * @return
+     */
     public RunnerModel getRunner(int runnerId) {
         for (RunnerModel runner : getRunners()) {
             if (runner.getId() == runnerId) {

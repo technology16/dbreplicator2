@@ -58,20 +58,16 @@ public class HikariCPConnectionsFactory implements ConnectionFactory {
 
     /**
      * Конструктор фабрики
-     *
-     * @param entityManager
-     *            - ссылка на объект хранилища настроек
+     * 
+     * @param settingStorage ссылка на объект хранилища настроек
      */
     public HikariCPConnectionsFactory(HikariCPSettingsService settingStorage) {
         this.settingStorage = settingStorage;
         connectionPools = new HashMap<String, HikariDataSource>();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see ru.taximaxim.dbreplicator2.cf.ConnectionFactory#
-     * getConnection(java.lang.String)
+    /* (non-Javadoc)
+     * @see ru.taximaxim.dbreplicator2.cf.ConnectionFactory#get(java.lang.String)
      */
     public DataSource get(String poolName) {
         HikariDataSource connectionPool;
@@ -109,12 +105,8 @@ public class HikariCPConnectionsFactory implements ConnectionFactory {
         return connectionPool;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * ru.taximaxim.dbreplicator2.cf.ConnectionFactory#close
-     * (java.lang.String)
+    /* (non-Javadoc)
+     * @see ru.taximaxim.dbreplicator2.cf.ConnectionFactory#close(java.lang.String)
      */
     public void close(String poolName) {
         synchronized (connectionPools) {
@@ -123,11 +115,8 @@ public class HikariCPConnectionsFactory implements ConnectionFactory {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * ru.taximaxim.dbreplicator2.cf.ConnectionFactory#close()
+    /* (non-Javadoc)
+     * @see ru.taximaxim.dbreplicator2.cf.ConnectionFactory#close()
      */
     public void close() {
         synchronized (connectionPools) {

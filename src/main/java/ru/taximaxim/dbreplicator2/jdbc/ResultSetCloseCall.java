@@ -35,12 +35,20 @@ import java.util.concurrent.Callable;
  */
 public class ResultSetCloseCall implements Callable<Void> {
     
-    protected ResultSet resultSet;
+    protected final ResultSet resultSet;
     
+    /**
+     * Инициализация закрытия resultSet
+     * 
+     * @param resultSet закрываемый резурс
+     */
     public ResultSetCloseCall(ResultSet resultSet) {
         this.resultSet = resultSet;
     }
     
+    /* (non-Javadoc)
+     * @see java.util.concurrent.Callable#call()
+     */
     @Override
     public Void call() throws SQLException {
         resultSet.close();

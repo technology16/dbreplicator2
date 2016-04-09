@@ -47,10 +47,6 @@ import org.apache.log4j.Logger;
  * @author volodin_aa
  *
  */
-/**
- * @author volodin_aa
- *
- */
 @Entity
 @Table(name = "tables")
 public class TableModel implements Cloneable, Serializable {
@@ -179,6 +175,12 @@ public class TableModel implements Cloneable, Serializable {
         return getProperties().getProperty(key);
     }
 
+    /**
+     * Установка параметра таблицы
+     * 
+     * @param key параметр
+     * @param value значение
+     */
     public void setParam(String key, String value) {
         getProperties().put(key, value);
         StringWriter writer = new StringWriter();
@@ -188,6 +190,7 @@ public class TableModel implements Cloneable, Serializable {
 
     /**
      * Получение настроек
+     * 
      * @return
      */
     public Properties getProperties() {
@@ -287,6 +290,7 @@ public class TableModel implements Cloneable, Serializable {
     
     /**
      * Получение наименование таблицы-приемника
+     * 
      * @return
      */
     public String getDestTableName() {
