@@ -48,7 +48,7 @@ public class CronPool {
 
     private static final Logger LOG = Logger.getLogger(CronPool.class);
 
-    private CronSettingsService cronSettingsService;
+    private final CronSettingsService cronSettingsService;
 
     /**
      * Конструктор на основе сервиса настроек задач по расписанию

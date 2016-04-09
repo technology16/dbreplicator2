@@ -43,8 +43,8 @@ public class GenericDataTypeService extends GenericDataService implements DataSe
     /**
      * Кешированные запросы получения данных из источника и приемника
      */
-    private StatementsHashMap<TableModel, PreparedStatement> selectStatementsAll = new StatementsHashMap<TableModel, PreparedStatement>();
-    private Map<TableModel, Map<String, Integer>> allColsTypes = new HashMap<TableModel, Map<String, Integer>>();
+    private final StatementsHashMap<TableModel, PreparedStatement> selectStatementsAll = new StatementsHashMap<TableModel, PreparedStatement>();
+    private final Map<TableModel, Map<String, Integer>> allColsTypes = new HashMap<TableModel, Map<String, Integer>>();
 
     /**
      * Конструктор на основе подключения к БД

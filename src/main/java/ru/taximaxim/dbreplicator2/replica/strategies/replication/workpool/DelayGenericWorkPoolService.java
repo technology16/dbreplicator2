@@ -42,7 +42,7 @@ public class DelayGenericWorkPoolService extends GenericWorkPoolService
 
     private PreparedStatement lastOperationsStatement;
 
-    private int period;
+    private final int period;
 
     private PreparedStatement clearWorkPoolDataStatement;
 

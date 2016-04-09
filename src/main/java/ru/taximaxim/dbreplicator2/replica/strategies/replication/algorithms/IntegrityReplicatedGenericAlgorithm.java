@@ -53,8 +53,8 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm {
     
     private static final String ID_RUNNER = "idRunner";
     
-    private GenericDataTypeService sourceDataService;
-    private GenericDataTypeService destDataService;
+    private final GenericDataTypeService sourceDataService;
+    private final GenericDataTypeService destDataService;
     
     /**
      * Конструктор по умолчанию

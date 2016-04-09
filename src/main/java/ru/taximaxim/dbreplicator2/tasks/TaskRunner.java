@@ -42,12 +42,12 @@ public class TaskRunner implements Runnable {
     /**
      * Текущие настройки задачи
      */
-    private TaskSettings taskSettings;
+    private final TaskSettings taskSettings;
 
     /**
      * Инициализированный рабочий поток
      */
-    private WorkerThread workerThread;
+    private final WorkerThread workerThread;
 
     /**
      * Флаг активности задачи

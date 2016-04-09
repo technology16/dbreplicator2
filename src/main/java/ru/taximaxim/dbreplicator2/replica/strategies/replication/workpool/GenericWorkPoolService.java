@@ -39,7 +39,7 @@ import ru.taximaxim.dbreplicator2.replica.strategies.replication.data.DataServic
 public class GenericWorkPoolService extends DataServiceSkeleton
         implements WorkPoolService, AutoCloseable {
 
-    private ErrorsLogService errorsLog;
+    private final ErrorsLogService errorsLog;
 
     /**
      * @return the errorsLog

@@ -54,7 +54,7 @@ public class StatsService {
      */
     public static final int TYPE_ERROR = 0; 
 
-    private DataSource dataSource;
+    private final DataSource dataSource;
 
     /**
      * Конструктор - Сервис статистики

@@ -46,28 +46,28 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
     /**
      * Кешированные запросы удаления данных в приемнике
      */
-    private StatementsHashMap<TableModel, PreparedStatement> deleteStatements = new StatementsHashMap<TableModel, PreparedStatement>();
+    private final StatementsHashMap<TableModel, PreparedStatement> deleteStatements = new StatementsHashMap<TableModel, PreparedStatement>();
     /**
      * Кешированные запросы получения данных из источника
      */
-    private StatementsHashMap<TableModel, PreparedStatement> selectStatements = new StatementsHashMap<TableModel, PreparedStatement>();
+    private final StatementsHashMap<TableModel, PreparedStatement> selectStatements = new StatementsHashMap<TableModel, PreparedStatement>();
     /**
      * Кешированные запросы обновления данных в приемнике
      */
-    private StatementsHashMap<TableModel, PreparedStatement> updateStatements = new StatementsHashMap<TableModel, PreparedStatement>();
+    private final StatementsHashMap<TableModel, PreparedStatement> updateStatements = new StatementsHashMap<TableModel, PreparedStatement>();
     /**
      * Кешировнные запросы вставки данных в приемник
      */
-    private StatementsHashMap<TableModel, PreparedStatement> insertStatements = new StatementsHashMap<TableModel, PreparedStatement>();
+    private final StatementsHashMap<TableModel, PreparedStatement> insertStatements = new StatementsHashMap<TableModel, PreparedStatement>();
 
-    private Map<TableModel, Set<String>> priCols = new HashMap<TableModel, Set<String>>();
-    private Map<TableModel, Set<String>> allAvaliableCols = new HashMap<TableModel, Set<String>>();
-    private Map<TableModel, Set<String>> avaliableDataCols = new HashMap<TableModel, Set<String>>();
-    private Map<TableModel, Set<String>> allCols = new HashMap<TableModel, Set<String>>();
-    private Map<TableModel, Set<String>> dataCols = new HashMap<TableModel, Set<String>>();
-    private Map<TableModel, Set<String>> identityCols = new HashMap<TableModel, Set<String>>();
-    private Map<TableModel, Set<String>> ignoredCols = new HashMap<TableModel, Set<String>>();
-    private Map<TableModel, Set<String>> requiredCols = new HashMap<TableModel, Set<String>>();
+    private final Map<TableModel, Set<String>> priCols = new HashMap<TableModel, Set<String>>();
+    private final Map<TableModel, Set<String>> allAvaliableCols = new HashMap<TableModel, Set<String>>();
+    private final Map<TableModel, Set<String>> avaliableDataCols = new HashMap<TableModel, Set<String>>();
+    private final Map<TableModel, Set<String>> allCols = new HashMap<TableModel, Set<String>>();
+    private final Map<TableModel, Set<String>> dataCols = new HashMap<TableModel, Set<String>>();
+    private final Map<TableModel, Set<String>> identityCols = new HashMap<TableModel, Set<String>>();
+    private final Map<TableModel, Set<String>> ignoredCols = new HashMap<TableModel, Set<String>>();
+    private final Map<TableModel, Set<String>> requiredCols = new HashMap<TableModel, Set<String>>();
 
     protected static final String WHERE = "where";
 
