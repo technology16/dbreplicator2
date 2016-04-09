@@ -146,11 +146,11 @@ public class TaskRunner implements Runnable {
     protected void wait(Watch watch, long interval, String message)
             throws InterruptedException {
         // Ожидаем окончания периода синхронизации
-        long sleepTime = watch.remaining(interval);
+        final long sleepTime = watch.remaining(interval);
         if (sleepTime > 0) {
             LOG.info(String.format(message, sleepTime, taskSettings.getTaskId(),
                     taskSettings.getDescription()));
         }
-        watch.sleep(taskSettings.getSuccessInterval());
+        watch.sleep(interval);
     }
 }

@@ -23,8 +23,6 @@
 
 package ru.taximaxim.dbreplicator2.utils;
 
-import java.util.Date;
-
 /**
  * Класс для отслеживания равных промежутков времени
  * 
@@ -34,15 +32,13 @@ import java.util.Date;
  */
 public class Watch {
 
-    private final Date date;
     private long startTime;
 
     /**
      * Конструктор 
      */
     public Watch() {
-        this.date = new Date();
-        startTime = date.getTime();
+        startTime = System.currentTimeMillis();
     }
 
     /**
@@ -52,7 +48,7 @@ public class Watch {
      *            отслеживаемый интервал, мс
      */
     public long remaining(long interval) {
-        return startTime + interval - date.getTime();
+        return startTime + interval - System.currentTimeMillis();
     }
 
     /**
@@ -74,7 +70,7 @@ public class Watch {
      * @throws InterruptedException
      */
     public void sleep(long interval) throws InterruptedException {
-        long sleepTime = remaining(interval);
+        final long sleepTime = remaining(interval);
         if (sleepTime > 0) {
             Thread.sleep(sleepTime);
         }
@@ -85,6 +81,6 @@ public class Watch {
      * Отмеряем начало интервала
      */
     public void start() {
-        startTime = date.getTime();
+        startTime = System.currentTimeMillis();
     }
 }
