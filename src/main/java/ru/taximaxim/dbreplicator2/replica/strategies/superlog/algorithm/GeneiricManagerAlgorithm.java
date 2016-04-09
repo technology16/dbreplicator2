@@ -227,7 +227,7 @@ public abstract class GeneiricManagerAlgorithm {
         Set<RunnerModel> runners = new HashSet<RunnerModel>();
         Future<int[]> deleteSuperLogResult = null;
         Future<ResultSet> superLog = initSuperLog;
-        
+
         do {
             rowsCount = 0;
             // Извлекаем очередную порцию данных
@@ -264,8 +264,12 @@ public abstract class GeneiricManagerAlgorithm {
                 }
                 runners.clear();
 
-                LOG.info(String.format("Стратегией [id = %d] обработано %d строк...",
-                        data.getId(), rowsCount));
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(String.format(
+                            "Раннер [id_runner = %d, %s], стратегия [id = %d] обработано %d строк",
+                            data.getRunner().getId(), data.getRunner().getDescription(),
+                            data.getId(), rowsCount));
+                }
             }
             totalRows = +rowsCount;
         } while (rowsCount > 0);
