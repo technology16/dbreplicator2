@@ -43,38 +43,43 @@ import org.apache.log4j.Logger;
 @Table(name = "strategies")
 @IdClass(StrategyKey.class)
 public class StrategyModel implements Serializable {
-    
+
     private static final long serialVersionUID = 1L;
-    
-    public StrategyModel() {}
-    
+
+    /**
+     * Конструктор по умолчанию
+     */
+    public StrategyModel() {
+    }
+
+    /**
+     * Инициализация стратегии
+     * 
+     * @param key
+     *            уникальный идентификатор стратегии
+     */
     public StrategyModel(StrategyKey key) {
         this.id = key.getId();
         this.runner = key.getRunner();
     }
-    
+
     /**
      * Идентификатор стратегии
      */
-    /**
-     * Идентификатор настройки
-     */
     @Id
-    @AttributeOverrides({
-        @AttributeOverride(name = "id", column = @Column(name = "id")),
-        @AttributeOverride(name = "runner", column = @Column(name = "id_runner"))
-    })
+    @AttributeOverrides({ @AttributeOverride(name = "id", column = @Column(name = "id")),
+            @AttributeOverride(name = "runner", column = @Column(name = "id_runner")) })
 
     @Column(name = "id")
     private Integer id;
-    
+
     /**
      * Поток исполнитель, которому принадлежит стратегия
      */
     @ManyToOne
     @JoinColumn(name = "id_runner")
     private RunnerModel runner;
-    
+
     /**
      * Имя класса
      */
@@ -83,7 +88,7 @@ public class StrategyModel implements Serializable {
     /**
      * Параметры
      */
-    @Column(length=20000)
+    @Column(length = 20000)
     private String param;
 
     /**
@@ -98,7 +103,7 @@ public class StrategyModel implements Serializable {
 
     /**
      * Настройки
-    */
+     */
     private Properties prop;
 
     /**
@@ -155,10 +160,10 @@ public class StrategyModel implements Serializable {
      */
     public void setParam(String key, String value) {
         getProp().put(key, value);
-        
+
         StringWriter writer = new StringWriter();
         prop.list(new PrintWriter(writer));
-        this.param =  writer.getBuffer().toString();
+        this.param = writer.getBuffer().toString();
     }
 
     /**
@@ -188,27 +193,30 @@ public class StrategyModel implements Serializable {
     public void setPriority(int priority) {
         this.priority = priority;
     }
-    
+
     /**
      * Получение настроек
+     * 
      * @return
      */
-    private Properties getProp(){
-        if(this.prop == null) {
+    private Properties getProp() {
+        if (this.prop == null) {
             this.prop = new Properties();
-            if(param != null){
+            if (param != null) {
                 try {
                     this.prop.load(new StringReader(param));
                 } catch (IOException e) {
-                    Logger.getLogger("StrategyModel").error("Ошибка при чтение параметров [" + param + "]!", e);
+                    Logger.getLogger("StrategyModel")
+                            .error("Ошибка при чтение параметров [" + param + "]!", e);
                 }
             }
         }
         return this.prop;
     }
-    
+
     /**
      * Получение всех параметров в виде строки
+     * 
      * @return
      */
     public String getParam() {
