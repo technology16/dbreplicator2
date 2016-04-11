@@ -87,7 +87,7 @@ public abstract class GeneiricManagerAlgorithm {
      * @return
      */
     protected long getSuperLogPeriod() {
-        String superLogPeriod = data.getParam(SUPER_LOG_PERIOD_PARAM);
+        final String superLogPeriod = data.getParam(SUPER_LOG_PERIOD_PARAM);
         if (superLogPeriod == null) {
             return SUPER_LOG_PERIOD;
         }
@@ -98,7 +98,7 @@ public abstract class GeneiricManagerAlgorithm {
      * @return
      */
     protected long getStartAllRunnersPeriod() {
-        String superLogWatchParam = data.getParam(START_ALL_RUNNERS_PERIOD_PARAM);
+        final String superLogWatchParam = data.getParam(START_ALL_RUNNERS_PERIOD_PARAM);
         if (superLogWatchParam == null) {
             return START_ALL_RUNNERS_PERIOD;
         }
@@ -106,7 +106,8 @@ public abstract class GeneiricManagerAlgorithm {
     }
 
     /**
-     * Вставка данных в ворк пул
+     * Вставка данных в ворк пул. Возвращает true если у таблицы были
+     * обработчики
      * 
      * @param superLogResult
      * @param deleteSuperLog
@@ -114,15 +115,16 @@ public abstract class GeneiricManagerAlgorithm {
      * @param runners
      * @param tableName
      * @param observers
+     * 
      * @throws SQLException
      */
-    protected long insertRunnersData(ResultSet superLogResult,
+    protected int insertRunnersData(ResultSet superLogResult,
             PreparedStatement insertRunnerData, PreparedStatement deleteSuperLog,
             Map<String, Collection<RunnerModel>> tableObservers, Set<RunnerModel> runners)
             throws SQLException {
-        long idSuperLog = superLogResult.getLong(WorkPoolService.ID_SUPERLOG);
-        String tableName = superLogResult.getString(WorkPoolService.ID_TABLE);
-        Collection<RunnerModel> observers = tableObservers.get(tableName);
+        final long idSuperLog = superLogResult.getLong(WorkPoolService.ID_SUPERLOG);
+        final String tableName = superLogResult.getString(WorkPoolService.ID_TABLE);
+        final Collection<RunnerModel> observers = tableObservers.get(tableName);
         if (observers != null) {
             // Заполняем "константы"
             insertRunnerData.setLong(2, idSuperLog);
@@ -148,8 +150,88 @@ public abstract class GeneiricManagerAlgorithm {
             // Удаляем исходную запись
             deleteSuperLog.setLong(1, idSuperLog);
             deleteSuperLog.addBatch();
+            return 1;
         }
-        return idSuperLog;
+        return 0;
+    }
+
+    /**
+     * Извлекает данные из супер лога и разносит по раннерам в ворк пуле.
+     * Работает пока очередная выборка не вернет 0 строк.
+     * 
+     * @param superLog
+     * @param tableObservers
+     * @param selectService
+     * @param deleteService
+     * @return суммарное количество обработанных строк
+     * @throws SQLException
+     * @throws InterruptedException
+     * @throws ExecutionException
+     */
+    protected int writeToWorkPool(Future<ResultSet> initSuperLog,
+            Map<String, Collection<RunnerModel>> tableObservers,
+            ExecutorService selectService, ExecutorService deleteService,
+            Watch startAllRunnersWatch, long startAllRunnersPeriod)
+            throws SQLException, InterruptedException, ExecutionException {
+        int rowsCount = 0;
+        long idSuperLog = 0;
+        boolean hasRows;
+        final Set<RunnerModel> runners = new HashSet<RunnerModel>();
+        Future<int[]> deleteSuperLogResult = null;
+        Future<ResultSet> superLog = initSuperLog;
+
+        do {
+            hasRows = false;
+            // Извлекаем очередную порцию данных
+            try (final ResultSet superLogResult = superLog.get()) {
+                waitDeleteSuperlog(deleteSuperLogResult);
+
+                while (superLogResult.next()) {
+                    // Копируем записи
+                    idSuperLog = superLogResult.getLong(WorkPoolService.ID_SUPERLOG);
+                    rowsCount += insertRunnersData(superLogResult,
+                            getInsertWorkpoolStatement(), getDeleteSuperlogStatement(),
+                            tableObservers, runners);
+                    hasRows = true;
+                }
+            }
+
+            // Если в выборке были данные, то в параллельном потоке
+            // запускаем чтение новых данных
+            if (hasRows) {
+                getSelectSuperlogStatement().setLong(1, idSuperLog);
+                superLog = selectService
+                        .submit(new QueryCall(getSelectSuperlogStatement()));
+
+                // Сбрасываем данные в базу
+                deleteSuperLogResult = executeBatches(deleteService,
+                        getDeleteSuperlogStatement(), getInsertWorkpoolStatement());
+
+                // запускаем обработчики реплик
+                if (startAllRunnersWatch.timeOut(startAllRunnersPeriod)) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug(String.format(
+                                "Раннер [id_runner = %d, %s], стратегия [id = %d] запустила все раннеры",
+                                data.getRunner().getId(),
+                                data.getRunner().getDescription(), data.getId()));
+                    }
+                    startAllRunners(tableObservers);
+                    startAllRunnersWatch.start();
+                } else {
+                    startRunners(runners);
+                }
+                runners.clear();
+
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(String.format(
+                            "Раннер [id_runner = %d, %s], стратегия [id = %d] обработано %d строк",
+                            data.getRunner().getId(), data.getRunner().getDescription(),
+                            data.getId(), rowsCount));
+                }
+            }
+        } while (hasRows);
+
+        return rowsCount;
     }
 
     /**
@@ -159,28 +241,28 @@ public abstract class GeneiricManagerAlgorithm {
      */
     public void execute() throws SQLException {
         // Выборку данных будем выполнять в отдельном потоке
-        ExecutorService selectService = Executors.newSingleThreadExecutor();
+        final ExecutorService selectService = Executors.newSingleThreadExecutor();
         // Переносим данные
         try {
-            PreparedStatement initSelectSuperLog = getInitSelectSuperlogStatement();
+            final PreparedStatement initSelectSuperLog = getInitSelectSuperlogStatement();
             Future<ResultSet> superLog = selectService
                     .submit(new QueryCall(initSelectSuperLog));
             // Начинаем отсчет времени
-            Watch superLogWatch = new Watch();
-            Watch startAllRunnersWatch = new Watch();
+            final Watch superLogWatch = new Watch();
+            final Watch startAllRunnersWatch = new Watch();
 
-            long superLogPeriod = getSuperLogPeriod();
-            long startAllRunnersPeriod = getStartAllRunnersPeriod();
+            final long superLogPeriod = getSuperLogPeriod();
+            final long startAllRunnersPeriod = getStartAllRunnersPeriod();
 
             // Строим список обработчиков реплик
-            Map<String, Collection<RunnerModel>> tableObservers = getTableObservers(
+            final Map<String, Collection<RunnerModel>> tableObservers = getTableObservers(
                     data.getRunner().getSource());
 
             // При старте принудительно запускаем все обработчики
             startAllRunners(tableObservers);
 
             // Удалени данных будем выполнять в фоновой очереди заданий
-            ExecutorService deleteService = Executors.newSingleThreadExecutor();
+            final ExecutorService deleteService = Executors.newSingleThreadExecutor();
 
             int totalRowsCount = 0;
             try {
@@ -212,86 +294,6 @@ public abstract class GeneiricManagerAlgorithm {
     }
 
     /**
-     * Извлекает данные из супер лога и разносит по раннерам в ворк пуле.
-     * Работает пока очередная выборка не вернет 0 строк.
-     * 
-     * @param superLog
-     * @param tableObservers
-     * @param selectService
-     * @param deleteService
-     * @return суммарное количество обработанных строк
-     * @throws SQLException
-     * @throws InterruptedException
-     * @throws ExecutionException
-     */
-    protected int writeToWorkPool(Future<ResultSet> initSuperLog,
-            Map<String, Collection<RunnerModel>> tableObservers,
-            ExecutorService selectService, ExecutorService deleteService,
-            Watch startAllRunnersWatch, long startAllRunnersPeriod)
-            throws SQLException, InterruptedException, ExecutionException {
-        int totalRows = 0;
-        int rowsCount = 0;
-        long idSuperLog = 0;
-        Set<RunnerModel> runners = new HashSet<RunnerModel>();
-        Future<int[]> deleteSuperLogResult = null;
-        Future<ResultSet> superLog = initSuperLog;
-
-        do {
-            rowsCount = 0;
-            // Извлекаем очередную порцию данных
-            try (ResultSet superLogResult = superLog.get()) {
-
-                waitDeleteSuperlog(deleteSuperLogResult);
-
-                while (superLogResult.next()) {
-                    // Копируем записи
-                    idSuperLog = insertRunnersData(superLogResult,
-                            getInsertWorkpoolStatement(), getDeleteSuperlogStatement(),
-                            tableObservers, runners);
-                    rowsCount++;
-                }
-            }
-
-            // Если в выборке были данные, то в параллельном потоке
-            // запускаем чтение новых данных
-            if (rowsCount > 0) {
-                getSelectSuperlogStatement().setLong(1, idSuperLog);
-                superLog = selectService
-                        .submit(new QueryCall(getSelectSuperlogStatement()));
-
-                // Сбрасываем данные в базу
-                deleteSuperLogResult = executeBatches(deleteService,
-                        getDeleteSuperlogStatement(), getInsertWorkpoolStatement());
-
-                // запускаем обработчики реплик
-                if (startAllRunnersWatch.timeOut(startAllRunnersPeriod)) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(String.format(
-                                "Раннер [id_runner = %d, %s], стратегия [id = %d] запустила все раннеры",
-                                data.getRunner().getId(),
-                                data.getRunner().getDescription(), data.getId()));
-                    }
-                    startAllRunners(tableObservers);
-                    startAllRunnersWatch.start();
-                } else {
-                    startRunners(runners);
-                }
-                runners.clear();
-
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(String.format(
-                            "Раннер [id_runner = %d, %s], стратегия [id = %d] обработано %d строк",
-                            data.getRunner().getId(), data.getRunner().getDescription(),
-                            data.getId(), rowsCount));
-                }
-            }
-            totalRows += rowsCount;
-        } while (rowsCount > 0);
-
-        return totalRows;
-    }
-
-    /**
      * @param deleteSuperLogResult
      * @throws InterruptedException
      * @throws ExecutionException
@@ -311,7 +313,7 @@ public abstract class GeneiricManagerAlgorithm {
      */
     protected void startAllRunners(Map<String, Collection<RunnerModel>> tableObservers)
             throws SQLException {
-        Set<RunnerModel> runners = new HashSet<RunnerModel>();
+        final Set<RunnerModel> runners = new HashSet<RunnerModel>();
         // запускаем все обработчики реплик
         for (Collection<RunnerModel> observers : tableObservers.values()) {
             runners.addAll(observers);
@@ -384,11 +386,11 @@ public abstract class GeneiricManagerAlgorithm {
      */
     public Map<String, Collection<RunnerModel>> getTableObservers(
             HikariCPSettingsModel sourcePool) {
-        Map<String, Collection<RunnerModel>> tableObservers = new TreeMap<String, Collection<RunnerModel>>(
+        final Map<String, Collection<RunnerModel>> tableObservers = new TreeMap<String, Collection<RunnerModel>>(
                 String.CASE_INSENSITIVE_ORDER);
         for (RunnerModel runner : sourcePool.getRunners()) {
             for (TableModel table : runner.getTables()) {
-                String tableName = table.getName();
+                final String tableName = table.getName();
                 Collection<RunnerModel> observers = tableObservers.get(tableName);
                 if (observers == null) {
                     observers = new ArrayList<RunnerModel>();
@@ -407,7 +409,7 @@ public abstract class GeneiricManagerAlgorithm {
      */
     protected Set<Runner> getRunnersFromTask() {
         if (tRunners == null) {
-            TaskSettingsService taskSettingsService = Core.getTaskSettingsService();
+            final TaskSettingsService taskSettingsService = Core.getTaskSettingsService();
             tRunners = new HashSet<>();
             for (TaskSettings task : taskSettingsService.getTasks().values()) {
                 tRunners.add(task.getRunner());
