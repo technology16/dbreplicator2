@@ -60,6 +60,9 @@ import ru.taximaxim.dbreplicator2.utils.Watch;
  */
 public abstract class GeneiricManagerAlgorithm {
 
+    private static final String SUPER_LOG_PERIOD_PARAM = "superLogPeriod";
+    private static final String START_ALL_RUNNERS_PERIOD_PARAM = "startAllRunnersPeriod";
+
     private static final long SUPER_LOG_PERIOD = 100;
     private static final long START_ALL_RUNNERS_PERIOD = 1000;
 
@@ -84,7 +87,7 @@ public abstract class GeneiricManagerAlgorithm {
      * @return
      */
     protected long getSuperLogPeriod() {
-        String superLogPeriod = data.getParam("superLogPeriod");
+        String superLogPeriod = data.getParam(SUPER_LOG_PERIOD_PARAM);
         if (superLogPeriod == null) {
             return SUPER_LOG_PERIOD;
         }
@@ -95,7 +98,7 @@ public abstract class GeneiricManagerAlgorithm {
      * @return
      */
     protected long getStartAllRunnersPeriod() {
-        String superLogWatchParam = data.getParam("startAllRunnersPeriod");
+        String superLogWatchParam = data.getParam(START_ALL_RUNNERS_PERIOD_PARAM);
         if (superLogWatchParam == null) {
             return START_ALL_RUNNERS_PERIOD;
         }
@@ -262,6 +265,12 @@ public abstract class GeneiricManagerAlgorithm {
 
                 // запускаем обработчики реплик
                 if (startAllRunnersWatch.timeOut(startAllRunnersPeriod)) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug(String.format(
+                                "Раннер [id_runner = %d, %s], стратегия [id = %d] запустила все раннеры",
+                                data.getRunner().getId(),
+                                data.getRunner().getDescription(), data.getId()));
+                    }
                     startAllRunners(tableObservers);
                     startAllRunnersWatch.start();
                 } else {
@@ -276,7 +285,7 @@ public abstract class GeneiricManagerAlgorithm {
                             data.getId(), rowsCount));
                 }
             }
-            totalRows = +rowsCount;
+            totalRows += rowsCount;
         } while (rowsCount > 0);
 
         return totalRows;
