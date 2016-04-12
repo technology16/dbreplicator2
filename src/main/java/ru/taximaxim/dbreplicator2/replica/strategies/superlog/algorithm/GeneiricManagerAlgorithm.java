@@ -63,8 +63,8 @@ public abstract class GeneiricManagerAlgorithm {
     private static final String SUPER_LOG_PERIOD_PARAM = "superLogPeriod";
     private static final String START_ALL_RUNNERS_PERIOD_PARAM = "startAllRunnersPeriod";
 
-    private static final long SUPER_LOG_PERIOD = 100;
-    private static final long START_ALL_RUNNERS_PERIOD = 1000;
+    private static final long SUPER_LOG_PERIOD = 400;
+    private static final long START_ALL_RUNNERS_PERIOD = 10000;
 
     private static final Logger LOG = Logger.getLogger(GeneiricManagerAlgorithm.class);
 
