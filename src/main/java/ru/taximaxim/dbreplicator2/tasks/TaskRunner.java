@@ -23,11 +23,10 @@
 package ru.taximaxim.dbreplicator2.tasks;
 
 import java.sql.SQLException;
-import java.util.Date;
-
 import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
+import ru.taximaxim.dbreplicator2.utils.Watch;
 import ru.taximaxim.dbreplicator2.model.TaskSettings;
 
 /**
@@ -43,17 +42,17 @@ public class TaskRunner implements Runnable {
     /**
      * Текущие настройки задачи
      */
-    private TaskSettings taskSettings;
+    private final TaskSettings taskSettings;
 
     /**
      * Инициализированный рабочий поток
      */
-    private WorkerThread workerThread;
+    private final WorkerThread workerThread;
 
     /**
      * Флаг активности задачи
      */
-    private boolean enabled;
+    private volatile boolean enabled;
 
     /**
      * @param taskSettings
@@ -66,84 +65,92 @@ public class TaskRunner implements Runnable {
     }
 
     /**
-     * Метод для корректной остановки потока задачи. Поток дождется окончания текущего цикла и завершит работу
+     * Метод для корректной остановки потока задачи. Поток дождется окончания
+     * текущего цикла и завершит работу
      */
-    public void stop(){
+    public void stop() {
         enabled = false;
+    }
+
+    /**
+     * Пытаемся выполнить таск
+     * 
+     * @return true если все прошло успешно
+     */
+    protected boolean tryProcessCommand() {
+        try {
+            workerThread.processCommand();
+            return true;
+        } catch (InstantiationException | IllegalAccessException e) {
+            LOG.error(String.format(
+                    "Ошибка при создании объекта-стратегии раннера задачи [id_task = %d, %s]",
+                    taskSettings.getTaskId(), taskSettings.getDescription()), e);
+        } catch (ClassNotFoundException e) {
+            LOG.error(String.format(
+                    "Ошибка инициализации при выполнении задачи [id_task = %d, %s]",
+                    taskSettings.getTaskId(), taskSettings.getDescription()), e);
+        } catch (SQLException e) {
+            LOG.error(String.format(
+                    "Ошибка БД при выполнении стратегии из задачи [id_task = %d, %s]",
+                    taskSettings.getTaskId(), taskSettings.getDescription()), e);
+            SQLException nextEx = e.getNextException();
+            while (nextEx != null) {
+                LOG.error("Подробности:", nextEx);
+                nextEx = nextEx.getNextException();
+            }
+        } catch (Exception e) {
+            LOG.error(String.format("Ошибка при выполнении задачи [id_task = %d, %s]",
+                    taskSettings.getTaskId(), taskSettings.getDescription()), e);
+        }
+
+        return false;
     }
 
     @Override
     public void run() {
-        LOG.info(String.format("Запуск задачи [%d] %s",
-                taskSettings.getTaskId(), taskSettings.getDescription()));
-        while (enabled) {
-            long startTime = new Date().getTime();
-            boolean isSuccess = false;
-            
-            try {
-                workerThread.processCommand();
-                isSuccess = true;
-            } catch (InstantiationException | IllegalAccessException e) {
-                LOG.error(
-                        String.format("Ошибка при создании объекта-стратегии раннера задачи [id_task = %d, %s]", 
-                                taskSettings.getTaskId(),
-                                taskSettings.getDescription()), 
-                                e);
-            } catch (ClassNotFoundException e) {
-                LOG.error(
-                        String.format("Ошибка инициализации при выполнении задачи [id_task = %d, %s]",
-                                taskSettings.getTaskId(),
-                                taskSettings.getDescription()), e);
-            } catch (SQLException e) {
-                LOG.error(
-                        String.format("Ошибка БД при выполнении стратегии из задачи [id_task = %d, %s]",
-                        taskSettings.getTaskId(),
-                        taskSettings.getDescription()), e);
-                SQLException nextEx = e.getNextException();
-                while (nextEx!=null){
-                    LOG.error("Подробности:", nextEx);
-                    nextEx = nextEx.getNextException();
-                }
-            } catch (Exception e) {
-                LOG.error(
-                        String.format("Ошибка при выполнении задачи [id_task = %d, %s]",
-                                taskSettings.getTaskId(),
-                                taskSettings.getDescription()), e);
-            }
-            
-            try {
-                if (isSuccess) {
-                    if(taskSettings.getSuccessInterval()==null) {
-                        stop();
-                    } else {
-                        // Ожидаем окончания периода синхронизации
-                        long sleepTime = startTime + taskSettings.getSuccessInterval()
-                                - new Date().getTime();
-                        if (sleepTime > 0) {
-                            LOG.info(String
-                                    .format("Ожидаем %d милисекунд после завершения задачи [id_task = %d, %s]",
-                                            sleepTime, taskSettings.getTaskId(),
-                                            taskSettings.getDescription()));
-                            Thread.sleep(sleepTime);
-                        }
+        LOG.info(String.format("Запуск задачи [%d] %s", taskSettings.getTaskId(),
+                taskSettings.getDescription()));
+        final Watch watch = new Watch();
+        final Integer successInterval = taskSettings.getSuccessInterval();
+        final Integer failInterval = taskSettings.getFailInterval();
+        try {
+            while (enabled) {
+                if (tryProcessCommand()) {
+                    if (successInterval == null) {
+                        break;
                     }
+                    wait(watch, successInterval,
+                            "Ожидаем %d милисекунд после завершения задачи [id_task = %d, %s]");
                 } else {
-                    if(taskSettings.getFailInterval()==null) {
-                        stop();
-                    } else {
-                        long sleepTime = startTime + taskSettings.getFailInterval() - new Date().getTime();
-                        if (sleepTime > 0) {
-                            LOG.info(String.format(
-                                    "Ожидаем %d миллисекунд до рестарта задачи [id_task = %d, %s]",
-                                    sleepTime, taskSettings.getTaskId(), 
-                                    taskSettings.getDescription()));
-                            Thread.sleep(sleepTime);
-                        }
+                    if (failInterval == null) {
+                        break;
                     }
+                    wait(watch, failInterval,
+                            "Ожидаем %d миллисекунд до рестарта задачи [id_task = %d, %s]");
                 }
-            } catch (InterruptedException ex) {
-                LOG.warn(ex);
             }
+            stop();
+        } catch (InterruptedException ex) {
+            LOG.warn(ex);
+            Thread.currentThread().interrupt();
         }
+    }
+
+    /**
+     * Ожидаем interval (мс)
+     * 
+     * @param watch
+     * @param interval
+     * @throws InterruptedException
+     */
+    protected void wait(Watch watch, long interval, String message)
+            throws InterruptedException {
+        // Ожидаем окончания периода синхронизации
+        final long sleepTime = watch.remaining(interval);
+        if (sleepTime > 0) {
+            LOG.info(String.format(message, sleepTime, taskSettings.getTaskId(),
+                    taskSettings.getDescription()));
+        }
+        watch.sleep(interval);
     }
 }

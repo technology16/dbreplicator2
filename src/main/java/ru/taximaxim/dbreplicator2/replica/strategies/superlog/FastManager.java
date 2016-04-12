@@ -52,7 +52,7 @@ public class FastManager extends StrategySkeleton implements Strategy {
                 .get(data.getRunner().getTarget().getPoolId());
         try (GenericSuperlogDataService superlogDataServise = new GenericSuperlogDataService(
                 source, target, getFetchSize(data));) {
-            new FastManagerAlgorithm(superlogDataServise).execute(data);
+            new FastManagerAlgorithm(superlogDataServise, data).execute();
         }
     }
 }

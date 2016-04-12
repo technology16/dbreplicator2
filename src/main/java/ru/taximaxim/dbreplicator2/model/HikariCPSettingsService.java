@@ -55,6 +55,12 @@ public class HikariCPSettingsService {
         this.sessionFactory = sessionFactory;
     }
 
+    /**
+     * Получение настроек HikariCP по имени пула
+     * 
+     * @param poolName имя пула
+     * @return
+     */
     public HikariCPSettingsModel getDataBaseSettingsByName(String poolName) {
         Session session = sessionFactory.openSession();
         try {
@@ -64,6 +70,11 @@ public class HikariCPSettingsService {
         }
     }
 
+    /**
+     * Получение всех настроек HikariCP
+     * 
+     * @return
+     */
     public Map<String, HikariCPSettingsModel> getDataBaseSettings() {
         Map<String, HikariCPSettingsModel> result = new HashMap<String, HikariCPSettingsModel>();
 
@@ -83,6 +94,11 @@ public class HikariCPSettingsService {
         return result;
     }
 
+    /**
+     * Обновление настроек пула HikariCP
+     * 
+     * @param dataBaseSettings новые настройки пула
+     */
     public void setDataBaseSettings(HikariCPSettingsModel dataBaseSettings) {
         Session session = sessionFactory.openSession();
         session.beginTransaction();
@@ -97,6 +113,11 @@ public class HikariCPSettingsService {
         }
     }
 
+    /**
+     * Удаление настроек пула HikariCP
+     * 
+     * @param dataBaseSettings удаляемые настройки
+     */
     public void delDataBaseSettings(HikariCPSettingsModel dataBaseSettings) {
         Session session = sessionFactory.openSession();
         session.beginTransaction();

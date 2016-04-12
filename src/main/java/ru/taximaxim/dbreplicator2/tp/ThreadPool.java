@@ -46,7 +46,7 @@ public class ThreadPool {
     private static final Logger LOG = Logger.getLogger(ThreadPool.class);
 
     private ExecutorService executor = null;
-    private Set<RunnerModel> pendingRunners = new HashSet<RunnerModel>();
+    private final Set<RunnerModel> pendingRunners = new HashSet<RunnerModel>();
 
     /**
      * Инициализация пула потоков

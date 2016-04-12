@@ -36,8 +36,8 @@ import ru.taximaxim.dbreplicator2.model.RunnerModel;
  */
 public class PendingWorkerThread implements Runnable {
 
-    private Set<RunnerModel> pendingRunners;
-    private Runner runner;
+    private final Set<RunnerModel> pendingRunners;
+    private final Runner runner;
     private WorkerThread workerThread;
 
     /**

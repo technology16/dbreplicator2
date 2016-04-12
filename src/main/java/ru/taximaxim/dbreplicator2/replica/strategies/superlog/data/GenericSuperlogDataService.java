@@ -46,10 +46,17 @@ public class GenericSuperlogDataService implements SuperlogDataService {
     protected Connection deleteConnection;
     protected Connection targetConnection;
 
-    protected DataSource source;
-    protected DataSource target;
-    protected int fetchSize;
+    protected final DataSource source;
+    protected final DataSource target;
+    protected final int fetchSize;
 
+    /**
+     * Инициализация дата сервиса
+     * 
+     * @param source пул источника
+     * @param target пул приемника
+     * @param fetchSize размер выборки
+     */
     public GenericSuperlogDataService(DataSource source, DataSource target,
             int fetchSize) {
         this.source = source;
@@ -57,6 +64,9 @@ public class GenericSuperlogDataService implements SuperlogDataService {
         this.fetchSize = fetchSize;
     }
 
+    /* (non-Javadoc)
+     * @see ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.SuperlogDataService#getSelectConnection()
+     */
     @Override
     public Connection getSelectConnection() throws SQLException {
         if (selectConnection == null) {
@@ -68,6 +78,9 @@ public class GenericSuperlogDataService implements SuperlogDataService {
         return selectConnection;
     }
 
+    /* (non-Javadoc)
+     * @see ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.SuperlogDataService#getDeleteConnection()
+     */
     @Override
     public Connection getDeleteConnection() throws SQLException {
         if (deleteConnection == null) {
@@ -79,6 +92,9 @@ public class GenericSuperlogDataService implements SuperlogDataService {
         return deleteConnection;
     }
 
+    /* (non-Javadoc)
+     * @see ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.SuperlogDataService#getTargetConnection()
+     */
     @Override
     public Connection getTargetConnection() throws SQLException {
         if (targetConnection == null) {
@@ -90,6 +106,9 @@ public class GenericSuperlogDataService implements SuperlogDataService {
         return targetConnection;
     }
 
+    /* (non-Javadoc)
+     * @see ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.SuperlogDataService#getInitSelectSuperlogStatement()
+     */
     @Override
     public PreparedStatement getInitSelectSuperlogStatement() throws SQLException {
         if (selectInitSuperlogStatement == null) {
@@ -103,6 +122,9 @@ public class GenericSuperlogDataService implements SuperlogDataService {
         return selectInitSuperlogStatement;
     }
 
+    /* (non-Javadoc)
+     * @see ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.SuperlogDataService#getSelectSuperlogStatement()
+     */
     @Override
     public PreparedStatement getSelectSuperlogStatement() throws SQLException {
         if (selectSuperlogStatement == null) {
@@ -116,6 +138,9 @@ public class GenericSuperlogDataService implements SuperlogDataService {
         return selectSuperlogStatement;
     }
 
+    /* (non-Javadoc)
+     * @see ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.SuperlogDataService#getDeleteSuperlogStatement()
+     */
     @Override
     public PreparedStatement getDeleteSuperlogStatement() throws SQLException {
         if (deleteSuperlogStatement == null) {
@@ -126,6 +151,9 @@ public class GenericSuperlogDataService implements SuperlogDataService {
         return deleteSuperlogStatement;
     }
 
+    /* (non-Javadoc)
+     * @see ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.SuperlogDataService#getInsertWorkpoolStatement()
+     */
     @Override
     public PreparedStatement getInsertWorkpoolStatement() throws SQLException {
         if (insertWorkpoolStatement == null) {
@@ -137,11 +165,14 @@ public class GenericSuperlogDataService implements SuperlogDataService {
         return insertWorkpoolStatement;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.AutoCloseable#close()
+     */
     @Override
     public void close() throws SQLException {
-        try (Connection selectConnection = this.selectConnection;
-                Connection deleteConnection = this.deleteConnection;
-                Connection targetConnection = this.targetConnection;
+        try (final Connection selectConnection = this.selectConnection;
+                final Connection deleteConnection = this.deleteConnection;
+                final Connection targetConnection = this.targetConnection;
                 PreparedStatement insertWorkpoolStatement = this.insertWorkpoolStatement;
                 PreparedStatement deleteSuperlogStatement = this.deleteSuperlogStatement;
                 PreparedStatement selectSuperlogStatement = this.selectSuperlogStatement;

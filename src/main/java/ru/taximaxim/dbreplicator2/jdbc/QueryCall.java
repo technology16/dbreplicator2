@@ -36,12 +36,20 @@ import java.util.concurrent.Callable;
  */
 public class QueryCall implements Callable<ResultSet> {
     
-    protected PreparedStatement statement;
+    protected final PreparedStatement statement;
     
+    /**
+     * Инициализация вывполнения запроса
+     * 
+     * @param statement выполняемый запрос
+     */
     public QueryCall(PreparedStatement statement) {
         this.statement = statement;
     }
     
+    /* (non-Javadoc)
+     * @see java.util.concurrent.Callable#call()
+     */
     @Override
     public ResultSet call() throws SQLException {
         return statement.executeQuery();

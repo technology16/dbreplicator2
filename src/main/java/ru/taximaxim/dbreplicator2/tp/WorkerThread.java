@@ -43,7 +43,7 @@ import ru.taximaxim.dbreplicator2.utils.Core;
 public class WorkerThread implements Runnable {
 
     private static final Logger LOG = Logger.getLogger(WorkerThread.class);
-    private Runner runner;
+    private final Runner runner;
 
     /**
      * Конструктор на основе настроек раннера

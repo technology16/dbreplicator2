@@ -64,14 +64,14 @@ public class GenericAlgorithm {
 
     private boolean isStrict = false;
 
-    private WorkPoolService workPoolService;
+    private final WorkPoolService workPoolService;
 
-    private DataService sourceDataService;
+    private final DataService sourceDataService;
 
-    private DataService destDataService;
+    private final DataService destDataService;
 
-    private Count countSuccess;
-    private Count countError;
+    private final Count countSuccess;
+    private final Count countError;
 
     protected Map<TableModel, TableModel> destTables = new HashMap<TableModel, TableModel>();
 
