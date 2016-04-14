@@ -103,6 +103,8 @@ public abstract class AbstractReplicationTest {
         Core.taskSettingsServiceClose();
         Core.configurationClose();
         Core.threadPoolClose();
+        Core.cronPoolClose();
+        Core.cronSettingsServiceClose();
         errorsLog.close();
     }
     
