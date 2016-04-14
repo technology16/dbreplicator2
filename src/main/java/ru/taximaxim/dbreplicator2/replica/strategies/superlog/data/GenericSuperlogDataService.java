@@ -64,11 +64,7 @@ public class GenericSuperlogDataService implements SuperlogDataService {
         this.fetchSize = fetchSize;
     }
 
-    /* (non-Javadoc)
-     * @see ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.SuperlogDataService#getSelectConnection()
-     */
-    @Override
-    public Connection getSelectConnection() throws SQLException {
+    protected Connection getSelectConnection() throws SQLException {
         if (selectConnection == null) {
             selectConnection = source.getConnection();
             selectConnection.setAutoCommit(true);
@@ -78,11 +74,7 @@ public class GenericSuperlogDataService implements SuperlogDataService {
         return selectConnection;
     }
 
-    /* (non-Javadoc)
-     * @see ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.SuperlogDataService#getDeleteConnection()
-     */
-    @Override
-    public Connection getDeleteConnection() throws SQLException {
+    protected Connection getDeleteConnection() throws SQLException {
         if (deleteConnection == null) {
             deleteConnection = source.getConnection();
             deleteConnection.setAutoCommit(false);
@@ -92,11 +84,7 @@ public class GenericSuperlogDataService implements SuperlogDataService {
         return deleteConnection;
     }
 
-    /* (non-Javadoc)
-     * @see ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.SuperlogDataService#getTargetConnection()
-     */
-    @Override
-    public Connection getTargetConnection() throws SQLException {
+    protected Connection getTargetConnection() throws SQLException {
         if (targetConnection == null) {
             targetConnection = target.getConnection();
             targetConnection.setAutoCommit(false);

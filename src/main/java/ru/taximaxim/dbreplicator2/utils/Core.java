@@ -233,6 +233,13 @@ public final class Core {
     }
     
     /**
+     * Закрываем сервис настройки соединений
+     */
+    public static void tasksPoolClose() {
+        tasksPool = null;
+    }
+    
+    /**
      * Возвращает сервис настройки соединений
      * 
      * @return сервис настройки соединений
@@ -272,8 +279,11 @@ public final class Core {
     /**
      * Закрываем сервис настройки соединений
      */
-    public static void tasksPoolClose() {
-        tasksPool = null;
+    public static synchronized void cronPoolClose() {
+        if (cronPool != null) {
+            cronPool.stop();
+            cronPool = null;
+        }
     }
     
     /**

@@ -50,10 +50,13 @@ public class CronPool {
 
     private final CronSettingsService cronSettingsService;
 
+    private Scheduler scheduler;
+
     /**
      * Конструктор на основе сервиса настроек задач по расписанию
      * 
      * @param cronSettingsService
+     * @throws SchedulerException
      */
     public CronPool(CronSettingsService cronSettingsService) {
         this.cronSettingsService = cronSettingsService;
@@ -64,12 +67,15 @@ public class CronPool {
      */
     public void start() {
         try {
-            Scheduler scheduler = new StdSchedulerFactory().getScheduler();
-            Map<Integer, CronSettings> taskSettings = cronSettingsService.getTasks();
+            stop();
+            
+            scheduler = new StdSchedulerFactory().getScheduler();
+            final Map<Integer, CronSettings> taskSettings = cronSettingsService
+                    .getTasks();
             boolean hasTasks = false;
             for (CronSettings task : taskSettings.values()) {
                 if (addTask(scheduler, task)) {
-                  hasTasks = true;
+                    hasTasks = true;
                 }
             }
             // Запускаем если только у нас есть задания
@@ -100,8 +106,9 @@ public class CronPool {
     protected boolean addTask(Scheduler scheduler, CronSettings task) {
         if (task.getEnabled()) {
             try {
-                Trigger trigger = TriggerBuilder.newTrigger().withSchedule(
-                        CronScheduleBuilder.cronSchedule(task.getCronString()))
+                Trigger trigger = TriggerBuilder.newTrigger()
+                        .withSchedule(
+                                CronScheduleBuilder.cronSchedule(task.getCronString()))
                         .build();
                 JobDetail jobDetail = JobBuilder.newJob(CronRunner.class).build();
                 jobDetail.getJobDataMap().put("task", task);
@@ -110,14 +117,12 @@ public class CronPool {
                 return true;
             } catch (SchedulerException e) {
                 // Игнорим ошибки кварца
-                LOG.error(String.format(
-                        "Ошибка при старте задачи cron [id = %s, %s]!",
+                LOG.error(String.format("Ошибка при старте задачи cron [id = %s, %s]!",
                         task.getTaskId(), task.getDescription()), e);
             } catch (RuntimeException e) {
                 // Игнорим ошибки парсера
                 if (e.getCause() instanceof ParseException) {
-                    LOG.error(String.format(
-                            "Ошибка настройки задачи cron [id = %s, %s]!",
+                    LOG.error(String.format("Ошибка настройки задачи cron [id = %s, %s]!",
                             task.getTaskId(), task.getDescription()), e);
                 } else {
                     throw e;
@@ -127,4 +132,22 @@ public class CronPool {
 
         return false;
     }
+
+    /**
+     * Останавливаем потоки задач
+     */
+    public void stop() {
+        if (scheduler == null) {
+            return;
+        }
+
+        try {
+            scheduler.shutdown();
+        } catch (SchedulerException e) {
+            // Игнорим ошибку планировщика
+            LOG.error("Ошибка при остановки планировщика задач!", e);
+        }
+        scheduler = null;
+    }
+
 }
