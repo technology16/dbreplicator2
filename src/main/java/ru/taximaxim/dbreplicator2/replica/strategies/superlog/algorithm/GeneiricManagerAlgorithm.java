@@ -173,7 +173,8 @@ public abstract class GeneiricManagerAlgorithm {
             ExecutorService selectService, ExecutorService deleteService,
             Watch startAllRunnersWatch, long startAllRunnersPeriod)
             throws SQLException, InterruptedException, ExecutionException {
-        int rowsCount = 0;
+        int totalRows = 0;
+        int rowsCount;
         long idSuperLog = 0;
         boolean hasRows;
         final Set<RunnerModel> runners = new HashSet<RunnerModel>();
@@ -181,6 +182,7 @@ public abstract class GeneiricManagerAlgorithm {
         Future<ResultSet> superLog = initSuperLog;
 
         do {
+            rowsCount = 0;
             hasRows = false;
             // Извлекаем очередную порцию данных
             try (final ResultSet superLogResult = superLog.get()) {
@@ -204,8 +206,18 @@ public abstract class GeneiricManagerAlgorithm {
                         .submit(new QueryCall(getSelectSuperlogStatement()));
 
                 // Сбрасываем данные в базу
-                deleteSuperLogResult = executeBatches(deleteService,
-                        getDeleteSuperlogStatement(), getInsertWorkpoolStatement());
+                try {
+                    deleteSuperLogResult = executeBatches(deleteService,
+                            getDeleteSuperlogStatement(), getInsertWorkpoolStatement());
+                } catch (SQLException e) {
+                    SQLException nextEx = e;
+                    while (nextEx != null) {
+                        LOG.warn("Ошибка вставки записей в rep2_workpool_data:", nextEx);
+                        nextEx = nextEx.getNextException();
+                    }
+                    // В случае ошибки обнуляем счетчик обработанных записей
+                    rowsCount = 0;
+                }
 
                 // запускаем обработчики реплик
                 if (startAllRunnersWatch.timeOut(startAllRunnersPeriod)) {
@@ -221,6 +233,8 @@ public abstract class GeneiricManagerAlgorithm {
                     startRunners(runners);
                 }
                 runners.clear();
+                
+                totalRows += rowsCount;
 
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(String.format(
@@ -231,7 +245,7 @@ public abstract class GeneiricManagerAlgorithm {
             }
         } while (hasRows);
 
-        return rowsCount;
+        return totalRows;
     }
 
     /**
@@ -369,12 +383,15 @@ public abstract class GeneiricManagerAlgorithm {
         Future<int[]> deleteSuperLogResult = null;
         try {
             insertRunnerData.executeBatch();
-            superlogDataService.getTargetConnection().commit();
+            insertRunnerData.getConnection().commit();
             // Удаляем данные в очереди с выборкой новой порции
             deleteSuperLogResult = service.submit(new BatchCall(deleteSuperLog));
         } catch (SQLException e) {
-            LOG.warn("Ошибка вставки записей в rep2_workpool_data:", e);
-            superlogDataService.getTargetConnection().rollback();
+            // Очищаем батч удаления записей
+            deleteSuperLog.clearBatch();
+            // Откатываем транзакцию
+            insertRunnerData.getConnection().rollback();
+            throw e;
         }
         return deleteSuperLogResult;
     }

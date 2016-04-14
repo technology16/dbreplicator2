@@ -23,7 +23,6 @@
 
 package ru.taximaxim.dbreplicator2.replica.strategies.superlog.data;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -58,25 +57,4 @@ public interface SuperlogDataService extends AutoCloseable {
      * @return
      */
     PreparedStatement getInsertWorkpoolStatement() throws SQLException;
-
-    /**
-     * Получение коннекшена выборки из суперлога
-     * @return
-     * @throws SQLException 
-     */
-    Connection getSelectConnection() throws SQLException;
-
-    /**
-     * Получение коннекшена удаления из суперлога
-     * @return
-     * @throws SQLException 
-     */
-    Connection getDeleteConnection() throws SQLException;
-
-    /**
-     * Получение коннекшена вставки данных в воркпул 
-     * @return
-     * @throws SQLException 
-     */
-    Connection getTargetConnection() throws SQLException;
 }
