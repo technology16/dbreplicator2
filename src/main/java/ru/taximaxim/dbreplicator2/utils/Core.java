@@ -279,7 +279,7 @@ public final class Core {
     /**
      * Закрываем сервис настройки соединений
      */
-    public static void cronPoolClose() {
+    public static synchronized void cronPoolClose() {
         if (cronPool != null) {
             cronPool.stop();
             cronPool = null;
