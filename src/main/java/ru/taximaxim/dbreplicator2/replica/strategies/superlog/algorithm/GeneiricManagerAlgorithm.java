@@ -128,14 +128,14 @@ public abstract class GeneiricManagerAlgorithm {
         if (observers != null) {
             // Заполняем "константы"
             insertRunnerData.setLong(2, idSuperLog);
-            insertRunnerData.setInt(3, superLogResult.getInt(WorkPoolService.ID_FOREIGN));
-            insertRunnerData.setString(4, tableName);
-            insertRunnerData.setString(5,
-                    superLogResult.getString(WorkPoolService.C_OPERATION));
-            insertRunnerData.setTimestamp(6,
-                    superLogResult.getTimestamp(WorkPoolService.C_DATE));
-            insertRunnerData.setString(7,
-                    superLogResult.getString(WorkPoolService.ID_TRANSACTION));
+            insertRunnerData.setObject(3, superLogResult.getObject(WorkPoolService.ID_FOREIGN));
+            insertRunnerData.setObject(4, tableName);
+            insertRunnerData.setObject(5,
+                    superLogResult.getObject(WorkPoolService.C_OPERATION));
+            insertRunnerData.setObject(6,
+                    superLogResult.getObject(WorkPoolService.C_DATE));
+            insertRunnerData.setObject(7,
+                    superLogResult.getObject(WorkPoolService.ID_TRANSACTION));
 
             // Раскладываем данные по раннерам
             for (RunnerModel runner : observers) {
