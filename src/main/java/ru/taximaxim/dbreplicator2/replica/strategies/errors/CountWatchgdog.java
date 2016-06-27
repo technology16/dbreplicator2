@@ -101,9 +101,11 @@ public class CountWatchgdog extends StrategySkeleton implements Strategy {
                                 + "SELECT id_runner, id_table, id_foreign, MAX(id_errors_log) AS max_id_errors_log, COUNT(*) AS count "
                                 + "FROM public.rep2_errors_log WHERE c_status = 0 GROUP BY id_runner, id_table, id_foreign) as t1 "
                                 + "LEFT JOIN rep2_errors_log ON t1.max_id_errors_log=rep2_errors_log.id_errors_log "
-                                + "WHERE count > ? ORDER BY max_id_errors_log")) {
+                                + "WHERE count > ? ORDER BY max_id_errors_log "
+                                + "LIMIT ?")) {
 
                     selectErrors.setInt(1, maxErrors);
+                    selectErrors.setInt(2, partEmail);
                     selectErrors.setFetchSize(getFetchSize(data));
 
                     try (ResultSet errorsResult = selectErrors.executeQuery();) {
@@ -113,7 +115,7 @@ public class CountWatchgdog extends StrategySkeleton implements Strategy {
                         StringBuffer rowDumpEmail = new StringBuffer(String.format(
                                 "%n%nВ %s превышен лимит в %s ошибок!%n%n",
                                 data.getRunner().getSource().getPoolId(), maxErrors));
-                        while (errorsResult.next() && (count < partEmail)) {
+                        while (errorsResult.next()) {
                             count++;
                             // при необходимости пишем ошибку в лог
                             String rowDump = String.format(
