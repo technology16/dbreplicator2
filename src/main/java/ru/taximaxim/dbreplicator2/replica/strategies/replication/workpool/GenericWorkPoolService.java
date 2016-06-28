@@ -63,6 +63,7 @@ public class GenericWorkPoolService extends DataServiceSkeleton
     @Override
     public PreparedStatement getLastOperationsStatement() throws SQLException {
         if (lastOperationsStatement == null) {
+            // Сортируем записи rep2_workpool_data в порядке поступления
             lastOperationsStatement = getConnection().prepareStatement(
                     "SELECT MIN(id_superlog) AS id_superlog_min, MAX(id_superlog) AS id_superlog_max, id_foreign, id_table, COUNT(*) AS records_count, ? AS id_runner "
                             + "  FROM ( " + "  SELECT id_superlog, id_foreign, id_table "
@@ -70,7 +71,7 @@ public class GenericWorkPoolService extends DataServiceSkeleton
                             + "    ORDER BY id_superlog " + "    LIMIT ? OFFSET ? "
                             + "  ) AS part_rep2_workpool_data "
                             + "GROUP BY id_foreign, id_table "
-                            + "ORDER BY id_superlog_max",
+                            + "ORDER BY id_superlog_min",
                     ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
         }
 
