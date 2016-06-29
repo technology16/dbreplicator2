@@ -66,9 +66,9 @@ public class GenericWorkPoolService extends DataServiceSkeleton
             // Сортируем записи rep2_workpool_data в порядке поступления
             lastOperationsStatement = getConnection().prepareStatement(
                     "SELECT MIN(id_superlog) AS id_superlog_min, MAX(id_superlog) AS id_superlog_max, id_foreign, id_table, COUNT(*) AS records_count, ? AS id_runner "
-                            + "  FROM ( " + "  SELECT id_superlog, id_foreign, id_table "
-                            + "    FROM rep2_workpool_data " + "    WHERE id_runner=? "
-                            + "    ORDER BY id_superlog " + "    LIMIT ? OFFSET ? "
+                            + "  FROM (SELECT id_superlog, id_foreign, id_table "
+                            + "    FROM rep2_workpool_data WHERE id_runner=? "
+                            + "    ORDER BY id_superlog LIMIT ? OFFSET ? "
                             + "  ) AS part_rep2_workpool_data "
                             + "GROUP BY id_foreign, id_table "
                             + "ORDER BY id_superlog_min",
