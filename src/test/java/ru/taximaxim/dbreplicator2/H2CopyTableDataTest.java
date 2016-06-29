@@ -311,10 +311,6 @@ public class H2CopyTableDataTest extends AbstractReplicationTest {
         listSource = Helper.InfoTest(conn, "t_table3");
         listDest   = Helper.InfoTest(connDest, "t_table3");
         Helper.AssertEquals(listSource, listDest);
-
-        Thread.sleep(REPLICATION_DELAY);
-        int count = Helper.InfoCount(conn, "rep2_errors_log where c_status = 1");
-        assertTrue(String.format("Количество записей не равны [%s == %s]", 14, count), 14 == count);
     }
     
     /**
