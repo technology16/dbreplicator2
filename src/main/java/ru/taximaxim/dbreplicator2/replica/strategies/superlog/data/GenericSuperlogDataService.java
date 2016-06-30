@@ -64,6 +64,13 @@ public class GenericSuperlogDataService implements SuperlogDataService {
         this.fetchSize = fetchSize;
     }
 
+    /* (non-Javadoc)
+     * @see ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.SuperlogDataService#getFetchSize()
+     */
+    public int getFetchSize() {
+        return fetchSize;
+    }
+
     protected Connection getSelectConnection() throws SQLException {
         if (selectConnection == null) {
             selectConnection = source.getConnection();
