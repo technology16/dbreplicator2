@@ -128,7 +128,8 @@ public abstract class GeneiricManagerAlgorithm {
         if (observers != null) {
             // Заполняем "константы"
             insertRunnerData.setLong(2, idSuperLog);
-            insertRunnerData.setObject(3, superLogResult.getObject(WorkPoolService.ID_FOREIGN));
+            insertRunnerData.setObject(3,
+                    superLogResult.getObject(WorkPoolService.ID_FOREIGN));
             insertRunnerData.setObject(4, tableName);
             insertRunnerData.setObject(5,
                     superLogResult.getObject(WorkPoolService.C_OPERATION));
@@ -157,13 +158,13 @@ public abstract class GeneiricManagerAlgorithm {
 
     /**
      * Извлекает данные из супер лога и разносит по раннерам в ворк пуле.
-     * Работает пока очередная выборка не вернет 0 строк.
+     * Работает пока очередная выборка не вернет менее fetchSize строк.
      * 
      * @param superLog
      * @param tableObservers
      * @param selectService
      * @param deleteService
-     * @return суммарное количество обработанных строк
+     * @return суммарное количество вставленных строк
      * @throws SQLException
      * @throws InterruptedException
      * @throws ExecutionException
@@ -174,16 +175,15 @@ public abstract class GeneiricManagerAlgorithm {
             Watch startAllRunnersWatch, long startAllRunnersPeriod)
             throws SQLException, InterruptedException, ExecutionException {
         int totalRows = 0;
-        int rowsCount;
+        int selectedRowsCount;
         long idSuperLog = 0;
-        boolean hasRows;
         final Set<RunnerModel> runners = new HashSet<RunnerModel>();
         Future<int[]> deleteSuperLogResult = null;
         Future<ResultSet> superLog = initSuperLog;
 
         do {
-            rowsCount = 0;
-            hasRows = false;
+            selectedRowsCount = 0;
+            int insertedRowsCount = 0;
             // Извлекаем очередную порцию данных
             try (final ResultSet superLogResult = superLog.get()) {
                 waitDeleteSuperlog(deleteSuperLogResult);
@@ -191,16 +191,18 @@ public abstract class GeneiricManagerAlgorithm {
                 while (superLogResult.next()) {
                     // Копируем записи
                     idSuperLog = superLogResult.getLong(WorkPoolService.ID_SUPERLOG);
-                    rowsCount += insertRunnersData(superLogResult,
+                    // Подсчитаем количество вставленных записей в ворк пул
+                    insertedRowsCount += insertRunnersData(superLogResult,
                             getInsertWorkpoolStatement(), getDeleteSuperlogStatement(),
                             tableObservers, runners);
-                    hasRows = true;
+                    // При прокручивании выборки из супер лога будем контролировать количество выбранных записей
+                    selectedRowsCount++;
                 }
             }
 
             // Если в выборке были данные, то в параллельном потоке
             // запускаем чтение новых данных
-            if (hasRows) {
+            if (selectedRowsCount > 0) {
                 getSelectSuperlogStatement().setLong(1, idSuperLog);
                 superLog = selectService
                         .submit(new QueryCall(getSelectSuperlogStatement()));
@@ -209,14 +211,15 @@ public abstract class GeneiricManagerAlgorithm {
                 try {
                     deleteSuperLogResult = executeBatches(deleteService,
                             getDeleteSuperlogStatement(), getInsertWorkpoolStatement());
+                    
+                    // Если все нормально, увеличиваем счетчик обработанных записей
+                    totalRows += insertedRowsCount;
                 } catch (SQLException e) {
                     SQLException nextEx = e;
                     while (nextEx != null) {
                         LOG.warn("Ошибка вставки записей в rep2_workpool_data:", nextEx);
                         nextEx = nextEx.getNextException();
                     }
-                    // В случае ошибки обнуляем счетчик обработанных записей
-                    rowsCount = 0;
                 }
 
                 // запускаем обработчики реплик
@@ -233,17 +236,19 @@ public abstract class GeneiricManagerAlgorithm {
                     startRunners(runners);
                 }
                 runners.clear();
-                
-                totalRows += rowsCount;
 
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(String.format(
                             "Раннер [id_runner = %d, %s], стратегия [id = %d] обработано %d строк",
                             data.getRunner().getId(), data.getRunner().getDescription(),
-                            data.getId(), rowsCount));
+                            data.getId(), selectedRowsCount));
                 }
             }
-        } while (hasRows);
+        } while (selectedRowsCount == superlogDataService.getFetchSize());
+
+        // Дожидаемся удаления данных из суперлога, иначе возможны проблемы
+        // синхронизации
+        waitDeleteSuperlog(deleteSuperLogResult);
 
         return totalRows;
     }
@@ -258,9 +263,8 @@ public abstract class GeneiricManagerAlgorithm {
         final ExecutorService selectService = Executors.newSingleThreadExecutor();
         // Переносим данные
         try {
-            final PreparedStatement initSelectSuperLog = getInitSelectSuperlogStatement();
             Future<ResultSet> superLog = selectService
-                    .submit(new QueryCall(initSelectSuperLog));
+                    .submit(new QueryCall(getInitSelectSuperlogStatement()));
             // Начинаем отсчет времени
             final Watch superLogWatch = new Watch();
             final Watch startAllRunnersWatch = new Watch();
@@ -291,7 +295,7 @@ public abstract class GeneiricManagerAlgorithm {
                         superLogWatch.sleep(superLogPeriod);
                         // и извлекаем данные с начала
                         superLog = selectService
-                                .submit(new QueryCall(initSelectSuperLog));
+                                .submit(new QueryCall(getInitSelectSuperlogStatement()));
                     }
                 } while (totalRowsCount > 0);
             } finally {

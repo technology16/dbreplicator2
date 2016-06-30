@@ -57,4 +57,11 @@ public interface SuperlogDataService extends AutoCloseable {
      * @return
      */
     PreparedStatement getInsertWorkpoolStatement() throws SQLException;
+    
+    /**
+     * Получние размера выборки fetchSize
+     * 
+     * @return the fetchSize
+     */
+    int getFetchSize();
 }
