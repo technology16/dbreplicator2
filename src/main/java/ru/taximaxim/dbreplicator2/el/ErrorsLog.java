@@ -117,7 +117,7 @@ public class ErrorsLog extends DataServiceSkeleton
             statement.setString(5, error.replaceAll("\0", "&#x00;"));
             statement.execute();
         } catch (Throwable e) {
-            LOG.fatal("Ошибка записи в rep2_errors_log:", e);
+            LOG.error("Ошибка записи в rep2_errors_log:", e);
             LOG.error(error);
         }
     }
