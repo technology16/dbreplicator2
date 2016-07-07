@@ -164,7 +164,7 @@ public class ErrorsLog extends DataServiceSkeleton
 
             statement.execute();
         } catch (Throwable e) {
-            LOG.fatal(String.format(
+            LOG.error(String.format(
                     "Ошибка при установки статуса в rep2_errors_log: runnerId=[%s], tableId=[%s], foreignId=[%s], c_status=%s",
                     runnerId, tableId, foreignId, status), e);
         }
@@ -175,7 +175,7 @@ public class ErrorsLog extends DataServiceSkeleton
         try (StatementsHashMap<String, PreparedStatement> statementsCache = this.statementsCache) {
             super.close();
         } catch (SQLException e) {
-            LOG.fatal("Ошибка закрытия ресурсов!", e);
+            LOG.error("Ошибка закрытия ресурсов!", e);
         }
     }
 }
