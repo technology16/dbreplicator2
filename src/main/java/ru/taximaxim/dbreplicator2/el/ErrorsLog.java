@@ -114,10 +114,10 @@ public class ErrorsLog extends DataServiceSkeleton
             statement.setObject(2, tableId);
             statement.setObject(3, foreignId);
             statement.setTimestamp(4, new Timestamp(new Date().getTime()));
-            statement.setString(5, error);
+            statement.setString(5, error.replaceAll("\0", "&#x00;"));
             statement.execute();
         } catch (Throwable e) {
-            LOG.fatal("Ошибка записи в rep2_errors_log:", e);
+            LOG.error("Ошибка записи в rep2_errors_log:", e);
             LOG.error(error);
         }
     }
