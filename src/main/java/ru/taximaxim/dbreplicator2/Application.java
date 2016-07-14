@@ -27,6 +27,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
+import org.apache.log4j.xml.DOMConfigurator;
 import org.hibernate.cfg.Configuration;
 
 import ru.taximaxim.dbreplicator2.cli.AbstractCommandLineParser;
@@ -50,10 +51,10 @@ public final class Application extends AbstractCommandLineParser {
         setOption("u", "update", true,
                 "Обновление настроек dbreplicator2 скриптом из файла", 1, false, "file");
         setOption("c", "conf", true,
-                "Явное задание пути к файлу конфигурации. По умолчанию берется файл hibernate.cfg.xml", 
+                "Явное задание пути к файлу конфигурации. По умолчанию берется файл hibernate.cfg.xml",
                 1, false, "file");
         setOption("l", "log4j", true,
-                "Явное задание пути к файлу настроек логгирования. По умолчанию берется файл log4j.properties", 
+                "Явное задание пути к файлу настроек логгирования. По умолчанию берется файл log4j.properties",
                 1, false, "file");
         setOption("s", "start", false, "Запуск репликации dbreplicator2", 0, false, null);
     }
@@ -63,7 +64,7 @@ public final class Application extends AbstractCommandLineParser {
         boolean hasOption = false;
 
         LOG.info("Запускаем dbreplicator2...");
-        
+
         // Конфигурируем log4j
         String fLog4j = "log4j.properties";
         if (commandLine.hasOption('l')) {
@@ -73,9 +74,16 @@ public final class Application extends AbstractCommandLineParser {
 
             hasOption = true;
         }
-        PropertyConfigurator.configureAndWatch(fLog4j);
 
-        
+        // Если имя файла настроек лога оканчивается на .xml, то используем
+        // DOMConfigurator
+        if (fLog4j.toLowerCase().endsWith(".xml")) {
+            DOMConfigurator.configureAndWatch(fLog4j);
+        } else {
+            // иначе используем PropertyConfigurator
+            PropertyConfigurator.configureAndWatch(fLog4j);
+        }
+
         String configurationName = null;
         if (commandLine.hasOption('c')) {
             String[] arguments = commandLine.getOptionValues('c');
@@ -95,7 +103,7 @@ public final class Application extends AbstractCommandLineParser {
             hibernateHbm2ddlImportFiles = arguments[0];
             hasOption = true;
         }
-        
+
         boolean coreGetTasksPoolStart = false;
         if (commandLine.hasOption('s')) {
             // Запускаем репликацию
@@ -109,51 +117,53 @@ public final class Application extends AbstractCommandLineParser {
 
         if (commandLine.hasOption('h') || !hasOption) {
             if (!hasOption) {
-                LOG.error("Неизвестная команда, пожалуйста воспользуетесь командой [-h] или [--help]");
+                LOG.error(
+                        "Неизвестная команда, пожалуйста воспользуетесь командой [-h] или [--help]");
             }
 
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp("java dbreplicator2.jar", getOptions());
         }
-        
-        if(hasOption) {
-            if(hibernateHbm2ddlAuto && hibernateHbm2ddlImportFiles != null) {
-                start(configurationName, hibernateHbm2ddlAuto, 
+
+        if (hasOption) {
+            if (hibernateHbm2ddlAuto && hibernateHbm2ddlImportFiles != null) {
+                start(configurationName, hibernateHbm2ddlAuto,
                         hibernateHbm2ddlImportFiles, coreGetTasksPoolStart);
             } else if (coreGetTasksPoolStart) {
-                start(configurationName, hibernateHbm2ddlAuto, 
+                start(configurationName, hibernateHbm2ddlAuto,
                         hibernateHbm2ddlImportFiles, coreGetTasksPoolStart);
             } else if (hibernateHbm2ddlImportFiles != null) {
-                start(configurationName, hibernateHbm2ddlAuto, 
+                start(configurationName, hibernateHbm2ddlAuto,
                         hibernateHbm2ddlImportFiles, coreGetTasksPoolStart);
             }
         }
     }
 
-    protected void start(String configurationName, boolean hibernateHbm2ddlAuto
-            ,String hibernateHbm2ddlImportFiles, boolean coreGetTasksPoolStart) {
+    protected void start(String configurationName, boolean hibernateHbm2ddlAuto,
+            String hibernateHbm2ddlImportFiles, boolean coreGetTasksPoolStart) {
         // Конфигурируем Hibernate
         Configuration configuration;
         // Инициализируем БД настроек
         configuration = Core.getConfiguration(configurationName);
 
-        if(hibernateHbm2ddlAuto) {
+        if (hibernateHbm2ddlAuto) {
             // Инициализируем БД настроек
             configuration.setProperty("hibernate.hbm2ddl.auto", "create");
         }
 
-        if(hibernateHbm2ddlImportFiles != null) {
+        if (hibernateHbm2ddlImportFiles != null) {
             // Обновляем БД настроек скриптом из файла
-            configuration.setProperty("hibernate.hbm2ddl.import_files", hibernateHbm2ddlImportFiles);
+            configuration.setProperty("hibernate.hbm2ddl.import_files",
+                    hibernateHbm2ddlImportFiles);
         }
         Core.getSessionFactory(configuration);
-        
-        if(coreGetTasksPoolStart) {
+
+        if (coreGetTasksPoolStart) {
             Core.getTasksPool().start();
             Core.getCronPool().start();
         }
     }
-    
+
     /**
      * Точка входа
      * 
