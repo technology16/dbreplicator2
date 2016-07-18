@@ -25,6 +25,8 @@ package ru.taximaxim.dbreplicator2.replica.strategies.replication.data;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -70,7 +72,8 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
     private final Map<TableModel, Set<String>> requiredCols = new HashMap<TableModel, Set<String>>();
 
     protected static final String WHERE = "where";
-
+    
+    private static final String KEYS = "keys";
     /**
      * 
      */
@@ -194,7 +197,20 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
 
         return statement;
     }
+    
+    protected Collection<String> str2upperList(String str) {
+        Collection<String> list = new ArrayList<String>();
+        if (str != null) {
+            list = Arrays.asList(str.toUpperCase().split(","));
+        }
+        return list;
+    }
 
+    protected Collection<String> getKeysColumn(TableModel table) {
+        return str2upperList(table.getParam(KEYS));
+    }
+
+    
     /**
      * Кешированное получение списка ключевых колонок
      * 
@@ -206,7 +222,12 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
     public Set<String> getPriCols(TableModel table) throws SQLException {
         Set<String> cols = priCols.get(table);
         if (cols == null) {
-            cols = JdbcMetadata.getPrimaryColumns(getConnection(), table.getName());
+            Collection<String>keys = getKeysColumn(table);
+            if (keys.isEmpty()) {
+                cols = JdbcMetadata.getPrimaryColumns(getConnection(), table.getName());
+            } else {
+                cols = new LinkedHashSet<String>(keys);
+            }
             priCols.put(table, cols);
         }
 
