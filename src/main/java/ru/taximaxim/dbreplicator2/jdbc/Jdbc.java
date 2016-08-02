@@ -84,7 +84,7 @@ public final class Jdbc {
      */
     public static String resultSetToString(ResultSet data, 
             Collection<String> columnsList) throws SQLException {
-        StringBuffer str  = new StringBuffer();
+        StringBuilder str  = new StringBuilder();
         for (String columnName : columnsList) {
             str.append("[ col ").append(columnName).append(" = ")
                 .append(data.getString(columnName)).append(" ] ");

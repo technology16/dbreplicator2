@@ -112,7 +112,7 @@ public class CountWatchgdog extends StrategySkeleton implements Strategy {
                         List<String> cols = new ArrayList<String>(
                                 JdbcMetadata.getColumns(errorsResult));
                         int count = 0;
-                        StringBuffer rowDumpEmail = new StringBuffer(String.format(
+                        StringBuilder rowDumpEmail = new StringBuilder(String.format(
                                 "%n%nВ %s превышен лимит в %s ошибок!%n%n",
                                 data.getRunner().getSource().getPoolId(), maxErrors));
                         while (errorsResult.next()) {

@@ -122,7 +122,7 @@ public class ErrorsLog extends DataServiceSkeleton
         }
     }
 
-    protected int addIsNull(StringBuffer query, Object value) {
+    protected int addIsNull(StringBuilder query, Object value) {
         if (value == null) {
             query.append(" IS NULL");
             return 0;
@@ -134,7 +134,7 @@ public class ErrorsLog extends DataServiceSkeleton
 
     @Override
     public void setStatus(Integer runnerId, String tableId, Long foreignId, int status) {
-        StringBuffer updateQuery = new StringBuffer(
+        StringBuilder updateQuery = new StringBuilder(
                 "UPDATE rep2_errors_log SET c_status = ? WHERE c_status<> ?  AND id_runner");
         try {
             int runnerIdPos = addIsNull(updateQuery, runnerId);

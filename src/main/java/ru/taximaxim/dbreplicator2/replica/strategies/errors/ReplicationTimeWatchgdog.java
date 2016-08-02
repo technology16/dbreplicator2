@@ -79,7 +79,7 @@ public class ReplicationTimeWatchgdog implements Strategy {
     @Override
     public void execute(ConnectionFactory connectionsFactory, StrategyModel data)
             throws SQLException {
-        StringBuffer runIgSql = new StringBuffer();
+        StringBuilder runIgSql = new StringBuilder();
         int period = DEFAULT_PERIOD;
         int partEmail = DEFAULT_PART_EMAIL;
 
@@ -93,8 +93,8 @@ public class ReplicationTimeWatchgdog implements Strategy {
             }
 
             if (data.getParam(RUNNERS) != null) {
-                StringBuffer runnerIgnore = new StringBuffer();
-                StringBuffer runnerAktiv = new StringBuffer();
+                StringBuilder runnerIgnore = new StringBuilder();
+                StringBuilder runnerAktiv = new StringBuilder();
                 StringTokenizer totoken = new StringTokenizer(
                         data.getParam(RUNNERS).toString(), ",");
                 while (totoken.hasMoreTokens()) {
@@ -149,7 +149,7 @@ public class ReplicationTimeWatchgdog implements Strategy {
                         List<String> cols = new ArrayList<String>(
                                 JdbcMetadata.getColumns(resultSet));
                         int count = 0;
-                        StringBuffer rowDumpEmail = new StringBuffer(String.format(
+                        StringBuilder rowDumpEmail = new StringBuilder(String.format(
                                 "%n%nВ %s превышен лимит таймаута репликации в %s милисекунд!%n%n",
                                 data.getRunner().getSource().getPoolId(), period));
                         while (resultSet.next() && (count < partEmail)) {

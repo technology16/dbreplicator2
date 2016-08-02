@@ -27,9 +27,12 @@
  */
 package ru.taximaxim.dbreplicator2.jdbc;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -47,6 +50,7 @@ public final class QueryConstructors {
     private static final String WHERE = " WHERE ";
     private static final String ORDER_BY = " ORDER BY ";
     private static final String AND = " AND ";
+    private static final String OR = " OR ";
     private static final String DELETE_FROM = "DELETE FROM ";
     private static final String UPDATE = "UPDATE ";
     private static final String SET = " SET ";
@@ -106,7 +110,7 @@ public final class QueryConstructors {
      * @return строка из элементов списка, разделенных разделителем delimiter
      */
     public static String listToString(Collection<?> list, String delimiter) {
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
         boolean setComma = false;
         for (Object val : list) {
             if (setComma) {
@@ -230,7 +234,7 @@ public final class QueryConstructors {
      * @return строка запроса для вставки данных
      */
     public static String constructInsertQuery(String tableName, Collection<String> colsList, Map<String, String> castCols) {
-        StringBuffer insertQuery = new StringBuffer().append(INSERT_INTO)
+        StringBuilder insertQuery = new StringBuilder().append(INSERT_INTO)
                 .append(tableName).append("(").append(listToString(colsList, DELIMITER))
                 .append(VALUES).append(listToString(questionMarks(colsList, castCols), DELIMITER))
                 .append(")");
@@ -269,7 +273,7 @@ public final class QueryConstructors {
     public static String constructInsertSelectQuery(String tableName,
             Collection<String> colsList, Map<String, String> castCols) {
         
-        StringBuffer insertQuery = new StringBuffer().append(INSERT_INTO)
+        StringBuilder insertQuery = new StringBuilder().append(INSERT_INTO)
                 .append(tableName).append("(").append(listToString(colsList, DELIMITER))
                 .append(") ").append(constructSelectQuery(questionMarks(colsList, castCols)));
         
@@ -297,7 +301,7 @@ public final class QueryConstructors {
      * @return строкf запроса на выборку данных
      */
     public static String constructSelectQuery(Collection<String> colsList, Map<String, String> castCols) {
-        StringBuffer query = new StringBuffer().append(SELECT).append(
+        StringBuilder query = new StringBuilder().append(SELECT).append(
                 listToString(colsList, castCols, DELIMITER));
 
         return query.toString();
@@ -327,7 +331,7 @@ public final class QueryConstructors {
      */
     public static String constructSelectQuery(String tableName, Collection<String> colsList,
             Map<String, String> castCols) {
-        StringBuffer query = new StringBuffer(constructSelectQuery(colsList, castCols)).append(
+        StringBuilder query = new StringBuilder(constructSelectQuery(colsList, castCols)).append(
                 FROM).append(tableName);
 
         return query.toString();
@@ -362,11 +366,10 @@ public final class QueryConstructors {
      */
     public static String constructSelectQuery(String tableName, Collection<String> colsList,
             Map<String, String> castCols, Collection<String> whereList, String where) {
-        StringBuffer query = new StringBuffer(constructSelectQuery(tableName, colsList, castCols))
+        StringBuilder query = new StringBuilder(constructSelectQuery(tableName, colsList, castCols))
                 .append(WHERE).append(listToString(whereList, AND, "=?"));
-        if (where != null && !where.isEmpty()) {
-            query.append(AND).append(where);
-        }
+        appendClause(query, AND, where);
+
         return query.toString();
     }
     
@@ -398,7 +401,7 @@ public final class QueryConstructors {
     public static String constructSelectQuery(String tableName, Collection<String> colsList,
             Map<String, String> castCols, Collection<String> whereList, Collection<String> orderByList, String where) {
         
-        StringBuffer query = new StringBuffer(constructSelectQuery(tableName, colsList, castCols, whereList, where));
+        StringBuilder query = new StringBuilder(constructSelectQuery(tableName, colsList, castCols, whereList, where));
         query.append(ORDER_BY).append(listToString(orderByList, DELIMITER));
 
         return query.toString();
@@ -435,7 +438,7 @@ public final class QueryConstructors {
     public static String constructUpdateQuery(String tableName, Collection<String> colsList,
             Map<String, String> castCols, Collection<String> whereList) {
         
-        StringBuffer insertQuery = new StringBuffer().append(UPDATE).append(tableName)
+        StringBuilder insertQuery = new StringBuilder().append(UPDATE).append(tableName)
                 .append(SET).append(listToString(colsList, castCols, DELIMITER, "=?"))
                 .append(WHERE).append(listToString(whereList, AND, "=?"));
 
@@ -454,7 +457,7 @@ public final class QueryConstructors {
      * @return строка запроса на выборку данных из таблицы с условием
      */
     public static String constructSelectQuery(String tableName, Collection<String> colsList, String where) {
-        StringBuffer query = new StringBuffer(constructSelectQuery(tableName, colsList))
+        StringBuilder query = new StringBuilder(constructSelectQuery(tableName, colsList))
                 .append(WHERE).append(where);
 
         return query.toString();
@@ -470,9 +473,113 @@ public final class QueryConstructors {
      * @return
      */
     public static String constructDeleteQuery(String tableName, Collection<String> whereList) {
-        StringBuffer query = new StringBuffer().append(DELETE_FROM).append(tableName)
+        StringBuilder query = new StringBuilder().append(DELETE_FROM).append(tableName)
                 .append(WHERE).append(listToString(whereList, AND, "=?"));
 
         return query.toString();
+    }
+
+    /**
+     * Добавление заданного выражения к запросу
+     * 
+     * @param query запрос
+     * @param clause выражение
+     * @param text содержимое выражения
+     * 
+     * @param query
+     * @param text
+     */
+    public static void appendClause(StringBuilder query, String clause, String text) {
+        if ((text != null) && (text.length() > 0)) {
+            query.append(clause).append(text);
+        }
+    }
+
+    /**
+     * Добавление заданного выражения к запросу
+     * 
+     * @param query запрос
+     * @param clause выражение
+     * @param value значение
+     */
+    public static void appendClause(StringBuilder query, String clause, Integer value) {
+        if (value != null) {
+            query.append(clause).append(value);
+        }
+    }
+
+    /**
+     * Генерация условия сдвига по составному ключу
+     * 
+     * @param primaryKeys
+     * @param selectQuery
+     */
+    public static StringBuilder getKeyShift(Collection<String> primaryKeys, String orderMode) {
+        StringBuilder selectQuery = new StringBuilder();
+        List<String> tempKeys = new ArrayList<String>(primaryKeys);
+        while (tempKeys.size() > 0) {
+            selectQuery.append('(');
+            for (int i = 0; i < tempKeys.size(); i++) {
+                if (i != tempKeys.size() - 1) {
+                    selectQuery.append(tempKeys.get(i)).append(" = ? ");
+                    selectQuery.append(AND);
+                } else {
+                    selectQuery.append(tempKeys.get(i));
+                    if (orderMode.equals("DESC")) {
+                        selectQuery.append(" < ? ");
+                    } else {
+                        selectQuery.append(" > ? ");
+                    }
+                }
+            }
+            tempKeys.remove(tempKeys.size() - 1);
+            if (tempKeys.size() > 0) {
+                selectQuery.append(')').append(OR);
+            } else {
+                selectQuery.append(')');
+            }
+        }
+        return selectQuery;
+    }
+    
+    /**
+     * Список параметров для условия сдвига по составному ключу
+     * 
+     * @param primaryKeys
+     * @param selectQuery
+     */
+    public static Collection<String> getKeyShiftParams(String tableName, Collection<String> primaryKeys) throws SQLException {
+        LinkedList<String> keys = new LinkedList<String>(primaryKeys);
+        Collection<String> cols = new LinkedList<String>();
+        while (keys.size() > 0) {
+            cols.addAll(keys);
+            keys.removeLast();
+        }
+
+        return cols;
+    }
+
+    /**
+     * AND (where)
+     * 
+     * @param query
+     * @param where
+     */
+    public static void appendWhereParam(StringBuilder query, String where) {
+        if ((where != null) && (!where.isEmpty())) {
+            query.append(AND).append('(').append(where).append(')');
+        }
+    }
+    
+    /**
+     * WHERE (where)
+     * 
+     * @param query
+     * @param where
+     */
+    public static void appendWhere(StringBuilder query, String where) {
+        if ((where != null) && (!where.isEmpty())) {
+            query.append(WHERE).append('(').append(where).append(')');
+        }
     }
 }
