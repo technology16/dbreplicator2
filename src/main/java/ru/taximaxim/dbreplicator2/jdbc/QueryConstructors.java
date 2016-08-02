@@ -41,6 +41,7 @@ import java.util.Map;
  */
 public final class QueryConstructors {
 
+    private static final String EQUAL = " = ? ";
     private static final String QUESTION = "?";
     private static final String DELIMITER = ", ";
     private static final String INSERT_INTO = "INSERT INTO ";
@@ -385,7 +386,7 @@ public final class QueryConstructors {
             Collection<String> whereList, String where) {
         StringBuilder query = new StringBuilder(
                 constructSelectQuery(tableName, colsList, castCols)).append(WHERE)
-                        .append(listToString(whereList, AND, " = ? "));
+                        .append(listToString(whereList, AND, EQUAL));
         appendClause(query, AND, where);
 
         return query.toString();
@@ -466,8 +467,8 @@ public final class QueryConstructors {
             Collection<String> whereList) {
 
         StringBuilder insertQuery = new StringBuilder().append(UPDATE).append(tableName)
-                .append(SET).append(listToString(colsList, castCols, DELIMITER, " = ? "))
-                .append(WHERE).append(listToString(whereList, AND, " = ? "));
+                .append(SET).append(listToString(colsList, castCols, DELIMITER, EQUAL))
+                .append(WHERE).append(listToString(whereList, AND, EQUAL));
 
         return insertQuery.toString();
     }
@@ -503,7 +504,7 @@ public final class QueryConstructors {
     public static String constructDeleteQuery(String tableName,
             Collection<String> whereList) {
         StringBuilder query = new StringBuilder().append(DELETE_FROM).append(tableName)
-                .append(WHERE).append(listToString(whereList, AND, " = ? "));
+                .append(WHERE).append(listToString(whereList, AND, EQUAL));
 
         return query.toString();
     }
@@ -558,7 +559,7 @@ public final class QueryConstructors {
             selectQuery.append('(');
             for (int i = 0; i < tempKeys.size(); i++) {
                 if (i != tempKeys.size() - 1) {
-                    selectQuery.append(tempKeys.get(i)).append(" = ? ").append(AND);
+                    selectQuery.append(tempKeys.get(i)).append(EQUAL).append(AND);
                 } else {
                     selectQuery.append(tempKeys.get(i)).append(postfix);
                 }
