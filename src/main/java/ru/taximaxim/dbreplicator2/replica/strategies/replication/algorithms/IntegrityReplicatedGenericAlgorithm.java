@@ -96,7 +96,7 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm {
             TableModel sourceTable, TableModel destTable, ResultSet sourceResult)
             throws SQLException {
         // Вместо репликации проверяем запись
-        StringBuffer rowDumpHead = new StringBuffer(String.format(
+        StringBuilder rowDumpHead = new StringBuilder(String.format(
                 INTEGRITY_ERROR, data
                         .getRunner().getSource().getPoolId(), data.getRunner()
                         .getTarget().getPoolId()));
@@ -166,7 +166,7 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm {
         selectTargetStatement.setLong(1, getWorkPoolService().getForeign(operationsResult));
         try (ResultSet targetResult = selectTargetStatement.executeQuery();) {
             if(targetResult.next()) {
-                StringBuffer rowDumpHead = new StringBuffer(String.format(
+                StringBuilder rowDumpHead = new StringBuilder(String.format(
                         INTEGRITY_ERROR, data
                                 .getRunner().getSource().getPoolId(), data.getRunner()
                                 .getTarget().getPoolId()));

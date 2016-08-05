@@ -103,7 +103,7 @@ public class SuperlogWatchgdog implements Strategy {
                         List<String> cols = new ArrayList<String>(
                                 JdbcMetadata.getColumns(resultSet));
                         int count = 0;
-                        StringBuffer rowDumpEmail = new StringBuffer(String.format(
+                        StringBuilder rowDumpEmail = new StringBuilder(String.format(
                                 "%n%nВ %s превышен лимит таймаута в superlog в %s миллисекунд!%n%n",
                                 data.getRunner().getSource().getPoolId(), period));
                         while (resultSet.next() && (count < partEmail)) {
