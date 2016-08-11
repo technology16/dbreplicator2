@@ -138,3 +138,4 @@ insert into tables (name, id_runner, param) values ('T_TABLE2', 6, 'ignoredCols=
 insert into tables (name, id_runner, param) values ('T_TABLE3', 6, 'ignoredCols=_STRING');
 insert into tables (name, id_runner, param) values ('T_TABLE4', 6, 'ignoredCols=_STRING');
 insert into tables (name, id_runner, param) values ('T_TABLE5', 5, 'ignoredCols=_STRING');
+insert into tables (name, id_runner, param) values ('T_TABLE5', 5, 'ignoredCols=_STRING');

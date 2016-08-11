@@ -26,7 +26,6 @@ package ru.taximaxim.dbreplicator2.replica.strategies.superlog.algorithm;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -414,7 +413,7 @@ public abstract class GeneiricManagerAlgorithm {
                 final String tableName = table.getName();
                 Collection<RunnerModel> observers = tableObservers.get(tableName);
                 if (observers == null) {
-                    observers = new ArrayList<RunnerModel>();
+                    observers = new HashSet<RunnerModel>();
                     tableObservers.put(tableName, observers);
                 }
                 observers.add(runner);
