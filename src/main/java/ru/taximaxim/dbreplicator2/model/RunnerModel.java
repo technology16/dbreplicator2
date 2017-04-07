@@ -188,6 +188,7 @@ public class RunnerModel implements Runner, Serializable {
      */
     @OneToMany(mappedBy = "runner", fetch = FetchType.EAGER)
     @Fetch(FetchMode.SELECT)
+    @OrderBy("id_table ASC")
     private List<TableModel> tables;
     
     /**
