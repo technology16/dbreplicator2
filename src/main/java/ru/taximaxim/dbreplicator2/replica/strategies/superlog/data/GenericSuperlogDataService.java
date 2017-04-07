@@ -67,6 +67,7 @@ public class GenericSuperlogDataService implements SuperlogDataService {
     /* (non-Javadoc)
      * @see ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.SuperlogDataService#getFetchSize()
      */
+    @Override
     public int getFetchSize() {
         return fetchSize;
     }
@@ -165,13 +166,14 @@ public class GenericSuperlogDataService implements SuperlogDataService {
      */
     @Override
     public void close() throws SQLException {
-        try (final Connection selectConnection = this.selectConnection;
-                final Connection deleteConnection = this.deleteConnection;
-                final Connection targetConnection = this.targetConnection;
-                PreparedStatement insertWorkpoolStatement = this.insertWorkpoolStatement;
-                PreparedStatement deleteSuperlogStatement = this.deleteSuperlogStatement;
-                PreparedStatement selectSuperlogStatement = this.selectSuperlogStatement;
-                PreparedStatement selectInitSuperlogStatement = this.selectInitSuperlogStatement;) {
+        try (Connection thisSelectConnection = this.selectConnection;
+                Connection thisDeleteConnection = this.deleteConnection;
+                Connection thisTargetConnection = this.targetConnection;
+                PreparedStatement thisInsertWorkpoolStatement = this.insertWorkpoolStatement;
+                PreparedStatement thisDeleteSuperlogStatement = this.deleteSuperlogStatement;
+                PreparedStatement thisSelectSuperlogStatement = this.selectSuperlogStatement;
+                PreparedStatement thisSelectInitSuperlogStatement = this.selectInitSuperlogStatement;) {
+            // Автоматическое закрытие ресурсов
         }
     }
 }

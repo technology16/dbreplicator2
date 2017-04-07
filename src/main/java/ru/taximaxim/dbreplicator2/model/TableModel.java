@@ -244,7 +244,7 @@ public class TableModel implements Cloneable, Serializable {
      * @return
      */
     protected Collection<String> str2upperList(String str) {
-        Collection<String> list = new ArrayList<String>();
+        Collection<String> list = new ArrayList<>();
         if (str != null && !str.isEmpty()) {       
             list = Arrays.asList(str.toUpperCase().split(","));
         }
@@ -256,7 +256,7 @@ public class TableModel implements Cloneable, Serializable {
      * @return
      */
     public Set<String> getIgnoredColumns(){
-        Set<String> ingnoredColumns = new HashSet<String>();
+        Set<String> ingnoredColumns = new HashSet<>();
         if (getParam(IGNORED_COLUMNS) != null) {
             ingnoredColumns.addAll(str2upperList(getParam(IGNORED_COLUMNS)));
         }
@@ -268,7 +268,7 @@ public class TableModel implements Cloneable, Serializable {
      * @return
      */
     public Set<String> getRequiredColumns(){
-        Set<String> requiredColumns = new HashSet<String>();
+        Set<String> requiredColumns = new HashSet<>();
         if (getParam(REQUIRED_COLUMNS) != null) {
             requiredColumns.addAll(str2upperList(getParam(REQUIRED_COLUMNS)));
         }
@@ -305,7 +305,7 @@ public class TableModel implements Cloneable, Serializable {
      * @throws SQLException 
      */
     public Map<String, String> getCastFromColumns(Collection<String> columns) throws SQLException {
-        Map<String, String> castFromColums = new HashMap<String, String>();
+        Map<String, String> castFromColums = new HashMap<>();
         for (String column : columns) {
             String castStatement = getParam(CAST_FROM + column.toLowerCase());
             if (castStatement != null) {
@@ -323,7 +323,7 @@ public class TableModel implements Cloneable, Serializable {
      * @throws SQLException 
      */
     public Map<String, String> getCastToColumns(Collection<String> columns) throws SQLException {
-        Map<String, String> castToColums = new HashMap<String, String>();
+        Map<String, String> castToColums = new HashMap<>();
         for (String column : columns) {
             String castStatement = getParam(CAST_TO + column.toLowerCase());
             if (castStatement != null) {

@@ -43,8 +43,8 @@ public class GenericDataTypeService extends GenericDataService implements DataSe
     /**
      * Кешированные запросы получения данных из источника и приемника
      */
-    private final StatementsHashMap<TableModel, PreparedStatement> selectStatementsAll = new StatementsHashMap<TableModel, PreparedStatement>();
-    private final Map<TableModel, Map<String, Integer>> allColsTypes = new HashMap<TableModel, Map<String, Integer>>();
+    private final StatementsHashMap<TableModel, PreparedStatement> selectStatementsAll = new StatementsHashMap<>();
+    private final Map<TableModel, Map<String, Integer>> allColsTypes = new HashMap<>();
 
     /**
      * Конструктор на основе подключения к БД
@@ -82,7 +82,7 @@ public class GenericDataTypeService extends GenericDataService implements DataSe
 
             // Оставляем обязательно реплицируемые колонки
             Set<String> requiredColsSet = getRequiredCols(table);
-            if (requiredColsSet.size() != 0) {
+            if (!requiredColsSet.isEmpty()) {
                 for (String colName : colsTypes.keySet()) {
                     if (!requiredColsSet.contains(colName)) {
                         colsTypes.remove(colName);
@@ -97,7 +97,7 @@ public class GenericDataTypeService extends GenericDataService implements DataSe
 
     @Override
     public void close() throws SQLException {
-        try (StatementsHashMap<TableModel, PreparedStatement>  selectStatementsAll = this.selectStatementsAll) {
+        try (StatementsHashMap<TableModel, PreparedStatement>  thisSelectStatementsAll = this.selectStatementsAll) {
             super.close();
         }
     }

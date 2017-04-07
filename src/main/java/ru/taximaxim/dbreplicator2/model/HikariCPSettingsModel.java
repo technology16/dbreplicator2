@@ -57,11 +57,6 @@ public class HikariCPSettingsModel implements Serializable {
     private static final int MAX_LIFETIME = 600000;
 
     /**
-     * Конструктор по умолчанию
-     */
-    public HikariCPSettingsModel() {}
-
-    /**
      * Имя пула
      */
     private String poolId;
@@ -105,6 +100,18 @@ public class HikariCPSettingsModel implements Serializable {
     private int maximumPoolSize;
 
     private boolean initializationFailFast;
+
+    /**
+     * Список обработчиков
+     */
+    private List<RunnerModel> runners;
+
+    /**
+     * Конструктор по умолчанию
+     */
+    public HikariCPSettingsModel() {
+        // Для Hibernate
+    }
 
     /**
      * Инициализация настроек HikariCP
@@ -328,11 +335,6 @@ public class HikariCPSettingsModel implements Serializable {
     }
 
     /**
-     * Список обработчиков
-     */
-    private List<RunnerModel> runners;
-
-    /**
      * Получение списка раннеров 
      */
     @Column
@@ -340,7 +342,7 @@ public class HikariCPSettingsModel implements Serializable {
     @Fetch(FetchMode.SELECT)
     public List<RunnerModel> getRunners() {
         if (runners == null) {
-            runners = new ArrayList<RunnerModel>();
+            runners = new ArrayList<>();
         }
 
         return runners;

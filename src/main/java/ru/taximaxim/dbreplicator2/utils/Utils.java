@@ -35,6 +35,12 @@ import java.util.List;
 public final class Utils {
 
     /**
+     * Данный класс нельзя инстанциировать.
+     */
+    private Utils() {
+    }
+
+    /**
      * Фикс для исправления предупреждения
      * "The expression of type List needs unchecked conversion"
      * 
@@ -46,16 +52,10 @@ public final class Utils {
      * @return Проверенный список
      */
     public static <T> List<T> castList(Class<? extends T> clazz, Collection<?> c) {
-        List<T> r = new ArrayList<T>(c.size());
+        List<T> r = new ArrayList<>(c.size());
         for (Object o : c) {
             r.add(clazz.cast(o));
         }
         return r;
-    }
-
-    /**
-     * Данный класс нельзя инстанциировать.
-     */
-    private Utils() {
     }
 }

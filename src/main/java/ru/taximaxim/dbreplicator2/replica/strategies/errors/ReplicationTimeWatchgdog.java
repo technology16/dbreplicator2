@@ -96,7 +96,7 @@ public class ReplicationTimeWatchgdog implements Strategy {
                 StringBuilder runnerIgnore = new StringBuilder();
                 StringBuilder runnerAktiv = new StringBuilder();
                 StringTokenizer totoken = new StringTokenizer(
-                        data.getParam(RUNNERS).toString(), ",");
+                        data.getParam(RUNNERS), ",");
                 while (totoken.hasMoreTokens()) {
                     String str = totoken.nextToken();
                     if (Integer.parseInt(str) < 0) {
@@ -146,7 +146,7 @@ public class ReplicationTimeWatchgdog implements Strategy {
                     selectPreparedStatement.setTimestamp(1, date);
                     selectPreparedStatement.setFetchSize(partEmail);
                     try (ResultSet resultSet = selectPreparedStatement.executeQuery();) {
-                        List<String> cols = new ArrayList<String>(
+                        List<String> cols = new ArrayList<>(
                                 JdbcMetadata.getColumns(resultSet));
                         int count = 0;
                         StringBuilder rowDumpEmail = new StringBuilder(String.format(

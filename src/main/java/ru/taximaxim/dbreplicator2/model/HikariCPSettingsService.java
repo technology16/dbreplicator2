@@ -76,7 +76,7 @@ public class HikariCPSettingsService {
      * @return
      */
     public Map<String, HikariCPSettingsModel> getDataBaseSettings() {
-        Map<String, HikariCPSettingsModel> result = new HashMap<String, HikariCPSettingsModel>();
+        Map<String, HikariCPSettingsModel> result = new HashMap<>();
 
         Session session = sessionFactory.openSession();
         try {

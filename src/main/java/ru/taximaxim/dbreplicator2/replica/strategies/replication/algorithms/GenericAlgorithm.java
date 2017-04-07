@@ -73,7 +73,7 @@ public class GenericAlgorithm {
     private final Count countSuccess;
     private final Count countError;
 
-    protected Map<TableModel, TableModel> destTables = new HashMap<TableModel, TableModel>();
+    protected Map<TableModel, TableModel> destTables = new HashMap<>();
 
     /**
      * Конструктор нпо умолчанию
@@ -200,7 +200,7 @@ public class GenericAlgorithm {
         PreparedStatement updateDestStatement = getDestDataService().getUpdateStatement(
                 destTable, getSourceDataService().getAllCols(sourceTable));
         // Добавляем данные в целевую таблицу
-        Collection<String> colsForUpdate = new ArrayList<String>(
+        Collection<String> colsForUpdate = new ArrayList<>(
                 getDestDataService().getAvaliableDataCols(destTable,
                         getSourceDataService().getAllCols(sourceTable)));
         colsForUpdate.addAll(getDestDataService().getPriCols(destTable));
@@ -264,8 +264,8 @@ public class GenericAlgorithm {
                     destTable.setParam("tempKey", "tempValue");
                     destTable.setRunner(null);
                 } catch (CloneNotSupportedException e) {
-                    LOG.error("Ошибка при клонировании таблицы-источника:\n"
-                            + e.getMessage());
+                    LOG.error("Ошибка при клонировании таблицы-источника:",
+                            e);
                 }
             }
             destTables.put(sourceTable, destTable);

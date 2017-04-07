@@ -176,7 +176,7 @@ public abstract class GeneiricManagerAlgorithm {
         int totalRows = 0;
         int selectedRowsCount;
         long idSuperLog = 0;
-        final Set<RunnerModel> runners = new HashSet<RunnerModel>();
+        final Set<RunnerModel> runners = new HashSet<>();
         Future<int[]> deleteSuperLogResult = null;
         Future<ResultSet> superLog = initSuperLog;
 
@@ -330,7 +330,7 @@ public abstract class GeneiricManagerAlgorithm {
      */
     protected void startAllRunners(Map<String, Collection<RunnerModel>> tableObservers)
             throws SQLException {
-        final Set<RunnerModel> runners = new HashSet<RunnerModel>();
+        final Set<RunnerModel> runners = new HashSet<>();
         // запускаем все обработчики реплик
         for (Collection<RunnerModel> observers : tableObservers.values()) {
             runners.addAll(observers);
@@ -406,14 +406,14 @@ public abstract class GeneiricManagerAlgorithm {
      */
     public Map<String, Collection<RunnerModel>> getTableObservers(
             HikariCPSettingsModel sourcePool) {
-        final Map<String, Collection<RunnerModel>> tableObservers = new TreeMap<String, Collection<RunnerModel>>(
+        final Map<String, Collection<RunnerModel>> tableObservers = new TreeMap<>(
                 String.CASE_INSENSITIVE_ORDER);
         for (RunnerModel runner : sourcePool.getRunners()) {
             for (TableModel table : runner.getTables()) {
                 final String tableName = table.getName();
                 Collection<RunnerModel> observers = tableObservers.get(tableName);
                 if (observers == null) {
-                    observers = new HashSet<RunnerModel>();
+                    observers = new HashSet<>();
                     tableObservers.put(tableName, observers);
                 }
                 observers.add(runner);

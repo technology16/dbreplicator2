@@ -44,15 +44,6 @@ public class DefaultUncaughtExceptionHandler implements UncaughtExceptionHandler
     private Integer runnerId;
 
     /**
-     * Получение раннера потока
-     * 
-     * @return the runnerId
-     */
-    protected Integer getRunnerId() {
-        return runnerId;
-    }
-
-    /**
      * Конструктор для конкретного раннера
      * 
      * @param runnerId
@@ -62,9 +53,12 @@ public class DefaultUncaughtExceptionHandler implements UncaughtExceptionHandler
     }
 
     /**
-     * Конструктор по умолчанию
+     * Получение раннера потока
+     * 
+     * @return the runnerId
      */
-    public DefaultUncaughtExceptionHandler() {
+    protected Integer getRunnerId() {
+        return runnerId;
     }
 
     /*

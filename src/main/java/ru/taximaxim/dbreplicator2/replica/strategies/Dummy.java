@@ -39,12 +39,6 @@ public class Dummy implements Strategy {
 
     public static final Logger LOG = Logger.getLogger(Dummy.class);
 
-    /**
-     * Конструктор по умолчанию
-     */
-    public Dummy() {
-    }
-
     @Override
     public void execute(ConnectionFactory connectionsFactory,
             StrategyModel data) {

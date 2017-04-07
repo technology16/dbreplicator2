@@ -77,6 +77,7 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm {
     /**
      * @return the sourceDataService
      */
+    @Override
     protected GenericDataTypeService getSourceDataService() {
         return sourceDataService;
     }
@@ -84,6 +85,7 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm {
     /**
      * @return the destDataService
      */
+    @Override
     protected GenericDataTypeService getDestDataService() {
         return destDataService;
     }
@@ -100,7 +102,7 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm {
                 INTEGRITY_ERROR, data
                         .getRunner().getSource().getPoolId(), data.getRunner()
                         .getTarget().getPoolId()));
-        List<String> priCols = new ArrayList<String>(getSourceDataService().getPriCols(
+        List<String> priCols = new ArrayList<>(getSourceDataService().getPriCols(
                 sourceTable));
 
         PreparedStatement selectTargetStatement = getDestDataService()
@@ -115,7 +117,7 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm {
 
         try (ResultSet targetResult = selectTargetStatement.executeQuery();) {
             if (targetResult.next()) {
-                Map<String, Integer> colsSource = new HashMap<String, Integer>(
+                Map<String, Integer> colsSource = new HashMap<>(
                         getSourceDataService().getAllColsTypes(sourceTable));
 
                 boolean errorRows = false;
@@ -170,7 +172,7 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm {
                         INTEGRITY_ERROR, data
                                 .getRunner().getSource().getPoolId(), data.getRunner()
                                 .getTarget().getPoolId()));
-                List<String> priCols = new ArrayList<String>(getSourceDataService().getPriCols(
+                List<String> priCols = new ArrayList<>(getSourceDataService().getPriCols(
                         sourceTable));
                 
                 rowDumpHead.append(String.format(
@@ -270,7 +272,7 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm {
                     destTable.setParam("tempKey", "tempValue");
                     destTable.setRunner(null);
                 } catch (CloneNotSupportedException e) {
-                    LOG.error("Ошибка при клонировании таблицы-источника:\n" + e.getMessage());
+                    LOG.error("Ошибка при клонировании таблицы-источника:", e);
                 }
             }
             destTables.put(sourceTable, destTable);
