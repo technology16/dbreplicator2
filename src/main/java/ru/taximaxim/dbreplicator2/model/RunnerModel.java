@@ -90,6 +90,14 @@ public class RunnerModel implements Runner, Serializable {
     @Fetch(FetchMode.SELECT)
     @OrderBy("priority ASC")
     private List<StrategyModel> strategyModels;
+    
+    /**
+     * Список таблиц, которые обрабатывает раннер
+     */
+    @OneToMany(mappedBy = "runner", fetch = FetchType.EAGER)
+    @Fetch(FetchMode.SELECT)
+    @OrderBy("id_table ASC")
+    private List<TableModel> tables;
 
     /**
      * Добавляет стратегию к runner'y
@@ -129,10 +137,11 @@ public class RunnerModel implements Runner, Serializable {
     /**
      * Получение списка стратегий раннера
      */
+    @Override
     public List<StrategyModel> getStrategyModels() {
 
         if (strategyModels == null) {
-            strategyModels = new ArrayList<StrategyModel>();
+            strategyModels = new ArrayList<>();
         }
 
         return strategyModels;
@@ -184,20 +193,13 @@ public class RunnerModel implements Runner, Serializable {
     }
     
     /**
-     * Список таблиц, которые обрабатывает раннер
-     */
-    @OneToMany(mappedBy = "runner", fetch = FetchType.EAGER)
-    @Fetch(FetchMode.SELECT)
-    private List<TableModel> tables;
-    
-    /**
      * Получение списка обрабатываемых раннером таблиц
      * 
      * @return список таблиц
      */
     public List<TableModel> getTables() {
         if (tables == null) {
-            tables = new ArrayList<TableModel>();
+            tables = new ArrayList<>();
         }
         return this.tables;
     }

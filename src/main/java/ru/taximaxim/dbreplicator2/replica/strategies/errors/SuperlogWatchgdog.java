@@ -100,7 +100,7 @@ public class SuperlogWatchgdog implements Strategy {
                     selectPreparedStatement.setFetchSize(partEmail);
 
                     try (ResultSet resultSet = selectPreparedStatement.executeQuery();) {
-                        List<String> cols = new ArrayList<String>(
+                        List<String> cols = new ArrayList<>(
                                 JdbcMetadata.getColumns(resultSet));
                         int count = 0;
                         StringBuilder rowDumpEmail = new StringBuilder(String.format(

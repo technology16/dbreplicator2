@@ -65,7 +65,7 @@ public class H2CopyTableDataTest extends AbstractReplicationTest {
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        setUp(null, null, "init_db/importRep2.sql", "init_db/importSource.sql", "init_db/importDest.sql"); 
+        setUp("import.sql", "init_db/importRep2.sql", "init_db/importSource.sql", "init_db/importDest.sql"); 
         initRunners();
     }
 

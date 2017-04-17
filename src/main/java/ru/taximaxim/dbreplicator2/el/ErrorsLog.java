@@ -45,12 +45,21 @@ import ru.taximaxim.dbreplicator2.replica.strategies.replication.data.DataServic
 public class ErrorsLog extends DataServiceSkeleton
         implements ErrorsLogService {
 
+    private static final String DETAILS = "Подробности: ";
+
     private static final Logger LOG = Logger.getLogger(ErrorsLog.class);
 
     /**
      * кешированный запрос обновления
      */
-    private final StatementsHashMap<String, PreparedStatement> statementsCache = new StatementsHashMap<String, PreparedStatement>();
+    private final StatementsHashMap<String, PreparedStatement> statementsCache = new StatementsHashMap<>();
+
+    /**
+     * Конструктор на основе соединения к БД
+     */
+    public ErrorsLog(DataSource dataSource) {
+        super(dataSource);
+    }
 
     /**
      * Получение выражения на основе текста запроса. Выражения кешируются.
@@ -70,19 +79,12 @@ public class ErrorsLog extends DataServiceSkeleton
         return statement;
     }
 
-    /**
-     * Конструктор на основе соединения к БД
-     */
-    public ErrorsLog(DataSource dataSource) {
-        super(dataSource);
-    }
-
     @Override
     public void add(Integer runnerId, String tableId, Long foreignId, String error,
             Throwable e) {
         StringWriter writer = new StringWriter();
         PrintWriter printWriter = new PrintWriter(writer);
-        printWriter.println("Подробности: ");
+        printWriter.println(DETAILS);
         e.printStackTrace(printWriter);
         printWriter.flush();
         add(runnerId, tableId, foreignId, error + "\n" + writer.toString());
@@ -93,12 +95,12 @@ public class ErrorsLog extends DataServiceSkeleton
             SQLException e) {
         Writer writer = new StringWriter();
         PrintWriter printWriter = new PrintWriter(writer);
-        printWriter.println("Подробности: ");
+        printWriter.println(DETAILS);
         e.printStackTrace(printWriter);
 
         SQLException nextEx = e.getNextException();
         while (nextEx != null) {
-            printWriter.println("Подробности: ");
+            printWriter.println(DETAILS);
             nextEx.printStackTrace(printWriter);
             nextEx = nextEx.getNextException();
         }
@@ -172,7 +174,7 @@ public class ErrorsLog extends DataServiceSkeleton
 
     @Override
     public void close() {
-        try (StatementsHashMap<String, PreparedStatement> statementsCache = this.statementsCache) {
+        try (StatementsHashMap<String, PreparedStatement> thisStatementsCache = this.statementsCache) {
             super.close();
         } catch (SQLException e) {
             LOG.error("Ошибка закрытия ресурсов!", e);

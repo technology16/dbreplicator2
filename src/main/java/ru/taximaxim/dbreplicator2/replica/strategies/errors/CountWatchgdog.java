@@ -109,7 +109,7 @@ public class CountWatchgdog extends StrategySkeleton implements Strategy {
                     selectErrors.setFetchSize(getFetchSize(data));
 
                     try (ResultSet errorsResult = selectErrors.executeQuery();) {
-                        List<String> cols = new ArrayList<String>(
+                        List<String> cols = new ArrayList<>(
                                 JdbcMetadata.getColumns(errorsResult));
                         int count = 0;
                         StringBuilder rowDumpEmail = new StringBuilder(String.format(

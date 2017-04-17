@@ -48,28 +48,28 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
     /**
      * Кешированные запросы удаления данных в приемнике
      */
-    private final StatementsHashMap<TableModel, PreparedStatement> deleteStatements = new StatementsHashMap<TableModel, PreparedStatement>();
+    private final StatementsHashMap<TableModel, PreparedStatement> deleteStatements = new StatementsHashMap<>();
     /**
      * Кешированные запросы получения данных из источника
      */
-    private final StatementsHashMap<TableModel, PreparedStatement> selectStatements = new StatementsHashMap<TableModel, PreparedStatement>();
+    private final StatementsHashMap<TableModel, PreparedStatement> selectStatements = new StatementsHashMap<>();
     /**
      * Кешированные запросы обновления данных в приемнике
      */
-    private final StatementsHashMap<TableModel, PreparedStatement> updateStatements = new StatementsHashMap<TableModel, PreparedStatement>();
+    private final StatementsHashMap<TableModel, PreparedStatement> updateStatements = new StatementsHashMap<>();
     /**
      * Кешировнные запросы вставки данных в приемник
      */
-    private final StatementsHashMap<TableModel, PreparedStatement> insertStatements = new StatementsHashMap<TableModel, PreparedStatement>();
+    private final StatementsHashMap<TableModel, PreparedStatement> insertStatements = new StatementsHashMap<>();
 
-    private final Map<TableModel, Set<String>> priCols = new HashMap<TableModel, Set<String>>();
-    private final Map<TableModel, Set<String>> allAvaliableCols = new HashMap<TableModel, Set<String>>();
-    private final Map<TableModel, Set<String>> avaliableDataCols = new HashMap<TableModel, Set<String>>();
-    private final Map<TableModel, Set<String>> allCols = new HashMap<TableModel, Set<String>>();
-    private final Map<TableModel, Set<String>> dataCols = new HashMap<TableModel, Set<String>>();
-    private final Map<TableModel, Set<String>> identityCols = new HashMap<TableModel, Set<String>>();
-    private final Map<TableModel, Set<String>> ignoredCols = new HashMap<TableModel, Set<String>>();
-    private final Map<TableModel, Set<String>> requiredCols = new HashMap<TableModel, Set<String>>();
+    private final Map<TableModel, Set<String>> priCols = new HashMap<>();
+    private final Map<TableModel, Set<String>> allAvaliableCols = new HashMap<>();
+    private final Map<TableModel, Set<String>> avaliableDataCols = new HashMap<>();
+    private final Map<TableModel, Set<String>> allCols = new HashMap<>();
+    private final Map<TableModel, Set<String>> dataCols = new HashMap<>();
+    private final Map<TableModel, Set<String>> identityCols = new HashMap<>();
+    private final Map<TableModel, Set<String>> ignoredCols = new HashMap<>();
+    private final Map<TableModel, Set<String>> requiredCols = new HashMap<>();
 
     protected static final String WHERE = "where";
     
@@ -199,7 +199,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
     }
     
     protected Collection<String> str2upperList(String str) {
-        Collection<String> list = new ArrayList<String>();
+        Collection<String> list = new ArrayList<>();
         if (str != null) {
             list = Arrays.asList(str.toUpperCase().split(","));
         }
@@ -219,6 +219,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * @return
      * @throws SQLException
      */
+    @Override
     public Set<String> getPriCols(TableModel table) throws SQLException {
         Set<String> cols = priCols.get(table);
         if (cols == null) {
@@ -226,7 +227,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
             if (keys.isEmpty()) {
                 cols = JdbcMetadata.getPrimaryColumns(getConnection(), table.getName());
             } else {
-                cols = new LinkedHashSet<String>(keys);
+                cols = new LinkedHashSet<>(keys);
             }
             priCols.put(table, cols);
         }
@@ -241,6 +242,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * @return
      * @throws SQLException
      */
+    @Override
     public Set<String> getAllCols(TableModel table) throws SQLException {
         Set<String> cols = allCols.get(table);
         if (cols == null) {
@@ -250,7 +252,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
             cols.removeAll(getIgnoredCols(table));
 
             // Оставляем обязательные колонки
-            if (getRequiredCols(table).size() != 0) {
+            if (!getRequiredCols(table).isEmpty()) {
                 cols.retainAll(getRequiredCols(table));
                 cols.addAll(getPriCols(table));
             }
@@ -268,11 +270,12 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * @return
      * @throws SQLException
      */
+    @Override
     public Set<String> getAllAvaliableCols(TableModel table,
             Collection<String> avaliableCals) throws SQLException {
         Set<String> cols = allAvaliableCols.get(table);
         if (cols == null) {
-            cols = new LinkedHashSet<String>(getAllCols(table));
+            cols = new LinkedHashSet<>(getAllCols(table));
 
             // Оставляем только доступные колонки
             cols.retainAll(avaliableCals);
@@ -291,10 +294,11 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * @return
      * @throws SQLException
      */
+    @Override
     public Set<String> getDataCols(TableModel table) throws SQLException {
         Set<String> cols = dataCols.get(table);
         if (cols == null) {
-            cols = new LinkedHashSet<String>(getAllCols(table));
+            cols = new LinkedHashSet<>(getAllCols(table));
             cols.removeAll(getPriCols(table));
 
             dataCols.put(table, cols);
@@ -311,11 +315,12 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * @return
      * @throws SQLException
      */
+    @Override
     public Set<String> getAvaliableDataCols(TableModel table,
             Collection<String> avaliableCals) throws SQLException {
         Set<String> cols = avaliableDataCols.get(table);
         if (cols == null) {
-            cols = new LinkedHashSet<String>(getDataCols(table));
+            cols = new LinkedHashSet<>(getDataCols(table));
 
             // Оставляем только доступные колонки
             cols.retainAll(avaliableCals);
@@ -332,6 +337,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * @return
      * @throws SQLException
      */
+    @Override
     public Set<String> getIdentityCols(TableModel table) throws SQLException {
         Set<String> cols = identityCols.get(table);
         if (cols == null) {
@@ -350,6 +356,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * @return
      * @throws SQLException
      */
+    @Override
     public Set<String> getIgnoredCols(TableModel table) throws SQLException {
         Set<String> cols = ignoredCols.get(table);
         if (cols == null) {
@@ -368,6 +375,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * @return
      * @throws SQLException
      */
+    @Override
     public Set<String> getRequiredCols(TableModel table) throws SQLException {
         Set<String> cols = requiredCols.get(table);
         if (cols == null) {
@@ -384,16 +392,17 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * 
      * @throws Exception
      */
+    @Override
     public void setRepServerName(String repServerName) throws SQLException {
-
+        // По умолчанию ни чего не делаем. Реализуется для конкретных баз.
     }
 
     @Override
     public void close() throws SQLException {
-        try (StatementsHashMap<TableModel, PreparedStatement> deleteStatements = this.deleteStatements;
-                StatementsHashMap<TableModel, PreparedStatement> selectStatements = this.selectStatements;
-                StatementsHashMap<TableModel, PreparedStatement> updateStatements = this.updateStatements;
-                StatementsHashMap<TableModel, PreparedStatement> insertStatements = this.insertStatements;) {
+        try (StatementsHashMap<TableModel, PreparedStatement> thisDeleteStatements = this.deleteStatements;
+                StatementsHashMap<TableModel, PreparedStatement> thisSelectStatements = this.selectStatements;
+                StatementsHashMap<TableModel, PreparedStatement> thisUpdateStatements = this.updateStatements;
+                StatementsHashMap<TableModel, PreparedStatement> thisInsertStatements = this.insertStatements;) {
             super.close();
         }
     }

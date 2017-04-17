@@ -37,7 +37,7 @@ import ru.taximaxim.dbreplicator2.model.TaskSettingsService;
  */
 public class TasksPool {
 
-    private final Map<TaskRunner, Thread> taskThreads = new HashMap<TaskRunner, Thread>();
+    private final Map<TaskRunner, Thread> taskThreads = new HashMap<>();
 
     private final TaskSettingsService taskSettingsService;
 

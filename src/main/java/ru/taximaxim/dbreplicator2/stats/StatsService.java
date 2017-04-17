@@ -103,9 +103,9 @@ public class StatsService {
      */
     public List<Map<String, Object>> convertResultSetToList(ResultSet result)
             throws SQLException {
-        List<Map<String, Object>> tablesResultSetList = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> tablesResultSetList = new ArrayList<>();
         while (result.next()) {
-            Map<String, Object> tablesResultSet = new HashMap<String, Object>();
+            Map<String, Object> tablesResultSet = new HashMap<>();
             tablesResultSet.put("id_statistics", result.getInt("id_statistics"));
             tablesResultSet.put("c_date", result.getTimestamp("c_date"));
             tablesResultSet.put("c_type", result.getInt("c_type"));

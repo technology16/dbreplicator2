@@ -41,25 +41,46 @@ public class StrategyKey implements Serializable {
     @ManyToOne
     @JoinColumn(name = "id_runner")
     private RunnerModel runner;
-    
-    public StrategyKey() {}
-    
+
+    /**
+     * Получение идентификатора стратегии
+     * 
+     * @return
+     */
     public Integer getId() {
         return id;
     }
     
+    /**
+     * Получение раннера
+     * 
+     * @return
+     */
     public RunnerModel getRunner() {
         return runner;
     }
     
+    /**
+     * Изменение идентификатора стратегии
+     * 
+     * @param id
+     */
     public void setId(Integer id) {
         this.id = id;
     }
     
+    /**
+     * Изменение раннера
+     * 
+     * @param runner
+     */
     public void setRunner(RunnerModel runner) {
         this.runner = runner;
     }
     
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
     @Override
     public boolean equals(Object object) {
         if ((object == null) || !(object instanceof StrategyKey)) {
@@ -73,6 +94,9 @@ public class StrategyKey implements Serializable {
         return false;
     }
     
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
     @Override
     public int hashCode() {
         final int prime = 31;

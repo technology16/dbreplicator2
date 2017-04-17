@@ -58,7 +58,7 @@ public class TaskSettingsService {
      * @return
      */
     public Map<Integer, TaskSettings> getTasks() {
-        Map<Integer, TaskSettings> result = new HashMap<Integer, TaskSettings>();
+        Map<Integer, TaskSettings> result = new HashMap<>();
 
         Session session = sessionFactory.openSession();
         try {

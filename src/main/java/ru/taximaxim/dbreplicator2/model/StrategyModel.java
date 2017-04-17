@@ -47,23 +47,6 @@ public class StrategyModel implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Конструктор по умолчанию
-     */
-    public StrategyModel() {
-    }
-
-    /**
-     * Инициализация стратегии
-     * 
-     * @param key
-     *            уникальный идентификатор стратегии
-     */
-    public StrategyModel(StrategyKey key) {
-        this.id = key.getId();
-        this.runner = key.getRunner();
-    }
-
-    /**
      * Идентификатор стратегии
      */
     @Id
@@ -105,6 +88,24 @@ public class StrategyModel implements Serializable {
      * Настройки
      */
     private Properties prop;
+
+    /**
+     * Конструктор по умолчанию
+     */
+    public StrategyModel() {
+        // Для Hibernate
+    }
+
+    /**
+     * Инициализация стратегии
+     * 
+     * @param key
+     *            уникальный идентификатор стратегии
+     */
+    public StrategyModel(StrategyKey key) {
+        this.id = key.getId();
+        this.runner = key.getRunner();
+    }
 
     /**
      * @see StrategyModel#runner

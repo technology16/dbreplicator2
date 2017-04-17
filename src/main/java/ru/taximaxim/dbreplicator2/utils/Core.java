@@ -51,12 +51,6 @@ public final class Core {
     
     private static final Logger LOG = Logger.getLogger(Core.class);
 
-    /**
-     * Данный класс нельзя инстанциировать.
-     */
-    private Core() {
-    }
-
     private static SessionFactory sessionFactory;
 
     private static ConnectionFactory connectionFactory;
@@ -74,6 +68,12 @@ public final class Core {
     private static ThreadPool threadPool;
     
     private static StatsService statsService;
+
+    /**
+     * Данный класс нельзя инстанциировать.
+     */
+    private Core() {
+    }
     
     /**
      * Получение настроек из файла
@@ -347,8 +347,7 @@ public final class Core {
     public static synchronized ErrorsLog getErrorsLog() {
         ApplicatonSettingsService aService = new ApplicatonSettingsService(getSessionFactory());
         String baseConnName = aService.getValue("error.dest");
-        ErrorsLog errorLog = new ErrorsLog(getConnectionFactory().get(baseConnName));
 
-        return errorLog;
+        return new ErrorsLog(getConnectionFactory().get(baseConnName));
     }
 }

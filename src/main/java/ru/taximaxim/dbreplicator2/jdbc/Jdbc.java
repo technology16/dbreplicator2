@@ -128,7 +128,7 @@ public final class Jdbc {
      */
     public static Map<String, Object> resultSetToMap(ResultSet data,
             Collection<String> columnsList) throws SQLException {
-        Map<String, Object> result = new HashMap<String, Object>();
+        Map<String, Object> result = new HashMap<>();
 
         for (String columnName : columnsList) {
             result.put(columnName, data.getObject(columnName));

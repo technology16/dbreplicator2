@@ -71,7 +71,7 @@ public final class JdbcMetadata {
     public static Set<String> getColumns(Connection connection, String tableName)
             throws SQLException {
         // Получаем список колонок
-        Set<String> colsList = new LinkedHashSet<String>();
+        Set<String> colsList = new LinkedHashSet<>();
         DatabaseMetaData metaData = connection.getMetaData();
         try (ResultSet colsResultSet = metaData.getColumns(null, getSchemaName(tableName), getTableName(tableName), null);) {
             while (colsResultSet.next()) {
@@ -95,7 +95,7 @@ public final class JdbcMetadata {
     public static Set<String> getColumns(ResultSet result)
             throws SQLException {
         // Получаем список колонок
-        Set<String> colsList = new LinkedHashSet<String>();
+        Set<String> colsList = new LinkedHashSet<>();
         ResultSetMetaData metaData = result.getMetaData();
         int columnCount = metaData.getColumnCount();
         for (int i = 1; i <= columnCount; i++) {
@@ -118,7 +118,7 @@ public final class JdbcMetadata {
     public static Set<String> getPrimaryColumns(Connection connection,
             String tableName) throws SQLException {
         // Получаем список ключевых колонок
-        Set<String> primaryKeyColsList = new LinkedHashSet<String>();
+        Set<String> primaryKeyColsList = new LinkedHashSet<>();
         DatabaseMetaData metaData = connection.getMetaData();
         try (ResultSet primaryKeysResultSet = metaData.getPrimaryKeys(null, getSchemaName(tableName), getTableName(tableName));) {
             while (primaryKeysResultSet.next()) {
@@ -169,7 +169,7 @@ public final class JdbcMetadata {
     public static Set<String> getIdentityColumns(Connection connection,
             String tableName) throws SQLException {
         // Получаем список колонок
-        Set<String> colsList = new LinkedHashSet<String>();
+        Set<String> colsList = new LinkedHashSet<>();
         DatabaseMetaData metaData = connection.getMetaData();
         getSchemaName(tableName);
         try (ResultSet colsResultSet = metaData.getColumns(null, getSchemaName(tableName), getTableName(tableName), null);) {
@@ -197,7 +197,7 @@ public final class JdbcMetadata {
     public static Set<String> getNullableColumns(Connection connection,
             String tableName) throws SQLException {
         // Получаем список колонок
-        Set<String> cols = new LinkedHashSet<String>();
+        Set<String> cols = new LinkedHashSet<>();
         DatabaseMetaData metaData = connection.getMetaData();
         try (ResultSet colsResultSet = metaData.getColumns(null, getSchemaName(tableName), getTableName(tableName), null);) {
             while (colsResultSet.next()) {
@@ -217,7 +217,7 @@ public final class JdbcMetadata {
      * @throws SQLException
      */
     public static Map<String, Integer> getColumnsTypes(Connection connection, String tableName) throws SQLException {
-        Map<String, Integer> colsTypes = new HashMap<String, Integer>();
+        Map<String, Integer> colsTypes = new HashMap<>();
         DatabaseMetaData metaData = connection.getMetaData();
         try (ResultSet colsResultSet = metaData.getColumns(null, getSchemaName(tableName), getTableName(tableName), null);) {
             while (colsResultSet.next()) {
@@ -240,7 +240,7 @@ public final class JdbcMetadata {
     public static Map<String, Integer>  getPrimaryColumnsTypes(Connection connection,
             String tableName) throws SQLException {
         // Получаем список ключевых колонок
-        Map<String, Integer> primaryKeyColsTypes = new HashMap<String, Integer>();
+        Map<String, Integer> primaryKeyColsTypes = new HashMap<>();
         Map<String, Integer> colsTypes = getColumnsTypes(connection, tableName);
         Set<String> primaryKeyCols = getPrimaryColumns(connection, tableName);
         
@@ -266,7 +266,7 @@ public final class JdbcMetadata {
        boolean targetBoolean = targetResult.getObject(colsName) == null;
        if (sourceBoolean != targetBoolean) {
            return false;
-       } else if (sourceBoolean & targetBoolean) {
+       } else if (sourceBoolean && targetBoolean) {
            return true;
        } else {
        

@@ -74,7 +74,7 @@ public final class QueryConstructors {
     public static Collection<String> listAddPostfix(Collection<?> list,
             Map<String, String> castCols, String postfix) {
 
-        Collection<String> newList = new ArrayList<String>();
+        Collection<String> newList = new ArrayList<>();
         for (Object val : list) {
             if (castCols.keySet().contains(val)) {
                 newList.add(val + "=" + castCols.get(val));
@@ -94,7 +94,7 @@ public final class QueryConstructors {
      */
     public static Collection<String> listToCastString(Collection<?> list,
             Map<String, String> castCols) {
-        Collection<String> newList = new ArrayList<String>();
+        Collection<String> newList = new ArrayList<>();
         for (Object val : list) {
             if (castCols.keySet().contains(val)) {
                 newList.add(castCols.get(val));
@@ -206,7 +206,7 @@ public final class QueryConstructors {
      */
     public static Collection<String> questionMarks(Collection<?> colsList,
             Map<String, String> castCols) {
-        Collection<String> result = new ArrayList<String>();
+        Collection<String> result = new ArrayList<>();
         for (Object col : colsList) {
             if (castCols.keySet().contains(col)) {
                 result.add(castCols.get(col));
@@ -553,7 +553,7 @@ public final class QueryConstructors {
     public static StringBuilder getKeyShift(Collection<String> primaryKeys,
             String orderMode) {
         StringBuilder selectQuery = new StringBuilder();
-        List<String> tempKeys = new ArrayList<String>(primaryKeys);
+        List<String> tempKeys = new ArrayList<>(primaryKeys);
         String postfix = "DESC".equals(orderMode) ? " < ? " : " > ? ";
         while (!tempKeys.isEmpty()) {
             selectQuery.append('(');
@@ -581,8 +581,8 @@ public final class QueryConstructors {
      */
     public static Collection<String> getKeyShiftParams(Collection<String> primaryKeys)
             throws SQLException {
-        LinkedList<String> keys = new LinkedList<String>(primaryKeys);
-        Collection<String> cols = new LinkedList<String>();
+        LinkedList<String> keys = new LinkedList<>(primaryKeys);
+        Collection<String> cols = new LinkedList<>();
         while (!keys.isEmpty()) {
             cols.addAll(keys);
             keys.removeLast();

@@ -58,7 +58,7 @@ public class CronSettingsService {
      * @return
      */
     public Map<Integer, CronSettings> getTasks() {
-        Map<Integer, CronSettings> result = new HashMap<Integer, CronSettings>();
+        Map<Integer, CronSettings> result = new HashMap<>();
 
         Session session = sessionFactory.openSession();
         try {
@@ -94,13 +94,13 @@ public class CronSettingsService {
     /**
      * Сохранение экземпляра настроек задачи
      *
-     * @param CronSettings
+     * @param cronSettings
      */
-    public void setTask(CronSettings CronSettings) {
+    public void setTask(CronSettings cronSettings) {
         Session session = sessionFactory.openSession();
         session.beginTransaction();
         try {
-            session.saveOrUpdate(CronSettings);
+            session.saveOrUpdate(cronSettings);
             session.getTransaction().commit();
         } catch (HibernateException e) {
             session.getTransaction().rollback();

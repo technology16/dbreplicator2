@@ -41,12 +41,9 @@ public class GenericWorkPoolService extends DataServiceSkeleton
 
     private final ErrorsLogService errorsLog;
 
-    /**
-     * @return the errorsLog
-     */
-    protected ErrorsLogService getErrorsLog() {
-        return errorsLog;
-    }
+    private PreparedStatement clearWorkPoolDataStatement;
+
+    private PreparedStatement lastOperationsStatement;
 
     /**
      * Конструктор на основе соединения к БД
@@ -56,9 +53,12 @@ public class GenericWorkPoolService extends DataServiceSkeleton
         this.errorsLog = errorsLog;
     }
 
-    private PreparedStatement clearWorkPoolDataStatement;
-
-    private PreparedStatement lastOperationsStatement;
+    /**
+     * @return the errorsLog
+     */
+    protected ErrorsLogService getErrorsLog() {
+        return errorsLog;
+    }
 
     @Override
     public PreparedStatement getLastOperationsStatement() throws SQLException {
@@ -121,6 +121,7 @@ public class GenericWorkPoolService extends DataServiceSkeleton
      * @param operationsResult
      * @throws SQLException
      */
+    @Override
     public void clearWorkPoolData(ResultSet operationsResult) throws SQLException {
         // Очищаем данные о текущей записи из набора данных реплики
         PreparedStatement deleteWorkPoolData = getClearWorkPoolDataStatement();
@@ -139,6 +140,7 @@ public class GenericWorkPoolService extends DataServiceSkeleton
      * 
      * @throws SQLException
      */
+    @Override
     public void trackError(String message, SQLException e, ResultSet operation)
             throws SQLException {
         getErrorsLog().add(getRunner(operation), getTable(operation),
@@ -172,8 +174,8 @@ public class GenericWorkPoolService extends DataServiceSkeleton
 
     @Override
     public void close() throws SQLException {
-        try (PreparedStatement clearWorkPoolDataStatement = this.clearWorkPoolDataStatement;
-                PreparedStatement lastOperationsStatement = this.lastOperationsStatement) {
+        try (PreparedStatement thisClearWorkPoolDataStatement = this.clearWorkPoolDataStatement;
+                PreparedStatement thisLastOperationsStatement = this.lastOperationsStatement) {
             super.close();
         }
     }

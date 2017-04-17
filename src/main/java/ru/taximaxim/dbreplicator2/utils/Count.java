@@ -33,7 +33,7 @@ import java.util.Set;
  */
 public class Count {
     
-    private final Map<String,Integer> tablesCount = new HashMap<String,Integer>();
+    private final Map<String,Integer> tablesCount = new HashMap<>();
     /**
      * Увеличение счетчика на ед.
      * 

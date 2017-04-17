@@ -41,12 +41,6 @@ public class ApplicatonSettingsModel implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Конструктор по умолчанию
-     */
-    public ApplicatonSettingsModel() {
-    }
-    
-    /**
      * Ключ
      */
     private String key;
@@ -55,6 +49,13 @@ public class ApplicatonSettingsModel implements Serializable {
      * Значение
      */
     private String value;
+
+    /**
+     * Конструктор по умолчанию
+     */
+    public ApplicatonSettingsModel() {
+        // Для Hibernate
+    }
     
     /**
      * Получение имени ключа
