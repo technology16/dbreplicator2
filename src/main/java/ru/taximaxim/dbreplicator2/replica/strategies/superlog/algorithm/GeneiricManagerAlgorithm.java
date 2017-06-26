@@ -39,13 +39,13 @@ import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.jdbc.BatchCall;
 import ru.taximaxim.dbreplicator2.jdbc.QueryCall;
+import ru.taximaxim.dbreplicator2.model.CronSettings;
 import ru.taximaxim.dbreplicator2.model.HikariCPSettingsModel;
 import ru.taximaxim.dbreplicator2.model.Runner;
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.model.TableModel;
 import ru.taximaxim.dbreplicator2.model.TaskSettings;
-import ru.taximaxim.dbreplicator2.model.TaskSettingsService;
 import ru.taximaxim.dbreplicator2.replica.strategies.replication.workpool.WorkPoolService;
 import ru.taximaxim.dbreplicator2.replica.strategies.superlog.data.SuperlogDataService;
 import ru.taximaxim.dbreplicator2.utils.Core;
@@ -194,7 +194,8 @@ public abstract class GeneiricManagerAlgorithm {
                     insertedRowsCount += insertRunnersData(superLogResult,
                             getInsertWorkpoolStatement(), getDeleteSuperlogStatement(),
                             tableObservers, runners);
-                    // При прокручивании выборки из супер лога будем контролировать количество выбранных записей
+                    // При прокручивании выборки из супер лога будем
+                    // контролировать количество выбранных записей
                     selectedRowsCount++;
                 }
             }
@@ -210,8 +211,9 @@ public abstract class GeneiricManagerAlgorithm {
                 try {
                     deleteSuperLogResult = executeBatches(deleteService,
                             getDeleteSuperlogStatement(), getInsertWorkpoolStatement());
-                    
-                    // Если все нормально, увеличиваем счетчик обработанных записей
+
+                    // Если все нормально, увеличиваем счетчик обработанных
+                    // записей
                     totalRows += insertedRowsCount;
                 } catch (SQLException e) {
                     SQLException nextEx = e;
@@ -429,10 +431,13 @@ public abstract class GeneiricManagerAlgorithm {
      */
     protected Set<Runner> getRunnersFromTask() {
         if (tRunners == null) {
-            final TaskSettingsService taskSettingsService = Core.getTaskSettingsService();
             tRunners = new HashSet<>();
-            for (TaskSettings task : taskSettingsService.getTasks().values()) {
+            for (TaskSettings task : Core.getTaskSettingsService().getTasks().values()) {
                 tRunners.add(task.getRunner());
+            }
+
+            for (CronSettings cron : Core.getCronSettingsService().getTasks().values()) {
+                tRunners.add(cron.getRunner());
             }
         }
 
