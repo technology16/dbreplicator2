@@ -23,9 +23,12 @@
 
 package ru.taximaxim.dbreplicator2.model;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -34,6 +37,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.apache.log4j.Logger;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
@@ -48,7 +52,7 @@ import org.hibernate.annotations.FetchMode;
 @Table(name = "hikari_cp_settings")
 public class HikariCPSettingsModel implements Serializable {
     
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
     
     private static final int MAXIMUM_POOL_SIZE = 3;
     private static final boolean INITIALIZATION_FAIL_FAST = false;
@@ -59,51 +63,76 @@ public class HikariCPSettingsModel implements Serializable {
     /**
      * Имя пула
      */
+    @Id
+    @Column(name = "id_pool")
     private String poolId;
     /**
      * Наименование драйвера БД
      */
+    @Column(name = "driver")
     private String driver;
     /**
      * Строка подключения к БД
      */
+    @Column(name = "url")
     private String url;
     /**
      * Имя пользователя
      */
+    @Column(name = "user")
     private String user;
     /**
      * Пароль
      */
+    @Column(name = "pass")
     private String pass;
     
     /**
      * Таймаут получения соединения (по-умолчанию 30 секунд)
      */
+    @Column(name = "connection_timeout")
     private int connectionTimeout;
     
     /**
      * Время, в течении которого соединение может находиться в
      * соостоянии idle (по-умолчанию 10 минут)
      */
+    @Column(name = "idle_timeout")
     private int idleTimeout;
     
     /**
      * Максимальное время жихни соедения в пуле
      * (по-умолчанию 30 минут)
      */
+    @Column(name = "max_lifetime")
     private int maxLifetime;
   
     /**
      * Максимальное количество соединений
      */
+    @Column(name = "max_pool_size")
     private int maximumPoolSize;
 
+    @Column(name = "init_fail_fast")
     private boolean initializationFailFast;
+
+    /**
+     * Дополнительные параметры
+     */
+    @Column(name = "param", length = 20000)
+    private String param;
+
+    /**
+     * Поле для получения настроек
+     */
+    private Properties properties;
 
     /**
      * Список обработчиков
      */
+    @Column
+    @OneToMany(targetEntity=RunnerModel.class, mappedBy="source", fetch=FetchType.EAGER)
+    @Fetch(FetchMode.SELECT)
     private List<RunnerModel> runners;
 
     /**
@@ -170,8 +199,6 @@ public class HikariCPSettingsModel implements Serializable {
      * 
      * @return the name
      */
-    @Id
-    @Column(name = "id_pool")
     public String getPoolId() {
         return poolId;
     }
@@ -191,7 +218,6 @@ public class HikariCPSettingsModel implements Serializable {
      * 
      * @return the driver
      */
-    @Column(name = "driver")
     public String getDriver() {
         return driver;
     }
@@ -209,7 +235,6 @@ public class HikariCPSettingsModel implements Serializable {
     /**
      * @return the url
      */
-    @Column(name = "url")
     public String getUrl() {
         return url;
     }
@@ -225,7 +250,6 @@ public class HikariCPSettingsModel implements Serializable {
     /**
      * @return the user
      */
-    @Column(name = "user")
     public String getUser() {
         return user;
     }
@@ -241,7 +265,6 @@ public class HikariCPSettingsModel implements Serializable {
     /**
      * @return the pass
      */
-    @Column(name = "pass")
     public String getPass() {
         return pass;
     }
@@ -257,7 +280,6 @@ public class HikariCPSettingsModel implements Serializable {
     /**
      * @return the maximumPoolSize
      */
-    @Column(name = "max_pool_size")
     public int getMaximumPoolSize() {
         return maximumPoolSize;
     }
@@ -273,7 +295,6 @@ public class HikariCPSettingsModel implements Serializable {
     /**
      * @return the initializationFailFast
      */
-    @Column(name = "init_fail_fast")
     public boolean getInitializationFailFast() {
         return initializationFailFast;
     }
@@ -287,25 +308,23 @@ public class HikariCPSettingsModel implements Serializable {
     }
 
     /**
-     * @return the connectionTimeout
+     * @return the param
      */
-    @Column(name = "connection_timeout")
-    public int getConnectionTimeout() {
-        return connectionTimeout;
+    public String getParam() {
+        return param;
     }
 
     /**
-     * @param connectionTimeout
-     *            the connectionTimeout to set
+     * @param param
+     *            the param to set
      */
-    public void setConnectionTimeout(int connectionTimeout) {
-        this.connectionTimeout = connectionTimeout;
+    public void setParam(String param) {
+        this.param = param;
     }
 
     /**
      * @return the idleTimeout
      */
-    @Column(name = "idle_timeout")
     public int getIdleTimeout() {
         return idleTimeout;
     }
@@ -321,7 +340,6 @@ public class HikariCPSettingsModel implements Serializable {
     /**
      * @return the maxLifetime
      */
-    @Column(name = "max_lifetime")
     public int getMaxLifetime() {
         return maxLifetime;
     }
@@ -337,9 +355,6 @@ public class HikariCPSettingsModel implements Serializable {
     /**
      * Получение списка раннеров 
      */
-    @Column
-    @OneToMany(targetEntity=RunnerModel.class, mappedBy="source", fetch=FetchType.EAGER)
-    @Fetch(FetchMode.SELECT)
     public List<RunnerModel> getRunners() {
         if (runners == null) {
             runners = new ArrayList<>();
@@ -370,6 +385,40 @@ public class HikariCPSettingsModel implements Serializable {
     public void setRunners(List<RunnerModel> runners) {
         this.runners = runners;
     }
+
+    /**
+     * @return the connectionTimeout
+     */
+    public int getConnectionTimeout() {
+        return connectionTimeout;
+    }
+
+    /**
+     * @param connectionTimeout
+     *            the connectionTimeout to set
+     */
+    public void setConnectionTimeout(int connectionTimeout) {
+        this.connectionTimeout = connectionTimeout;
+    }
+
+    /**
+     * Получение дополнительных настроек
+     * 
+     * @return
+     */
+    public Properties getProperties() {
+        if(properties == null) {
+            properties = new Properties();
+            if(getParam() != null){
+                try {
+                    properties.load(new StringReader(getParam()));
+                } catch (IOException e) {
+                    Logger.getLogger(HikariCPSettingsModel.class).error("Ошибка при чтение параметров [" + getParam() + "]!", e);
+                }
+            }
+        }
+        return properties;
+    }
     
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()
@@ -379,10 +428,12 @@ public class HikariCPSettingsModel implements Serializable {
         final int prime = 31;
         int result = 1;
         result = prime * result + connectionTimeout;
-        result = prime * result + idleTimeout;
-        result = prime * result + maxLifetime;
         result = prime * result + ((driver == null) ? 0 : driver.hashCode());
+        result = prime * result + idleTimeout;
+        result = prime * result + (initializationFailFast ? 1231 : 1237);
+        result = prime * result + maxLifetime;
         result = prime * result + maximumPoolSize;
+        result = prime * result + ((param == null) ? 0 : param.hashCode());
         result = prime * result + ((pass == null) ? 0 : pass.hashCode());
         result = prime * result + ((poolId == null) ? 0 : poolId.hashCode());
         result = prime * result + ((url == null) ? 0 : url.hashCode());
@@ -405,6 +456,42 @@ public class HikariCPSettingsModel implements Serializable {
             return false;
         }
         HikariCPSettingsModel other = (HikariCPSettingsModel) obj;
+        if (connectionTimeout != other.connectionTimeout) {
+            return false;
+        }
+        if (driver == null) {
+            if (other.driver != null) {
+                return false;
+            }
+        } else if (!driver.equals(other.driver)) {
+            return false;
+        }
+        if (idleTimeout != other.idleTimeout) {
+            return false;
+        }
+        if (initializationFailFast != other.initializationFailFast) {
+            return false;
+        }
+        if (maxLifetime != other.maxLifetime) {
+            return false;
+        }
+        if (maximumPoolSize != other.maximumPoolSize) {
+            return false;
+        }
+        if (param == null) {
+            if (other.param != null) {
+                return false;
+            }
+        } else if (!param.equals(other.param)) {
+            return false;
+        }
+        if (pass == null) {
+            if (other.pass != null) {
+                return false;
+            }
+        } else if (!pass.equals(other.pass)) {
+            return false;
+        }
         if (poolId == null) {
             if (other.poolId != null) {
                 return false;
@@ -417,6 +504,13 @@ public class HikariCPSettingsModel implements Serializable {
                 return false;
             }
         } else if (!url.equals(other.url)) {
+            return false;
+        }
+        if (user == null) {
+            if (other.user != null) {
+                return false;
+            }
+        } else if (!user.equals(other.user)) {
             return false;
         }
         return true;
