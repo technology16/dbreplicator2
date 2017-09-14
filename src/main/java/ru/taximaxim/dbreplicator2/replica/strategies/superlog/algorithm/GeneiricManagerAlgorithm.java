@@ -105,6 +105,29 @@ public abstract class GeneiricManagerAlgorithm {
     }
 
     /**
+     * Добавляем данные конкретного раннера в батч
+     * 
+     * @param superLogResult
+     * @param insertRunnerData
+     * @param runners
+     * @param runner
+     * @throws SQLException
+     */
+    protected void runnerDataAddBatch(ResultSet superLogResult,
+            PreparedStatement insertRunnerData, Set<RunnerModel> runners,
+            RunnerModel runner) throws SQLException {
+        // Игнорим данные у которых владелец совпадает с приемником
+        if (superLogResult.getString(WorkPoolService.ID_POOL)
+                .equals(runner.getTarget().getPoolId())) {
+            return;
+        }
+
+        insertRunnerData.setInt(1, runner.getId());
+        insertRunnerData.addBatch();
+        runners.add(runner);
+    }
+
+    /**
      * Вставка данных в ворк пул. Возвращает true если у таблицы были
      * обработчики
      * 
@@ -139,13 +162,7 @@ public abstract class GeneiricManagerAlgorithm {
 
             // Раскладываем данные по раннерам
             for (RunnerModel runner : observers) {
-                // Игнорим данные у которых владелец совпадает с приемником
-                if (!superLogResult.getString(WorkPoolService.ID_POOL)
-                        .equals(runner.getTarget().getPoolId())) {
-                    insertRunnerData.setInt(1, runner.getId());
-                    insertRunnerData.addBatch();
-                    runners.add(runner);
-                }
+                runnerDataAddBatch(superLogResult, insertRunnerData, runners, runner);
             }
             // Удаляем исходную запись
             deleteSuperLog.setLong(1, idSuperLog);
