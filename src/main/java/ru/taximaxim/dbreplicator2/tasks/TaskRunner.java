@@ -37,6 +37,11 @@ import ru.taximaxim.dbreplicator2.model.TaskSettings;
  */
 public class TaskRunner implements Runnable {
 
+    /**
+     * Глубина просмотра цепочки исключений
+     */
+    private static final int NEXT_EXCEPTION_DEPTH = 10;
+
     public static final Logger LOG = Logger.getLogger(TaskRunner.class);
 
     /**
@@ -94,7 +99,7 @@ public class TaskRunner implements Runnable {
                     "Ошибка БД при выполнении стратегии из задачи [id_task = %d, %s]",
                     taskSettings.getTaskId(), taskSettings.getDescription()), e);
             SQLException nextEx = e.getNextException();
-            while (nextEx != null) {
+            for (int i = 1; (i <= NEXT_EXCEPTION_DEPTH) && (nextEx != null); i++) {
                 LOG.error("Подробности:", nextEx);
                 nextEx = nextEx.getNextException();
             }

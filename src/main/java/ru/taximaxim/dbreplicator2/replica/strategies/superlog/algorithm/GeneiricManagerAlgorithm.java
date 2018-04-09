@@ -65,6 +65,11 @@ public abstract class GeneiricManagerAlgorithm {
     private static final long SUPER_LOG_PERIOD = 400;
     private static final long START_ALL_RUNNERS_PERIOD = 10000;
 
+    /**
+     * Глубина просмотра цепочки исключений
+     */
+    private static final int NEXT_EXCEPTION_DEPTH = 10;
+
     private static final Logger LOG = Logger.getLogger(GeneiricManagerAlgorithm.class);
 
     protected final SuperlogDataService superlogDataService;
@@ -234,7 +239,7 @@ public abstract class GeneiricManagerAlgorithm {
                     totalRows += insertedRowsCount;
                 } catch (SQLException e) {
                     SQLException nextEx = e;
-                    while (nextEx != null) {
+                    for (int i = 1; (i <= NEXT_EXCEPTION_DEPTH) && (nextEx != null); i++) {
                         LOG.warn("Ошибка вставки записей в rep2_workpool_data:", nextEx);
                         nextEx = nextEx.getNextException();
                     }
