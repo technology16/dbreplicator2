@@ -45,6 +45,11 @@ import ru.taximaxim.dbreplicator2.replica.strategies.replication.data.DataServic
 public class ErrorsLog extends DataServiceSkeleton
         implements ErrorsLogService {
 
+    /**
+     * Глубина просмотра цепочки исключений
+     */
+    private static final int NEXT_EXCEPTION_DEPTH = 10;
+
     private static final String DETAILS = "Подробности: ";
 
     private static final Logger LOG = Logger.getLogger(ErrorsLog.class);
@@ -99,7 +104,7 @@ public class ErrorsLog extends DataServiceSkeleton
         e.printStackTrace(printWriter);
 
         SQLException nextEx = e.getNextException();
-        while (nextEx != null) {
+        for (int i = 1; (i <= NEXT_EXCEPTION_DEPTH) && (nextEx != null); i++) {
             printWriter.println(DETAILS);
             nextEx.printStackTrace(printWriter);
             nextEx = nextEx.getNextException();
