@@ -43,6 +43,11 @@ import ru.taximaxim.dbreplicator2.model.CronSettings;
 @DisallowConcurrentExecution
 public class CronRunner implements Job {
 
+    /**
+     * Глубина просмотра цепочки исключений
+     */
+    private static final int NEXT_EXCEPTION_DEPTH = 10;
+
     public static final Logger LOG = Logger.getLogger(CronRunner.class);
 
     @Override
@@ -73,7 +78,7 @@ public class CronRunner implements Job {
                             cronSettings.getTaskId(),
                             cronSettings.getDescription()), e);
             SQLException nextEx = e.getNextException();
-            while (nextEx!=null){
+            for (int i = 1; (i <= NEXT_EXCEPTION_DEPTH) && (nextEx != null); i++) {
                 LOG.error("Подробности:", nextEx);
                 nextEx = nextEx.getNextException();
             }
