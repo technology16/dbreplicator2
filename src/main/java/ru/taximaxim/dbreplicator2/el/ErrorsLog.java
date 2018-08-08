@@ -142,7 +142,7 @@ public class ErrorsLog extends DataServiceSkeleton
     @Override
     public void setStatus(Integer runnerId, String tableId, Long foreignId, int status) {
         StringBuilder updateQuery = new StringBuilder(
-                "UPDATE rep2_errors_log SET c_status = ? WHERE c_status<> ?  AND id_runner");
+                "UPDATE rep2_errors_log SET c_status = ? WHERE c_status = 0  AND id_runner");
         try {
             int runnerIdPos = addIsNull(updateQuery, runnerId);
 
@@ -155,18 +155,17 @@ public class ErrorsLog extends DataServiceSkeleton
             PreparedStatement statement = getStatement(updateQuery.toString());
 
             statement.setInt(1, status);
-            statement.setInt(2, status);
 
             if (runnerIdPos != 0) {
-                statement.setInt(2 + runnerIdPos, runnerId);
+                statement.setInt(1 + runnerIdPos, runnerId);
             }
 
             if (tableIdPos != 0) {
-                statement.setString(2 + runnerIdPos + tableIdPos, tableId);
+                statement.setString(1 + runnerIdPos + tableIdPos, tableId);
             }
 
             if (foreignIdPos != 0) {
-                statement.setLong(2 + runnerIdPos + tableIdPos + foreignIdPos, foreignId);
+                statement.setLong(1 + runnerIdPos + tableIdPos + foreignIdPos, foreignId);
             }
 
             statement.execute();
