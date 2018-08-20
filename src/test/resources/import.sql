@@ -80,11 +80,20 @@ insert into runners (id_runner, source, target, description) values (9, 'dest', 
 insert into strategies (id, className, param, isEnabled, priority, id_runner) values (9, 'ru.taximaxim.dbreplicator2.replica.strategies.replication.Generic', null, true, 100, 9);
 
 --Runner CountWatchgdog
-insert into runners (id_runner, source, target, description) values (7, 'source', 'source', 'ErrorsCountWatchgdogStrategy');
+insert into runners
+(id_runner, source, target, description) values
+(7, 'source', 'source', 'ErrorsCountWatchgdogStrategy');
 --Strategy  CountWatchgdog
-insert into strategies (id, className, param, isEnabled, priority, id_runner) values (7, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.CountWatchgdog', 'maxErrors=0
-partEmail=10', true, 100, 7);
-insert into strategies (id, className, param, isEnabled, priority, id_runner) values (10, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.CountWatchgdog', null, true, 100, 7);
+insert into strategies
+(id, className, param, isEnabled, priority, id_runner) values
+(7, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.CountWatchgdog', 'maxErrors=0
+partEmail=5', true, 100, 7);
+insert into strategies
+(id, className, param, isEnabled, priority, id_runner) values
+(8, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.CountWatchgdog', null, true, 100, 7);
+insert into strategies
+(id, className, param, isEnabled, priority, id_runner) values
+(9, 'ru.taximaxim.dbreplicator2.replica.strategies.errors.CountWatchgdog', 'where=c_date<DATEADD(''SECOND'', -5, NOW())', true, 100, 7);
 
 --Runner SuperlogWatchgdog
 insert into runners (id_runner, source, target, description) values (15, 'source', 'source', 'ErrorsSuperlogWatchgdog');

@@ -81,39 +81,39 @@ public class IntegrityReplicatedDataTest extends AbstractReplicationTest {
     @Test
     public void testInsert() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
       //Проверка вставки
-        Helper.executeSqlFromFile(conn, "sql_query/sql_insert.sql");
+        Helper.executeSqlFromFile(source, "sql_query/sql_insert.sql");
         worker.run();
-        Helper.executeSqlFromFile(conn, "sql_query/sql_update.sql"); 
+        Helper.executeSqlFromFile(source, "sql_query/sql_update.sql"); 
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
-        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
-        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
+        List<MyTablesType> listSource = Helper.InfoTest(source, "t_table");
+        List<MyTablesType> listDest   = Helper.InfoTest(dest, "t_table");
         Helper.AssertEquals(listSource, listDest);
 
-        listSource = Helper.InfoTest(conn, "t_table1");
-        listDest   = Helper.InfoTest(connDest, "t_table1");
+        listSource = Helper.InfoTest(source, "t_table1");
+        listDest   = Helper.InfoTest(dest, "t_table1");
         Helper.AssertEquals(listSource, listDest);
-        Helper.executeSqlFromFile(connDest, "sql_query/sql_update.sql"); 
-        Helper.executeSqlFromFile(connDest, "sql_query/sql_delete.sql"); 
-        int count_rep2_errors_log = Helper.InfoCount(conn, "rep2_errors_log");
-        Helper.InfoSelect(conn, "rep2_errors_log");
+        Helper.executeSqlFromFile(dest, "sql_query/sql_update.sql"); 
+        Helper.executeSqlFromFile(dest, "sql_query/sql_delete.sql"); 
+        int count_rep2_errors_log = Helper.InfoCount(source, "rep2_errors_log");
+        Helper.InfoSelect(source, "rep2_errors_log");
         assertEquals("rep2_errors_log чистый", 0, count_rep2_errors_log);
         
         errorsIntegrityReplicatedData.run();
         Thread.sleep(REPLICATION_DELAY);
-        int count_rep2_workpool_data = Helper.InfoCount(conn, "rep2_workpool_data");
+        int count_rep2_workpool_data = Helper.InfoCount(source, "rep2_workpool_data");
         assertTrue(String.format("Должны быть ошибки [%s!=0]", count_rep2_workpool_data), count_rep2_workpool_data!= 0);
         
-        count_rep2_errors_log = Helper.InfoCount(conn, "rep2_errors_log where c_status = 0");
+        count_rep2_errors_log = Helper.InfoCount(source, "rep2_errors_log where c_status = 0");
         assertTrue(String.format("Должны быть ошибки rep2_errors_log [%s!=0]", count_rep2_errors_log), count_rep2_errors_log!= 0);
 
-        Helper.executeSqlFromFile(conn, "sql_query/sql_delete.sql");
+        Helper.executeSqlFromFile(source, "sql_query/sql_delete.sql");
         worker.run();
-        Helper.executeSqlFromFile(conn, "sql_query/sql_update.sql");
+        Helper.executeSqlFromFile(source, "sql_query/sql_update.sql");
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
         
-        PreparedStatement statement = conn.prepareStatement("INSERT INTO T_TABLE1 (id, _int, _boolean, _long, _decimal, _double, _float, _string, _byte, _date, _time, _timestamp) select  id_foreign, 2, true, 5968326496, 99.65, 5.62, 79.6, 'rasfar', 0, now(), now(), now() from rep2_workpool_data where id_table='T_TABLE1' and c_operation = 'D'");
+        PreparedStatement statement = source.prepareStatement("INSERT INTO T_TABLE1 (id, _int, _boolean, _long, _decimal, _double, _float, _string, _byte, _date, _time, _timestamp) select  id_foreign, 2, true, 5968326496, 99.65, 5.62, 79.6, 'rasfar', 0, now(), now(), now() from rep2_workpool_data where id_table='T_TABLE1' and c_operation = 'D'");
         statement.execute();
         statement.close();
         worker.run();
@@ -122,8 +122,8 @@ public class IntegrityReplicatedDataTest extends AbstractReplicationTest {
         errorsIntegrityReplicatedData.run();
         Thread.sleep(REPLICATION_DELAY);
         
-        count_rep2_errors_log = Helper.InfoCount(conn, "rep2_errors_log where c_status = 0"); 
-        Helper.InfoSelect(conn, "rep2_errors_log");
+        count_rep2_errors_log = Helper.InfoCount(source, "rep2_errors_log where c_status = 0"); 
+        Helper.InfoSelect(source, "rep2_errors_log");
         
         assertTrue(String.format("Должны быть ошибки исправлены rep2_errors_log [%s==0]", count_rep2_errors_log), count_rep2_errors_log == 0);
     }
@@ -135,7 +135,6 @@ public class IntegrityReplicatedDataTest extends AbstractReplicationTest {
         RunnerService runnerService = new RunnerService(sessionFactory);
 
         worker = new WorkerThread(runnerService.getRunner(1));
-        errorsCountWatchdogWorker = new WorkerThread(runnerService.getRunner(7));
         errorsIntegrityReplicatedData = new WorkerThread(runnerService.getRunner(16));
     }
 }

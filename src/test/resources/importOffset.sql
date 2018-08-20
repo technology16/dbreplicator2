@@ -4,10 +4,12 @@ insert into application_settings (key, value) values ('tp.threads', '10');
 insert into application_settings (key, value) values ('stats.dest', 'source');
 insert into application_settings (key, value) values ('error.dest', 'source');
 
---Connection source
-insert into hikari_cp_settings (id_pool, driver, url, user, pass, max_pool_size, init_fail_fast, connection_timeout, idle_timeout, max_lifetime) values ('source', 'org.h2.Driver', 'jdbc:h2:mem://localhost/~/source', 'sa', '', 10, false, 10000, 10000, 10000);
---Connection dest
-insert into hikari_cp_settings (id_pool, driver, url, user, pass, max_pool_size, init_fail_fast, connection_timeout, idle_timeout, max_lifetime) values ('dest', 'org.h2.Driver', 'jdbc:h2:mem://localhost/~/dest'  , 'sa', '', 10, false, 10000, 10000, 10000);
+--Connections
+insert into hikari_cp_settings 
+(id_pool, driver, url, user, pass, max_pool_size, init_fail_fast, connection_timeout, idle_timeout, max_lifetime) values
+('source', 'org.h2.Driver', 'jdbc:h2:mem://localhost/~/source', 'sa', '', 10, false, 10000, 10000, 10000),
+('error', 'org.h2.Driver', 'jdbc:h2:mem://localhost/~/source', 'sa', '', 10, false, 10000, 10000, 10000),
+('dest', 'org.h2.Driver', 'jdbc:h2:mem://localhost/~/dest' , 'sa', '', 10, false, 10000, 10000, 10000);
 
 --Runners Super Log
 insert into runners (id_runner, source, target, description) values (1, 'source', 'source', 'FastManager');

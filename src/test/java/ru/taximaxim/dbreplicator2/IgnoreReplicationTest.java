@@ -74,15 +74,15 @@ public class IgnoreReplicationTest extends AbstractReplicationTest{
     @Test
     public void testUpdate() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
       //Проверка вставки
-        Helper.executeSqlFromFile(conn, "sql_query/sql_update_ignore_replication.sql");
+        Helper.executeSqlFromFile(source, "sql_query/sql_update_ignore_replication.sql");
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
-        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
-        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
+        List<MyTablesType> listSource = Helper.InfoTest(source, "t_table");
+        List<MyTablesType> listDest   = Helper.InfoTest(dest, "t_table");
         Helper.AssertEqualsIgnoreReplication(listSource, listDest);
 
-        listSource = Helper.InfoTest(conn, "t_table1");
-        listDest   = Helper.InfoTest(connDest, "t_table1");
+        listSource = Helper.InfoTest(source, "t_table1");
+        listDest   = Helper.InfoTest(dest, "t_table1");
         Helper.AssertEqualsIgnoreReplication(listSource, listDest);
     }
     
@@ -93,6 +93,5 @@ public class IgnoreReplicationTest extends AbstractReplicationTest{
         RunnerService runnerService = new RunnerService(sessionFactory);
 
         worker = new WorkerThread(runnerService.getRunner(1));
-        errorsCountWatchdogWorker = new WorkerThread(runnerService.getRunner(7));
     }
 }

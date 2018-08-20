@@ -50,12 +50,14 @@ public abstract class AbstractReplicationTest {
     protected static SessionFactory sessionFactory;
     protected static Session session;
     protected static ConnectionFactory connectionFactory;
-    protected static ErrorsLog errorsLog; 
-    protected static Connection conn = null;
-    protected static Connection connDest = null;
+    protected static ErrorsLog errorsLog;
+    
+    protected static Connection source = null;
+    protected static Connection dest = null;
+    protected static Connection error = null;
+    
     protected static Runnable worker = null;
     protected static Runnable worker2 = null;
-    protected static Runnable errorsCountWatchdogWorker = null;
 
     protected static void setUp(String importSql, String sqlRep2, String sqlSourse, String sqlDest) throws ClassNotFoundException, SQLException, IOException {
         setUp("src/test/resources/hibernate.cfg.xml", importSql, sqlRep2, sqlSourse, sqlDest);
@@ -87,10 +89,12 @@ public abstract class AbstractReplicationTest {
      * @throws InterruptedException 
      */
     protected static void close() throws SQLException, InterruptedException {
-        if(conn!=null)
-            conn.close();
-        if(connDest!=null)
-            connDest.close();
+        if(source!=null)
+            source.close();
+        if(dest!=null)
+            dest.close();
+        if(error!=null)
+            error.close();
         if(session!=null)
             session.close();
         sessionFactory.close();
@@ -113,14 +117,17 @@ public abstract class AbstractReplicationTest {
      */
     public static void initialization(String sqlRep2, String sqlSourse, String sqlDest) throws ClassNotFoundException, SQLException, IOException{
         LOG.info("initialization");
-        conn = connectionFactory.get("source").getConnection();
+        source = connectionFactory.get("source").getConnection();
 
-        Helper.executeSqlFromFile(conn, sqlRep2);
-        Helper.executeSqlFromFile(conn, sqlSourse);
+        Helper.executeSqlFromFile(source, sqlRep2);
+        Helper.executeSqlFromFile(source, sqlSourse);
 
-        connDest = connectionFactory.get("dest").getConnection();
-        Helper.executeSqlFromFile(connDest, sqlRep2);
-        Helper.executeSqlFromFile(connDest, sqlDest);
+        dest = connectionFactory.get("dest").getConnection();
+        Helper.executeSqlFromFile(dest, sqlRep2);
+        Helper.executeSqlFromFile(dest, sqlDest);
+        
+        error = connectionFactory.get("error").getConnection();
+
     }
 
 }

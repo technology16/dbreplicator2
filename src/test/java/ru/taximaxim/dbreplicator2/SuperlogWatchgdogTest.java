@@ -51,22 +51,22 @@ protected static final Logger LOG = Logger.getLogger(SuperlogWatchgdogTest.class
     @Test
     public void testInsert() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
       //Проверка вставки
-        Helper.executeSqlFromFile(conn, "sql_query/sql_insert_error_tab.sql");
+        Helper.executeSqlFromFile(source, "sql_query/sql_insert_error_tab.sql");
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
         errorsSuperlogWatchgdog.run();
 
-        Helper.InfoSelect(conn,  "rep2_superlog");
+        Helper.InfoSelect(source,  "rep2_superlog");
         
-        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
-        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
+        List<MyTablesType> listSource = Helper.InfoTest(source, "t_table");
+        List<MyTablesType> listDest   = Helper.InfoTest(dest, "t_table");
         Helper.AssertEquals(listSource, listDest);
         
-        listSource = Helper.InfoTest(conn, "t_table1");
-        listDest   = Helper.InfoTest(connDest, "t_table1");
+        listSource = Helper.InfoTest(source, "t_table1");
+        listDest   = Helper.InfoTest(dest, "t_table1");
         Helper.AssertEquals(listSource, listDest);
         
-        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        int count = Helper.InfoCount(source,  "rep2_superlog");
         assertTrue(String.format("Количество записей не должно быть пустым [%s != 0]", count), 0 != count);
     }
     
@@ -77,7 +77,6 @@ protected static final Logger LOG = Logger.getLogger(SuperlogWatchgdogTest.class
         RunnerService runnerService = new RunnerService(sessionFactory);
 
         worker = new WorkerThread(runnerService.getRunner(1));
-        errorsCountWatchdogWorker = new WorkerThread(runnerService.getRunner(7));
         errorsSuperlogWatchgdog = new WorkerThread(runnerService.getRunner(15));
     }
 }

@@ -79,12 +79,12 @@ public class ErrorReplicationTest extends AbstractReplicationTest{
     @Test
     public void testErroReplicated() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
       //Проверка вставки
-        Helper.executeSqlFromFile(conn, "sql_query/sql_insert_error.sql");
+        Helper.executeSqlFromFile(source, "sql_query/sql_insert_error.sql");
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
-        Helper.InfoSelect(conn, "rep2_errors_log");
-        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table1");
-        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table1");
+        Helper.InfoSelect(source, "rep2_errors_log");
+        List<MyTablesType> listSource = Helper.InfoTest(source, "t_table1");
+        List<MyTablesType> listDest   = Helper.InfoTest(dest, "t_table1");
         assertEquals("Количество записей в источнике не верно!", 5, listSource.size());
         assertEquals("Количество записей в приемнике не верно!", 2, listDest.size());
     }
@@ -96,6 +96,5 @@ public class ErrorReplicationTest extends AbstractReplicationTest{
         RunnerService runnerService = new RunnerService(sessionFactory);
 
         worker = new WorkerThread(runnerService.getRunner(1));
-        errorsCountWatchdogWorker = new WorkerThread(runnerService.getRunner(7));
     }
 }
