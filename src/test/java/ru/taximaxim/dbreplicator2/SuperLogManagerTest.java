@@ -79,7 +79,6 @@ public class SuperLogManagerTest extends AbstractReplicationTest {
         RunnerService runnerService = new RunnerService(sessionFactory);
 
         worker = new WorkerThread(runnerService.getRunner(1));
-        errorsCountWatchdogWorker = new WorkerThread(runnerService.getRunner(7));
     }
 
     /**
@@ -95,7 +94,7 @@ public class SuperLogManagerTest extends AbstractReplicationTest {
     @Test
     public void testWorkpoolDataClearing() throws Exception {
         // Добавляем операцию над несуществующеми данными
-        try (PreparedStatement statement = conn.prepareStatement(
+        try (PreparedStatement statement = source.prepareStatement(
                 "INSERT INTO REP2_SUPERLOG (id_foreign, id_table, c_operation, c_date, id_transaction, id_pool) VALUES (?, 'T_TABLE2', ?, now(), 0, 'source')")) {
             statement.setInt(1, 1234567890);
             statement.setString(2, "U");
@@ -108,7 +107,7 @@ public class SuperLogManagerTest extends AbstractReplicationTest {
 
         // Проверка внешних ключей
         LOG.info("Проверка внешних ключей");
-        Helper.executeSqlFromFile(conn, "sql_query/sql_foreign_key_error.sql");
+        Helper.executeSqlFromFile(source, "sql_query/sql_foreign_key_error.sql");
 
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
@@ -118,11 +117,11 @@ public class SuperLogManagerTest extends AbstractReplicationTest {
         Thread.sleep(REPLICATION_DELAY);
 
         // Выводим данные из rep2_superlog_table
-        try (PreparedStatement select = conn
+        try (PreparedStatement select = source
                 .prepareStatement("SELECT * FROM REP2_WORKPOOL_DATA");
                 ResultSet result = select.executeQuery();) {
             List<String> cols = new ArrayList<String>(
-                    JdbcMetadata.getColumns(conn, "REP2_WORKPOOL_DATA"));
+                    JdbcMetadata.getColumns(source, "REP2_WORKPOOL_DATA"));
 
             while (result.next()) {
                 LOG.info("================================");
@@ -135,12 +134,12 @@ public class SuperLogManagerTest extends AbstractReplicationTest {
 
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
-        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table2");
-        List<MyTablesType> listDest = Helper.InfoTest(connDest, "t_table2");
+        List<MyTablesType> listSource = Helper.InfoTest(source, "t_table2");
+        List<MyTablesType> listDest = Helper.InfoTest(dest, "t_table2");
         Helper.AssertEquals(listSource, listDest);
 
-        listSource = Helper.InfoTest(conn, "t_table3");
-        listDest = Helper.InfoTest(connDest, "t_table3");
+        listSource = Helper.InfoTest(source, "t_table3");
+        listDest = Helper.InfoTest(dest, "t_table3");
         assertTrue(String.format("Количество записей [%s == 8 и %s = 2]",
                 listSource.size(), listDest.size()),
                 listSource.size() == 8 && listDest.size() == 2);
@@ -154,7 +153,7 @@ public class SuperLogManagerTest extends AbstractReplicationTest {
     @Test
     public void testWorkPoolInsertError() throws Exception {
         // Вставляем данные в супер лог
-        try (PreparedStatement statement = conn.prepareStatement(
+        try (PreparedStatement statement = source.prepareStatement(
                 "INSERT INTO REP2_SUPERLOG (id_superlog, id_foreign, id_table, c_operation, c_date, id_transaction, id_pool) "
                         + "VALUES (?, ?, ?, ?, now(), 0, 'source')")) {
             //  Таблица без настроек
@@ -186,7 +185,7 @@ public class SuperLogManagerTest extends AbstractReplicationTest {
         }
 
         // Вставляем задвоенные данные в ворк пул
-        try (PreparedStatement statement = conn.prepareStatement(
+        try (PreparedStatement statement = source.prepareStatement(
                 "INSERT INTO REP2_WORKPOOL_DATA (id_superlog, id_runner, id_foreign, id_table, c_operation, c_date, id_transaction) "
                         + "VALUES (?, 3, ?, ?, ?, now(), 0)")) {
             statement.setInt(1, 2);
@@ -206,13 +205,13 @@ public class SuperLogManagerTest extends AbstractReplicationTest {
 
         // Проверяем что данные сохранились в супер логе
         LOG.info("================================");
-        Helper.InfoSelect(conn, "rep2_superlog");
+        Helper.InfoSelect(source, "rep2_superlog");
         LOG.info("================================");
-        Helper.InfoSelect(conn, "rep2_workpool_data");
+        Helper.InfoSelect(source, "rep2_workpool_data");
         LOG.info("================================");
 
         // Проверяем наличие записей в суперлоге
-        try (PreparedStatement select = conn.prepareStatement(
+        try (PreparedStatement select = source.prepareStatement(
                 "SELECT * "
                 + "FROM REP2_SUPERLOG "
                 + "WHERE id_superlog = ?")) {
@@ -232,7 +231,7 @@ public class SuperLogManagerTest extends AbstractReplicationTest {
             }
         }        
         // Проверяем наличие записей в ворк пуле
-        try (PreparedStatement select = conn.prepareStatement(
+        try (PreparedStatement select = source.prepareStatement(
                 "SELECT * "
                 + "FROM REP2_WORKPOOL_DATA "
                 + "WHERE id_superlog = ?")) {

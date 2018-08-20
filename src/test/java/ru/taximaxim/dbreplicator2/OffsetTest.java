@@ -73,7 +73,6 @@ public class OffsetTest extends AbstractReplicationTest {
         RunnerService runnerService = new RunnerService(sessionFactory);
 
         worker = new WorkerThread(runnerService.getRunner(1));
-        errorsCountWatchdogWorker = new WorkerThread(runnerService.getRunner(7));
     }
     
     /**
@@ -92,7 +91,7 @@ public class OffsetTest extends AbstractReplicationTest {
     public void testOffset() throws Exception {
         //Проверка внешних ключей
         LOG.info("Проверка внешних ключей");
-        Helper.executeSqlFromFile(conn, "sql_query/sql_foreign_key_error.sql");
+        Helper.executeSqlFromFile(source, "sql_query/sql_foreign_key_error.sql");
         
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
@@ -103,11 +102,11 @@ public class OffsetTest extends AbstractReplicationTest {
         
         // Выводим данные из rep2_superlog_table
         try (PreparedStatement select = 
-                conn.prepareStatement("SELECT * FROM REP2_WORKPOOL_DATA");
+                source.prepareStatement("SELECT * FROM REP2_WORKPOOL_DATA");
                 ResultSet result = select.executeQuery();
         ) {
             List<String> cols = 
-                    new ArrayList<String>(JdbcMetadata.getColumns(conn, "REP2_WORKPOOL_DATA"));
+                    new ArrayList<String>(JdbcMetadata.getColumns(source, "REP2_WORKPOOL_DATA"));
             
             while (result.next()) {
                 LOG.info("================================");
@@ -121,12 +120,12 @@ public class OffsetTest extends AbstractReplicationTest {
         //errorsCountWatchdogWorker.run();
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
-        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table2");
-        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table2");
+        List<MyTablesType> listSource = Helper.InfoTest(source, "t_table2");
+        List<MyTablesType> listDest   = Helper.InfoTest(dest, "t_table2");
         Helper.AssertEquals(listSource, listDest);
 
-        listSource = Helper.InfoTest(conn, "t_table3");
-        listDest   = Helper.InfoTest(connDest, "t_table3");
+        listSource = Helper.InfoTest(source, "t_table3");
+        listDest   = Helper.InfoTest(dest, "t_table3");
         assertTrue(String.format("Количество записей [%s == 8 и %s = 2]", listSource.size(), listDest.size()),
                 listSource.size() == 8 && listDest.size() == 2);
     }    

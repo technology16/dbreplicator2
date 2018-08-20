@@ -79,7 +79,6 @@ public class H2CopyTableData2repTest extends AbstractReplicationTest {
 
         worker = new WorkerThread(runnerService.getRunner(1));
         worker2 = new WorkerThread(runnerService.getRunner(2));
-        errorsCountWatchdogWorker = new WorkerThread(runnerService.getRunner(6));
     }
     
     /**
@@ -99,10 +98,10 @@ public class H2CopyTableData2repTest extends AbstractReplicationTest {
         Thread.sleep(REPLICATION_DELAY);
         //Проверка внешних ключей
         LOG.info("Проверка внешних ключей");
-        Helper.executeSqlFromFile(conn, "sql_query/sql_foreign_key.sql", 20);
+        Helper.executeSqlFromFile(source, "sql_query/sql_foreign_key.sql", 20);
         
         workerRun();
-        Helper.executeSqlFromFile(connDest,  "sql_query/sql_foreign_key2.sql", 20);
+        Helper.executeSqlFromFile(dest,  "sql_query/sql_foreign_key2.sql", 20);
         workerRun2();
         
         workerRun();
@@ -119,48 +118,47 @@ public class H2CopyTableData2repTest extends AbstractReplicationTest {
         
         // Выводим данные из rep2_superlog_table
         try (PreparedStatement select = 
-                conn.prepareStatement("SELECT * FROM rep2_workpool_data");
+                source.prepareStatement("SELECT * FROM rep2_workpool_data");
         ) {
             ResultSet result = select.executeQuery();
             List<String> cols = 
-                    new ArrayList<String>(JdbcMetadata.getColumns(conn, "REP2_WORKPOOL_DATA"));
+                    new ArrayList<String>(JdbcMetadata.getColumns(source, "REP2_WORKPOOL_DATA"));
             while (result.next()) {
                 LOG.info(Jdbc.resultSetToString(result, cols));
             }
         }
         
-        errorsCountWatchdogWorker.run();
         workerRun();
         Thread.sleep(REPLICATION_DELAY);
         Thread.sleep(REPLICATION_DELAY);
-        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table2");
-        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table2");
+        List<MyTablesType> listSource = Helper.InfoTest(source, "t_table2");
+        List<MyTablesType> listDest   = Helper.InfoTest(dest, "t_table2");
         Helper.AssertEquals(listSource, listDest);
 
-        listSource = Helper.InfoTest(conn, "t_table3");
-        listDest   = Helper.InfoTest(connDest, "t_table3");
+        listSource = Helper.InfoTest(source, "t_table3");
+        listDest   = Helper.InfoTest(dest, "t_table3");
         Helper.AssertEquals(listSource, listDest);
         
-        listSource = Helper.InfoTest(conn, "t_table2");
-        listDest   = Helper.InfoTest(connDest, "t_table2");
+        listSource = Helper.InfoTest(source, "t_table2");
+        listDest   = Helper.InfoTest(dest, "t_table2");
         Helper.AssertEquals(listSource, listDest);
         
-        listSource = Helper.InfoTest(conn, "t_table3");
-        listDest   = Helper.InfoTest(connDest, "t_table3");
+        listSource = Helper.InfoTest(source, "t_table3");
+        listDest   = Helper.InfoTest(dest, "t_table3");
         Helper.AssertEquals(listSource, listDest);
         
-        listSource = Helper.InfoTest(conn, "t_table4");
-        listDest   = Helper.InfoTest(connDest, "t_table4");
+        listSource = Helper.InfoTest(source, "t_table4");
+        listDest   = Helper.InfoTest(dest, "t_table4");
         Helper.AssertEquals(listSource, listDest);
         
-        listSource = Helper.InfoTest(conn, "t_table5");
-        listDest   = Helper.InfoTest(connDest, "t_table5");
+        listSource = Helper.InfoTest(source, "t_table5");
+        listDest   = Helper.InfoTest(dest, "t_table5");
         Helper.AssertEquals(listSource, listDest);
         
         workerEnd();
         workerEnd2();
         
-        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        int count = Helper.InfoCount(source,  "rep2_superlog");
         assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }    
     
@@ -173,9 +171,9 @@ public class H2CopyTableData2repTest extends AbstractReplicationTest {
         testInsert();
         //Проверка обновления
         LOG.info("Проверка обновления");
-        Helper.executeSqlFromFile(conn, "sql_query/sql_update.sql");
+        Helper.executeSqlFromFile(source, "sql_query/sql_update.sql");
         workerRun();
-        Helper.executeSqlFromFile(connDest, "sql_query/sql_update2.sql");
+        Helper.executeSqlFromFile(dest, "sql_query/sql_update2.sql");
         workerRun2();
         
         workerRun();
@@ -186,7 +184,7 @@ public class H2CopyTableData2repTest extends AbstractReplicationTest {
         workerEnd();
         workerEnd2();
         
-        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        int count = Helper.InfoCount(source,  "rep2_superlog");
         assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }
     
@@ -199,9 +197,9 @@ public class H2CopyTableData2repTest extends AbstractReplicationTest {
         testInsert();
         LOG.info("Проверка удаления");
         //Проверка удаления
-        Helper.executeSqlFromFile(conn, "sql_query/sql_delete.sql");
+        Helper.executeSqlFromFile(source, "sql_query/sql_delete.sql");
         workerRun();
-        Helper.executeSqlFromFile(connDest, "sql_query/sql_delete.sql");
+        Helper.executeSqlFromFile(dest, "sql_query/sql_delete.sql");
         workerRun2();
         
         workerRun();
@@ -212,7 +210,7 @@ public class H2CopyTableData2repTest extends AbstractReplicationTest {
         workerEnd();
         workerEnd2();
         
-        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        int count = Helper.InfoCount(source,  "rep2_superlog");
         assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }
     
@@ -224,10 +222,10 @@ public class H2CopyTableData2repTest extends AbstractReplicationTest {
     public void testInsertUpdate() throws Exception {
       //Проверка вставки и обновления
         LOG.info("Проверка вставки и обновления");
-        Helper.executeSqlFromFile(conn, "sql_query/sql_insert.sql");
-        Helper.executeSqlFromFile(conn, "sql_query/sql_update.sql");
+        Helper.executeSqlFromFile(source, "sql_query/sql_insert.sql");
+        Helper.executeSqlFromFile(source, "sql_query/sql_update.sql");
         workerRun();
-        Helper.executeSqlFromFile(connDest, "sql_query/sql_update2.sql");
+        Helper.executeSqlFromFile(dest, "sql_query/sql_update2.sql");
         workerRun2();
         
         workerRun();
@@ -238,7 +236,7 @@ public class H2CopyTableData2repTest extends AbstractReplicationTest {
         workerEnd();
         workerEnd2();
         
-        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        int count = Helper.InfoCount(source,  "rep2_superlog");
         assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }
     
@@ -250,11 +248,11 @@ public class H2CopyTableData2repTest extends AbstractReplicationTest {
     public void testInsertDelete() throws Exception {
         LOG.info("Проверка вставки и удаления");
       //Проверка вставки и удаления
-        Helper.executeSqlFromFile(conn, "sql_query/sql_insert.sql");
-        Helper.executeSqlFromFile(conn, "sql_query/sql_delete.sql");
+        Helper.executeSqlFromFile(source, "sql_query/sql_insert.sql");
+        Helper.executeSqlFromFile(source, "sql_query/sql_delete.sql");
         workerRun();
-        Helper.executeSqlFromFile(connDest, "sql_query/sql_insert.sql");
-        Helper.executeSqlFromFile(connDest, "sql_query/sql_delete.sql");
+        Helper.executeSqlFromFile(dest, "sql_query/sql_insert.sql");
+        Helper.executeSqlFromFile(dest, "sql_query/sql_delete.sql");
         workerRun2();
         
         workerRun();
@@ -265,7 +263,7 @@ public class H2CopyTableData2repTest extends AbstractReplicationTest {
         workerEnd();
         workerEnd2();
         
-        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        int count = Helper.InfoCount(source,  "rep2_superlog");
         assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }
 
@@ -276,7 +274,7 @@ public class H2CopyTableData2repTest extends AbstractReplicationTest {
     @Test
     public void testInsert() throws Exception {
       //Проверка вставки
-        Helper.executeSqlFromFile(conn, "sql_query/sql_insert.sql");
+        Helper.executeSqlFromFile(source, "sql_query/sql_insert.sql");
         workerRun();
         workerRun2();
 
@@ -287,53 +285,53 @@ public class H2CopyTableData2repTest extends AbstractReplicationTest {
         
         workerEnd();
         workerEnd2();
-        int count = Helper.InfoCount(conn,  "rep2_superlog");
+        int count = Helper.InfoCount(source,  "rep2_superlog");
         assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
     }
     
     protected void verifyTables() throws SQLException, InterruptedException {
-        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table");
-        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table");
+        List<MyTablesType> listSource = Helper.InfoTest(source, "t_table");
+        List<MyTablesType> listDest   = Helper.InfoTest(dest, "t_table");
         Helper.AssertEquals(listSource, listDest);
 
-        listSource = Helper.InfoTest(conn, "t_table1");
-        listDest   = Helper.InfoTest(connDest, "t_table1");
+        listSource = Helper.InfoTest(source, "t_table1");
+        listDest   = Helper.InfoTest(dest, "t_table1");
         Helper.AssertEquals(listSource, listDest);
         
-        listSource = Helper.InfoTest(conn, "t_table2");
-        listDest   = Helper.InfoTest(connDest, "t_table2");
+        listSource = Helper.InfoTest(source, "t_table2");
+        listDest   = Helper.InfoTest(dest, "t_table2");
         Helper.AssertEquals(listSource, listDest);
         
-        listSource = Helper.InfoTest(conn, "t_table3");
-        listDest   = Helper.InfoTest(connDest, "t_table3");
+        listSource = Helper.InfoTest(source, "t_table3");
+        listDest   = Helper.InfoTest(dest, "t_table3");
         Helper.AssertEquals(listSource, listDest);
         
-        listSource = Helper.InfoTest(conn, "t_table4");
-        listDest   = Helper.InfoTest(connDest, "t_table4");
+        listSource = Helper.InfoTest(source, "t_table4");
+        listDest   = Helper.InfoTest(dest, "t_table4");
         Helper.AssertEquals(listSource, listDest);
         
-        listSource = Helper.InfoTest(conn, "t_table5");
-        listDest   = Helper.InfoTest(connDest, "t_table5");
+        listSource = Helper.InfoTest(source, "t_table5");
+        listDest   = Helper.InfoTest(dest, "t_table5");
         Helper.AssertEquals(listSource, listDest);
     }
     
     public void workerRun() throws Exception{
         worker.run();
-        Helper.executeSqlFromSql(conn, "UPDATE T_TAB SET _value = ?", "dest");
+        Helper.executeSqlFromSql(source, "UPDATE T_TAB SET _value = ?", "dest");
         Thread.sleep(REPLICATION_DELAY);
     }
     
     public void workerRun2() throws Exception{
         worker2.run();
-        Helper.executeSqlFromSql(connDest, "UPDATE T_TAB SET _value = ?", "source");
+        Helper.executeSqlFromSql(dest, "UPDATE T_TAB SET _value = ?", "source");
         Thread.sleep(REPLICATION_DELAY);
     }
     
     public void workerEnd() throws IOException, SQLException, InterruptedException{
-        Helper.executeSqlFromSql(conn, "UPDATE T_TAB SET _value = ?", "");
+        Helper.executeSqlFromSql(source, "UPDATE T_TAB SET _value = ?", "");
     }
     
     public void workerEnd2() throws IOException, SQLException, InterruptedException{
-        Helper.executeSqlFromSql(connDest, "UPDATE T_TAB SET _value = ?", "");
+        Helper.executeSqlFromSql(dest, "UPDATE T_TAB SET _value = ?", "");
     }
 }

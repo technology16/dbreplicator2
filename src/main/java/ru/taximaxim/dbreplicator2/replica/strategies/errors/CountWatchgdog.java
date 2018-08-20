@@ -50,46 +50,42 @@ public class CountWatchgdog extends StrategySkeleton implements Strategy {
 
     private static final Logger LOG = Logger.getLogger(CountWatchgdog.class);
 
-    private static final int DEFAULT_MAX_ERRORS = 0;
     private static final int DEFAULT_PART_EMAIL = 10;
 
-    private static final String MAX_ERRORS = "maxErrors";
     private static final String PART_EMAIL = "partEmail";
     private static final String COUNT = "count";
-
-    /**
-     * Конструктор по умолчанию
-     */
-    public CountWatchgdog() {
-    }
 
     @Override
     public void execute(ConnectionFactory connectionsFactory, StrategyModel data)
             throws SQLException {
-        int maxErrors = DEFAULT_MAX_ERRORS;
-        if (data.getParam(MAX_ERRORS) != null) {
-            maxErrors = Integer.parseInt(data.getParam(MAX_ERRORS));
-        }
-
         int partEmail = DEFAULT_PART_EMAIL;
         if (data.getParam(PART_EMAIL) != null) {
             partEmail = Integer.parseInt(data.getParam(PART_EMAIL));
         }
 
+        String where = getWhere(data);
+
+        if ((where == null)) {
+            // Заменяем null пустой строкой. Что бы не мешал.
+            where = "";
+        }
+
+        if (!where.isEmpty()) {
+            // Если присутствует условие, то заворачиваем в его в скобки и
+            // потом добавляем в запрос
+            where = "AND (" + where + ")";
+        }
+
         // Проверияем количество ошибочных итераций
-        int rowCount = 0;
+        long rowCount = 0;
         try (Connection sourceConnection = connectionsFactory
                 .get(data.getRunner().getSource().getPoolId()).getConnection();) {
-            try (PreparedStatement selectErrorsCount = sourceConnection
-                    .prepareStatement("SELECT COUNT(*) as count " + "FROM ("
-                            + "SELECT COUNT(*) AS errors_count "
-                            + "FROM public.rep2_errors_log " + "WHERE c_status = 0 "
-                            + "GROUP BY id_runner, id_table, id_foreign) AS t1 "
-                            + "WHERE errors_count > ?")) {
-                selectErrorsCount.setInt(1, maxErrors);
+            try (PreparedStatement selectErrorsCount = sourceConnection.prepareStatement(
+                    "SELECT COUNT(*) as count FROM public.rep2_errors_log WHERE c_status = 0 "
+                            + where)) {
                 try (ResultSet countResult = selectErrorsCount.executeQuery();) {
-                    while (countResult.next()) {
-                        rowCount = countResult.getInt(COUNT);
+                    if (countResult.next()) {
+                        rowCount = countResult.getLong(COUNT);
                     }
                 }
             }
@@ -99,22 +95,22 @@ public class CountWatchgdog extends StrategySkeleton implements Strategy {
                 try (PreparedStatement selectErrors = sourceConnection.prepareStatement(
                         "SELECT t1.id_runner, t1.id_table, t1.id_foreign, t1.max_id_errors_log, t1.count, c_error, c_date FROM ( "
                                 + "SELECT id_runner, id_table, id_foreign, MAX(id_errors_log) AS max_id_errors_log, COUNT(*) AS count "
-                                + "FROM public.rep2_errors_log WHERE c_status = 0 GROUP BY id_runner, id_table, id_foreign) as t1 "
+                                + "FROM public.rep2_errors_log WHERE c_status = 0 "
+                                + where
+                                + " GROUP BY id_runner, id_table, id_foreign) as t1 "
                                 + "LEFT JOIN rep2_errors_log ON t1.max_id_errors_log=rep2_errors_log.id_errors_log "
-                                + "WHERE count > ? ORDER BY max_id_errors_log "
+                                + "ORDER BY max_id_errors_log "
                                 + "LIMIT ?")) {
 
-                    selectErrors.setInt(1, maxErrors);
-                    selectErrors.setInt(2, partEmail);
-                    selectErrors.setFetchSize(getFetchSize(data));
+                    selectErrors.setInt(1, partEmail);
 
                     try (ResultSet errorsResult = selectErrors.executeQuery();) {
                         List<String> cols = new ArrayList<>(
                                 JdbcMetadata.getColumns(errorsResult));
                         int count = 0;
                         StringBuilder rowDumpEmail = new StringBuilder(String.format(
-                                "%n%nВ %s превышен лимит в %s ошибок!%n%n",
-                                data.getRunner().getSource().getPoolId(), maxErrors));
+                                "%n%nВ %s превышен лимит в 0 ошибок!%n%n",
+                                data.getRunner().getSource().getPoolId()));
                         while (errorsResult.next()) {
                             count++;
                             // при необходимости пишем ошибку в лог

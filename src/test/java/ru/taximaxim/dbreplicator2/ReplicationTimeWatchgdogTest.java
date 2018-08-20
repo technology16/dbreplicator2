@@ -60,14 +60,13 @@ protected static final Logger LOG = Logger.getLogger(ReplicationTimeWatchgdogTes
     public void testErrorsReplicationTimeWatchgdog() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
         //Проверка внешних ключей
         LOG.info("Проверка внешних ключей");
-        Helper.executeSqlFromFile(conn, "sql_query/sql_insert.sql");
-        Helper.executeSqlFromFile(conn, "sql_query/sql_update.sql");
+        Helper.executeSqlFromFile(source, "sql_query/sql_insert.sql");
+        Helper.executeSqlFromFile(source, "sql_query/sql_update.sql");
         
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
         
         errorsReplicationTimeWatchgdog.run();
-        errorsCountWatchdogWorker.run();
     }
     
     /**
@@ -77,7 +76,6 @@ protected static final Logger LOG = Logger.getLogger(ReplicationTimeWatchgdogTes
         RunnerService runnerService = new RunnerService(sessionFactory);
 
         worker = new WorkerThread(runnerService.getRunner(1));
-        errorsCountWatchdogWorker = new WorkerThread(runnerService.getRunner(7));
         errorsReplicationTimeWatchgdog = new WorkerThread(runnerService.getRunner(10));
     }
 }

@@ -33,6 +33,8 @@ public class StrategySkeleton {
 
     private static final String FETCH_SIZE = "fetchSize";
     private static final int DEFAULT_FETCH_SIZE = 1000;
+    private static final String WHERE = "where";
+
     /**
      * Размер выборки данных (строк)
      */
@@ -43,6 +45,15 @@ public class StrategySkeleton {
             fetchSize = Integer.parseInt(data.getParam(FETCH_SIZE));
         }
         return fetchSize;
+    }
+
+    /**
+     * Получение условия WHERE для отбора из целевой таблицы
+     * 
+     * @return
+     */
+    public String getWhere(StrategyModel data) {
+        return data.getParam(WHERE);
     }
 
 }

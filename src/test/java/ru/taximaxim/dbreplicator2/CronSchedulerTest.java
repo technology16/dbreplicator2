@@ -73,27 +73,26 @@ public class CronSchedulerTest extends AbstractReplicationTest {
         RunnerService runnerService = new RunnerService(sessionFactory);
 
         worker = new WorkerThread(runnerService.getRunner(1));
-        errorsCountWatchdogWorker = new WorkerThread(runnerService.getRunner(7));
     }
     
     @Test
     public void testTaskScheduler() throws Exception {
         //Проверка внешних ключей
         LOG.info("Проверка внешних ключей");
-        Helper.executeSqlFromFile(conn, "sql_query/sql_insert.sql");
+        Helper.executeSqlFromFile(source, "sql_query/sql_insert.sql");
 
         // Запуск всех тасков
         Core.getCronPool().start();
         Thread.sleep(REPLICATION_DELAY);
 
-        Helper.InfoSelect(conn, "rep2_errors_log");
+        Helper.InfoSelect(source, "rep2_errors_log");
         
-        List<MyTablesType> listSource = Helper.InfoTest(conn, "t_table2");
-        List<MyTablesType> listDest   = Helper.InfoTest(connDest, "t_table2");
+        List<MyTablesType> listSource = Helper.InfoTest(source, "t_table2");
+        List<MyTablesType> listDest   = Helper.InfoTest(dest, "t_table2");
         Helper.AssertEquals(listSource, listDest);
 
-        listSource = Helper.InfoTest(conn, "t_table3");
-        listDest   = Helper.InfoTest(connDest, "t_table3");
+        listSource = Helper.InfoTest(source, "t_table3");
+        listDest   = Helper.InfoTest(dest, "t_table3");
         Helper.AssertEquals(listSource, listDest);
     }
 }
