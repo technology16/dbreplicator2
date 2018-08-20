@@ -55,12 +55,6 @@ public class CountWatchgdog extends StrategySkeleton implements Strategy {
     private static final String PART_EMAIL = "partEmail";
     private static final String COUNT = "count";
 
-    /**
-     * Конструктор по умолчанию
-     */
-    public CountWatchgdog() {
-    }
-
     @Override
     public void execute(ConnectionFactory connectionsFactory, StrategyModel data)
             throws SQLException {
@@ -109,7 +103,6 @@ public class CountWatchgdog extends StrategySkeleton implements Strategy {
                                 + "LIMIT ?")) {
 
                     selectErrors.setInt(1, partEmail);
-                    selectErrors.setFetchSize(getFetchSize(data));
 
                     try (ResultSet errorsResult = selectErrors.executeQuery();) {
                         List<String> cols = new ArrayList<>(
