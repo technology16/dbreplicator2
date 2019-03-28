@@ -22,7 +22,6 @@
  */
 package ru.taximaxim.dbreplicator2.tasks;
 
-import java.sql.SQLException;
 import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
@@ -36,11 +35,6 @@ import ru.taximaxim.dbreplicator2.model.TaskSettings;
  *
  */
 public class TaskRunner implements Runnable {
-
-    /**
-     * Глубина просмотра цепочки исключений
-     */
-    private static final int NEXT_EXCEPTION_DEPTH = 10;
 
     public static final Logger LOG = Logger.getLogger(TaskRunner.class);
 
@@ -84,25 +78,8 @@ public class TaskRunner implements Runnable {
      */
     protected boolean tryProcessCommand() {
         try {
-            workerThread.processCommand();
+            workerThread.run();
             return true;
-        } catch (InstantiationException | IllegalAccessException e) {
-            LOG.error(String.format(
-                    "Ошибка при создании объекта-стратегии раннера задачи [id_task = %d, %s]",
-                    taskSettings.getTaskId(), taskSettings.getDescription()), e);
-        } catch (ClassNotFoundException e) {
-            LOG.error(String.format(
-                    "Ошибка инициализации при выполнении задачи [id_task = %d, %s]",
-                    taskSettings.getTaskId(), taskSettings.getDescription()), e);
-        } catch (SQLException e) {
-            LOG.error(String.format(
-                    "Ошибка БД при выполнении стратегии из задачи [id_task = %d, %s]",
-                    taskSettings.getTaskId(), taskSettings.getDescription()), e);
-            SQLException nextEx = e.getNextException();
-            for (int i = 1; (i <= NEXT_EXCEPTION_DEPTH) && (nextEx != null); i++) {
-                LOG.error("Подробности:", nextEx);
-                nextEx = nextEx.getNextException();
-            }
         } catch (Exception e) {
             LOG.error(String.format("Ошибка при выполнении задачи [id_task = %d, %s]",
                     taskSettings.getTaskId(), taskSettings.getDescription()), e);

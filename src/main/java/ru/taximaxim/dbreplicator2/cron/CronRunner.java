@@ -22,8 +22,6 @@
  */
 package ru.taximaxim.dbreplicator2.cron;
 
-import java.sql.SQLException;
-
 import org.apache.log4j.Logger;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
@@ -43,11 +41,6 @@ import ru.taximaxim.dbreplicator2.model.CronSettings;
 @DisallowConcurrentExecution
 public class CronRunner implements Job {
 
-    /**
-     * Глубина просмотра цепочки исключений
-     */
-    private static final int NEXT_EXCEPTION_DEPTH = 10;
-
     public static final Logger LOG = Logger.getLogger(CronRunner.class);
 
     @Override
@@ -60,28 +53,7 @@ public class CronRunner implements Job {
                 cronSettings.getTaskId(), cronSettings.getDescription()));
 
         try {
-            workerThread.processCommand();
-        } catch (InstantiationException | IllegalAccessException e) {
-            LOG.error(
-                    String.format("Ошибка при создании объекта-стратегии раннера задачи [id_task = %d, %s]", 
-                            cronSettings.getTaskId(),
-                            cronSettings.getDescription()), 
-                            e);
-        } catch (ClassNotFoundException e) {
-            LOG.error(
-                    String.format("Ошибка инициализации при выполнении задачи [id_task = %d, %s]",
-                            cronSettings.getTaskId(),
-                            cronSettings.getDescription()), e);
-        } catch (SQLException e) {
-            LOG.error(
-                    String.format("Ошибка БД при выполнении стратегии из задачи [id_task = %d, %s]",
-                            cronSettings.getTaskId(),
-                            cronSettings.getDescription()), e);
-            SQLException nextEx = e.getNextException();
-            for (int i = 1; (i <= NEXT_EXCEPTION_DEPTH) && (nextEx != null); i++) {
-                LOG.error("Подробности:", nextEx);
-                nextEx = nextEx.getNextException();
-            }
+            workerThread.run();
         } catch (Exception e) {
             LOG.error(
                     String.format("Ошибка при выполнении задачи [id_task = %d, %s]",
