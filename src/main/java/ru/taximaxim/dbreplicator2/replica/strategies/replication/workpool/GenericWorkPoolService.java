@@ -30,6 +30,7 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 
 import ru.taximaxim.dbreplicator2.el.ErrorsLogService;
+import ru.taximaxim.dbreplicator2.el.FatalReplicationException;
 import ru.taximaxim.dbreplicator2.replica.strategies.replication.data.DataServiceSkeleton;
 
 /**
@@ -61,18 +62,23 @@ public class GenericWorkPoolService extends DataServiceSkeleton
     }
 
     @Override
-    public PreparedStatement getLastOperationsStatement() throws SQLException {
+    public PreparedStatement getLastOperationsStatement() throws FatalReplicationException {
         if (lastOperationsStatement == null) {
             // Сортируем записи rep2_workpool_data в порядке поступления
-            lastOperationsStatement = getConnection().prepareStatement(
-                    "SELECT MIN(id_superlog) AS id_superlog_min, MAX(id_superlog) AS id_superlog_max, id_foreign, id_table, COUNT(*) AS records_count, ? AS id_runner "
-                            + "  FROM (SELECT id_superlog, id_foreign, id_table "
-                            + "    FROM rep2_workpool_data WHERE id_runner=? "
-                            + "    ORDER BY id_superlog LIMIT ? OFFSET ? "
-                            + "  ) AS part_rep2_workpool_data "
-                            + "GROUP BY id_foreign, id_table "
-                            + "ORDER BY id_superlog_min",
-                    ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            try {
+                lastOperationsStatement = getConnection().prepareStatement(
+                        "SELECT MIN(id_superlog) AS id_superlog_min, MAX(id_superlog) AS id_superlog_max, id_foreign, id_table, COUNT(*) AS records_count, ? AS id_runner "
+                                + "  FROM (SELECT id_superlog, id_foreign, id_table "
+                                + "    FROM rep2_workpool_data WHERE id_runner=? "
+                                + "    ORDER BY id_superlog LIMIT ? OFFSET ? "
+                                + "  ) AS part_rep2_workpool_data "
+                                + "GROUP BY id_foreign, id_table "
+                                + "ORDER BY id_superlog_min",
+                        ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            } catch (SQLException e) {
+                throw new FatalReplicationException(
+                        "Ошибка при получении подготовленного выражения для выборки последних операций", e);
+            }
         }
 
         return lastOperationsStatement;
@@ -86,29 +92,65 @@ public class GenericWorkPoolService extends DataServiceSkeleton
      * int, int)
      */
     @Override
-    public ResultSet getLastOperations(int runnerId, int fetchSize, int offset)
-            throws SQLException {
+    public ResultSet getLastOperations(int runnerId, int fetchSize, int offset) throws FatalReplicationException {
         PreparedStatement statement = getLastOperationsStatement();
 
-        statement.setInt(1, runnerId);
-        statement.setInt(2, runnerId);
-        // Извлекаем частями равными fetchSize
-        statement.setFetchSize(fetchSize);
+        try {
+            statement.setInt(1, runnerId);
+        } catch (SQLException e) {
+            throw new FatalReplicationException(
+                    String.format("Ошибка при установки идентификатора раннера [id_runner = %d] в запрос получения последних операций", runnerId), e);
+        }
 
-        // По задаче #2327
-        // Задаем первоначальное смещение выборки равное 0.
-        // При появлении ошибочных записей будем его увеличивать на 1.
-        statement.setInt(3, fetchSize);
-        statement.setInt(4, offset);
+        try {
+            statement.setInt(2, runnerId);
+        } catch (SQLException e) {
+            throw new FatalReplicationException(
+                    String.format("Ошибка при установки идентификатора раннера [id_runner = %d] в условие запроса получения последних операций", runnerId), e);
+        }
+        try {
+            // Извлекаем частями равными fetchSize
+            statement.setFetchSize(fetchSize);
+        } catch (SQLException e) {
+            throw new FatalReplicationException(
+                    String.format("Ошибка при установки размера выборки [fetchSize = %d] в запрос получения последних операций", fetchSize), e);
+        }
 
-        return statement.executeQuery();
+            // По задаче #2327
+            // Задаем первоначальное смещение выборки равное 0.
+            // При появлении ошибочных записей будем его увеличивать на 1.
+        try {
+            statement.setInt(3, fetchSize);
+        } catch (SQLException e) {
+            throw new FatalReplicationException(
+                    String.format("Ошибка при установки размера выборки [LIMIT = %d] в запрос получения последних операций", fetchSize), e);
+        }
+
+        try {
+            statement.setInt(4, offset);
+        } catch (SQLException e) {
+            throw new FatalReplicationException(
+                    String.format("Ошибка при установки смещения выборки [OFFSET = %d] в запрос получения последних операций", fetchSize), e);
+        }
+
+        try {
+            return statement.executeQuery();
+        } catch (SQLException e) {
+            throw new FatalReplicationException(
+                    "Ошибка при получении последних операций", e);
+        }
     }
 
     @Override
-    public PreparedStatement getClearWorkPoolDataStatement() throws SQLException {
+    public PreparedStatement getClearWorkPoolDataStatement() throws FatalReplicationException {
         if (clearWorkPoolDataStatement == null) {
-            clearWorkPoolDataStatement = getConnection().prepareStatement(
-                    "DELETE FROM rep2_workpool_data WHERE id_runner=? AND id_foreign=? AND id_table=? AND id_superlog>=? AND id_superlog<=?");
+            try {
+                clearWorkPoolDataStatement = getConnection().prepareStatement(
+                        "DELETE FROM rep2_workpool_data WHERE id_runner=? AND id_foreign=? AND id_table=? AND id_superlog>=? AND id_superlog<=?");
+            } catch (SQLException e) {
+                throw new FatalReplicationException(
+                        "Ошибка при получении подготовленного запроса для удаления обработанных данных из рабочего набора", e);
+            }
         }
 
         return clearWorkPoolDataStatement;
@@ -122,17 +164,29 @@ public class GenericWorkPoolService extends DataServiceSkeleton
      * @throws SQLException
      */
     @Override
-    public void clearWorkPoolData(ResultSet operationsResult) throws SQLException {
+    public void clearWorkPoolData(ResultSet operationsResult) throws FatalReplicationException {
         // Очищаем данные о текущей записи из набора данных реплики
         PreparedStatement deleteWorkPoolData = getClearWorkPoolDataStatement();
-        deleteWorkPoolData.setInt(1, getRunner(operationsResult));
-        deleteWorkPoolData.setLong(2, getForeign(operationsResult));
-        deleteWorkPoolData.setString(3, getTable(operationsResult));
-        deleteWorkPoolData.setLong(4, getSuperlogMin(operationsResult));
-        deleteWorkPoolData.setLong(5, getSuperlogMax(operationsResult));
-        deleteWorkPoolData.addBatch();
-        getErrorsLog().setStatus(getRunner(operationsResult), getTable(operationsResult),
-                getForeign(operationsResult), 1);
+        try {
+            deleteWorkPoolData.setInt(1, getRunner(operationsResult));
+            deleteWorkPoolData.setLong(2, getForeign(operationsResult));
+            deleteWorkPoolData.setString(3, getTable(operationsResult));
+            deleteWorkPoolData.setLong(4, getSuperlogMin(operationsResult));
+            deleteWorkPoolData.setLong(5, getSuperlogMax(operationsResult));
+        } catch (SQLException e) {
+            throw new FatalReplicationException(
+                    "Ошибка при установки параметров подготовленного запроса для удаления обработанных данных из рабочего набора", e);
+        }
+
+        try {
+            deleteWorkPoolData.addBatch();
+        } catch (SQLException e) {
+            throw new FatalReplicationException(
+                    "Ошибка при добавлениии в пакет запросов для удаления обработанных данных из рабочего набора", e);
+        }
+
+        getErrorsLog().setStatus(getRunner(operationsResult), getTable(operationsResult), getForeign(operationsResult),
+                1);
     }
 
     /**
@@ -142,46 +196,79 @@ public class GenericWorkPoolService extends DataServiceSkeleton
      */
     @Override
     public void trackError(String message, SQLException e, ResultSet operation)
-            throws SQLException {
-        getErrorsLog().add(getRunner(operation), getTable(operation),
-                getForeign(operation), message, e);
+            throws FatalReplicationException {
+            getErrorsLog().add(getRunner(operation), getTable(operation),
+                    getForeign(operation), message, e);
     }
 
     @Override
-    public String getTable(ResultSet resultSet) throws SQLException {
-        return resultSet.getString(ID_TABLE);
-    }
-
-    @Override
-    public Long getForeign(ResultSet resultSet) throws SQLException {
-        return resultSet.getLong(ID_FOREIGN);
-    }
-
-    @Override
-    public int getRunner(ResultSet resultSet) throws SQLException {
-        return resultSet.getInt(ID_RUNNER);
-    }
-
-    @Override
-    public Long getSuperlogMax(ResultSet resultSet) throws SQLException {
-        return resultSet.getLong(ID_SUPERLOG_MAX);
-    }
-
-    @Override
-    public Long getSuperlogMin(ResultSet resultSet) throws SQLException {
-        return resultSet.getLong(ID_SUPERLOG_MIN);
-    }
-
-    @Override
-    public void close() throws SQLException {
-        try (PreparedStatement thisClearWorkPoolDataStatement = this.clearWorkPoolDataStatement;
-                PreparedStatement thisLastOperationsStatement = this.lastOperationsStatement) {
-            super.close();
+    public String getTable(ResultSet resultSet) throws FatalReplicationException {
+        try {
+            return resultSet.getString(ID_TABLE);
+        } catch (SQLException e) {
+            throw new FatalReplicationException(
+                    String.format("Ошибка при получении названия таблицы из поля [%s]", ID_TABLE), e);
         }
     }
 
     @Override
-    public int getRecordsCount(ResultSet resultSet) throws SQLException {
-        return resultSet.getInt(RECORDS_COUNT);
+    public Long getForeign(ResultSet resultSet) throws FatalReplicationException {
+        try {
+            return resultSet.getLong(ID_FOREIGN);
+        } catch (SQLException e) {
+            throw new FatalReplicationException(
+                    String.format("Ошибка при получении идентификатора записи из поля [%s]", ID_FOREIGN), e);
+        }
+    }
+
+    @Override
+    public int getRunner(ResultSet resultSet) throws FatalReplicationException {
+        try {
+            return resultSet.getInt(ID_RUNNER);
+        } catch (SQLException e) {
+            throw new FatalReplicationException(
+                    String.format("Ошибка при получении идентификатора раннера из поля [%s]", ID_RUNNER), e);
+        }
+    }
+
+    @Override
+    public Long getSuperlogMax(ResultSet resultSet) throws FatalReplicationException {
+        try {
+            return resultSet.getLong(ID_SUPERLOG_MAX);
+        } catch (SQLException e) {
+            throw new FatalReplicationException(
+                    String.format("Ошибка при получении максимального идентификатора записи в супер логе из поля [%s]", ID_SUPERLOG_MAX), e);
+        }
+    }
+
+    @Override
+    public Long getSuperlogMin(ResultSet resultSet) throws FatalReplicationException {
+        try {
+            return resultSet.getLong(ID_SUPERLOG_MIN);
+        } catch (SQLException e) {
+            throw new FatalReplicationException(
+                    String.format("Ошибка при получении минимального идентификатора записи в супер логе из поля [%s]", ID_SUPERLOG_MAX), e);
+        }
+    }
+
+    @Override
+    public void close() throws FatalReplicationException {
+        try (PreparedStatement thisClearWorkPoolDataStatement = this.clearWorkPoolDataStatement;
+                PreparedStatement thisLastOperationsStatement = this.lastOperationsStatement) {
+            super.close();
+        } catch (SQLException e) {
+            throw new FatalReplicationException(
+                    "Ошибка при закрытии ресурсов", e);
+        }
+    }
+
+    @Override
+    public int getRecordsCount(ResultSet resultSet) throws FatalReplicationException {
+        try {
+            return resultSet.getInt(RECORDS_COUNT);
+        } catch (SQLException e) {
+            throw new FatalReplicationException(
+                    String.format("Ошибка при получении количества записей из поля [%s]", ID_SUPERLOG_MAX), e);
+        }
     }
 }

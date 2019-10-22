@@ -23,6 +23,7 @@
 
 package ru.taximaxim.dbreplicator2.replica.strategies.replication;
 
+import ru.taximaxim.dbreplicator2.el.FatalReplicationException;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 
 /**
@@ -40,7 +41,7 @@ public class StrategySkeleton {
      */
     private int fetchSize = DEFAULT_FETCH_SIZE;
     
-    protected int getFetchSize(StrategyModel data) {
+    protected int getFetchSize(StrategyModel data) throws FatalReplicationException {
         if (data.getParam(FETCH_SIZE) != null) {
             fetchSize = Integer.parseInt(data.getParam(FETCH_SIZE));
         }
@@ -52,7 +53,7 @@ public class StrategySkeleton {
      * 
      * @return
      */
-    public String getWhere(StrategyModel data) {
+    public String getWhere(StrategyModel data) throws FatalReplicationException {
         return data.getParam(WHERE);
     }
 

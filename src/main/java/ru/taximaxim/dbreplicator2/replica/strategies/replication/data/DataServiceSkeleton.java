@@ -31,6 +31,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import javax.sql.DataSource;
 
+import ru.taximaxim.dbreplicator2.el.FatalReplicationException;
+
 /**
  * Заготовка класса для работы с реплицируемыми данными
  * 
@@ -59,20 +61,28 @@ public class DataServiceSkeleton implements AutoCloseable {
      * @return the connection
      * @throws SQLException
      */
-    public Connection getConnection() throws SQLException {
+    public Connection getConnection() throws FatalReplicationException {
         if (connection == null) {
-            connection = dataSource.getConnection();
-            // Настраиваем соединение
-            connection.setAutoCommit(true);
-            connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+            try {
+                connection = dataSource.getConnection();
+                // Настраиваем соединение
+                connection.setAutoCommit(true);
+                connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+            } catch (SQLException e) {
+                throw new FatalReplicationException("Ошибка создания соединения", e);
+            }
         }
         return connection;
     }
 
     @Override
-    public void close() throws SQLException {
+    public void close() throws FatalReplicationException {
+        try {
         if (connection != null && !connection.isClosed()) {
-            connection.close();
+                connection.close();
+        }
+        } catch (SQLException e) {
+            throw new FatalReplicationException("Ошибка закрытия соединения", e);
         }
     }
     

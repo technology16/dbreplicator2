@@ -31,6 +31,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ru.taximaxim.dbreplicator2.abstracts.AbstractSettingTest;
+import ru.taximaxim.dbreplicator2.el.FatalReplicationException;
 import ru.taximaxim.dbreplicator2.model.HikariCPSettingsModel;
 import ru.taximaxim.dbreplicator2.model.RunnerModel;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
@@ -51,9 +52,10 @@ public class StrategiesTest extends AbstractSettingTest {
     
     /**
      * Проверка создания модели исполняемого потока и стратегии.
+     * @throws FatalReplicationException 
      */
     @Test
-    public void test() {
+    public void test() throws FatalReplicationException {
 
         session.beginTransaction();
 
@@ -107,7 +109,7 @@ public class StrategiesTest extends AbstractSettingTest {
         return runner;
     }
 
-    public StrategyModel createStrategy(Integer id, String className, String key, String value, boolean isEnabled, int priority) {
+    public StrategyModel createStrategy(Integer id, String className, String key, String value, boolean isEnabled, int priority) throws FatalReplicationException {
 
         StrategyModel strategy = new StrategyModel();
 
@@ -129,9 +131,10 @@ public class StrategiesTest extends AbstractSettingTest {
     
     /**
      * Тестирование работы механизма хранения многострочных параметров    
+     * @throws FatalReplicationException 
      */
     @Test
-    public void paramTest(){
+    public void paramTest() throws FatalReplicationException{
         StrategyModel strategy = new StrategyModel();
 
         // Добавляем 1 параметр

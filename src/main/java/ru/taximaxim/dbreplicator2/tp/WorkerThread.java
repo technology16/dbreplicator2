@@ -32,6 +32,7 @@ import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.el.DefaultUncaughtExceptionHandler;
 import ru.taximaxim.dbreplicator2.el.ErrorsLog;
+import ru.taximaxim.dbreplicator2.el.FatalReplicationException;
 import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
@@ -67,18 +68,7 @@ public class WorkerThread implements Runnable {
             try {
                 processCommand();
                 errorsLog.setStatus(runner.getId(), null, null, 1);
-            } catch (InstantiationException | IllegalAccessException e) {
-                errorsLog.add(runner.getId(), null, null,
-                        String.format(
-                                "Ошибка при создании объекта-стратегии раннера [id_runner = %d, %s]. [%s]",
-                                runner.getId(), runner.getDescription(), e));
-            } catch (ClassNotFoundException e) {
-                errorsLog.add(runner.getId(), null, null,
-                        String.format(
-                                "Ошибка при инициализации данных раннера [id_runner = %d, %s]",
-                                runner.getId(), runner.getDescription()),
-                        e);
-            } catch (SQLException e) {
+            } catch (FatalReplicationException e) {
                 errorsLog.add(runner.getId(), null, null,
                         String.format(
                                 "Ошибка БД при выполнении стратегии раннера [id_runner = %d, %s]",
@@ -104,15 +94,13 @@ public class WorkerThread implements Runnable {
      * @throws IllegalAccessException
      * @throws InstantiationException
      */
-    public void processCommand() throws ClassNotFoundException, SQLException,
-            InstantiationException, IllegalAccessException {
-
+    public void processCommand() throws FatalReplicationException {
         ConnectionFactory connectionsFactory = Core.getConnectionFactory();
         for (StrategyModel strategyModel : runner.getStrategyModels()) {
             if (strategyModel.isEnabled()) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug(String.format("Запускаем стратегию [%s, %s]);",
-                            strategyModel.getClassName(), strategyModel.getId()));
+                    LOG.debug(String.format("Запускаем стратегию [%s, %s]);", strategyModel.getClassName(),
+                            strategyModel.getId()));
                 }
 
                 runStrategy(connectionsFactory, strategyModel);
@@ -130,20 +118,27 @@ public class WorkerThread implements Runnable {
      * @param strategyModel
      *            Данные для стратегии
      *
-     * @throws ClassNotFoundException
-     * @throws InstantiationException
-     * @throws IllegalAccessException
-     * @throws StrategyException
-     * @throws SQLException
+     * @throws FatalReplicationException 
      */
-    protected void runStrategy(ConnectionFactory connectionsFactory,
-            StrategyModel strategyModel) throws SQLException, ClassNotFoundException,
-            InstantiationException, IllegalAccessException {
-
-        Class<?> clazz = Class.forName(strategyModel.getClassName());
-        Strategy strategy = (Strategy) clazz.newInstance();
-
-        strategy.execute(connectionsFactory, strategyModel);
+    protected void runStrategy(ConnectionFactory connectionsFactory, StrategyModel strategyModel)
+            throws FatalReplicationException {
+        try {
+            Class<?> clazz = Class.forName(strategyModel.getClassName());
+            Strategy strategy = (Strategy) clazz.newInstance();
+            strategy.execute(connectionsFactory, strategyModel);
+        } catch (ClassNotFoundException e) {
+            throw new FatalReplicationException(String.format("Класс [%s] стратегии [id = %d] не найден ",
+                    strategyModel.getClassName(), strategyModel.getId()), e);
+        } catch (InstantiationException e) {
+            throw new FatalReplicationException(
+                    String.format("Ошибка при создании объекта-стратегии [id = %d]", strategyModel.getId()), e);
+        } catch (IllegalAccessException e) {
+            throw new FatalReplicationException(
+                    String.format("Ошибка доступа к объекту-стратегии [id = %d]", strategyModel.getId()), e);
+        } catch (SQLException e) {
+            throw new FatalReplicationException(
+                    String.format("Ошибка выполнения стратегии [id = %d]", strategyModel.getId()), e);
+        }
     }
 
     /**

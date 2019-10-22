@@ -33,6 +33,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
+import ru.taximaxim.dbreplicator2.el.FatalReplicationException;
 import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
@@ -57,7 +58,7 @@ public class CountWatchgdog extends StrategySkeleton implements Strategy {
 
     @Override
     public void execute(ConnectionFactory connectionsFactory, StrategyModel data)
-            throws SQLException {
+            throws SQLException, FatalReplicationException {
         int partEmail = DEFAULT_PART_EMAIL;
         if (data.getParam(PART_EMAIL) != null) {
             partEmail = Integer.parseInt(data.getParam(PART_EMAIL));

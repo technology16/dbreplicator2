@@ -33,6 +33,7 @@ import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 
+import ru.taximaxim.dbreplicator2.el.FatalReplicationException;
 import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
@@ -96,7 +97,7 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm {
     @Override
     protected boolean replicateRecord(StrategyModel data, ResultSet operationsResult,
             TableModel sourceTable, TableModel destTable, ResultSet sourceResult)
-            throws SQLException {
+            throws SQLException, FatalReplicationException {
         // Вместо репликации проверяем запись
         StringBuilder rowDumpHead = new StringBuilder(String.format(
                 INTEGRITY_ERROR, data
@@ -161,7 +162,7 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm {
      */
     @Override
     protected boolean deleteRecord(StrategyModel data, ResultSet operationsResult,
-            TableModel sourceTable, TableModel destTable) throws SQLException {
+            TableModel sourceTable, TableModel destTable) throws SQLException, FatalReplicationException {
         // Вместо удаления проверяем отсутствие записи в приемнике
         PreparedStatement selectTargetStatement = getDestDataService()
                 .getSelectStatement(destTable);
@@ -197,10 +198,11 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm {
      * @param data              - данные стратегии
      * 
      * @throws SQLException
+     * @throws FatalReplicationException 
      * @throws ClassNotFoundException 
      */
     @Override
-    protected void selectLastOperations(StrategyModel data) throws SQLException {
+    protected void selectLastOperations(StrategyModel data) throws SQLException, FatalReplicationException {
         int runnerId = Integer.parseInt(data.getParam(ID_RUNNER));
         // Задаем первоначальное смещение выборки равное 0.
         // При появлении ошибочных записей будем его увеличивать на 1.
@@ -242,7 +244,7 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm {
      */
     @Override
     protected TableModel getSourceTable(StrategyModel data, ResultSet operationsResult)
-            throws SQLException {
+            throws SQLException, FatalReplicationException {
         return data.getRunner().getSource()
                 .getRunner(Integer.parseInt(data.getParam(ID_RUNNER)))
                 .getTable(getWorkPoolService().getTable(operationsResult));
@@ -254,9 +256,11 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm {
      * @param data
      * @param sourceTable
      * @return
+     * @throws FatalReplicationException 
+     * @throws  
      */
     @Override
-    protected TableModel getDestTable(StrategyModel data, TableModel sourceTable) {
+    protected TableModel getDestTable(StrategyModel data, TableModel sourceTable) throws FatalReplicationException {
         TableModel destTable = destTables.get(sourceTable);
         if (destTable == null) {
             destTable = sourceTable;

@@ -31,14 +31,15 @@ import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 import ru.taximaxim.dbreplicator2.el.ErrorsLog;
+import ru.taximaxim.dbreplicator2.el.FatalReplicationException;
 import ru.taximaxim.dbreplicator2.replica.strategies.replication.algorithms.GenericAlgorithm;
 import ru.taximaxim.dbreplicator2.replica.strategies.replication.data.GenericDataService;
 import ru.taximaxim.dbreplicator2.replica.strategies.replication.workpool.GenericWorkPoolService;
 import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
- * Класс стратегии репликации данных из источника в приемник
- * Записи реплицируются в порядке последних операций над ними.
+ * Класс стратегии репликации данных из источника в приемник Записи
+ * реплицируются в порядке последних операций над ними.
  * 
  * @author volodin_aa
  * 
@@ -46,19 +47,15 @@ import ru.taximaxim.dbreplicator2.utils.Core;
 public class Strict extends Generic implements Strategy {
 
     @Override
-    public void execute(ConnectionFactory connectionsFactory, StrategyModel data) throws SQLException {
-        DataSource source = connectionsFactory
-                .get(data.getRunner().getSource().getPoolId());
-        DataSource target = connectionsFactory
-                .get(data.getRunner().getTarget().getPoolId());
+    public void execute(ConnectionFactory connectionsFactory, StrategyModel data)
+            throws SQLException, FatalReplicationException {
+        DataSource source = connectionsFactory.get(data.getRunner().getSource().getPoolId());
+        DataSource target = connectionsFactory.get(data.getRunner().getTarget().getPoolId());
         try (ErrorsLog errorsLog = Core.getErrorsLog();
                 GenericWorkPoolService genericWorkPoolService = new GenericWorkPoolService(source, errorsLog);
                 GenericDataService genericDataServiceSourceConnection = new GenericDataService(source);
                 GenericDataService genericDataServiceTargetConnection = new GenericDataService(target);) {
-            new GenericAlgorithm(getFetchSize(data), 
-                    true, 
-                    genericWorkPoolService, 
-                    genericDataServiceSourceConnection, 
+            new GenericAlgorithm(getFetchSize(data), true, genericWorkPoolService, genericDataServiceSourceConnection,
                     genericDataServiceTargetConnection).execute(data);
         }
     }

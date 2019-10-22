@@ -37,9 +37,10 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import org.apache.log4j.Logger;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+
+import ru.taximaxim.dbreplicator2.el.FatalReplicationException;
 
 
 /**
@@ -405,15 +406,16 @@ public class HikariCPSettingsModel implements Serializable {
      * Получение дополнительных настроек
      * 
      * @return
+     * @throws FatalReplicationException 
      */
-    public Properties getProperties() {
+    public Properties getProperties() throws FatalReplicationException {
         if(properties == null) {
             properties = new Properties();
             if(getParam() != null){
                 try {
                     properties.load(new StringReader(getParam()));
                 } catch (IOException e) {
-                    Logger.getLogger(HikariCPSettingsModel.class).error("Ошибка при чтение параметров [" + getParam() + "]!", e);
+                    throw new FatalReplicationException("Ошибка при чтение параметров [" + getParam() + "]!", e);
                 }
             }
         }

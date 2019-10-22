@@ -26,6 +26,7 @@ package ru.taximaxim.dbreplicator2.replica;
 import java.sql.SQLException;
 
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
+import ru.taximaxim.dbreplicator2.el.FatalReplicationException;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 
 /**
@@ -40,10 +41,11 @@ public interface Strategy {
      * @param connectionsFactory connectionsFactory
      * @param data Модель данных описывающая стратегию.
      * @throws SQLException 
+     * @throws FatalReplicationException 
      * @throws Exception 
      * @throws ClassNotFoundException 
      */
     void execute(ConnectionFactory connectionsFactory,
-            StrategyModel data) throws SQLException;
+            StrategyModel data) throws SQLException, FatalReplicationException;
 
 }

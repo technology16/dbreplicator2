@@ -31,7 +31,7 @@ import java.util.Properties;
 
 import javax.persistence.*;
 
-import org.apache.log4j.Logger;
+import ru.taximaxim.dbreplicator2.el.FatalReplicationException;
 
 /**
  * Персистентный класс настроек стратегии
@@ -151,15 +151,17 @@ public class StrategyModel implements Serializable {
 
     /**
      * Получение параметра по ключу
+     * @throws FatalReplicationException 
      */
-    public String getParam(String key) {
+    public String getParam(String key) throws FatalReplicationException {
         return getProp().getProperty(key);
     }
 
     /**
      * Запись параметра по ключу
+     * @throws FatalReplicationException 
      */
-    public void setParam(String key, String value) {
+    public void setParam(String key, String value) throws FatalReplicationException {
         getProp().put(key, value);
 
         StringWriter writer = new StringWriter();
@@ -199,16 +201,16 @@ public class StrategyModel implements Serializable {
      * Получение настроек
      * 
      * @return
+     * @throws FatalReplicationException 
      */
-    private Properties getProp() {
+    private Properties getProp() throws FatalReplicationException {
         if (this.prop == null) {
             this.prop = new Properties();
             if (param != null) {
                 try {
                     this.prop.load(new StringReader(param));
                 } catch (IOException e) {
-                    Logger.getLogger("StrategyModel")
-                            .error("Ошибка при чтение параметров [" + param + "]!", e);
+                    throw new FatalReplicationException("Ошибка при чтение параметров [" + param + "]!", e);
                 }
             }
         }

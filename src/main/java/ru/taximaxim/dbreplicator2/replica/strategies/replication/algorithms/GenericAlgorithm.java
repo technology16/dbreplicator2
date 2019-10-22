@@ -34,6 +34,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import ru.taximaxim.dbreplicator2.el.FatalReplicationException;
 import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.model.TableModel;
@@ -169,9 +170,10 @@ public class GenericAlgorithm {
      * @return количество измененых записей
      * 
      * @throws SQLException
+     * @throws FatalReplicationException 
      */
     protected int replicateInsertion(TableModel sourceTable, TableModel destTable,
-            ResultSet data) throws SQLException {
+            ResultSet data) throws SQLException, FatalReplicationException {
         PreparedStatement insertDestStatement = getDestDataService().getInsertStatement(
                 destTable, getSourceDataService().getAllCols(sourceTable));
         // Добавляем данные в целевую таблицу
@@ -192,9 +194,10 @@ public class GenericAlgorithm {
      * @return количество измененых записей
      * 
      * @throws SQLException
+     * @throws FatalReplicationException 
      */
     protected int replicateUpdation(TableModel sourceTable, TableModel destTable,
-            ResultSet data) throws SQLException {
+            ResultSet data) throws SQLException, FatalReplicationException {
         // Если Была операция вставки или изменения, то сначала пытаемся
         // обновить запись,
         PreparedStatement updateDestStatement = getDestDataService().getUpdateStatement(
@@ -219,9 +222,10 @@ public class GenericAlgorithm {
      * @return количество измененых записей
      * 
      * @throws SQLException
+     * @throws FatalReplicationException 
      */
     protected int replicateDeletion(ResultSet operationsResult, TableModel table)
-            throws SQLException {
+            throws SQLException, FatalReplicationException {
         // Если была операция удаления, то удаляем запись в приемнике
         PreparedStatement deleteDestStatement = getDestDataService()
                 .getDeleteStatement(table);
@@ -236,9 +240,10 @@ public class GenericAlgorithm {
      * @param operationsResult
      * @return
      * @throws SQLException
+     * @throws FatalReplicationException 
      */
     protected TableModel getSourceTable(StrategyModel data, ResultSet operationsResult)
-            throws SQLException {
+            throws SQLException, FatalReplicationException {
         return data.getRunner().getTable(getWorkPoolService().getTable(operationsResult));
     }
 
@@ -248,8 +253,9 @@ public class GenericAlgorithm {
      * @param data
      * @param sourceTable
      * @return
+     * @throws FatalReplicationException 
      */
-    protected TableModel getDestTable(StrategyModel data, TableModel sourceTable) {
+    protected TableModel getDestTable(StrategyModel data, TableModel sourceTable) throws FatalReplicationException {
         TableModel destTable = destTables.get(sourceTable);
         if (destTable == null) {
             destTable = sourceTable;
@@ -281,9 +287,10 @@ public class GenericAlgorithm {
      * @param data
      * @param operationsResult
      * @throws SQLException
+     * @throws FatalReplicationException 
      */
     protected void tableIsNullHandling(StrategyModel data, ResultSet operationsResult)
-            throws SQLException {
+            throws SQLException, FatalReplicationException {
         String message = String.format(
                 "Раннер [id_runner = %s, %s] Стратегия [id = %s]: В списке таблиц раннера отстутсвует таблица %s",
                 data.getRunner().getId(), data.getRunner().getDescription(), data.getId(),
@@ -298,10 +305,11 @@ public class GenericAlgorithm {
      * @param data
      * @param operationsResult
      * @throws SQLException
+     * @throws FatalReplicationException 
      */
     protected void errorsHandling(String messTemplate, String rowMess, StrategyModel data,
             TableModel sourceTable, ResultSet operationsResult, SQLException e)
-            throws SQLException {
+            throws SQLException, FatalReplicationException {
 
         String message = String.format(messTemplate, data.getRunner().getId(),
                 data.getRunner().getDescription(), data.getId(), sourceTable.getName(),
@@ -315,9 +323,10 @@ public class GenericAlgorithm {
      * @param sourceTable
      * @param e
      * @throws SQLException
+     * @throws FatalReplicationException 
      */
     protected void errorsHandling(TableModel sourceTable, SQLException e)
-            throws SQLException {
+            throws SQLException, FatalReplicationException {
         if (getSourceDataService().getPriCols(sourceTable).isEmpty()) {
             throw new SQLException(
                     String.format("В таблице %s отсутствует первичный ключ!",
@@ -335,9 +344,10 @@ public class GenericAlgorithm {
      * @param e
      * @param operationsResult
      * @throws SQLException
+     * @throws FatalReplicationException 
      */
     protected void addErrorLog(String message, SQLException e, ResultSet operationsResult)
-            throws SQLException {
+            throws SQLException, FatalReplicationException {
         if (LOG.isDebugEnabled()) {
             LOG.debug(message, e);
         } else {
@@ -357,10 +367,11 @@ public class GenericAlgorithm {
      * @param sourceResult
      * @return
      * @throws SQLException
+     * @throws FatalReplicationException 
      */
     protected boolean replicateRecord(StrategyModel data, ResultSet operationsResult,
             TableModel sourceTable, TableModel destTable, ResultSet sourceResult)
-            throws SQLException {
+            throws SQLException, FatalReplicationException {
         // Извлекаем данные из приемника
         PreparedStatement selectDestStatement = getDestDataService()
                 .getSelectStatement(destTable);
@@ -434,9 +445,10 @@ public class GenericAlgorithm {
      * @param destTable
      * @return
      * @throws SQLException
+     * @throws FatalReplicationException 
      */
     protected boolean deleteRecord(StrategyModel data, ResultSet operationsResult,
-            TableModel sourceTable, TableModel destTable) throws SQLException {
+            TableModel sourceTable, TableModel destTable) throws SQLException, FatalReplicationException {
         // Если запись фактически отсутствует, то
         // удалем ее в приемнике
         try {
@@ -466,9 +478,10 @@ public class GenericAlgorithm {
      * @return true если данные реплицировались без ошибок
      * 
      * @throws SQLException
+     * @throws FatalReplicationException 
      */
     protected boolean replicateOperation(StrategyModel data, ResultSet operationsResult)
-            throws SQLException {
+            throws SQLException, FatalReplicationException {
         TableModel sourceTable = getSourceTable(data, operationsResult);
         if (sourceTable == null) {
             // Обработка возможной ошибки при рестарте
@@ -510,9 +523,10 @@ public class GenericAlgorithm {
      * операции вызывается функция replicateOperation(...).
      * 
      * @throws SQLException
+     * @throws FatalReplicationException 
      * @throws ClassNotFoundException
      */
-    protected void selectLastOperations(StrategyModel data) throws SQLException {
+    protected void selectLastOperations(StrategyModel data) throws SQLException, FatalReplicationException {
         // Задаем первоначальное смещение выборки равное 0.
         // При появлении ошибочных записей будем его увеличивать на 1.
         int offset = 0;
@@ -592,9 +606,10 @@ public class GenericAlgorithm {
      * selectLastOperations(...).
      * 
      * @throws SQLException
+     * @throws FatalReplicationException 
      * @throws ClassNotFoundException
      */
-    public void execute(StrategyModel data) throws SQLException {
+    public void execute(StrategyModel data) throws SQLException, FatalReplicationException {
         try {
             // Устанавливаем флаг текущего владельца записей
             getDestDataService()

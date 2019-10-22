@@ -35,6 +35,7 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
+import ru.taximaxim.dbreplicator2.el.FatalReplicationException;
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.jdbc.QueryConstructors;
 import ru.taximaxim.dbreplicator2.jdbc.StatementsHashMap;
@@ -89,11 +90,16 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * taximaxim.dbreplicator2.model.TableModel)
      */
     @Override
-    public PreparedStatement getDeleteStatement(TableModel table) throws SQLException {
+    public PreparedStatement getDeleteStatement(TableModel table) throws FatalReplicationException {
         PreparedStatement statement = getDeleteStatements().get(table);
         if (statement == null) {
-            statement = getConnection().prepareStatement(QueryConstructors
-                    .constructDeleteQuery(table.getName(), getPriCols(table)));
+            try {
+                statement = getConnection()
+                        .prepareStatement(QueryConstructors.constructDeleteQuery(table.getName(), getPriCols(table)));
+            } catch (SQLException e) {
+                throw new FatalReplicationException(
+                        String.format("Ошибка при генерации запроса DELETE из таблицы [%s]", table.getName()), e);
+            }
             getDeleteStatements().put(table, statement);
         }
 
@@ -140,12 +146,17 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * taximaxim.dbreplicator2.model.TableModel)
      */
     @Override
-    public PreparedStatement getSelectStatement(TableModel table) throws SQLException {
+    public PreparedStatement getSelectStatement(TableModel table) throws FatalReplicationException {
         PreparedStatement statement = getSelectStatements().get(table);
         if (statement == null) {
-            statement = getConnection().prepareStatement(
-                    QueryConstructors.constructSelectQuery(table.getName(),
-                            getAllCols(table), getPriCols(table), table.getParam(WHERE)));
+            try {
+                statement = getConnection().prepareStatement(
+                        QueryConstructors.constructSelectQuery(table.getName(),
+                                getAllCols(table), getPriCols(table), table.getParam(WHERE)));
+            } catch (SQLException e) {
+                throw new FatalReplicationException(
+                        String.format("Ошибка при генерации запроса SELECT из таблицы [%s]", table.getName()), e);
+            }
 
             getSelectStatements().put(table, statement);
         }
@@ -162,13 +173,18 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      */
     @Override
     public PreparedStatement getUpdateStatement(TableModel table,
-            Collection<String> avaliableCals) throws SQLException {
+            Collection<String> avaliableCals) throws FatalReplicationException {
         PreparedStatement statement = getUpdateStatements().get(table);
         if (statement == null) {
-            statement = getConnection().prepareStatement(
-                    QueryConstructors.constructUpdateQuery(table.getName(),
-                            getAvaliableDataCols(table, avaliableCals),
-                            getPriCols(table)));
+            try {
+                statement = getConnection().prepareStatement(
+                        QueryConstructors.constructUpdateQuery(table.getName(),
+                                getAvaliableDataCols(table, avaliableCals),
+                                getPriCols(table)));
+            } catch (SQLException e) {
+                throw new FatalReplicationException(
+                        String.format("Ошибка при генерации запроса UPDATE из таблицы [%s]", table.getName()), e);
+            }
 
             getUpdateStatements().put(table, statement);
         }
@@ -185,12 +201,17 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      */
     @Override
     public PreparedStatement getInsertStatement(TableModel table,
-            Collection<String> avaliableCals) throws SQLException {
+            Collection<String> avaliableCals) throws FatalReplicationException {
         PreparedStatement statement = getInsertStatements().get(table);
         if (statement == null) {
             String insertQuery = QueryConstructors.constructInsertQuery(table.getName(),
                     getAllAvaliableCols(table, avaliableCals));
-            statement = getConnection().prepareStatement(insertQuery);
+            try {
+                statement = getConnection().prepareStatement(insertQuery);
+            } catch (SQLException e) {
+                throw new FatalReplicationException(
+                        String.format("Ошибка при генерации запроса INSERT из таблицы [%s]", table.getName()), e);
+            }
 
             getInsertStatements().put(table, statement);
         }
@@ -206,7 +227,7 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
         return list;
     }
 
-    protected Collection<String> getKeysColumn(TableModel table) {
+    protected Collection<String> getKeysColumn(TableModel table) throws FatalReplicationException {
         return str2upperList(table.getParam(KEYS));
     }
 
@@ -217,15 +238,20 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * @param connection
      * @param table.getName()
      * @return
-     * @throws SQLException
+     * @throws FatalReplicationException 
      */
     @Override
-    public Set<String> getPriCols(TableModel table) throws SQLException {
+    public Set<String> getPriCols(TableModel table) throws FatalReplicationException {
         Set<String> cols = priCols.get(table);
         if (cols == null) {
             Collection<String>keys = getKeysColumn(table);
             if (keys.isEmpty()) {
-                cols = JdbcMetadata.getPrimaryColumns(getConnection(), table.getName());
+                try {
+                    cols = JdbcMetadata.getPrimaryColumns(getConnection(), table.getName());
+                } catch (SQLException e) {
+                    throw new FatalReplicationException(
+                            String.format("Ошибка при получении списка ключевых колонок из таблицы [%s]", table.getName()), e);
+                }
             } else {
                 cols = new LinkedHashSet<>(keys);
             }
@@ -240,13 +266,18 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * 
      * @param table.getName()
      * @return
-     * @throws SQLException
+     * @throws FatalReplicationException 
      */
     @Override
-    public Set<String> getAllCols(TableModel table) throws SQLException {
+    public Set<String> getAllCols(TableModel table) throws FatalReplicationException {
         Set<String> cols = allCols.get(table);
         if (cols == null) {
-            cols = JdbcMetadata.getColumns(getConnection(), table.getName());
+            try {
+                cols = JdbcMetadata.getColumns(getConnection(), table.getName());
+            } catch (SQLException e) {
+                throw new FatalReplicationException(
+                        String.format("Ошибка при получении списка всех колонок из таблицы [%s]", table.getName()), e);
+            }
 
             // Удаляем игнорируемые колонки
             cols.removeAll(getIgnoredCols(table));
@@ -268,11 +299,11 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * 
      * @param table.getName()
      * @return
-     * @throws SQLException
+     * @throws FatalReplicationException 
      */
     @Override
     public Set<String> getAllAvaliableCols(TableModel table,
-            Collection<String> avaliableCals) throws SQLException {
+            Collection<String> avaliableCals) throws FatalReplicationException {
         Set<String> cols = allAvaliableCols.get(table);
         if (cols == null) {
             cols = new LinkedHashSet<>(getAllCols(table));
@@ -292,10 +323,10 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * @param connection
      * @param table.getName()
      * @return
-     * @throws SQLException
+     * @throws FatalReplicationException 
      */
     @Override
-    public Set<String> getDataCols(TableModel table) throws SQLException {
+    public Set<String> getDataCols(TableModel table) throws FatalReplicationException {
         Set<String> cols = dataCols.get(table);
         if (cols == null) {
             cols = new LinkedHashSet<>(getAllCols(table));
@@ -313,11 +344,11 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * @param connection
      * @param table.getName()
      * @return
-     * @throws SQLException
+     * @throws FatalReplicationException 
      */
     @Override
     public Set<String> getAvaliableDataCols(TableModel table,
-            Collection<String> avaliableCals) throws SQLException {
+            Collection<String> avaliableCals) throws FatalReplicationException {
         Set<String> cols = avaliableDataCols.get(table);
         if (cols == null) {
             cols = new LinkedHashSet<>(getDataCols(table));
@@ -335,13 +366,18 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * @param connection
      * @param table.getName()
      * @return
-     * @throws SQLException
+     * @throws FatalReplicationException 
      */
     @Override
-    public Set<String> getIdentityCols(TableModel table) throws SQLException {
+    public Set<String> getIdentityCols(TableModel table) throws FatalReplicationException {
         Set<String> cols = identityCols.get(table);
         if (cols == null) {
-            cols = JdbcMetadata.getIdentityColumns(getConnection(), table.getName());
+            try {
+                cols = JdbcMetadata.getIdentityColumns(getConnection(), table.getName());
+            } catch (SQLException e) {
+                throw new FatalReplicationException(
+                        String.format("Ошибка при получении списка автоинкрементных колонок из таблицы [%s]", table.getName()), e);
+            }
             identityCols.put(table, cols);
         }
 
@@ -354,10 +390,10 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * @param connection
      * @param table.getName()
      * @return
-     * @throws SQLException
+     * @throws FatalReplicationException 
      */
     @Override
-    public Set<String> getIgnoredCols(TableModel table) throws SQLException {
+    public Set<String> getIgnoredCols(TableModel table) throws FatalReplicationException {
         Set<String> cols = ignoredCols.get(table);
         if (cols == null) {
             cols = table.getIgnoredColumns();
@@ -373,10 +409,10 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * @param connection
      * @param table.getName()
      * @return
-     * @throws SQLException
+     * @throws FatalReplicationException 
      */
     @Override
-    public Set<String> getRequiredCols(TableModel table) throws SQLException {
+    public Set<String> getRequiredCols(TableModel table) throws FatalReplicationException {
         Set<String> cols = requiredCols.get(table);
         if (cols == null) {
             cols = table.getRequiredColumns();
@@ -390,20 +426,22 @@ public class GenericDataService extends DataServiceSkeleton implements DataServi
      * Устанавливает сессионную переменную с именем текущей подписки или
      * публикации
      * 
-     * @throws Exception
      */
     @Override
-    public void setRepServerName(String repServerName) throws SQLException {
+    public void setRepServerName(String repServerName) {
         // По умолчанию ни чего не делаем. Реализуется для конкретных баз.
     }
 
     @Override
-    public void close() throws SQLException {
+    public void close() throws FatalReplicationException {
         try (StatementsHashMap<TableModel, PreparedStatement> thisDeleteStatements = this.deleteStatements;
                 StatementsHashMap<TableModel, PreparedStatement> thisSelectStatements = this.selectStatements;
                 StatementsHashMap<TableModel, PreparedStatement> thisUpdateStatements = this.updateStatements;
                 StatementsHashMap<TableModel, PreparedStatement> thisInsertStatements = this.insertStatements;) {
             super.close();
+        } catch (SQLException e) {
+            throw new FatalReplicationException(
+                    "Ошибка при закрытии сервиса данных", e);
         }
     }
 }

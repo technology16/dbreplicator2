@@ -34,6 +34,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
+import ru.taximaxim.dbreplicator2.el.FatalReplicationException;
 import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
@@ -62,7 +63,7 @@ public class SuperlogWatchgdog implements Strategy {
 
     @Override
     public void execute(ConnectionFactory connectionsFactory, StrategyModel data)
-            throws SQLException {
+            throws SQLException, FatalReplicationException {
         int period = DEFAULT_PERIOD;
         if (data.getParam(PERIOD) != null) {
             period = Integer.parseInt(data.getParam(PERIOD));

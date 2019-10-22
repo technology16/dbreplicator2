@@ -39,7 +39,7 @@ import java.util.Set;
 
 import javax.persistence.*;
 
-import org.apache.log4j.Logger;
+import ru.taximaxim.dbreplicator2.el.FatalReplicationException;
 
 /**
  * Таблицы, обрабатываемые в пуле соединеий.
@@ -170,8 +170,9 @@ public class TableModel implements Cloneable, Serializable {
 
     /**
      * Получение параметра по ключу
+     * @throws FatalReplicationException 
      */
-    public String getParam(String key) {
+    public String getParam(String key) throws FatalReplicationException {
         return getProperties().getProperty(key);
     }
 
@@ -180,8 +181,9 @@ public class TableModel implements Cloneable, Serializable {
      * 
      * @param key параметр
      * @param value значение
+     * @throws FatalReplicationException 
      */
-    public void setParam(String key, String value) {
+    public void setParam(String key, String value) throws FatalReplicationException {
         getProperties().put(key, value);
         StringWriter writer = new StringWriter();
         properties.list(new PrintWriter(writer));
@@ -192,15 +194,16 @@ public class TableModel implements Cloneable, Serializable {
      * Получение настроек
      * 
      * @return
+     * @throws FatalReplicationException 
      */
-    public Properties getProperties() {
+    public Properties getProperties() throws FatalReplicationException {
         if(properties == null) {
             properties = new Properties();
             if(param != null){
                 try {
                     properties.load(new StringReader(param));
                 } catch (IOException e) {
-                    Logger.getLogger("TableModel").error("Ошибка при чтение параметров [" + param + "]!", e);
+                    throw new FatalReplicationException("Ошибка при чтение параметров [" + param + "]!", e);
                 }
             }
         }
@@ -254,8 +257,9 @@ public class TableModel implements Cloneable, Serializable {
     /**
      * Получение списка игнорируемых колонок
      * @return
+     * @throws FatalReplicationException 
      */
-    public Set<String> getIgnoredColumns(){
+    public Set<String> getIgnoredColumns() throws FatalReplicationException{
         Set<String> ingnoredColumns = new HashSet<>();
         if (getParam(IGNORED_COLUMNS) != null) {
             ingnoredColumns.addAll(str2upperList(getParam(IGNORED_COLUMNS)));
@@ -266,8 +270,9 @@ public class TableModel implements Cloneable, Serializable {
     /**
      * Получение списка колонок, обязательных к репликации
      * @return
+     * @throws FatalReplicationException 
      */
-    public Set<String> getRequiredColumns(){
+    public Set<String> getRequiredColumns() throws FatalReplicationException{
         Set<String> requiredColumns = new HashSet<>();
         if (getParam(REQUIRED_COLUMNS) != null) {
             requiredColumns.addAll(str2upperList(getParam(REQUIRED_COLUMNS)));
@@ -292,8 +297,9 @@ public class TableModel implements Cloneable, Serializable {
      * Получение наименование таблицы-приемника
      * 
      * @return
+     * @throws FatalReplicationException 
      */
-    public String getDestTableName() {
+    public String getDestTableName() throws FatalReplicationException {
         return getParam(DEST_TABLE_NAME);
     }
     
@@ -303,8 +309,9 @@ public class TableModel implements Cloneable, Serializable {
      * @param columns
      * @return
      * @throws SQLException 
+     * @throws FatalReplicationException 
      */
-    public Map<String, String> getCastFromColumns(Collection<String> columns) throws SQLException {
+    public Map<String, String> getCastFromColumns(Collection<String> columns) throws SQLException, FatalReplicationException {
         Map<String, String> castFromColums = new HashMap<>();
         for (String column : columns) {
             String castStatement = getParam(CAST_FROM + column.toLowerCase());
@@ -321,8 +328,9 @@ public class TableModel implements Cloneable, Serializable {
      * @param columns
      * @return
      * @throws SQLException 
+     * @throws FatalReplicationException 
      */
-    public Map<String, String> getCastToColumns(Collection<String> columns) throws SQLException {
+    public Map<String, String> getCastToColumns(Collection<String> columns) throws SQLException, FatalReplicationException {
         Map<String, String> castToColums = new HashMap<>();
         for (String column : columns) {
             String castStatement = getParam(CAST_TO + column.toLowerCase());

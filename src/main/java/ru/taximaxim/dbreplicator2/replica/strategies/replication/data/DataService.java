@@ -33,6 +33,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Set;
 
+import ru.taximaxim.dbreplicator2.el.FatalReplicationException;
 import ru.taximaxim.dbreplicator2.model.TableModel;
 
 /**
@@ -49,9 +50,10 @@ public interface DataService extends AutoCloseable {
      * 
      * @return the deleteDestStatements
      * @throws SQLException
+     * @throws FatalReplicationException 
      */
      PreparedStatement getDeleteStatement(TableModel table)
-            throws SQLException;
+            throws FatalReplicationException;
 
     /**
      * Инициализация с кешированием подготовленного запроса для извлечения
@@ -59,9 +61,10 @@ public interface DataService extends AutoCloseable {
      * 
      * @return the selectSourceStatements
      * @throws SQLException
+     * @throws FatalReplicationException 
      */
     PreparedStatement getSelectStatement(TableModel table)
-            throws SQLException;
+            throws FatalReplicationException;
 
     /**
      * Инициализация с кешированием подготовленного запроса обновления записи в
@@ -69,9 +72,10 @@ public interface DataService extends AutoCloseable {
      * 
      * @return the updateDestStatements
      * @throws SQLException
+     * @throws FatalReplicationException 
      */
     PreparedStatement getUpdateStatement(TableModel table, Collection<String> avaliableCals)
-            throws SQLException;
+            throws FatalReplicationException;
 
     /**
      * Инициализация с кешированием подготовленного запроса для вставки записи в
@@ -79,9 +83,10 @@ public interface DataService extends AutoCloseable {
      * 
      * @return the insertDestStatements
      * @throws SQLException
+     * @throws FatalReplicationException 
      */
     PreparedStatement getInsertStatement(TableModel table, Collection<String> avaliableCals)
-            throws SQLException;
+            throws FatalReplicationException;
     
     /**
      * Кешированное получение списка ключевых колонок
@@ -89,8 +94,9 @@ public interface DataService extends AutoCloseable {
      * @param table.getName()
      * @return
      * @throws SQLException
+     * @throws FatalReplicationException 
      */
-    Set<String> getPriCols(TableModel table) throws SQLException;
+    Set<String> getPriCols(TableModel table) throws FatalReplicationException;
 
     /**
      * Кешированное получение списка всех колонок
@@ -98,8 +104,9 @@ public interface DataService extends AutoCloseable {
      * @param table.getName()
      * @return
      * @throws SQLException
+     * @throws FatalReplicationException 
      */
-    Set<String> getAllCols(TableModel table) throws SQLException;
+    Set<String> getAllCols(TableModel table) throws FatalReplicationException;
 
     /**
      * Кешированное получение списка всех доступных колонок
@@ -107,8 +114,9 @@ public interface DataService extends AutoCloseable {
      * @param table.getName()
      * @return
      * @throws SQLException
+     * @throws FatalReplicationException 
      */
-    Set<String> getAllAvaliableCols(TableModel table, Collection<String> avaliableCals) throws SQLException;
+    Set<String> getAllAvaliableCols(TableModel table, Collection<String> avaliableCals) throws FatalReplicationException;
     
     /**
      * Кешированное получение списка колонок с данными
@@ -116,9 +124,10 @@ public interface DataService extends AutoCloseable {
      * @param table.getName()
      * @return
      * @throws SQLException
+     * @throws FatalReplicationException 
      */
     Set<String> getDataCols(TableModel table)
-            throws SQLException;    
+            throws FatalReplicationException;    
     
     /**
      * Кешированное получение списка всех доступных колонок с данными
@@ -126,9 +135,10 @@ public interface DataService extends AutoCloseable {
      * @param table.getName()
      * @return
      * @throws SQLException
+     * @throws FatalReplicationException 
      */
     Set<String> getAvaliableDataCols(TableModel table, Collection<String> avaliableCals)
-            throws SQLException;    
+            throws FatalReplicationException;    
     
     /**
      * Кешированное получение списка автоинкрементных колонок
@@ -138,7 +148,7 @@ public interface DataService extends AutoCloseable {
      * @return
      * @throws SQLException
      */
-    Set<String> getIdentityCols(TableModel table) throws SQLException;
+    Set<String> getIdentityCols(TableModel table) throws FatalReplicationException;
     
     /**
      * Кешированное получение списка игнорируемых колонок
@@ -146,8 +156,9 @@ public interface DataService extends AutoCloseable {
      * @param table.getName()
      * @return
      * @throws SQLException
+     * @throws FatalReplicationException 
      */
-    Set<String> getIgnoredCols(TableModel table) throws SQLException;
+    Set<String> getIgnoredCols(TableModel table) throws FatalReplicationException;
 
     /**
      * Кешированное получение списка реплицируеммых колонок
@@ -155,8 +166,9 @@ public interface DataService extends AutoCloseable {
      * @param table.getName()
      * @return
      * @throws SQLException
+     * @throws FatalReplicationException 
      */
-    Set<String> getRequiredCols(TableModel table) throws SQLException;
+    Set<String> getRequiredCols(TableModel table) throws FatalReplicationException;
     
     /**
      * Устанавливает сессионную переменную с именем текущео владельца записи.
@@ -173,4 +185,4 @@ public interface DataService extends AutoCloseable {
      * 
      * @return
      */
-    Connection getConnection() throws SQLException;}
+    Connection getConnection() throws FatalReplicationException;}

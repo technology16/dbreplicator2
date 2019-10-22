@@ -31,14 +31,15 @@ import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 import ru.taximaxim.dbreplicator2.el.ErrorsLog;
+import ru.taximaxim.dbreplicator2.el.FatalReplicationException;
 import ru.taximaxim.dbreplicator2.replica.strategies.replication.algorithms.GenericAlgorithm;
 import ru.taximaxim.dbreplicator2.replica.strategies.replication.data.GenericDataService;
 import ru.taximaxim.dbreplicator2.replica.strategies.replication.workpool.GenericWorkPoolService;
 import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
- * Класс стратегии репликации данных из источника в приемник
- * Записи реплицируются в порядке последних операций над ними.
+ * Класс стратегии репликации данных из источника в приемник Записи
+ * реплицируются в порядке последних операций над ними.
  * 
  * @author volodin_aa
  * 
@@ -46,20 +47,16 @@ import ru.taximaxim.dbreplicator2.utils.Core;
 public class Generic extends StrategySkeleton implements Strategy {
 
     @Override
-    public void execute(ConnectionFactory connectionsFactory, StrategyModel data) throws SQLException {
-        DataSource source = connectionsFactory
-                .get(data.getRunner().getSource().getPoolId());
-        DataSource dest = connectionsFactory
-                .get(data.getRunner().getTarget().getPoolId());
+    public void execute(ConnectionFactory connectionsFactory, StrategyModel data)
+            throws SQLException, FatalReplicationException {
+        DataSource source = connectionsFactory.get(data.getRunner().getSource().getPoolId());
+        DataSource dest = connectionsFactory.get(data.getRunner().getTarget().getPoolId());
         try (ErrorsLog errorsLog = Core.getErrorsLog();
                 GenericWorkPoolService workPoolService = new GenericWorkPoolService(source, errorsLog);
                 GenericDataService sourceDataService = new GenericDataService(source);
                 GenericDataService destDataService = new GenericDataService(dest);) {
-            new GenericAlgorithm(getFetchSize(data), 
-                    false, 
-                    workPoolService, 
-                    sourceDataService, 
-                    destDataService).execute(data);
+            new GenericAlgorithm(getFetchSize(data), false, workPoolService, sourceDataService, destDataService)
+                    .execute(data);
         }
     }
 

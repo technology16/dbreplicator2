@@ -31,6 +31,7 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
+import ru.taximaxim.dbreplicator2.el.FatalReplicationException;
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.jdbc.StatementsHashMap;
 import ru.taximaxim.dbreplicator2.model.TableModel;
@@ -69,11 +70,17 @@ public class GenericDataTypeService extends GenericDataService implements DataSe
      * @param table.getName()
      * @return
      * @throws SQLException
+     * @throws FatalReplicationException 
      */
-    public Map<String, Integer> getAllColsTypes(TableModel table) throws SQLException {
+    public Map<String, Integer> getAllColsTypes(TableModel table) throws FatalReplicationException {
         Map<String, Integer> colsTypes = allColsTypes.get(table);
         if (colsTypes == null) {
-            colsTypes = JdbcMetadata.getColumnsTypes(getConnection(), table.getName());
+            try {
+                colsTypes = JdbcMetadata.getColumnsTypes(getConnection(), table.getName());
+            } catch (SQLException e) {
+                throw new FatalReplicationException(
+                        String.format("Ошибка при получении списка типов всех колонок из таблицы [%s]", table.getName()), e);
+            }
 
             // Удаляем игнорируемые колонки
             for (String ignoredCol : getIgnoredCols(table)) {
@@ -96,9 +103,12 @@ public class GenericDataTypeService extends GenericDataService implements DataSe
     }
 
     @Override
-    public void close() throws SQLException {
+    public void close() throws FatalReplicationException {
         try (StatementsHashMap<TableModel, PreparedStatement>  thisSelectStatementsAll = this.selectStatementsAll) {
             super.close();
+        } catch (SQLException e) {
+            throw new FatalReplicationException(
+                    "Ошибка при закрытии сервиса данных", e);
         }
     }
 }

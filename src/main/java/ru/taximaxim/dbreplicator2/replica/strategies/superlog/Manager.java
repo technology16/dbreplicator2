@@ -28,6 +28,7 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
+import ru.taximaxim.dbreplicator2.el.FatalReplicationException;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.strategies.replication.StrategySkeleton;
@@ -44,7 +45,7 @@ public class Manager extends StrategySkeleton implements Strategy {
 
     @Override
     public void execute(ConnectionFactory connectionsFactory, StrategyModel data)
-            throws SQLException {
+            throws FatalReplicationException, SQLException {
         DataSource source = connectionsFactory
                 .get(data.getRunner().getSource().getPoolId());
         DataSource target = connectionsFactory

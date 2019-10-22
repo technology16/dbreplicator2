@@ -71,10 +71,11 @@ public class ErrorsLog extends DataServiceSkeleton
      * 
      * @param query
      * @return
+     * @throws FatalReplicationException 
      * @throws ClassNotFoundException
      * @throws SQLException
      */
-    private PreparedStatement getStatement(String query) throws SQLException {
+    private PreparedStatement getStatement(String query) throws SQLException, FatalReplicationException {
         PreparedStatement statement = statementsCache.get(query);
         if (statement == null) {
             statement = getConnection().prepareStatement(query);
@@ -180,7 +181,7 @@ public class ErrorsLog extends DataServiceSkeleton
     public void close() {
         try (StatementsHashMap<String, PreparedStatement> thisStatementsCache = this.statementsCache) {
             super.close();
-        } catch (SQLException e) {
+        } catch (SQLException | FatalReplicationException e) {
             LOG.error("Ошибка закрытия ресурсов!", e);
         }
     }

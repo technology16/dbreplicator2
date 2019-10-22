@@ -37,6 +37,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.apache.log4j.Logger;
 
+import ru.taximaxim.dbreplicator2.el.FatalReplicationException;
 import ru.taximaxim.dbreplicator2.jdbc.BatchCall;
 import ru.taximaxim.dbreplicator2.jdbc.QueryCall;
 import ru.taximaxim.dbreplicator2.model.CronSettings;
@@ -89,8 +90,9 @@ public abstract class GeneiricManagerAlgorithm {
 
     /**
      * @return
+     * @throws FatalReplicationException 
      */
-    protected long getSuperLogPeriod() {
+    protected long getSuperLogPeriod() throws FatalReplicationException {
         final String superLogPeriod = data.getParam(SUPER_LOG_PERIOD_PARAM);
         if (superLogPeriod == null) {
             return SUPER_LOG_PERIOD;
@@ -100,8 +102,9 @@ public abstract class GeneiricManagerAlgorithm {
 
     /**
      * @return
+     * @throws FatalReplicationException 
      */
-    protected long getStartAllRunnersPeriod() {
+    protected long getStartAllRunnersPeriod() throws FatalReplicationException {
         final String superLogWatchParam = data.getParam(START_ALL_RUNNERS_PERIOD_PARAM);
         if (superLogWatchParam == null) {
             return START_ALL_RUNNERS_PERIOD;
@@ -280,8 +283,9 @@ public abstract class GeneiricManagerAlgorithm {
      * Запуск алгоритма обработки супер лога
      * 
      * @throws SQLException
+     * @throws FatalReplicationException 
      */
-    public void execute() throws SQLException {
+    public void execute() throws SQLException, FatalReplicationException {
         // Выборку данных будем выполнять в отдельном потоке
         final ExecutorService selectService = Executors.newSingleThreadExecutor();
         // Переносим данные

@@ -28,6 +28,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import ru.taximaxim.dbreplicator2.el.FatalReplicationException;
+
 /**
  * ИНтерфейс для инкапсуляции работы стратегии с данными в очереди репликации.
  * Необходим для реализации стратегии шаблонный метод.
@@ -90,16 +92,16 @@ public interface WorkPoolService {
      * @return
      * @throws SQLException 
      */
-    PreparedStatement getLastOperationsStatement() throws SQLException;
+    PreparedStatement getLastOperationsStatement() throws FatalReplicationException;
     
     /**
-     * Получение подготовленного выражения для выборки последних операций
+     * Получение последних операций
      * 
      * @return
      * 
      * @throws SQLException 
      */
-    ResultSet getLastOperations(int runnerId, int fetchSize, int offset) throws SQLException;
+    ResultSet getLastOperations(int runnerId, int fetchSize, int offset) throws FatalReplicationException;
     
     /**
      * Получение подготовленного запроса для удаления обработанных данных из рабочего набора
@@ -108,7 +110,7 @@ public interface WorkPoolService {
      * 
      * @throws SQLException
      */
-    PreparedStatement getClearWorkPoolDataStatement() throws SQLException;
+    PreparedStatement getClearWorkPoolDataStatement() throws FatalReplicationException;
     
     /**
      * Функция удаления обработанных данных из рабочего набора
@@ -117,7 +119,7 @@ public interface WorkPoolService {
      * 
      * @throws SQLException
      */
-    void clearWorkPoolData(ResultSet operationsResult) throws SQLException;
+    void clearWorkPoolData(ResultSet operationsResult) throws FatalReplicationException;
     
     /**
      * Функция записи информации об ошибке в рабочий набор
@@ -128,7 +130,7 @@ public interface WorkPoolService {
      * 
      * @throws SQLException
      */
-    void trackError(String message, SQLException e, ResultSet operation) throws SQLException;
+    void trackError(String message, SQLException e, ResultSet operation) throws FatalReplicationException;
     
     /**
      * Получение имени текущей таблицы
@@ -139,7 +141,7 @@ public interface WorkPoolService {
      * 
      * @throws SQLException
      */
-    String getTable(ResultSet resultSet) throws SQLException;
+    String getTable(ResultSet resultSet) throws FatalReplicationException;
     
     /**
      * Получение идентификатора текущей записи
@@ -148,7 +150,7 @@ public interface WorkPoolService {
      * @return
      * @throws SQLException
      */
-    Long getForeign(ResultSet resultSet) throws SQLException;
+    Long getForeign(ResultSet resultSet) throws FatalReplicationException;
     
     /**
      * Получение идентификатора текущего раннера
@@ -157,7 +159,7 @@ public interface WorkPoolService {
      * @return
      * @throws SQLException
      */
-    int getRunner(ResultSet resultSet) throws SQLException;
+    int getRunner(ResultSet resultSet) throws FatalReplicationException;
     
     /**
      * Получение максимального идентификатора текущей операции
@@ -166,7 +168,7 @@ public interface WorkPoolService {
      * @return
      * @throws SQLException
      */
-    Long getSuperlogMax(ResultSet resultSet) throws SQLException;
+    Long getSuperlogMax(ResultSet resultSet) throws FatalReplicationException;
     
     /**
      * Получение минимального идентификатора текущей операции
@@ -175,7 +177,7 @@ public interface WorkPoolService {
      * @return
      * @throws SQLException
      */
-    Long getSuperlogMin(ResultSet resultSet) throws SQLException;
+    Long getSuperlogMin(ResultSet resultSet) throws FatalReplicationException;
     
     /**
      * Получение колличества сгруппированных записей
@@ -184,12 +186,12 @@ public interface WorkPoolService {
      * @return
      * @throws SQLException
      */
-    int getRecordsCount(ResultSet resultSet) throws SQLException;
+    int getRecordsCount(ResultSet resultSet) throws FatalReplicationException;
 
     /**
      * Получение текущего соединения
      * 
      * @return
      */
-    Connection getConnection() throws SQLException;
+    Connection getConnection() throws FatalReplicationException;
 }

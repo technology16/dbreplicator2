@@ -32,6 +32,7 @@ import java.util.Calendar;
 import javax.sql.DataSource;
 
 import ru.taximaxim.dbreplicator2.el.ErrorsLogService;
+import ru.taximaxim.dbreplicator2.el.FatalReplicationException;
 
 /**
  * @author volodin_aa
@@ -68,11 +69,16 @@ public class DelayGenericWorkPoolService extends GenericWorkPoolService
     }
 
     @Override
-    public PreparedStatement getLastOperationsStatement() throws SQLException {
+    public PreparedStatement getLastOperationsStatement() throws FatalReplicationException {
         if (lastOperationsStatement == null) {
-            lastOperationsStatement = getConnection().prepareStatement(
-                    "SELECT DISTINCT id_runner, id_foreign, id_table FROM rep2_workpool_data WHERE id_runner=? and c_date<=? LIMIT ? OFFSET ?",
-                    ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            try {
+                lastOperationsStatement = getConnection().prepareStatement(
+                        "SELECT DISTINCT id_runner, id_foreign, id_table FROM rep2_workpool_data WHERE id_runner=? and c_date<=? LIMIT ? OFFSET ?",
+                        ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            } catch (SQLException e) {
+                throw new FatalReplicationException(
+                        "Ошибка при получении подготовленного выражения для выборки последних операций", e);
+            }
         }
 
         return lastOperationsStatement;
@@ -87,32 +93,47 @@ public class DelayGenericWorkPoolService extends GenericWorkPoolService
      */
     @Override
     public ResultSet getLastOperations(int runnerId, int fetchSize, int offset)
-            throws SQLException {
+            throws FatalReplicationException {
         PreparedStatement statement = getLastOperationsStatement();
 
-        statement.setInt(1, runnerId);
+        try {
+            statement.setInt(1, runnerId);
+    
+            Timestamp date = new Timestamp(
+                    Calendar.getInstance().getTimeInMillis() - getPeriod());
+            statement.setTimestamp(2, date);
+    
+            // Извлекаем частями равными fetchSize
+            statement.setFetchSize(fetchSize);
+    
+            // По задаче #2327
+            // Задаем первоначальное смещение выборки равное 0.
+            // При появлении ошибочных записей будем его увеличивать на 1.
+            statement.setInt(3, fetchSize);
+                statement.setInt(4, offset);
+        } catch (SQLException e) {
+            throw new FatalReplicationException(
+                    "Ошибка при подстановки параметров в подготовленное выражение для выборки последних операций", e);
+        }
 
-        Timestamp date = new Timestamp(
-                Calendar.getInstance().getTimeInMillis() - getPeriod());
-        statement.setTimestamp(2, date);
-
-        // Извлекаем частями равными fetchSize
-        statement.setFetchSize(fetchSize);
-
-        // По задаче #2327
-        // Задаем первоначальное смещение выборки равное 0.
-        // При появлении ошибочных записей будем его увеличивать на 1.
-        statement.setInt(3, fetchSize);
-        statement.setInt(4, offset);
-
-        return statement.executeQuery();
+        try {
+            return statement.executeQuery();
+        } catch (SQLException e) {
+            throw new FatalReplicationException(
+                    "Ошибка при получении последних операций", e);
+        }
     }
 
     @Override
-    public PreparedStatement getClearWorkPoolDataStatement() throws SQLException {
+    public PreparedStatement getClearWorkPoolDataStatement() throws FatalReplicationException {
         if (clearWorkPoolDataStatement == null) {
-            clearWorkPoolDataStatement = getConnection().prepareStatement(
-                    "DELETE FROM rep2_workpool_data WHERE id_runner=? AND id_foreign=? AND id_table=?");
+            try {
+                clearWorkPoolDataStatement = getConnection().prepareStatement(
+                        "DELETE FROM rep2_workpool_data WHERE id_runner=? AND id_foreign=? AND id_table=?");
+            } catch (SQLException e) {
+                throw new FatalReplicationException(
+                        "Ошибка при получении подготовленного запроса для удаления обработанных данных из рабочего набора", e);
+            }
         }
 
         return clearWorkPoolDataStatement;
@@ -125,22 +146,37 @@ public class DelayGenericWorkPoolService extends GenericWorkPoolService
      * GenericWorkPoolService#clearWorkPoolData(java.sql.ResultSet)
      */
     @Override
-    public void clearWorkPoolData(ResultSet operationsResult) throws SQLException {
+    public void clearWorkPoolData(ResultSet operationsResult) throws FatalReplicationException {
         // Очищаем данные о текущей записи из набора данных реплики
         PreparedStatement deleteWorkPoolData = getClearWorkPoolDataStatement();
+        try {
         deleteWorkPoolData.setInt(1, getRunner(operationsResult));
         deleteWorkPoolData.setLong(2, getForeign(operationsResult));
         deleteWorkPoolData.setString(3, getTable(operationsResult));
+        } catch (SQLException e) {
+            throw new FatalReplicationException(
+                    "Ошибка при установки параметров подготовленного запроса для удаления обработанных данных из рабочего набора", e);
+        }
+
+        try {
         deleteWorkPoolData.addBatch();
+        } catch (SQLException e) {
+            throw new FatalReplicationException(
+                    "Ошибка при добавлениии в пакет запросов для удаления обработанных данных из рабочего набора", e);
+        }
+
         getErrorsLog().setStatus(getRunner(operationsResult), getTable(operationsResult),
                 getForeign(operationsResult), 1);
     }
 
     @Override
-    public void close() throws SQLException {
+    public void close() throws FatalReplicationException {
         try (PreparedStatement lastOperationsStatement = this.lastOperationsStatement;
                 PreparedStatement clearWorkPoolDataStatement = this.clearWorkPoolDataStatement;) {
             super.close();
+        } catch (SQLException e) {
+            throw new FatalReplicationException(
+                    "Ошибка при закрытии ресурсов", e);
         }
     }
 }

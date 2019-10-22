@@ -40,6 +40,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ru.taximaxim.dbreplicator2.abstracts.AbstractReplicationTest;
+import ru.taximaxim.dbreplicator2.el.FatalReplicationException;
 import ru.taximaxim.dbreplicator2.jdbc.Jdbc;
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 import ru.taximaxim.dbreplicator2.model.RunnerService;
@@ -422,9 +423,10 @@ public class H2CopyTableDataTest extends AbstractReplicationTest {
     
     /**
      * Проверка чтения параметров стратегии 
+     * @throws FatalReplicationException 
      */
     @Test
-    public void paramTest(){
+    public void paramTest() throws FatalReplicationException{
         RunnerService runnerService = new RunnerService(sessionFactory);
         List<StrategyModel> strategyModels = runnerService.getRunner(1).getStrategyModels();
         boolean hasStrategy = false;

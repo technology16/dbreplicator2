@@ -7,12 +7,14 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.hibernate.HibernateException;
 import org.hibernate.criterion.Restrictions;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ru.taximaxim.dbreplicator2.abstracts.AbstractSettingTest;
+import ru.taximaxim.dbreplicator2.el.FatalReplicationException;
 import ru.taximaxim.dbreplicator2.model.TableModel;
 import ru.taximaxim.dbreplicator2.utils.Utils;
 
@@ -174,7 +176,7 @@ public class TableModelTest extends AbstractSettingTest {
     }
 
     @Test
-    public void testRequiredColumns() {
+    public void testRequiredColumns() throws HibernateException, FatalReplicationException {
 
         TableModel table = (TableModel) session.get(TableModel.class, 2);
 
@@ -212,7 +214,7 @@ public class TableModelTest extends AbstractSettingTest {
     }
 
     @Test
-    public void testIgnoreColumns() {
+    public void testIgnoreColumns() throws HibernateException, FatalReplicationException {
 
         TableModel table = (TableModel) session.get(TableModel.class, 2);
 
@@ -241,9 +243,10 @@ public class TableModelTest extends AbstractSettingTest {
      * Тестируем корректность клонирования таблицы
      * 
      * @throws CloneNotSupportedException
+     * @throws FatalReplicationException 
      */
     @Test
-    public void testCloneTable() throws CloneNotSupportedException {
+    public void testCloneTable() throws CloneNotSupportedException, FatalReplicationException {
         TableModel table = (TableModel) session.get(TableModel.class, 2);
 
         // Проверяем таблицу перед клонированием
@@ -272,8 +275,9 @@ public class TableModelTest extends AbstractSettingTest {
      * Проверка корректности настроек
      * 
      * @param table
+     * @throws FatalReplicationException 
      */
-    protected void checkTable(TableModel table) {
+    protected void checkTable(TableModel table) throws FatalReplicationException {
         assertEquals("У таблицы " + table.getName() + " не верное имя!", 
                 "T_TABLE1", table.getName());
         for (String ignoredColumn : table.getIgnoredColumns()) {

@@ -31,6 +31,7 @@ import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
 import ru.taximaxim.dbreplicator2.el.ErrorsLog;
+import ru.taximaxim.dbreplicator2.el.FatalReplicationException;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
 import ru.taximaxim.dbreplicator2.replica.strategies.replication.StrategySkeleton;
@@ -54,7 +55,7 @@ public class IntegrityReplicatedData extends StrategySkeleton implements Strateg
     }
 
     @Override
-    public void execute(ConnectionFactory connectionsFactory, StrategyModel data) throws SQLException {
+    public void execute(ConnectionFactory connectionsFactory, StrategyModel data) throws SQLException, FatalReplicationException {
         int period = DEFAULT_PERIOD;
         if (data.getParam(PERIOD) != null) {
             period = Integer.parseInt(data.getParam(PERIOD));
