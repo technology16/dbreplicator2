@@ -33,6 +33,8 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.apache.log4j.Logger;
 
+import ru.taximaxim.dbreplicator2.el.FatalReplicationException;
+
 /**
  * Абстрактный класс парсера командной строки приложения
  * 
@@ -152,8 +154,10 @@ public abstract class AbstractCommandLineParser {
      * parser command line
      *
      * @param args
+     * @throws ParseException 
+     * @throws FatalReplicationException 
      */
-    protected void parserCommandLine(String[] args) {
+    protected void parserCommandLine(String[] args) throws ParseException, FatalReplicationException {
 
         CommandLineParser cmdLinePosixParser = new PosixParser();
         CommandLine commandLine = null;
@@ -162,11 +166,13 @@ public abstract class AbstractCommandLineParser {
             processingCmd(commandLine);
         } catch (AlreadySelectedException ex) {
             LOG.error(String.format("Ошибка опций групп: %s", ex.getMessage()), ex);
+            throw ex;
         } catch (ParseException ex) {
             LOG.error("Неправильный синтаксис команд", ex);
+            throw ex;
         }
     }
 
-    protected abstract void processingCmd(CommandLine commandLine);
+    protected abstract void processingCmd(CommandLine commandLine) throws FatalReplicationException;
 
 }

@@ -25,12 +25,14 @@ package ru.taximaxim.dbreplicator2;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.hibernate.cfg.Configuration;
 
 import ru.taximaxim.dbreplicator2.cli.AbstractCommandLineParser;
+import ru.taximaxim.dbreplicator2.el.FatalReplicationException;
 import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
@@ -60,7 +62,7 @@ public final class Application extends AbstractCommandLineParser {
     }
 
     @Override
-    protected void processingCmd(CommandLine commandLine) {
+    protected void processingCmd(CommandLine commandLine) throws FatalReplicationException {
         boolean hasOption = false;
 
         LOG.info("Запускаем dbreplicator2...");
@@ -78,10 +80,10 @@ public final class Application extends AbstractCommandLineParser {
         // Если имя файла настроек лога оканчивается на .xml, то используем
         // DOMConfigurator
         if (fLog4j.toLowerCase().endsWith(".xml")) {
-            DOMConfigurator.configureAndWatch(fLog4j);
+            DOMConfigurator.configure(fLog4j);
         } else {
             // иначе используем PropertyConfigurator
-            PropertyConfigurator.configureAndWatch(fLog4j);
+            PropertyConfigurator.configure(fLog4j);
         }
 
         String configurationName = null;
@@ -117,8 +119,7 @@ public final class Application extends AbstractCommandLineParser {
 
         if (commandLine.hasOption('h') || !hasOption) {
             if (!hasOption) {
-                LOG.error(
-                        "Неизвестная команда, пожалуйста воспользуетесь командой [-h] или [--help]");
+                throw new FatalReplicationException("Неизвестная команда, пожалуйста воспользуетесь командой [-h] или [--help]");
             }
 
             HelpFormatter formatter = new HelpFormatter();
@@ -135,6 +136,15 @@ public final class Application extends AbstractCommandLineParser {
             } else if (hibernateHbm2ddlImportFiles != null) {
                 start(configurationName, hibernateHbm2ddlAuto,
                         hibernateHbm2ddlImportFiles, coreGetTasksPoolStart);
+            }
+
+            // Запускаем наблюдение за настрокуми log4j только если все стартовало
+            // Иначе будет висеть залипший поток
+            if (fLog4j.toLowerCase().endsWith(".xml")) {
+                DOMConfigurator.configureAndWatch(fLog4j);
+            } else {
+                // иначе используем PropertyConfigurator
+                PropertyConfigurator.configureAndWatch(fLog4j);
             }
         }
     }
@@ -168,9 +178,19 @@ public final class Application extends AbstractCommandLineParser {
      * Точка входа
      * 
      * @param args
+     * @throws ParseException 
+     * @throws FatalReplicationException 
      */
-    public static void main(String[] args) {
-        new Application().parserCommandLine(args);
+    public static void main(String[] args) throws ParseException, FatalReplicationException {
+        try {
+            new Application().parserCommandLine(args);
+        } catch (ParseException e) {
+            LOG.error(e);
+            throw e;
+        } catch (FatalReplicationException e) {
+            LOG.fatal(e);
+            throw e;
+        }
     }
 
 }
