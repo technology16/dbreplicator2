@@ -69,6 +69,7 @@ public abstract class AbstractReplicationTest {
         
         if(xmlForConfig != null){
             Configuration configuration = Core.getConfiguration(xmlForConfig);
+            configuration.setProperty("hibernate.hbm2ddl.auto", "create");
             if (importSql != null) {
                 configuration.setProperty("hibernate.hbm2ddl.import_files", importSql);
             }

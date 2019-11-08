@@ -120,10 +120,7 @@ public final class Core {
         LOG.debug("Запрошено создание новой фабрики сессий hibernate");
 
         if (sessionFactory == null) {
-            ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
-                    .applySettings(configuration.getProperties())
-                    .build();
-            sessionFactory = configuration.buildSessionFactory(serviceRegistry);
+            sessionFactory = configuration.buildSessionFactory();
 
             LOG.info("Создана новая фабрика сессий hibernate");
         }
