@@ -23,13 +23,22 @@
 
 package ru.taximaxim.dbreplicator2;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.apache.log4j.xml.DOMConfigurator;
+import org.hibernate.HibernateException;
+import org.hibernate.SQLQuery;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
-
 import ru.taximaxim.dbreplicator2.cli.AbstractCommandLineParser;
 import ru.taximaxim.dbreplicator2.utils.Core;
 
@@ -60,7 +69,7 @@ public final class Application extends AbstractCommandLineParser {
     }
 
     @Override
-    protected void processingCmd(CommandLine commandLine) {
+    protected void processingCmd(CommandLine commandLine) throws Exception {
         boolean hasOption = false;
 
         LOG.info("Запускаем dbreplicator2...");
@@ -139,8 +148,42 @@ public final class Application extends AbstractCommandLineParser {
         }
     }
 
+    /**
+     * Обновляем БД настроек скриптом из файла
+     * 
+     * @param importFiles
+     * @param configuration
+     * @throws Exception 
+     */
+    protected void importFiles(String importFiles, SessionFactory sessionFactory) throws Exception {
+        Session session = sessionFactory.openSession();
+
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+
+            for ( String currentFile : importFiles.split(",") ) {
+                Path path = Paths.get(Application.class.getClassLoader().getResource(currentFile).toURI());
+                SQLQuery query = session.createSQLQuery(
+                        new String(
+                                Files.readAllBytes(path), 
+                                "UTF-8"));
+                query.executeUpdate();
+            }
+            tx.commit();
+        } catch (HibernateException | URISyntaxException | IOException e) {
+            if (null != tx) {
+                tx.rollback();
+            }
+            
+            throw e;
+        } finally {
+            session.close();
+        }
+    }
+
     protected void start(String configurationName, boolean hibernateHbm2ddlAuto,
-            String hibernateHbm2ddlImportFiles, boolean coreGetTasksPoolStart) {
+            String hibernateHbm2ddlImportFiles, boolean coreGetTasksPoolStart) throws Exception {
         // Конфигурируем Hibernate
         Configuration configuration;
         // Инициализируем БД настроек
@@ -151,12 +194,11 @@ public final class Application extends AbstractCommandLineParser {
             configuration.setProperty("hibernate.hbm2ddl.auto", "create");
         }
 
+        SessionFactory sessionFactory = Core.getSessionFactory(configuration);
+
         if (hibernateHbm2ddlImportFiles != null) {
-            // Обновляем БД настроек скриптом из файла
-            configuration.setProperty("hibernate.hbm2ddl.import_files",
-                    hibernateHbm2ddlImportFiles);
+            importFiles(hibernateHbm2ddlImportFiles, sessionFactory);
         }
-        Core.getSessionFactory(configuration);
 
         if (coreGetTasksPoolStart) {
             Core.getTasksPool().start();
@@ -168,8 +210,9 @@ public final class Application extends AbstractCommandLineParser {
      * Точка входа
      * 
      * @param args
+     * @throws Exception 
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         new Application().parserCommandLine(args);
     }
 
