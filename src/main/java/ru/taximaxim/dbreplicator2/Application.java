@@ -152,26 +152,23 @@ public final class Application extends AbstractCommandLineParser {
         // Инициализируем БД настроек
         configuration = Core.getConfiguration(configurationName);
 
-        if (hibernateHbm2ddlAuto) {
-            // Инициализируем БД настроек
-            configuration.setProperty("hibernate.hbm2ddl.auto", "create");
-        }
-
-        // Файлы будем загружать своим кодом
-        configuration.setProperty("hibernate.hbm2ddl.import_files",
-                "");
-
         SessionFactory sessionFactory = Core.getSessionFactory(configuration);
 
         if (hibernateHbm2ddlImportFiles != null) {
             // Обновляем БД настроек скриптом из файла
             configuration.setProperty("hibernate.hbm2ddl.import_files",
                     hibernateHbm2ddlImportFiles);
+        }
 
+        if (hibernateHbm2ddlAuto) {
+            // Инициализируем БД настроек
+            configuration.setProperty("hibernate.hbm2ddl.auto", "create");
+
+            // Вручную загружаем настройки репликации
             ServiceRegistry serviceRegistry = sessionFactory.getSessionFactoryOptions().getServiceRegistry();
-            SchemaExport schemaExport = new SchemaExport(serviceRegistry , configuration );
-            schemaExport.setImportSqlCommandExtractor( serviceRegistry.getService( ImportSqlCommandExtractor.class ) )
-            .create( false, true );
+            SchemaExport schemaExport = new SchemaExport(serviceRegistry, configuration);
+            schemaExport.setImportSqlCommandExtractor(serviceRegistry.getService(ImportSqlCommandExtractor.class))
+                    .create(false, true);
 
             // Если во время загрузки файлов были ошибки, то пробрасывем их выше
             List<Exception> exceptions = schemaExport.getExceptions();
