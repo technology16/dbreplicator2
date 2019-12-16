@@ -154,13 +154,13 @@ public final class Application extends AbstractCommandLineParser {
 
         SessionFactory sessionFactory = Core.getSessionFactory(configuration);
 
-        if (hibernateHbm2ddlImportFiles != null) {
-            // Обновляем БД настроек скриптом из файла
-            configuration.setProperty("hibernate.hbm2ddl.import_files",
-                    hibernateHbm2ddlImportFiles);
-        }
-
         if (hibernateHbm2ddlAuto) {
+            if (hibernateHbm2ddlImportFiles != null) {
+                // Обновляем БД настроек скриптом из файла
+                configuration.setProperty("hibernate.hbm2ddl.import_files",
+                        hibernateHbm2ddlImportFiles);
+            }
+
             // Инициализируем БД настроек
             configuration.setProperty("hibernate.hbm2ddl.auto", "create");
 
