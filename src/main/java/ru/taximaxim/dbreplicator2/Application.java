@@ -23,22 +23,19 @@
 
 package ru.taximaxim.dbreplicator2;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.List;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.apache.log4j.xml.DOMConfigurator;
-import org.hibernate.HibernateException;
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.service.ServiceRegistry;
+import org.hibernate.tool.hbm2ddl.ImportSqlCommandExtractor;
+import org.hibernate.tool.hbm2ddl.SchemaExport;
+
 import ru.taximaxim.dbreplicator2.cli.AbstractCommandLineParser;
 import ru.taximaxim.dbreplicator2.utils.Core;
 
@@ -148,40 +145,6 @@ public final class Application extends AbstractCommandLineParser {
         }
     }
 
-    /**
-     * Обновляем БД настроек скриптом из файла
-     * 
-     * @param importFiles
-     * @param configuration
-     * @throws Exception 
-     */
-    protected void importFiles(String importFiles, SessionFactory sessionFactory) throws Exception {
-        Session session = sessionFactory.openSession();
-
-        Transaction tx = null;
-        try {
-            tx = session.beginTransaction();
-
-            for ( String currentFile : importFiles.split(",") ) {
-                Path path = Paths.get(Application.class.getClassLoader().getResource(currentFile).toURI());
-                SQLQuery query = session.createSQLQuery(
-                        new String(
-                                Files.readAllBytes(path), 
-                                "UTF-8"));
-                query.executeUpdate();
-            }
-            tx.commit();
-        } catch (HibernateException | URISyntaxException | IOException e) {
-            if (null != tx) {
-                tx.rollback();
-            }
-            
-            throw e;
-        } finally {
-            session.close();
-        }
-    }
-
     protected void start(String configurationName, boolean hibernateHbm2ddlAuto,
             String hibernateHbm2ddlImportFiles, boolean coreGetTasksPoolStart) throws Exception {
         // Конфигурируем Hibernate
@@ -194,10 +157,29 @@ public final class Application extends AbstractCommandLineParser {
             configuration.setProperty("hibernate.hbm2ddl.auto", "create");
         }
 
+        // Файлы будем загружать своим кодом
+        configuration.setProperty("hibernate.hbm2ddl.import_files",
+                "");
+
         SessionFactory sessionFactory = Core.getSessionFactory(configuration);
 
         if (hibernateHbm2ddlImportFiles != null) {
-            importFiles(hibernateHbm2ddlImportFiles, sessionFactory);
+            // Обновляем БД настроек скриптом из файла
+            configuration.setProperty("hibernate.hbm2ddl.import_files",
+                    hibernateHbm2ddlImportFiles);
+
+            ServiceRegistry serviceRegistry = sessionFactory.getSessionFactoryOptions().getServiceRegistry();
+            SchemaExport schemaExport = new SchemaExport(serviceRegistry , configuration );
+            schemaExport.setImportSqlCommandExtractor( serviceRegistry.getService( ImportSqlCommandExtractor.class ) )
+            .create( false, true );
+
+            // Если во время загрузки файлов были ошибки, то пробрасывем их выше
+            List<Exception> exceptions = schemaExport.getExceptions();
+            if (!exceptions.isEmpty()) {
+                for (Exception exception : exceptions) {
+                    throw new Exception("Ошибка при загрузке настроек репликации!", exception);
+                }
+            }
         }
 
         if (coreGetTasksPoolStart) {
@@ -213,7 +195,20 @@ public final class Application extends AbstractCommandLineParser {
      * @throws Exception 
      */
     public static void main(String[] args) throws Exception {
-        new Application().parserCommandLine(args);
+        // Флаг корректного старта
+        boolean isStarted = false;
+        try {
+            new Application().parserCommandLine(args);
+            isStarted = true;
+        } catch (Exception e) {
+            LOG.fatal("Ошибка при запуске репликатора!", e);
+            throw e;
+        } finally {
+            // Если не получилось запуститься, то принудительно выходим с кодом 1
+            if (!isStarted) {
+                System.exit(1);
+            }
+        }
     }
 
 }
