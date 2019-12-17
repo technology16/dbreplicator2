@@ -154,10 +154,9 @@ public abstract class AbstractCommandLineParser {
      * parser command line
      *
      * @param args
-     * @throws ParseException 
      * @throws FatalReplicationException 
      */
-    protected void parserCommandLine(String[] args) throws ParseException, FatalReplicationException {
+    protected void parserCommandLine(String[] args) throws FatalReplicationException {
 
         CommandLineParser cmdLinePosixParser = new PosixParser();
         CommandLine commandLine = null;
@@ -166,10 +165,10 @@ public abstract class AbstractCommandLineParser {
             processingCmd(commandLine);
         } catch (AlreadySelectedException ex) {
             LOG.error(String.format("Ошибка опций групп: %s", ex.getMessage()), ex);
-            throw ex;
+            throw new FatalReplicationException(ex);
         } catch (ParseException ex) {
             LOG.error("Неправильный синтаксис команд", ex);
-            throw ex;
+            throw new FatalReplicationException(ex);
         }
     }
 
