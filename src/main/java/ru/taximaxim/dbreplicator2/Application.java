@@ -86,10 +86,10 @@ public final class Application extends AbstractCommandLineParser {
         // Если имя файла настроек лога оканчивается на .xml, то используем
         // DOMConfigurator
         if (fLog4j.toLowerCase().endsWith(".xml")) {
-            DOMConfigurator.configure(fLog4j);
+            DOMConfigurator.configureAndWatch(fLog4j);
         } else {
             // иначе используем PropertyConfigurator
-            PropertyConfigurator.configure(fLog4j);
+            PropertyConfigurator.configureAndWatch(fLog4j);
         }
 
         String configurationName = null;
@@ -142,15 +142,6 @@ public final class Application extends AbstractCommandLineParser {
             } else if (hibernateHbm2ddlImportFiles != null) {
                 start(configurationName, hibernateHbm2ddlAuto,
                         hibernateHbm2ddlImportFiles, coreGetTasksPoolStart);
-            }
-
-            // Запускаем наблюдение за настрокуми log4j только если все стартовало
-            // Иначе будет висеть залипший поток
-            if (fLog4j.toLowerCase().endsWith(".xml")) {
-                DOMConfigurator.configureAndWatch(fLog4j);
-            } else {
-                // иначе используем PropertyConfigurator
-                PropertyConfigurator.configureAndWatch(fLog4j);
             }
         }
     }
