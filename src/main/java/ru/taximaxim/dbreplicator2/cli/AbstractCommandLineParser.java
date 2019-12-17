@@ -152,8 +152,9 @@ public abstract class AbstractCommandLineParser {
      * parser command line
      *
      * @param args
+     * @throws Exception 
      */
-    protected void parserCommandLine(String[] args) {
+    protected void parserCommandLine(String[] args) throws Exception {
 
         CommandLineParser cmdLinePosixParser = new PosixParser();
         CommandLine commandLine = null;
@@ -162,11 +163,13 @@ public abstract class AbstractCommandLineParser {
             processingCmd(commandLine);
         } catch (AlreadySelectedException ex) {
             LOG.error(String.format("Ошибка опций групп: %s", ex.getMessage()), ex);
+            throw ex;
         } catch (ParseException ex) {
             LOG.error("Неправильный синтаксис команд", ex);
+            throw ex;
         }
     }
 
-    protected abstract void processingCmd(CommandLine commandLine);
+    protected abstract void processingCmd(CommandLine commandLine) throws Exception;
 
 }
