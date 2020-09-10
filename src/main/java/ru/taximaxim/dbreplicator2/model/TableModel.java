@@ -27,7 +27,6 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.io.StringReader;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -303,9 +302,8 @@ public class TableModel implements Cloneable, Serializable {
      * @param data
      * @param columns
      * @return
-     * @throws SQLException 
      */
-    public Map<String, String> getCastFromColumns(Collection<String> columns) throws SQLException {
+    public Map<String, String> getCastFromColumns(Collection<String> columns) {
         Map<String, String> castFromColums = new HashMap<>();
         for (String column : columns) {
             String castStatement = getParam(CAST_FROM + column.toLowerCase());
@@ -321,9 +319,8 @@ public class TableModel implements Cloneable, Serializable {
      * @param data
      * @param columns
      * @return
-     * @throws SQLException 
      */
-    public Map<String, String> getCastToColumns(Collection<String> columns) throws SQLException {
+    public Map<String, String> getCastToColumns(Collection<String> columns) {
         Map<String, String> castToColums = new HashMap<>();
         for (String column : columns) {
             String castStatement = getParam(CAST_TO + column.toLowerCase());

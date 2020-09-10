@@ -130,11 +130,9 @@ public class StatsService {
      * @param dateEnd
      *            - Промежуток времени по будет выведен результат
      * @throws SQLException
-     * @throws ClassNotFoundException
      */
     public List<Map<String, Object>> getStat(int type, String tableName,
-            Timestamp dateStart, Timestamp dateEnd) throws SQLException,
-            ClassNotFoundException {
+            Timestamp dateStart, Timestamp dateEnd) throws SQLException {
         try (Connection conn = dataSource.getConnection();
             PreparedStatement selectStatement = conn.prepareStatement(
                 "SELECT * FROM rep2_statistics WHERE c_type = ? and id_table = ? and c_date >= ? and c_date <= ?",
@@ -155,10 +153,8 @@ public class StatsService {
      * @param type
      *            - Если 0 Значит ошибка, если 1 Значит успешно реплицировалась.
      * @throws SQLException
-     * @throws ClassNotFoundException
      */
-    public List<Map<String, Object>> getStat(int type) throws SQLException,
-            ClassNotFoundException {
+    public List<Map<String, Object>> getStat(int type) throws SQLException {
         try (Connection conn = dataSource.getConnection();
             PreparedStatement selectStatement = conn.prepareStatement(
                 "SELECT * FROM rep2_statistics WHERE c_type = ?",
@@ -178,10 +174,9 @@ public class StatsService {
      * @param tableName
      *            - Имя таблицы
      * @throws SQLException
-     * @throws ClassNotFoundException
      */
     public List<Map<String, Object>> getStat(int type, String tableName)
-            throws SQLException, ClassNotFoundException {
+            throws SQLException {
         try (Connection conn = dataSource.getConnection();
             PreparedStatement selectStatement = conn.prepareStatement(
                "SELECT * FROM rep2_statistics WHERE c_type = ? and id_table = ?",
@@ -205,10 +200,9 @@ public class StatsService {
      * @param dateEnd
      *            - Промежуток времени по будет выведен результат
      * @throws SQLException
-     * @throws ClassNotFoundException
      */
     public List<Map<String, Object>> getStat(int type, Timestamp dateStart,
-            Timestamp dateEnd) throws SQLException, ClassNotFoundException {
+            Timestamp dateEnd) throws SQLException {
         try (Connection conn = dataSource.getConnection();
             PreparedStatement selectStatement = conn.prepareStatement(
                  "SELECT * FROM rep2_statistics WHERE c_type = ? and c_date >= ? and c_date <= ?",

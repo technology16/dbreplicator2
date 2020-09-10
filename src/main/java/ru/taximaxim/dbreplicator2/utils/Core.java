@@ -320,7 +320,7 @@ public final class Core {
      * @throws SQLException 
      * @throws ClassNotFoundException 
      */
-    public static synchronized StatsService getStatsService() throws SQLException {
+    public static synchronized StatsService getStatsService() {
         if (statsService == null) {
             ApplicatonSettingsService aService = new ApplicatonSettingsService(getSessionFactory());
             String baseConnName = aService.getValue("stats.dest");
