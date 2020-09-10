@@ -47,12 +47,6 @@ public class IntegrityReplicatedData extends StrategySkeleton implements Strateg
     private static final String PERIOD = "period";
     private static final int DEFAULT_PERIOD = 300000;
 
-    /**
-     * Конструктор по умолчанию
-     */
-    public IntegrityReplicatedData() {
-    }
-
     @Override
     public void execute(ConnectionFactory connectionsFactory, StrategyModel data) throws SQLException {
         int period = DEFAULT_PERIOD;

@@ -54,12 +54,6 @@ public class SuperlogWatchgdog implements Strategy {
     private static final String PART_EMAIL = "partEmail";
     private static final String COUNT = "count";
 
-    /**
-     * Конструктор по умолчанию
-     */
-    public SuperlogWatchgdog() {
-    }
-
     @Override
     public void execute(ConnectionFactory connectionsFactory, StrategyModel data)
             throws SQLException {

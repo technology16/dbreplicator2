@@ -58,12 +58,6 @@ public class ReplicationTimeWatchgdog implements Strategy {
     private static final String COUNT = "count";
 
     /**
-     * Конструктор по умолчанию
-     */
-    public ReplicationTimeWatchgdog() {
-    }
-
-    /**
      * Последний символ
      * 
      * @param s
