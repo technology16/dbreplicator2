@@ -25,23 +25,22 @@ package ru.taximaxim.dbreplicator2.cli;
 
 import org.apache.commons.cli.AlreadySelectedException;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
 import org.apache.log4j.Logger;
 
 /**
  * Абстрактный класс парсера командной строки приложения
- * 
+ *
  * @author volodin_aa
  *
  */
 public abstract class AbstractCommandLineParser {
 
-    private Options posixOptions = new Options();
+    private final Options posixOptions = new Options();
     private OptionGroup optionGroup = new OptionGroup();
 
     private static final Logger LOG = Logger.getLogger(AbstractCommandLineParser.class);
@@ -152,15 +151,11 @@ public abstract class AbstractCommandLineParser {
      * parser command line
      *
      * @param args
-     * @throws Exception 
+     * @throws Exception
      */
     protected void parserCommandLine(String[] args) throws Exception {
-
-        CommandLineParser cmdLinePosixParser = new PosixParser();
-        CommandLine commandLine = null;
         try {
-            commandLine = cmdLinePosixParser.parse(getOptions(), args);
-            processingCmd(commandLine);
+            processingCmd(new DefaultParser().parse(getOptions(), args));
         } catch (AlreadySelectedException ex) {
             LOG.error(String.format("Ошибка опций групп: %s", ex.getMessage()), ex);
             throw ex;
