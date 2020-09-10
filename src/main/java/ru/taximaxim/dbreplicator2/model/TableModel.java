@@ -34,6 +34,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 
@@ -225,15 +226,16 @@ public class TableModel implements Cloneable, Serializable {
      * @see java.lang.Object#equals()
      */
     @Override
-    public boolean equals(Object object) {
-        if ((object == null) || !(object instanceof TableModel)) {
-            return false;
-        }
-        TableModel table = (TableModel) object;
-        if (this.getName().equals(table.getName())) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        return false;
+        if (!(obj instanceof TableModel)) {
+            return false;
+        }
+        TableModel other = (TableModel) obj;
+        return Objects.equals(name, other.name)
+                && Objects.equals(runner, other.runner);
     }
     
     /**
@@ -284,7 +286,6 @@ public class TableModel implements Cloneable, Serializable {
         int result = 1;
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + ((runner == null) ? 0 : runner.hashCode());
-        result = prime * result + ((param == null) ? 0 : param.hashCode());
         return result;
     }
     
