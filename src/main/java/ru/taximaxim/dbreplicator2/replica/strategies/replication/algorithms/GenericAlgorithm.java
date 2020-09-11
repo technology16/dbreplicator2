@@ -116,10 +116,9 @@ public class GenericAlgorithm {
 
     /**
      * @return StatsService
-     * @throws SQLException
      * @throws ClassNotFoundException
      */
-    protected StatsService getStatsService() throws SQLException {
+    protected StatsService getStatsService() {
         return Core.getStatsService();
     }
 

@@ -5,7 +5,6 @@ package ru.taximaxim.dbreplicator2;
 
 import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
@@ -63,7 +62,7 @@ public class StatsServiceTest extends AbstractSettingTest {
      * 
      * @throws InterruptedException
      */
-    public static void initialization() throws ClassNotFoundException, SQLException, IOException, InterruptedException {
+    public static void initialization() throws SQLException, InterruptedException {
         dateStart = new Timestamp(new Date().getTime());
         Thread.sleep(REPLICATION_DELAY);
         statsService.writeStat(new Timestamp(new Date().getTime()), StatsService.TYPE_SUCCESS, 2, T_PLACE, 10);
@@ -88,8 +87,7 @@ public class StatsServiceTest extends AbstractSettingTest {
     }
     
     @Test
-    public void testGetStatByTypeTablePeriod() throws ClassNotFoundException,
-            SQLException {
+    public void testGetStatByTypeTablePeriod() throws SQLException {
         // int type, String tableName, Timestamp dateStart, Timestamp dateEnd
         List<Map<String, Object>> result1 = statsService.getStat(StatsService.TYPE_ERROR, T_PLACE, dateStart, dateEnd);
         List<Map<String, Object>> result2 = statsService.getStat(StatsService.TYPE_ERROR, T_BASES, dateStart, dateEnd);
@@ -109,7 +107,7 @@ public class StatsServiceTest extends AbstractSettingTest {
     }
 
     @Test
-    public void testgetStatByType() throws ClassNotFoundException, SQLException {
+    public void testgetStatByType() throws SQLException {
         // int type
         List<Map<String, Object>> result1 = statsService.getStat(StatsService.TYPE_ERROR);
         List<Map<String, Object>> result2 = statsService.getStat(StatsService.TYPE_SUCCESS);
@@ -125,7 +123,7 @@ public class StatsServiceTest extends AbstractSettingTest {
     }
 
     @Test
-    public void testgetStatByTypeTable() throws ClassNotFoundException, SQLException {
+    public void testgetStatByTypeTable() throws SQLException {
         // int type, String tableName
         List<Map<String, Object>> result1 = statsService.getStat(StatsService.TYPE_ERROR, T_PLACE);
         List<Map<String, Object>> result2 = statsService.getStat(StatsService.TYPE_ERROR, T_BASES);
@@ -145,7 +143,7 @@ public class StatsServiceTest extends AbstractSettingTest {
     }
 
     @Test
-    public void testgetStatByTypePeriod() throws ClassNotFoundException, SQLException {
+    public void testgetStatByTypePeriod() throws SQLException {
         // int type, Timestamp dateStart, Timestamp dateEnd
         List<Map<String, Object>> result1 = statsService.getStat(StatsService.TYPE_ERROR, dateStart, dateEnd);
         List<Map<String, Object>> result2 = statsService.getStat(StatsService.TYPE_SUCCESS, dateStart, dateEnd);
@@ -181,7 +179,7 @@ public class StatsServiceTest extends AbstractSettingTest {
     }
 
     @Test
-    public void testgetStatByTypeTablePeriodMiddeEnd() throws ClassNotFoundException, SQLException {
+    public void testgetStatByTypeTablePeriodMiddeEnd() throws SQLException {
         // int type, String tableName, Timestamp dateStart, Timestamp dateEnd
         List<Map<String, Object>> result1 = statsService.getStat(StatsService.TYPE_ERROR, T_PLACE, dateMidde, dateEnd);
         List<Map<String, Object>> result2 = statsService.getStat(StatsService.TYPE_ERROR, T_BASES, dateMidde, dateEnd);

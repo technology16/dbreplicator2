@@ -23,6 +23,8 @@
 package ru.taximaxim.dbreplicator2.model;
 
 import java.io.Serializable;
+import java.util.Objects;
+
 import javax.persistence.*;
 
 /**
@@ -82,18 +84,18 @@ public class StrategyKey implements Serializable {
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
-    public boolean equals(Object object) {
-        if ((object == null) || !(object instanceof StrategyKey)) {
-            return false;
-        }
-        StrategyKey key = (StrategyKey) object;
-        if (this.getId().equals(key.getId()) &&
-                this.getRunner().equals(key.getRunner())) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        return false;
-    }
-    
+        if (!(obj instanceof StrategyKey)) {
+            return false;
+        }
+        StrategyKey other = (StrategyKey) obj;
+        return Objects.equals(id, other.id)
+                && Objects.equals(runner, other.runner);
+    } 
+
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()
      */

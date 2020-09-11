@@ -27,13 +27,13 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.io.StringReader;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 
@@ -225,15 +225,16 @@ public class TableModel implements Cloneable, Serializable {
      * @see java.lang.Object#equals()
      */
     @Override
-    public boolean equals(Object object) {
-        if ((object == null) || !(object instanceof TableModel)) {
-            return false;
-        }
-        TableModel table = (TableModel) object;
-        if (this.getName().equals(table.getName())) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        return false;
+        if (!(obj instanceof TableModel)) {
+            return false;
+        }
+        TableModel other = (TableModel) obj;
+        return Objects.equals(name, other.name)
+                && Objects.equals(runner, other.runner);
     }
     
     /**
@@ -284,7 +285,6 @@ public class TableModel implements Cloneable, Serializable {
         int result = 1;
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + ((runner == null) ? 0 : runner.hashCode());
-        result = prime * result + ((param == null) ? 0 : param.hashCode());
         return result;
     }
     
@@ -302,9 +302,8 @@ public class TableModel implements Cloneable, Serializable {
      * @param data
      * @param columns
      * @return
-     * @throws SQLException 
      */
-    public Map<String, String> getCastFromColumns(Collection<String> columns) throws SQLException {
+    public Map<String, String> getCastFromColumns(Collection<String> columns) {
         Map<String, String> castFromColums = new HashMap<>();
         for (String column : columns) {
             String castStatement = getParam(CAST_FROM + column.toLowerCase());
@@ -320,9 +319,8 @@ public class TableModel implements Cloneable, Serializable {
      * @param data
      * @param columns
      * @return
-     * @throws SQLException 
      */
-    public Map<String, String> getCastToColumns(Collection<String> columns) throws SQLException {
+    public Map<String, String> getCastToColumns(Collection<String> columns) {
         Map<String, String> castToColums = new HashMap<>();
         for (String column : columns) {
             String castStatement = getParam(CAST_TO + column.toLowerCase());

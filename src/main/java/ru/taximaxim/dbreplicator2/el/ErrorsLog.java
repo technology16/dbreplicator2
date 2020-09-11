@@ -29,6 +29,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
+
 import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
@@ -38,12 +39,11 @@ import ru.taximaxim.dbreplicator2.replica.strategies.replication.data.DataServic
 
 /**
  * Класс реализации механизма логирования ошибок
- * 
+ *
  * @author volodin_aa
  *
  */
-public class ErrorsLog extends DataServiceSkeleton
-        implements ErrorsLogService {
+public class ErrorsLog extends DataServiceSkeleton implements ErrorsLogService {
 
     /**
      * Глубина просмотра цепочки исключений
@@ -68,7 +68,7 @@ public class ErrorsLog extends DataServiceSkeleton
 
     /**
      * Получение выражения на основе текста запроса. Выражения кешируются.
-     * 
+     *
      * @param query
      * @return
      * @throws ClassNotFoundException
@@ -121,7 +121,7 @@ public class ErrorsLog extends DataServiceSkeleton
             statement.setObject(2, tableId);
             statement.setObject(3, foreignId);
             statement.setTimestamp(4, new Timestamp(new Date().getTime()));
-            statement.setString(5, error.replaceAll("\0", "&#x00;"));
+            statement.setString(5, error.replace("\0", "&#x00;"));
             statement.execute();
         } catch (Throwable e) {
             LOG.error("Ошибка записи в rep2_errors_log:", e);

@@ -2,6 +2,8 @@ package ru.taximaxim.dbreplicator2;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.fail;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -207,7 +209,7 @@ public class TableModelTest extends AbstractSettingTest {
                 LOG.info("tableModel: " + tableModel.getName());
             }
         } else {
-            assertEquals("Список реплицируеммых колонок пуст ", false);
+            fail("Список реплицируеммых колонок пуст ");
         }
     }
 
@@ -221,7 +223,7 @@ public class TableModelTest extends AbstractSettingTest {
                 LOG.info("ignoredColumnName: " + ignoredColumn);
                 LOG.info("===========================================================");
                 assertEquals("Ошибка Название игнорируеммой колонки не верно!",
-                        ignoredColumn, "_STRING");
+                        "_STRING", ignoredColumn);
             }
 
             List<TableModel> tableList = Utils.castList(TableModel.class,
@@ -233,7 +235,7 @@ public class TableModelTest extends AbstractSettingTest {
                 LOG.info("tableModel: " + tableModel.getName());
             }
         } else {
-            assertEquals("Список игнорируеммых колонок пуст ", false);
+            fail("Список игнорируеммых колонок пуст ");
         }
     }
 
@@ -280,7 +282,7 @@ public class TableModelTest extends AbstractSettingTest {
             assertEquals(
                     "Настройках таблицы" + table.getName()
                             + " не верное имя игнорируемой колонки!",
-                    ignoredColumn, "_STRING");
+                    "_STRING", ignoredColumn);
         }
 
         assertNotEquals("У таблицы " + table.getName() + " пропали обязательные колонки!",

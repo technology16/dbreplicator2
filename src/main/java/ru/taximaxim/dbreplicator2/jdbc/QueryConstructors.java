@@ -27,7 +27,6 @@
  */
 package ru.taximaxim.dbreplicator2.jdbc;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -579,8 +578,7 @@ public final class QueryConstructors {
      * @param primaryKeys
      * @param selectQuery
      */
-    public static Collection<String> getKeyShiftParams(Collection<String> primaryKeys)
-            throws SQLException {
+    public static Collection<String> getKeyShiftParams(Collection<String> primaryKeys) {
         LinkedList<String> keys = new LinkedList<>(primaryKeys);
         Collection<String> cols = new LinkedList<>();
         while (!keys.isEmpty()) {

@@ -1,18 +1,18 @@
-/* 
+/*
  * The MIT License (MIT)
- * 
+ *
  * Copyright (c) 2013 Technologiya
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
  * the Software without restriction, including without limitation the rights to
  * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
  * the Software, and to permit persons to whom the Software is furnished to do so,
  * subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
  * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -41,11 +41,11 @@ import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
  * @author TaxiMaxim
- * 
+ *
  */
 public final class Application extends AbstractCommandLineParser {
 
-    private static final Logger LOG = Logger.getLogger(Core.class);
+    private static final Logger LOG = Logger.getLogger(Application.class);
 
     /**
      * Данный класс нельзя инстанциировать.
@@ -131,17 +131,9 @@ public final class Application extends AbstractCommandLineParser {
             formatter.printHelp("java dbreplicator2.jar", getOptions());
         }
 
-        if (hasOption) {
-            if (hibernateHbm2ddlAuto && hibernateHbm2ddlImportFiles != null) {
-                start(configurationName, hibernateHbm2ddlAuto,
-                        hibernateHbm2ddlImportFiles, coreGetTasksPoolStart);
-            } else if (coreGetTasksPoolStart) {
-                start(configurationName, hibernateHbm2ddlAuto,
-                        hibernateHbm2ddlImportFiles, coreGetTasksPoolStart);
-            } else if (hibernateHbm2ddlImportFiles != null) {
-                start(configurationName, hibernateHbm2ddlAuto,
-                        hibernateHbm2ddlImportFiles, coreGetTasksPoolStart);
-            }
+        if (hasOption && (hibernateHbm2ddlImportFiles != null || coreGetTasksPoolStart)) {
+            start(configurationName, hibernateHbm2ddlAuto,
+                    hibernateHbm2ddlImportFiles, coreGetTasksPoolStart);
         }
     }
 
@@ -168,14 +160,16 @@ public final class Application extends AbstractCommandLineParser {
             ServiceRegistry serviceRegistry = sessionFactory.getSessionFactoryOptions().getServiceRegistry();
             SchemaExport schemaExport = new SchemaExport(serviceRegistry, configuration);
             schemaExport.setImportSqlCommandExtractor(serviceRegistry.getService(ImportSqlCommandExtractor.class))
-                    .create(false, true);
+            .create(false, true);
 
             // Если во время загрузки файлов были ошибки, то пробрасывем их выше
             List<Exception> exceptions = schemaExport.getExceptions();
             if (!exceptions.isEmpty()) {
+                Exception ex = new Exception("Ошибка при загрузке настроек репликации!");
                 for (Exception exception : exceptions) {
-                    throw new Exception("Ошибка при загрузке настроек репликации!", exception);
+                    ex.addSuppressed(exception);
                 }
+                throw ex;
             }
         }
 
@@ -187,9 +181,9 @@ public final class Application extends AbstractCommandLineParser {
 
     /**
      * Точка входа
-     * 
+     *
      * @param args
-     * @throws Exception 
+     * @throws Exception
      */
     public static void main(String[] args) throws Exception {
         // Флаг корректного старта
