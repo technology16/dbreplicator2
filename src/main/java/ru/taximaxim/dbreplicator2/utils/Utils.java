@@ -75,7 +75,6 @@ public final class Utils {
      */
     public static Properties convertParamStringToProperties(String param) {
         Properties properties = new Properties();
-        properties = new Properties();
         if (param != null) {
             try {
                 properties.load(new StringReader(param));
