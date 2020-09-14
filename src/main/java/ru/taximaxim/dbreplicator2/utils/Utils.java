@@ -22,15 +22,22 @@
  */
 package ru.taximaxim.dbreplicator2.utils;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Properties;
+
+import org.apache.log4j.Logger;
 
 /**
  * Вспомогательный алгоритмический класс
- * 
+ *
  * @author ags
- * 
+ *
  */
 public final class Utils {
 
@@ -43,12 +50,12 @@ public final class Utils {
     /**
      * Фикс для исправления предупреждения
      * "The expression of type List needs unchecked conversion"
-     * 
+     *
      * @param clazz
      *            Класс к которому нужно кастить список
      * @param c
      *            Коллекция объектов без приведения к нужному типу
-     * 
+     *
      * @return Проверенный список
      */
     public static <T> List<T> castList(Class<? extends T> clazz, Collection<?> c) {
@@ -57,5 +64,40 @@ public final class Utils {
             r.add(clazz.cast(o));
         }
         return r;
+    }
+
+    /**
+     * Превращает строку с параметрами в объект настроек
+     *
+     * @param params
+     *               Строка с параметрами
+     * @return Заполненные настройки
+     */
+    public static Properties convertParamStringToProperties(String param) {
+        Properties properties = new Properties();
+        properties = new Properties();
+        if (param != null) {
+            try {
+                properties.load(new StringReader(param));
+            } catch (IOException e) {
+                Logger.getLogger(Utils.class)
+                .error("Ошибка при чтение параметров [" + param + "]!", e);
+            }
+        }
+
+        return properties;
+    }
+
+    /**
+     * Превращает настройки в строку с параметрами
+     *
+     * @param properties
+     *               Настройки
+     * @return Строка с параметрами
+     */
+    public static String convertPropertiesToParamString(Properties properties) {
+        StringWriter writer = new StringWriter();
+        properties.list(new PrintWriter(writer));
+        return writer.getBuffer().toString();
     }
 }

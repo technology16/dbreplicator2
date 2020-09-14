@@ -23,11 +23,10 @@
 
 package ru.taximaxim.dbreplicator2.model;
 
-import java.io.IOException;
 import java.io.Serializable;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 
 import javax.persistence.Column;
@@ -37,10 +36,10 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import org.apache.log4j.Logger;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
+import ru.taximaxim.dbreplicator2.utils.Utils;
 
 /**
  * Персистентный класс настроек HikariCP
@@ -51,9 +50,12 @@ import org.hibernate.annotations.FetchMode;
 @Entity
 @Table(name = "hikari_cp_settings")
 public class HikariCPSettingsModel implements Serializable {
-    
+
     private static final long serialVersionUID = 2L;
-    
+
+    private static final String PROPERTY_IS_ENABLED = "is_enabled";
+    private static final String PROPERTY_SHARD = "shard";
+
     private static final int MAXIMUM_POOL_SIZE = 3;
     private static final boolean INITIALIZATION_FAIL_FAST = false;
     private static final int CONNECTION_TIMEOUT = 30000;
@@ -86,27 +88,27 @@ public class HikariCPSettingsModel implements Serializable {
      */
     @Column(name = "pass")
     private String pass;
-    
+
     /**
      * Таймаут получения соединения (по-умолчанию 30 секунд)
      */
     @Column(name = "connection_timeout")
     private int connectionTimeout;
-    
+
     /**
      * Время, в течении которого соединение может находиться в
      * соостоянии idle (по-умолчанию 10 минут)
      */
     @Column(name = "idle_timeout")
     private int idleTimeout;
-    
+
     /**
      * Максимальное время жихни соедения в пуле
      * (по-умолчанию 30 минут)
      */
     @Column(name = "max_lifetime")
     private int maxLifetime;
-  
+
     /**
      * Максимальное количество соединений
      */
@@ -144,7 +146,7 @@ public class HikariCPSettingsModel implements Serializable {
 
     /**
      * Инициализация настроек HikariCP
-     * 
+     *
      * @param poolId имя пула
      * @param driver драйвер БД
      * @param url путь к БД
@@ -157,7 +159,7 @@ public class HikariCPSettingsModel implements Serializable {
      * @param maxLifetime время жизни коннекшена в базе, мс
      */
     public HikariCPSettingsModel(String poolId, String driver, String url, String user,
-            String pass, int maximumPoolSize, boolean initializationFailFast, 
+            String pass, int maximumPoolSize, boolean initializationFailFast,
             int connectionTimeout, int idleTimeout, int maxLifetime) {
         this.poolId = poolId;
         this.driver = driver;
@@ -170,33 +172,25 @@ public class HikariCPSettingsModel implements Serializable {
         this.idleTimeout = idleTimeout;
         this.maxLifetime = maxLifetime;
     }
-    
+
     /**
      * Инициализация минимальных настроек HikariCP
-     * 
+     *
      * @param poolId имя пула
      * @param driver драйвер БД
      * @param url путь к БД
      * @param user пользователь
      * @param pass пароль
      */
-    public HikariCPSettingsModel(String poolId, String driver, String url, String user,
-            String pass) {
-        this.poolId = poolId;
-        this.driver = driver;
-        this.url = url;
-        this.user = user;
-        this.pass = pass;
-        this.maximumPoolSize = MAXIMUM_POOL_SIZE;
-        this.initializationFailFast = INITIALIZATION_FAIL_FAST;
-        this.connectionTimeout = CONNECTION_TIMEOUT;
-        this.idleTimeout = IDLE_TIMEOUT;
-        this.maxLifetime = MAX_LIFETIME;
+    public HikariCPSettingsModel(String poolId, String driver, String url,
+            String user, String pass) {
+        this(poolId, driver, url, user, pass, MAXIMUM_POOL_SIZE,
+                INITIALIZATION_FAIL_FAST, CONNECTION_TIMEOUT, IDLE_TIMEOUT, MAX_LIFETIME);
     }
 
     /**
      * Получение имени пула соединений
-     * 
+     *
      * @return the name
      */
     public String getPoolId() {
@@ -205,7 +199,7 @@ public class HikariCPSettingsModel implements Serializable {
 
     /**
      * Установка имени пула
-     * 
+     *
      * @param name
      *            the name to set
      */
@@ -214,8 +208,8 @@ public class HikariCPSettingsModel implements Serializable {
     }
 
     /**
-     * Получение дравера БД 
-     * 
+     * Получение дравера БД
+     *
      * @return the driver
      */
     public String getDriver() {
@@ -224,7 +218,7 @@ public class HikariCPSettingsModel implements Serializable {
 
     /**
      * Измение драйвера
-     * 
+     *
      * @param driver
      *            the driver to set
      */
@@ -308,18 +302,55 @@ public class HikariCPSettingsModel implements Serializable {
     }
 
     /**
-     * @return the param
+     * @return the isEnabled
      */
-    public String getParam() {
-        return param;
+    public boolean isEnabled() {
+        return Boolean.parseBoolean(getProperties().getProperty(PROPERTY_IS_ENABLED, "true"));
     }
 
     /**
-     * @param param
-     *            the param to set
+     * @param isEnabled
+     *            the isEnabled to set
      */
-    public void setParam(String param) {
-        this.param = param;
+    public void setEnabled(boolean isEnabled) {
+        setParam(PROPERTY_IS_ENABLED, Boolean.toString(isEnabled));
+    }
+
+    /**
+     * Получение параметра по ключу
+     *
+     * @param property
+     *            имя параметра
+     * @return значение параметра или null
+     */
+    public String getParam(String property) {
+        return getProperties().getProperty(property);
+    }
+
+    /**
+     * Установка параметра подключения
+     *
+     * @param key параметр
+     * @param value значение
+     */
+    public void setParam(String key, String value) {
+        getProperties().put(key, value);
+        param = Utils.convertPropertiesToParamString(getProperties());
+    }
+
+    /**
+     * @return имя шарда из списка параметров
+     */
+    public String getShard() {
+        return getParam(PROPERTY_SHARD);
+    }
+
+    /**
+     * @param shard
+     *            вносит имя шарда в список параметров
+     */
+    public void setShard(String shard) {
+        setParam(PROPERTY_SHARD, shard);
     }
 
     /**
@@ -353,7 +384,7 @@ public class HikariCPSettingsModel implements Serializable {
     }
 
     /**
-     * Получение списка раннеров 
+     * Получение списка раннеров
      */
     public List<RunnerModel> getRunners() {
         if (runners == null) {
@@ -362,11 +393,10 @@ public class HikariCPSettingsModel implements Serializable {
 
         return runners;
     }
-    
-    
+
     /**
      * Получение конкретного раннера пула
-     *  
+     *
      * @param runnerId идентификатор раннера
      * @return
      */
@@ -378,7 +408,7 @@ public class HikariCPSettingsModel implements Serializable {
         }
         return null;
     }
-    
+
     /**
      * Сохранение списка обработчиков
      */
@@ -403,26 +433,17 @@ public class HikariCPSettingsModel implements Serializable {
 
     /**
      * Получение дополнительных настроек
-     * 
+     *
      * @return
      */
-    public Properties getProperties() {
-        if(properties == null) {
-            properties = new Properties();
-            if(getParam() != null){
-                try {
-                    properties.load(new StringReader(getParam()));
-                } catch (IOException e) {
-                    Logger.getLogger(HikariCPSettingsModel.class).error("Ошибка при чтение параметров [" + getParam() + "]!", e);
-                }
-            }
+    private Properties getProperties() {
+        if (properties == null) {
+            properties = Utils.convertParamStringToProperties(param);
         }
+
         return properties;
     }
-    
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -441,78 +462,27 @@ public class HikariCPSettingsModel implements Serializable {
         return result;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
+
         if (!(obj instanceof HikariCPSettingsModel)) {
             return false;
         }
+
         HikariCPSettingsModel other = (HikariCPSettingsModel) obj;
-        if (connectionTimeout != other.connectionTimeout) {
-            return false;
-        }
-        if (driver == null) {
-            if (other.driver != null) {
-                return false;
-            }
-        } else if (!driver.equals(other.driver)) {
-            return false;
-        }
-        if (idleTimeout != other.idleTimeout) {
-            return false;
-        }
-        if (initializationFailFast != other.initializationFailFast) {
-            return false;
-        }
-        if (maxLifetime != other.maxLifetime) {
-            return false;
-        }
-        if (maximumPoolSize != other.maximumPoolSize) {
-            return false;
-        }
-        if (param == null) {
-            if (other.param != null) {
-                return false;
-            }
-        } else if (!param.equals(other.param)) {
-            return false;
-        }
-        if (pass == null) {
-            if (other.pass != null) {
-                return false;
-            }
-        } else if (!pass.equals(other.pass)) {
-            return false;
-        }
-        if (poolId == null) {
-            if (other.poolId != null) {
-                return false;
-            }
-        } else if (!poolId.equals(other.poolId)) {
-            return false;
-        }
-        if (url == null) {
-            if (other.url != null) {
-                return false;
-            }
-        } else if (!url.equals(other.url)) {
-            return false;
-        }
-        if (user == null) {
-            if (other.user != null) {
-                return false;
-            }
-        } else if (!user.equals(other.user)) {
-            return false;
-        }
-        return true;
+        return connectionTimeout == other.connectionTimeout
+                && Objects.equals(driver, other.driver)
+                && idleTimeout == other.idleTimeout
+                && initializationFailFast == other.initializationFailFast
+                && maxLifetime == other.maxLifetime
+                && maximumPoolSize == other.maximumPoolSize
+                && Objects.equals(param, other.param)
+                && Objects.equals(pass, other.pass)
+                && Objects.equals(poolId, other.poolId)
+                && Objects.equals(url, other.url)
+                && Objects.equals(user, other.user);
     }
 }

@@ -266,14 +266,10 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm {
                     .getTable(sourceTable.getName()).getParam("dest");
             if (destTableName != null) {
                 // Создаем копию для таблицы приемника
-                try {
-                    destTable = (TableModel) sourceTable.clone();
-                    destTable.setName(destTableName);
-                    destTable.setParam("tempKey", "tempValue");
-                    destTable.setRunner(null);
-                } catch (CloneNotSupportedException e) {
-                    LOG.error("Ошибка при клонировании таблицы-источника:", e);
-                }
+                destTable = sourceTable.copy();
+                destTable.setName(destTableName);
+                destTable.setParam("tempKey", "tempValue");
+                destTable.setRunner(null);
             }
             destTables.put(sourceTable, destTable);
         }
