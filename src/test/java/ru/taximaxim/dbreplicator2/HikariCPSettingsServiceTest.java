@@ -138,7 +138,7 @@ public class HikariCPSettingsServiceTest extends AbstractHikariCPTest {
         newHikariCPSettings1.setUser("sa");
         newHikariCPSettings1.setPass("");
         newHikariCPSettings1.setEnabled(false);
-        newHikariCPSettings1.setParam("shard", "01");
+        newHikariCPSettings1.setShard("01");
 
         settingStorage.setDataBaseSettings(newHikariCPSettings1);
 
