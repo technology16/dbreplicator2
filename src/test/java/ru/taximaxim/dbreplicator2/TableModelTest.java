@@ -240,34 +240,32 @@ public class TableModelTest extends AbstractSettingTest {
     }
 
     /**
-     * Тестируем корректность клонирования таблицы
-     * 
-     * @throws CloneNotSupportedException
+     * Тестируем корректность копирования таблицы
      */
     @Test
-    public void testCloneTable() throws CloneNotSupportedException {
+    public void testCopyTable() {
         TableModel table = (TableModel) session.get(TableModel.class, 2);
 
-        // Проверяем таблицу перед клонированием
+        // Проверяем таблицу перед копированием
         checkTable(table);
         
         // Клонируем таблицу
-        TableModel clone = (TableModel) table.clone();
-        clone.setName("clone_" + table.getName());
-        clone.setRunner(null);
-        clone.setParam(TableModel.REQUIRED_COLUMNS, "");
-        clone.setParam(TableModel.IGNORED_COLUMNS, "");
+        TableModel copy = table.copy();
+        copy.setName("clone_" + table.getName());
+        copy.setRunner(null);
+        copy.setParam(TableModel.REQUIRED_COLUMNS, "");
+        copy.setParam(TableModel.IGNORED_COLUMNS, "");
 
-        // Проверяем таблицу после клонированием
+        // Проверяем таблицу после копирования
         checkTable(table);
 
-        // Проверяем корректность клона
-        assertEquals("У клона не верное имя!", "clone_" + table.getName(),
-                clone.getName());
-        assertEquals("У клона остались игнорируемые колонки!", 0,
-                clone.getIgnoredColumns().size());
-        assertEquals("У клона остались обязательные колонки!", 0,
-                clone.getRequiredColumns().size());
+        // Проверяем корректность копии
+        assertEquals("У копии не верное имя!", "clone_" + table.getName(),
+                copy.getName());
+        assertEquals("У копии остались игнорируемые колонки!", 0,
+                copy.getIgnoredColumns().size());
+        assertEquals("У копии остались обязательные колонки!", 0,
+                copy.getRequiredColumns().size());
     }
 
     /**

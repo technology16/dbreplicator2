@@ -22,11 +22,7 @@
  */
 package ru.taximaxim.dbreplicator2.model;
 
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Serializable;
-import java.io.StringWriter;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -39,11 +35,11 @@ import java.util.Set;
 
 import javax.persistence.*;
 
-import org.apache.log4j.Logger;
+import ru.taximaxim.dbreplicator2.utils.Utils;
 
 /**
  * Таблицы, обрабатываемые в пуле соединеий.
- * 
+ *
  * @author volodin_aa
  *
  */
@@ -177,50 +173,39 @@ public class TableModel implements Cloneable, Serializable {
 
     /**
      * Установка параметра таблицы
-     * 
+     *
      * @param key параметр
      * @param value значение
      */
     public void setParam(String key, String value) {
         getProperties().put(key, value);
-        StringWriter writer = new StringWriter();
-        properties.list(new PrintWriter(writer));
-        this.param =  writer.getBuffer().toString();
+        param = Utils.convertPropertiesToParamString(getProperties());
     }
 
     /**
      * Получение настроек
-     * 
+     *
      * @return
      */
     public Properties getProperties() {
-        if(properties == null) {
-            properties = new Properties();
-            if(param != null){
-                try {
-                    properties.load(new StringReader(param));
-                } catch (IOException e) {
-                    Logger.getLogger("TableModel").error("Ошибка при чтение параметров [" + param + "]!", e);
-                }
-            }
+        if (properties == null) {
+            properties = Utils.convertParamStringToProperties(param);
         }
         return properties;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#clone()
+    /**
+     * @return копию текущего объект
      */
-    @Override
-    public Object clone() throws CloneNotSupportedException {
-        TableModel clone;
-        clone = (TableModel) super.clone();
-        if (properties != null) {
-            clone.properties = (Properties) properties.clone();
-        }
-        
-        return clone;
+    public TableModel copy() {
+        TableModel model = new TableModel();
+        model.tableId = tableId;
+        model.name = name;
+        model.runner = runner;
+        model.param = param;
+        return model;
     }
-    
+
     /* (non-Javadoc)
      * @see java.lang.Object#equals()
      */

@@ -22,16 +22,12 @@
  */
 package ru.taximaxim.dbreplicator2.model;
 
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Serializable;
-import java.io.StringReader;
-import java.io.StringWriter;
 import java.util.Properties;
 
 import javax.persistence.*;
 
-import org.apache.log4j.Logger;
+import ru.taximaxim.dbreplicator2.utils.Utils;
 
 /**
  * Персистентный класс настроек стратегии
@@ -153,18 +149,15 @@ public class StrategyModel implements Serializable {
      * Получение параметра по ключу
      */
     public String getParam(String key) {
-        return getProp().getProperty(key);
+        return getProperties().getProperty(key);
     }
 
     /**
      * Запись параметра по ключу
      */
     public void setParam(String key, String value) {
-        getProp().put(key, value);
-
-        StringWriter writer = new StringWriter();
-        prop.list(new PrintWriter(writer));
-        this.param = writer.getBuffer().toString();
+        getProperties().put(key, value);
+        param = Utils.convertPropertiesToParamString(getProperties());
     }
 
     /**
@@ -200,19 +193,11 @@ public class StrategyModel implements Serializable {
      * 
      * @return
      */
-    private Properties getProp() {
-        if (this.prop == null) {
-            this.prop = new Properties();
-            if (param != null) {
-                try {
-                    this.prop.load(new StringReader(param));
-                } catch (IOException e) {
-                    Logger.getLogger("StrategyModel")
-                            .error("Ошибка при чтение параметров [" + param + "]!", e);
-                }
-            }
+    private Properties getProperties() {
+        if (prop == null) {
+            prop = Utils.convertParamStringToProperties(param);
         }
-        return this.prop;
+        return prop;
     }
 
     /**

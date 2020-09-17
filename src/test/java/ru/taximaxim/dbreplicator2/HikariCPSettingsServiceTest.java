@@ -23,9 +23,10 @@
 
 package ru.taximaxim.dbreplicator2;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 
-import java.sql.SQLException;
 import java.util.Map;
 
 import org.junit.AfterClass;
@@ -37,9 +38,9 @@ import ru.taximaxim.dbreplicator2.model.HikariCPSettingsModel;
 
 /**
  * Класс для тестирования пулов соединений
- * 
+ *
  * @author volodin_aa
- * 
+ *
  */
 public class HikariCPSettingsServiceTest extends AbstractHikariCPTest {
 
@@ -54,15 +55,12 @@ public class HikariCPSettingsServiceTest extends AbstractHikariCPTest {
     }
 
     /**
-     * Проверка получения настроек по имени: 1. Полуение несуществующих настроек
+     * Проверка получения настроек по имени:
+     * 1. Получение несуществующих настроек
      * 2. Получение существующих
-     * 
-     * @throws ClassNotFoundException
-     * @throws SQLException
      */
     @Test
-    public void testGetDataBaseSettingsByName() throws ClassNotFoundException,
-            SQLException {
+    public void testGetDataBaseSettingsByName() {
         // Полуение несуществующих настроек
         HikariCPSettingsModel hikariCPSettings = settingStorage
                 .getDataBaseSettingsByName("testGetDataBaseSettingsByName");
@@ -100,14 +98,10 @@ public class HikariCPSettingsServiceTest extends AbstractHikariCPTest {
     }
 
     /**
-     * Тест получение всех настроек
-     * 
-     * @throws ClassNotFoundException
-     * @throws SQLException
+     * Тест получения всех настроек
      */
     @Test
-    public void testGetDataBaseSettings() throws ClassNotFoundException,
-            SQLException {
+    public void testGetDataBaseSettings() {
         // Создание настроек
         HikariCPSettingsModel newHikariCPSettings1 = new HikariCPSettingsModel(
                 "testGetDataBaseSettings1", "org.h2.Driver",
@@ -132,14 +126,38 @@ public class HikariCPSettingsServiceTest extends AbstractHikariCPTest {
     }
 
     /**
-     * Тест таймаута при привышении максимального количества открытых соединений
-     * 
-     * @throws ClassNotFoundException
-     * @throws SQLException
+     * Тест получения настроек с дополнительными параметрами
      */
     @Test
-    public void testSetDataBaseSettings() throws ClassNotFoundException,
-            SQLException {
+    public void testGetDataBaseAdditionalParameters() {
+        // Создание настроек
+        HikariCPSettingsModel newHikariCPSettings1 = new HikariCPSettingsModel();
+        newHikariCPSettings1.setPoolId("testGetDataBaseSettings1");
+        newHikariCPSettings1.setDriver("org.h2.Driver");
+        newHikariCPSettings1.setUrl("jdbc:h2:mem://localhost/~/test");
+        newHikariCPSettings1.setUser("sa");
+        newHikariCPSettings1.setPass("");
+        newHikariCPSettings1.setEnabled(false);
+        newHikariCPSettings1.setShard("01");
+
+        settingStorage.setDataBaseSettings(newHikariCPSettings1);
+
+        HikariCPSettingsModel actualSettings = settingStorage
+                .getDataBaseSettings().get("testGetDataBaseSettings1");
+
+        assertEquals("Ошибка при получение существующих настроек!",
+                newHikariCPSettings1, actualSettings);
+        assertEquals("Ошибка при получение дополнительных параметров!",
+                "01", actualSettings.getShard());
+        assertFalse("Ошибка при проверке доступности базы данных",
+                actualSettings.isEnabled());
+    }
+
+    /**
+     * Тест таймаута при привышении максимального количества открытых соединений
+     */
+    @Test
+    public void testSetDataBaseSettings() {
         // Создание настроек
         HikariCPSettingsModel newHikariCPSettings = new HikariCPSettingsModel(
                 "testSetDataBaseSettings", "org.h2.Driver",
@@ -175,13 +193,9 @@ public class HikariCPSettingsServiceTest extends AbstractHikariCPTest {
 
     /**
      * Тест удаления настроек
-     * 
-     * @throws ClassNotFoundException
-     * @throws SQLException
      */
     @Test
-    public void testDelDataBaseSettings() throws ClassNotFoundException,
-            SQLException {
+    public void testDelDataBaseSettings() {
         // Создание настроек
         HikariCPSettingsModel newHikariCPSettings = new HikariCPSettingsModel(
                 "testDelDataBaseSettings", "org.h2.Driver",

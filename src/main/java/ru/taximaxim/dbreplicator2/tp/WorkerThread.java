@@ -24,19 +24,21 @@
 package ru.taximaxim.dbreplicator2.tp;
 
 import java.sql.SQLException;
+
 import org.apache.log4j.Logger;
 
 import ru.taximaxim.dbreplicator2.cf.ConnectionFactory;
+import ru.taximaxim.dbreplicator2.el.DefaultUncaughtExceptionHandler;
+import ru.taximaxim.dbreplicator2.el.ErrorsLog;
+import ru.taximaxim.dbreplicator2.model.HikariCPSettingsModel;
 import ru.taximaxim.dbreplicator2.model.Runner;
 import ru.taximaxim.dbreplicator2.model.StrategyModel;
 import ru.taximaxim.dbreplicator2.replica.Strategy;
-import ru.taximaxim.dbreplicator2.el.DefaultUncaughtExceptionHandler;
-import ru.taximaxim.dbreplicator2.el.ErrorsLog;
 import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
  * Обработчик раннера
- * 
+ *
  * @author volodin_aa
  *
  */
@@ -47,7 +49,7 @@ public class WorkerThread implements Runnable {
 
     /**
      * Конструктор на основе настроек раннера
-     * 
+     *
      * @param runner
      */
     public WorkerThread(Runner runner) {
@@ -105,7 +107,23 @@ public class WorkerThread implements Runnable {
      * @throws InstantiationException
      */
     public void processCommand() throws ClassNotFoundException, SQLException,
-            InstantiationException, IllegalAccessException {
+    InstantiationException, IllegalAccessException {
+
+        HikariCPSettingsModel sourceSettings = runner.getSource();
+        if (sourceSettings != null && !sourceSettings.isEnabled()) {
+            LOG.warn(String.format(
+                    "Раннер [id_runner = %d, %s] : база-источник [%s] отключена настройками",
+                    runner.getId(), runner.getDescription(), sourceSettings.getPoolId()));
+            return;
+        }
+
+        HikariCPSettingsModel targetSettings = runner.getTarget();
+        if (targetSettings != null && !targetSettings.isEnabled()) {
+            LOG.warn(String.format(
+                    "Раннер [id_runner = %d, %s] : база-приемник [%s] отключена настройками",
+                    runner.getId(), runner.getDescription(), targetSettings.getPoolId()));
+            return;
+        }
 
         ConnectionFactory connectionsFactory = Core.getConnectionFactory();
         for (StrategyModel strategyModel : runner.getStrategyModels()) {
@@ -138,7 +156,7 @@ public class WorkerThread implements Runnable {
      */
     protected void runStrategy(ConnectionFactory connectionsFactory,
             StrategyModel strategyModel) throws SQLException, ClassNotFoundException,
-            InstantiationException, IllegalAccessException {
+    InstantiationException, IllegalAccessException {
 
         Class<?> clazz = Class.forName(strategyModel.getClassName());
         Strategy strategy = (Strategy) clazz.newInstance();
