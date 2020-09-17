@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>ru.taximaxim.dbreplicator2</groupId>
     <artifactId>dbreplicator2</artifactId>
-    <version>1.12.0.862164</version>
+    <version>1.13.0</version>
     <dependencies>
         <dependency>
             <groupId>log4j</groupId>
