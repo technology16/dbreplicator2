@@ -23,7 +23,6 @@
 package ru.taximaxim.dbreplicator2.utils;
 
 import java.io.File;
-import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
 import org.hibernate.SessionFactory;
@@ -317,8 +316,6 @@ public final class Core {
      * Получаем сервис статистики
      * 
      * @return сервис статистики
-     * @throws SQLException 
-     * @throws ClassNotFoundException 
      */
     public static synchronized StatsService getStatsService() {
         if (statsService == null) {
@@ -341,8 +338,6 @@ public final class Core {
      * Получаем сервис ErrorsLog
      * 
      * @return сервис ErrorsLog
-     * @throws SQLException 
-     * @throws ClassNotFoundException 
      */
     public static synchronized ErrorsLog getErrorsLog() {
         ApplicatonSettingsService aService = new ApplicatonSettingsService(getSessionFactory());

@@ -22,11 +22,12 @@
  */
 package ru.taximaxim.dbreplicator2;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import org.apache.log4j.Logger;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -43,12 +44,12 @@ public class StrategiesTest extends AbstractSettingTest {
     public static void setUpBeforeClass() throws Exception {
         setUp(null, null, null);
     }
-    
+
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
         close();
     }
-    
+
     /**
      * Проверка создания модели исполняемого потока и стратегии.
      */
@@ -60,7 +61,7 @@ public class StrategiesTest extends AbstractSettingTest {
         RunnerModel runner = createRunner(new HikariCPSettingsModel(), new HikariCPSettingsModel(), "Описание исполняемого потока");
         StrategyModel strategy = createStrategy(1, "ru.taximaxim.Class", "key", "value", true, 100);
 
-        Assert.assertNull(runner.getId());
+        assertNull(runner.getId());
         LOG.debug("Идентификатор потока перед сохранением: " + runner.getId());
 
         addStrategy(runner, strategy);
@@ -68,12 +69,12 @@ public class StrategiesTest extends AbstractSettingTest {
         session.saveOrUpdate(strategy);
 
         LOG.debug("Идентификатор потока после его сохранения: " + runner.getId());
-        Assert.assertNotNull(runner.getId());
+        assertNotNull(runner.getId());
 
         RunnerModel runner_compare = (RunnerModel) session.get(RunnerModel.class, runner.getId());
 
         LOG.debug("Идентификатор потока после его восстановления: " + runner_compare.getId());
-        Assert.assertEquals(runner.getId(), runner_compare.getId());
+        assertEquals(runner.getId(), runner_compare.getId());
 
         RunnerModel runner2 = createRunner(new HikariCPSettingsModel(), new HikariCPSettingsModel(), "Описание исполняемого потока (2)");
         StrategyModel strategy2 = createStrategy(2, "ru.taximaxim.Class", "key", "value", true, 100);
@@ -81,19 +82,18 @@ public class StrategiesTest extends AbstractSettingTest {
 
         session.saveOrUpdate(runner2);
         session.saveOrUpdate(strategy2);
-        
-        Assert.assertNotNull(((StrategyModel) runner2.getStrategyModels().get(0)).getId());
-        Assert.assertTrue("Нарушение описания состаного ключа стратегии", runner2.getStrategyModels().get(0).getRunner().equals(runner2));
-        
+
+        assertNotNull(runner2.getStrategyModels().get(0).getId());
+        assertEquals("Нарушение описания состаного ключа стратегии", runner2, runner2.getStrategyModels().get(0).getRunner());
+
         StrategyModel strategy3 = createStrategy(3, "ru.taximaxim.Class", "key", "value", true, 100);
         addStrategy(runner2, strategy3);
 
         session.saveOrUpdate(runner2);
         session.saveOrUpdate(strategy3);
-        
-        Assert.assertNotNull(((StrategyModel) runner2.getStrategyModels().get(1)).getId());
-        Assert.assertTrue("Нарушение описания состаного ключа стратегии", runner2.getStrategyModels().get(1).getRunner().equals(runner2));
-        
+
+        assertNotNull(runner2.getStrategyModels().get(1).getId());
+        assertEquals("Нарушение описания состаного ключа стратегии", runner2, runner2.getStrategyModels().get(1).getRunner());
     }
 
     public RunnerModel createRunner(HikariCPSettingsModel source, HikariCPSettingsModel target, String description) {
@@ -126,9 +126,9 @@ public class StrategiesTest extends AbstractSettingTest {
         strategy.setRunner(runner);
 
     }
-    
+
     /**
-     * Тестирование работы механизма хранения многострочных параметров    
+     * Тестирование работы механизма хранения многострочных параметров
      */
     @Test
     public void paramTest(){
@@ -136,12 +136,12 @@ public class StrategiesTest extends AbstractSettingTest {
 
         // Добавляем 1 параметр
         strategy.setParam("1", "11");
-        
+
         // Добавляем 2 параметр
         strategy.setParam("2", "22");
-        
+
         // Проверяем оба параметра
-        assertTrue("Ошибка в 1 параметре!", strategy.getParam("1").equals("11"));
-        assertTrue("Ошибка в 2 параметре!", strategy.getParam("2").equals("22"));
+        assertEquals("Ошибка в 1 параметре!", "11", strategy.getParam("1"));
+        assertEquals("Ошибка в 2 параметре!", "22", strategy.getParam("2"));
     }
 }

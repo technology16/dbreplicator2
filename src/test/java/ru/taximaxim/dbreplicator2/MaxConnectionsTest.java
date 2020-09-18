@@ -79,12 +79,10 @@ public class MaxConnectionsTest extends AbstractHikariCPTest {
     /**
      * Тест таймаута при привышении максимального количества открытых соединений
      *
-     * @throws ClassNotFoundException
      * @throws SQLException
      */
     @Test
-    public void testMaxConnections() throws ClassNotFoundException,
-            SQLException {
+    public void testMaxConnections() throws SQLException {
         ConnectionFactory connectionsFactory = new HikariCPConnectionsFactory(
                 settingStorage);
         try {

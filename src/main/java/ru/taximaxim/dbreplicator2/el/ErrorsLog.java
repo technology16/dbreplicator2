@@ -71,7 +71,6 @@ public class ErrorsLog extends DataServiceSkeleton implements ErrorsLogService {
      *
      * @param query
      * @return
-     * @throws ClassNotFoundException
      * @throws SQLException
      */
     private PreparedStatement getStatement(String query) throws SQLException {

@@ -76,7 +76,6 @@ public class StatsService {
      * @param id_table
      * @param count
      * @throws SQLException
-     * @throws ClassNotFoundException
      */
     public void writeStat(Timestamp date, int type, int strategyId, String tableName,
             int count) throws SQLException {

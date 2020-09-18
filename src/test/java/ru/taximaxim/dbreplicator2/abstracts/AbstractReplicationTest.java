@@ -28,8 +28,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
-import org.hibernate.SessionFactory;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
 import ru.taximaxim.dbreplicator2.Helper;
@@ -39,42 +39,42 @@ import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
  * Абстракный класс для инициализации общих полей тестовых классов
- * 
+ *
  * @author petrov_im
  *
  */
 public abstract class AbstractReplicationTest {
-    
+
     protected static final Logger LOG = Logger.getLogger(AbstractReplicationTest.class);
-    
+
     protected static SessionFactory sessionFactory;
     protected static Session session;
     protected static ConnectionFactory connectionFactory;
     protected static ErrorsLog errorsLog;
-    
+
     protected static Connection source = null;
     protected static Connection dest = null;
     protected static Connection error = null;
-    
+
     protected static Runnable worker = null;
     protected static Runnable worker2 = null;
 
-    protected static void setUp(String importSql, String sqlRep2, String sqlSourse, String sqlDest) throws ClassNotFoundException, SQLException, IOException {
+    protected static void setUp(String importSql, String sqlRep2, String sqlSourse, String sqlDest)
+            throws SQLException, IOException {
         setUp("src/test/resources/hibernate.cfg.xml", importSql, sqlRep2, sqlSourse, sqlDest);
-
     }
-    
-    protected static void setUp(String xmlForConfig, String importSql, String sqlRep2, String sqlSourse, String sqlDest) throws ClassNotFoundException, SQLException, IOException {
+
+    protected static void setUp(String xmlForConfig, String importSql, String sqlRep2, String sqlSourse, String sqlDest)
+            throws SQLException, IOException {
         Core.configurationClose();
-        
-        if(xmlForConfig != null){
+
+        if (xmlForConfig != null) {
             Configuration configuration = Core.getConfiguration(xmlForConfig);
             if (importSql != null) {
                 configuration.setProperty("hibernate.hbm2ddl.import_files", importSql);
             }
             sessionFactory = Core.getSessionFactory(configuration);
-        }
-        else {
+        } else {
             sessionFactory = Core.getSessionFactory();
         }
         connectionFactory = Core.getConnectionFactory();
@@ -82,21 +82,25 @@ public abstract class AbstractReplicationTest {
         errorsLog = Core.getErrorsLog();
         initialization(sqlRep2, sqlSourse, sqlDest);
     }
-    
+
     /**
      * Закрытие соединений
-     * @throws SQLException 
-     * @throws InterruptedException 
+     * @throws SQLException
+     * @throws InterruptedException
      */
     protected static void close() throws SQLException, InterruptedException {
-        if(source!=null)
+        if (source != null) {
             source.close();
-        if(dest!=null)
+        }
+        if (dest != null) {
             dest.close();
-        if(error!=null)
+        }
+        if (error != null) {
             error.close();
-        if(session!=null)
+        }
+        if (session != null) {
             session.close();
+        }
         sessionFactory.close();
         connectionFactory.close();
         sessionFactory.close();
@@ -111,11 +115,12 @@ public abstract class AbstractReplicationTest {
         Core.cronSettingsServiceClose();
         errorsLog.close();
     }
-    
+
     /**
      * Инициализация
      */
-    public static void initialization(String sqlRep2, String sqlSourse, String sqlDest) throws ClassNotFoundException, SQLException, IOException{
+    private static void initialization(String sqlRep2, String sqlSourse, String sqlDest)
+            throws SQLException, IOException {
         LOG.info("initialization");
         source = connectionFactory.get("source").getConnection();
 
@@ -125,10 +130,18 @@ public abstract class AbstractReplicationTest {
         dest = connectionFactory.get("dest").getConnection();
         Helper.executeSqlFromFile(dest, sqlRep2);
         Helper.executeSqlFromFile(dest, sqlDest);
-        
-        error = connectionFactory.get("error").getConnection();
 
+        error = connectionFactory.get("error").getConnection();
     }
 
+    /**
+     * Сравнение таблицы из source и dest по записям
+     * @param table - имя таблицы
+     * @throws SQLException
+     * @throws InterruptedException
+     */
+    protected void verifyTable(String table) throws SQLException, InterruptedException {
+        Helper.AssertEquals(Helper.InfoTest(source, table), Helper.InfoTest(dest, table));
+    }
 }
 

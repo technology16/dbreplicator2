@@ -134,10 +134,10 @@ public class SuperLogManagerTest extends AbstractReplicationTest {
 
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
-        List<MyTablesType> listSource = Helper.InfoTest(source, "t_table2");
-        List<MyTablesType> listDest = Helper.InfoTest(dest, "t_table2");
-        Helper.AssertEquals(listSource, listDest);
+        verifyTable("t_table2");
 
+        List<MyTablesType> listSource = Helper.InfoTest(source, "t_table3");
+        List<MyTablesType> listDest = Helper.InfoTest(dest, "t_table3");
         listSource = Helper.InfoTest(source, "t_table3");
         listDest = Helper.InfoTest(dest, "t_table3");
         assertTrue(String.format("Количество записей [%s == 8 и %s = 2]",

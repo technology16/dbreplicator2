@@ -1,18 +1,6 @@
 package ru.taximaxim.dbreplicator2.strategies.errors;
 
-import org.apache.log4j.Logger;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InOrder;
-import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -21,18 +9,34 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.apache.log4j.AppenderSkeleton;
+import org.apache.log4j.Logger;
+import org.apache.log4j.spi.LoggingEvent;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
+
 import ru.taximaxim.dbreplicator2.abstracts.AbstractReplicationTest;
 import ru.taximaxim.dbreplicator2.model.RunnerService;
-import ru.taximaxim.dbreplicator2.replica.strategies.errors.CountWatchgdog;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ Logger.class })
-@PowerMockIgnore("javax.management.*")
+@RunWith(MockitoJUnitRunner.class)
 public class CountWatchgdogTest extends AbstractReplicationTest {
-    protected static final Logger LOG = Logger.getLogger(CountWatchgdogTest.class);
 
-    private static final Logger spyLogger = spy(Logger.getLogger(CountWatchgdog.class));;
+    @Mock
+    private AppenderSkeleton appender;
+
+    @Captor
+    private ArgumentCaptor<LoggingEvent> logCaptor;
+
     private static RunnerService runnerService;
 
     @BeforeClass
@@ -41,17 +45,21 @@ public class CountWatchgdogTest extends AbstractReplicationTest {
                 "init_db/importSource.sql", "init_db/importDest.sql");
 
         runnerService = new RunnerService(sessionFactory);
-
-        // Мокируем логгер для проверки сообщений об ошибках
-        PowerMockito.spy(Logger.class);
-        PowerMockito.doReturn(spyLogger).when(Logger.class, "getLogger",
-                CountWatchgdog.class);
-
     }
 
     @AfterClass
     public static void setUpAfterClass() throws Exception {
         close();
+    }
+
+    @Before
+    public void addAppender() {
+        Logger.getRootLogger().addAppender(appender);
+    }
+
+    @After
+    public void removeAppender() {
+        Logger.getRootLogger().removeAppender(appender);
     }
 
     /**
@@ -65,8 +73,8 @@ public class CountWatchgdogTest extends AbstractReplicationTest {
     }
 
     /**
-     * Вставлем ошибки таблицы
-     * 
+     * Вставляем ошибки таблицы
+     *
      * @param now
      * @throws SQLException
      */
@@ -84,8 +92,8 @@ public class CountWatchgdogTest extends AbstractReplicationTest {
     }
 
     /**
-     * Вставлем ошибки таблицы
-     * 
+     * Вставляем ошибки таблицы
+     *
      * @param now
      * @throws SQLException
      */
@@ -102,8 +110,8 @@ public class CountWatchgdogTest extends AbstractReplicationTest {
     }
 
     /**
-     * Вставлем ошибки
-     * 
+     * Вставляем ошибки
+     *
      * @param now
      * @throws SQLException
      */
@@ -122,8 +130,8 @@ public class CountWatchgdogTest extends AbstractReplicationTest {
     }
 
     /**
-     * Вставлем ошибки
-     * 
+     * Вставляем ошибки
+     *
      * @param now
      * @throws SQLException
      */
@@ -152,8 +160,8 @@ public class CountWatchgdogTest extends AbstractReplicationTest {
     }
 
     /**
-     * Вставлем отработанные ошибки
-     * 
+     * Вставляем отработанные ошибки
+     *
      * @param now
      * @throws SQLException
      */
@@ -172,8 +180,8 @@ public class CountWatchgdogTest extends AbstractReplicationTest {
     }
 
     /**
-     * Вставлем отработанные ошибки таблицы
-     * 
+     * Вставляем отработанные ошибки таблицы
+     *
      * @param now
      * @throws SQLException
      */
@@ -191,8 +199,8 @@ public class CountWatchgdogTest extends AbstractReplicationTest {
     }
 
     /**
-     * Вставлем отработанные ошибки раннера
-     * 
+     * Вставляем отработанные ошибки раннера
+     *
      * @param now
      * @throws SQLException
      */
@@ -210,7 +218,7 @@ public class CountWatchgdogTest extends AbstractReplicationTest {
 
     /**
      * Проверка наличия активных ошибок с дефолтными настроками
-     * 
+     *
      * @throws SQLException
      */
     @Test
@@ -236,8 +244,8 @@ public class CountWatchgdogTest extends AbstractReplicationTest {
         WorkerThread errorsCountWatchdogWorker = new WorkerThread(runnerService.getRunner(1));
         errorsCountWatchdogWorker.run();
 
-        InOrder inOrder = Mockito.inOrder(spyLogger);
-        inOrder.verify(spyLogger).error("\n" + "\n"
+        Mockito.verify(appender).doAppend(logCaptor.capture());
+        assertEquals("", logCaptor.getValue().getRenderedMessage(), "\n" + "\n"
                 + "В error превышен лимит в 0 ошибок!\n" + "\n" + "Ошибка 1 из 11 \n"
                 + "[ tableName = REP2_ERRORS_LOG [ row = [ col ID_RUNNER = 1 ] [ col ID_TABLE = table ] [ col ID_FOREIGN = 11 ] [ col MAX_ID_ERRORS_LOG = 11 ] [ col COUNT = 1 ] [ col C_ERROR = Error in record ] [ col C_DATE = "
                 + now + " ]  ] ]\n" + "==========================================\n"
@@ -273,7 +281,7 @@ public class CountWatchgdogTest extends AbstractReplicationTest {
 
     /**
      * Проверка при отсутствии активных ошибок
-     * 
+     *
      * @throws SQLException
      */
     @Test
@@ -289,21 +297,20 @@ public class CountWatchgdogTest extends AbstractReplicationTest {
         insertFixedTableError(2, "table", now, 2L);
         insertFixedRunnerError(3, now, 3L);
 
-        Mockito.reset(spyLogger);
+        Mockito.reset(appender);
 
         // Запускаем CountWatchgdog
         WorkerThread errorsCountWatchdogWorker = new WorkerThread(runnerService.getRunner(1));
         errorsCountWatchdogWorker.run();
 
         // проверяем что не было сообщений об ошибках
-        InOrder inOrder = Mockito.inOrder(spyLogger);
-        inOrder.verifyNoMoreInteractions();
+        Mockito.inOrder(appender).verifyNoMoreInteractions();
     }
 
     /**
      * Проверка наличия активных ошибок с настроками количества отображаемых
      * ошибок
-     * 
+     *
      * @throws SQLException
      */
     @Test
@@ -324,8 +331,8 @@ public class CountWatchgdogTest extends AbstractReplicationTest {
         WorkerThread errorsCountWatchdogWorker = new WorkerThread(runnerService.getRunner(2));
         errorsCountWatchdogWorker.run();
 
-        InOrder inOrder = Mockito.inOrder(spyLogger);
-        inOrder.verify(spyLogger).error("\n" + "\n" + "В error превышен лимит в 0 ошибок!\n"
+        Mockito.verify(appender).doAppend(logCaptor.capture());
+        assertEquals("", logCaptor.getValue().getRenderedMessage(), "\n" + "\n" + "В error превышен лимит в 0 ошибок!\n"
                 + "\n" + "Ошибка 1 из 11 \n"
                 + "[ tableName = REP2_ERRORS_LOG [ row = [ col ID_RUNNER = 1 ] [ col ID_TABLE = table ] [ col ID_FOREIGN = 1 ] [ col MAX_ID_ERRORS_LOG = 1 ] [ col COUNT = 1 ] [ col C_ERROR = Error in record ] [ col C_DATE = "
                 + now + " ]  ] ]\n" + "==========================================\n"
@@ -346,9 +353,9 @@ public class CountWatchgdogTest extends AbstractReplicationTest {
 
     /**
      * Проверка наличия активных ошибок старше 5 секунды
-     * 
+     *
      * @throws InterruptedException
-     * @throws SQLException 
+     * @throws SQLException
      */
     @Test
     public void testWhereActiveErrors() throws InterruptedException, SQLException {
@@ -357,13 +364,13 @@ public class CountWatchgdogTest extends AbstractReplicationTest {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.0");
 
         clearErrorsLog();
-        
+
         // Добавляем ошибки старше 10 секунд
         String now10 = formatter.format(new Timestamp(System.currentTimeMillis() - 10000));
         insertActiveError(1, "table", now10, 1L);
         insertActiveTableError(2, "table", now10, 2L);
         insertActiveRunnerError(3, now10, 3L);
-        
+
         // Добавляем ошибки старше 3 секунд
         String now3 = formatter.format(new Timestamp(System.currentTimeMillis() - 3000));
         insertActiveError(1, "table", now3, 4L);
@@ -374,24 +381,23 @@ public class CountWatchgdogTest extends AbstractReplicationTest {
         WorkerThread errorsCountWatchdogWorker = new WorkerThread(runnerService.getRunner(3));
         errorsCountWatchdogWorker.run();
 
-
-        InOrder inOrder = Mockito.inOrder(spyLogger);
-        inOrder.verify(spyLogger).error("\n" + 
-                "\n" + 
-                "В error превышен лимит в 0 ошибок!\n" + 
-                "\n" + 
-                "Ошибка 1 из 3 \n" + 
+        Mockito.verify(appender).doAppend(logCaptor.capture());
+        assertEquals("", logCaptor.getValue().getRenderedMessage(), "\n" +
+                "\n" +
+                "В error превышен лимит в 0 ошибок!\n" +
+                "\n" +
+                "Ошибка 1 из 3 \n" +
                 "[ tableName = REP2_ERRORS_LOG [ row = [ col ID_RUNNER = 1 ] [ col ID_TABLE = table ] [ col ID_FOREIGN = 1 ] [ col MAX_ID_ERRORS_LOG = 1 ] [ col COUNT = 1 ] [ col C_ERROR = Error in record ] [ col C_DATE = "
-                + now10 + " ]  ] ]\n" + 
-                "==========================================\n" + 
-                "Ошибка 2 из 3 \n" + 
+                + now10 + " ]  ] ]\n" +
+                "==========================================\n" +
+                "Ошибка 2 из 3 \n" +
                 "[ tableName = REP2_ERRORS_LOG [ row = [ col ID_RUNNER = 2 ] [ col ID_TABLE = table ] [ col ID_FOREIGN = null ] [ col MAX_ID_ERRORS_LOG = 2 ] [ col COUNT = 1 ] [ col C_ERROR = Error in table ] [ col C_DATE = "
-                + now10 + " ]  ] ]\n" + 
-                "==========================================\n" + 
-                "Ошибка 3 из 3 \n" + 
+                + now10 + " ]  ] ]\n" +
+                "==========================================\n" +
+                "Ошибка 3 из 3 \n" +
                 "[ tableName = REP2_ERRORS_LOG [ row = [ col ID_RUNNER = 3 ] [ col ID_TABLE = null ] [ col ID_FOREIGN = null ] [ col MAX_ID_ERRORS_LOG = 3 ] [ col COUNT = 1 ] [ col C_ERROR = Error in runner ] [ col C_DATE = "
-                + now10 + " ]  ] ]\n" + 
-                "==========================================\n" + 
+                + now10 + " ]  ] ]\n" +
+                "==========================================\n" +
                 "Всего 3 ошибочных записей. Полный список ошибок доступен в таблице REP2_ERRORS_LOG.");
     }
 }

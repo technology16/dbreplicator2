@@ -72,12 +72,11 @@ public class ErrorReplicationTest extends AbstractReplicationTest{
      * гет приводит к бесконечному циклу.
      * (Придется завершать процесс)
      * @throws SQLException
-     * @throws ClassNotFoundException
      * @throws IOException
      * @throws InterruptedException
      */
     @Test
-    public void testErroReplicated() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
+    public void testErroReplicated() throws SQLException, IOException, InterruptedException {
       //Проверка вставки
         Helper.executeSqlFromFile(source, "sql_query/sql_insert_error.sql");
         worker.run();

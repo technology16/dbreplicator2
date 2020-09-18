@@ -25,6 +25,7 @@ package ru.taximaxim.dbreplicator2;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 
 import java.util.Map;
@@ -93,8 +94,8 @@ public class HikariCPSettingsServiceTest extends AbstractHikariCPTest {
 
         hikariCPSettings = settingStorage
                 .getDataBaseSettingsByName("testGetDataBaseSettingsByName");
-        assertFalse("Ошибка при получение существующих настроек!",
-                newHikariCPSettings.equals(hikariCPSettings));
+        assertNotEquals("Ошибка при получение существующих настроек!",
+                newHikariCPSettings, hikariCPSettings);
     }
 
     /**

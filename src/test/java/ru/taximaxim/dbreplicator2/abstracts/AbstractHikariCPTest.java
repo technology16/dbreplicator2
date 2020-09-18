@@ -43,7 +43,7 @@ public abstract class AbstractHikariCPTest {
     protected static SessionFactory sessionFactory;
     protected static HikariCPSettingsService settingStorage;
     
-    protected static void setUp() throws ClassNotFoundException, SQLException, IOException {
+    protected static void setUp() throws SQLException, IOException {
         // Инициализируем Hibernate
         sessionFactory = Core.getSessionFactory();
         

@@ -116,7 +116,6 @@ public class GenericAlgorithm {
 
     /**
      * @return StatsService
-     * @throws ClassNotFoundException
      */
     protected StatsService getStatsService() {
         return Core.getStatsService();
@@ -504,7 +503,6 @@ public class GenericAlgorithm {
      * операции вызывается функция replicateOperation(...).
      * 
      * @throws SQLException
-     * @throws ClassNotFoundException
      */
     protected void selectLastOperations(StrategyModel data) throws SQLException {
         // Задаем первоначальное смещение выборки равное 0.
@@ -562,7 +560,6 @@ public class GenericAlgorithm {
      * 
      * @param strategy
      * @throws SQLException
-     * @throws ClassNotFoundException
      */
     protected void writeStatCount(int strategy) throws SQLException {
         Timestamp date = new Timestamp(new Date().getTime());
@@ -586,7 +583,6 @@ public class GenericAlgorithm {
      * selectLastOperations(...).
      * 
      * @throws SQLException
-     * @throws ClassNotFoundException
      */
     public void execute(StrategyModel data) throws SQLException {
         try {

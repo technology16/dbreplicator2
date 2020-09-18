@@ -67,12 +67,11 @@ public class IgnoreReplicationTest extends AbstractReplicationTest{
     /**
      * Проверка вставки 
      * @throws SQLException
-     * @throws ClassNotFoundException
      * @throws IOException
      * @throws InterruptedException 
      */
     @Test
-    public void testUpdate() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
+    public void testUpdate() throws SQLException, IOException, InterruptedException {
       //Проверка вставки
         Helper.executeSqlFromFile(source, "sql_query/sql_update_ignore_replication.sql");
         worker.run();

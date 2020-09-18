@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
@@ -38,13 +37,11 @@ import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
  * Абстракный класс для инициализации общих полей тестовых классов
- * 
+ *
  * @author petrov_im
  *
  */
 public abstract class AbstractSettingTest {
-    
-    protected static final Logger LOG = Logger.getLogger(AbstractSettingTest.class);
 
     protected static SessionFactory sessionFactory;
     protected static Session session;
@@ -52,34 +49,39 @@ public abstract class AbstractSettingTest {
     protected static StatsService statsService;
     protected static Connection conn = null;
 
-    protected static void setUp(String sqlRep2, String sqlSourse, String sqlDest) throws ClassNotFoundException, SQLException, IOException {
+    protected static void setUp(String sqlRep2, String sqlSourse, String sqlDest)
+            throws SQLException, IOException {
         sessionFactory = Core.getSessionFactory();
         session = sessionFactory.openSession();
         connectionFactory = Core.getConnectionFactory();
         statsService = Core.getStatsService();
-        
+
         String source = "source";
         conn = connectionFactory.get(source).getConnection();
-        
-        if (sqlRep2 != null)
+
+        if (sqlRep2 != null) {
             Helper.executeSqlFromFile(conn, sqlRep2);
-        if (sqlSourse != null)
+        }
+        if (sqlSourse != null) {
             Helper.executeSqlFromFile(conn, sqlSourse);
-        if (sqlDest != null)
+        }
+        if (sqlDest != null) {
             Helper.executeSqlFromFile(conn, sqlDest);
-        
+        }
     }
 
     /**
      * Закрытие соединений
-     * @throws SQLException 
-     * @throws InterruptedException 
+     * @throws SQLException
+     * @throws InterruptedException
      */
     protected static void close() throws SQLException, InterruptedException {
-        if (session != null)
+        if (session != null) {
             session.close();
-        if (conn != null)
+        }
+        if (conn != null) {
             conn.close();
+        }
         connectionFactory.close();
         sessionFactory.close();
         Core.connectionFactoryClose();
@@ -87,8 +89,7 @@ public abstract class AbstractSettingTest {
         Core.statsServiceClose();
         Core.threadPoolClose();
         Core.tasksPoolClose();
-        Core.taskSettingsServiceClose(); 
+        Core.taskSettingsServiceClose();
         Core.configurationClose();
     }
-
 }

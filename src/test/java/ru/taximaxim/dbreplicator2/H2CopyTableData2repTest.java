@@ -23,9 +23,6 @@
 
 package ru.taximaxim.dbreplicator2;
 
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -44,25 +41,25 @@ import ru.taximaxim.dbreplicator2.model.RunnerService;
 import ru.taximaxim.dbreplicator2.tp.WorkerThread;
 
 /**
- * Тест репликации данных между базами H2-H2. 
- * 
- * Данный тест использует асинхронный менеджер записей супер лог таблицы, 
- * поэтому после каждого цикла репликации вызывается инструкция 
- * Thread.sleep(500); Тест может некорректно работать на медленных машинах, 
+ * Тест репликации данных между базами H2-H2.
+ *
+ * Данный тест использует асинхронный менеджер записей супер лог таблицы,
+ * поэтому после каждого цикла репликации вызывается инструкция
+ * Thread.sleep(500); Тест может некорректно работать на медленных машинах,
  * при необходимости подгонять величину задержки вручную!
- * 
+ *
  * @author volodin_aa
  *
  */
 public class H2CopyTableData2repTest extends AbstractReplicationTest {
     // Задержка между циклами репликации
     private static final int REPLICATION_DELAY = 100;
-    
-    protected static final Logger LOG = Logger.getLogger(H2CopyTableDataTest.class);
-    
+
+    private static final Logger LOG = Logger.getLogger(H2CopyTableDataTest.class);
+
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        setUp("import.sql", "init_db/importRep2.sql", "init_db/importSource.sql", "init_db/importDest.sql"); 
+        setUp("import.sql", "init_db/importRep2.sql", "init_db/importSource.sql", "init_db/importDest.sql");
         initRunners();
     }
 
@@ -70,28 +67,28 @@ public class H2CopyTableData2repTest extends AbstractReplicationTest {
     public static void setUpAfterClass() throws Exception {
         close();
     }
-    
+
     /**
      * Инициализация раннеров
      */
-    public static void initRunners() {
+    private static void initRunners() {
         RunnerService runnerService = new RunnerService(sessionFactory);
 
         worker = new WorkerThread(runnerService.getRunner(1));
         worker2 = new WorkerThread(runnerService.getRunner(2));
     }
-    
+
     /**
      * Проверка внешних ключей
-     * вставка в главную таблицу  
+     * вставка в главную таблицу
      * вставка таблицу подчиненную
      * изменение главной таблицы
-     * 
+     *
      * репликация
-     * 
+     *
      * вставка таблицу подчиненную
      * изменение главной таблицы
-     * @throws Exception 
+     * @throws Exception
      */
     @Test
     public void testForeignKey() throws Exception {
@@ -99,72 +96,54 @@ public class H2CopyTableData2repTest extends AbstractReplicationTest {
         //Проверка внешних ключей
         LOG.info("Проверка внешних ключей");
         Helper.executeSqlFromFile(source, "sql_query/sql_foreign_key.sql", 20);
-        
+
         workerRun();
         Helper.executeSqlFromFile(dest,  "sql_query/sql_foreign_key2.sql", 20);
         workerRun2();
-        
+
         workerRun();
         workerRun2();
-        
+
         workerRun();
         workerRun2();
-        
+
         workerRun();
         workerRun2();
-        
+
         workerRun();
         workerRun2();
-        
+
         // Выводим данные из rep2_superlog_table
-        try (PreparedStatement select = 
-                source.prepareStatement("SELECT * FROM rep2_workpool_data");
-        ) {
+        try (PreparedStatement select =
+                source.prepareStatement("SELECT * FROM rep2_workpool_data")) {
             ResultSet result = select.executeQuery();
-            List<String> cols = 
-                    new ArrayList<String>(JdbcMetadata.getColumns(source, "REP2_WORKPOOL_DATA"));
+            List<String> cols =
+                    new ArrayList<>(JdbcMetadata.getColumns(source, "REP2_WORKPOOL_DATA"));
             while (result.next()) {
                 LOG.info(Jdbc.resultSetToString(result, cols));
             }
         }
-        
+
         workerRun();
         Thread.sleep(REPLICATION_DELAY);
         Thread.sleep(REPLICATION_DELAY);
-        List<MyTablesType> listSource = Helper.InfoTest(source, "t_table2");
-        List<MyTablesType> listDest   = Helper.InfoTest(dest, "t_table2");
-        Helper.AssertEquals(listSource, listDest);
 
-        listSource = Helper.InfoTest(source, "t_table3");
-        listDest   = Helper.InfoTest(dest, "t_table3");
-        Helper.AssertEquals(listSource, listDest);
-        
-        listSource = Helper.InfoTest(source, "t_table2");
-        listDest   = Helper.InfoTest(dest, "t_table2");
-        Helper.AssertEquals(listSource, listDest);
-        
-        listSource = Helper.InfoTest(source, "t_table3");
-        listDest   = Helper.InfoTest(dest, "t_table3");
-        Helper.AssertEquals(listSource, listDest);
-        
-        listSource = Helper.InfoTest(source, "t_table4");
-        listDest   = Helper.InfoTest(dest, "t_table4");
-        Helper.AssertEquals(listSource, listDest);
-        
-        listSource = Helper.InfoTest(source, "t_table5");
-        listDest   = Helper.InfoTest(dest, "t_table5");
-        Helper.AssertEquals(listSource, listDest);
-        
+        verifyTable("t_table2");
+        verifyTable("t_table3");
+        verifyTable("t_table2");
+        verifyTable("t_table3");
+        verifyTable("t_table4");
+        verifyTable("t_table5");
+
         workerEnd();
         workerEnd2();
-        
-        int count = Helper.InfoCount(source,  "rep2_superlog");
-        assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
-    }    
-    
+
+        Helper.assertEmptyTable(source, "rep2_superlog");
+    }
+
     /**
      * Проверка обновления
-     * @throws Exception 
+     * @throws Exception
      */
     @Test
     public void testUpdate() throws Exception {
@@ -174,23 +153,12 @@ public class H2CopyTableData2repTest extends AbstractReplicationTest {
         Helper.executeSqlFromFile(source, "sql_query/sql_update.sql");
         workerRun();
         Helper.executeSqlFromFile(dest, "sql_query/sql_update2.sql");
-        workerRun2();
-        
-        workerRun();
-        workerRun2();
-        
-        verifyTables();
-        
-        workerEnd();
-        workerEnd2();
-        
-        int count = Helper.InfoCount(source,  "rep2_superlog");
-        assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
+        testWorkers();
     }
-    
+
     /**
      * Проверка удаления
-     * @throws Exception 
+     * @throws Exception
      */
     @Test
     public void testDelete() throws Exception {
@@ -200,138 +168,92 @@ public class H2CopyTableData2repTest extends AbstractReplicationTest {
         Helper.executeSqlFromFile(source, "sql_query/sql_delete.sql");
         workerRun();
         Helper.executeSqlFromFile(dest, "sql_query/sql_delete.sql");
-        workerRun2();
-        
-        workerRun();
-        workerRun2();
-        
-        verifyTables();
-        
-        workerEnd();
-        workerEnd2();
-        
-        int count = Helper.InfoCount(source,  "rep2_superlog");
-        assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
+        testWorkers();
     }
-    
+
     /**
      * Проверка вставки и обновления
-     * @throws Exception 
+     * @throws Exception
      */
     @Test
     public void testInsertUpdate() throws Exception {
-      //Проверка вставки и обновления
+        //Проверка вставки и обновления
         LOG.info("Проверка вставки и обновления");
         Helper.executeSqlFromFile(source, "sql_query/sql_insert.sql");
         Helper.executeSqlFromFile(source, "sql_query/sql_update.sql");
         workerRun();
         Helper.executeSqlFromFile(dest, "sql_query/sql_update2.sql");
-        workerRun2();
-        
-        workerRun();
-        workerRun2();
-        
-        verifyTables();
-        
-        workerEnd();
-        workerEnd2();
-        
-        int count = Helper.InfoCount(source,  "rep2_superlog");
-        assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
+        testWorkers();
     }
-    
+
     /**
      * Проверка вставки и удаления
-     * @throws Exception 
+     * @throws Exception
      */
     @Test
     public void testInsertDelete() throws Exception {
         LOG.info("Проверка вставки и удаления");
-      //Проверка вставки и удаления
+        //Проверка вставки и удаления
         Helper.executeSqlFromFile(source, "sql_query/sql_insert.sql");
         Helper.executeSqlFromFile(source, "sql_query/sql_delete.sql");
         workerRun();
         Helper.executeSqlFromFile(dest, "sql_query/sql_insert.sql");
         Helper.executeSqlFromFile(dest, "sql_query/sql_delete.sql");
-        workerRun2();
-        
-        workerRun();
-        workerRun2();
-        
-        verifyTables();
-        
-        workerEnd();
-        workerEnd2();
-        
-        int count = Helper.InfoCount(source,  "rep2_superlog");
-        assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
+        testWorkers();
     }
 
     /**
-     * Проверка вставки 
-     * @throws Exception 
+     * Проверка вставки
+     * @throws Exception
      */
     @Test
     public void testInsert() throws Exception {
-      //Проверка вставки
+        //Проверка вставки
         Helper.executeSqlFromFile(source, "sql_query/sql_insert.sql");
         workerRun();
+        testWorkers();
+    }
+
+    private void testWorkers() throws Exception {
         workerRun2();
 
         workerRun();
         workerRun2();
-        
+
         verifyTables();
-        
+
         workerEnd();
         workerEnd2();
-        int count = Helper.InfoCount(source,  "rep2_superlog");
-        assertTrue(String.format("Количество записей должно быть пустым [%s == 0]", count), 0 == count);
-    }
-    
-    protected void verifyTables() throws SQLException, InterruptedException {
-        List<MyTablesType> listSource = Helper.InfoTest(source, "t_table");
-        List<MyTablesType> listDest   = Helper.InfoTest(dest, "t_table");
-        Helper.AssertEquals(listSource, listDest);
 
-        listSource = Helper.InfoTest(source, "t_table1");
-        listDest   = Helper.InfoTest(dest, "t_table1");
-        Helper.AssertEquals(listSource, listDest);
-        
-        listSource = Helper.InfoTest(source, "t_table2");
-        listDest   = Helper.InfoTest(dest, "t_table2");
-        Helper.AssertEquals(listSource, listDest);
-        
-        listSource = Helper.InfoTest(source, "t_table3");
-        listDest   = Helper.InfoTest(dest, "t_table3");
-        Helper.AssertEquals(listSource, listDest);
-        
-        listSource = Helper.InfoTest(source, "t_table4");
-        listDest   = Helper.InfoTest(dest, "t_table4");
-        Helper.AssertEquals(listSource, listDest);
-        
-        listSource = Helper.InfoTest(source, "t_table5");
-        listDest   = Helper.InfoTest(dest, "t_table5");
-        Helper.AssertEquals(listSource, listDest);
+        Helper.assertEmptyTable(source, "rep2_superlog");
     }
-    
-    public void workerRun() throws Exception{
+
+    private void verifyTables() throws SQLException, InterruptedException {
+        verifyTable("t_table");
+        verifyTable("t_table1");
+        verifyTable("t_table2");
+        verifyTable("t_table3");
+        verifyTable("t_table4");
+        verifyTable("t_table5");
+    }
+
+    private void workerRun() throws SQLException, InterruptedException {
         worker.run();
         Helper.executeSqlFromSql(source, "UPDATE T_TAB SET _value = ?", "dest");
         Thread.sleep(REPLICATION_DELAY);
     }
-    
-    public void workerRun2() throws Exception{
+
+    private void workerRun2() throws SQLException, InterruptedException {
         worker2.run();
         Helper.executeSqlFromSql(dest, "UPDATE T_TAB SET _value = ?", "source");
         Thread.sleep(REPLICATION_DELAY);
     }
-    
-    public void workerEnd() throws IOException, SQLException, InterruptedException{
+
+    private void workerEnd() throws SQLException, InterruptedException {
         Helper.executeSqlFromSql(source, "UPDATE T_TAB SET _value = ?", "");
     }
-    
-    public void workerEnd2() throws IOException, SQLException, InterruptedException{
+
+    private void workerEnd2() throws SQLException, InterruptedException {
         Helper.executeSqlFromSql(dest, "UPDATE T_TAB SET _value = ?", "");
     }
 }

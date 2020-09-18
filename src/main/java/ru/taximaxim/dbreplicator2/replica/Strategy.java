@@ -30,20 +30,17 @@ import ru.taximaxim.dbreplicator2.model.StrategyModel;
 
 /**
  * Базовый интерфейс-предок всех стратегий.
- * 
+ *
  * @author ags
  */
 public interface Strategy {
     /**
      * Отрабатывает стратегию кода.
-     * 
+     *
      * @param connectionsFactory connectionsFactory
      * @param data Модель данных описывающая стратегию.
-     * @throws SQLException 
-     * @throws Exception 
-     * @throws ClassNotFoundException 
+     * @throws SQLException
      */
-    void execute(ConnectionFactory connectionsFactory,
-            StrategyModel data) throws SQLException;
+    void execute(ConnectionFactory connectionsFactory, StrategyModel data) throws SQLException;
 
 }

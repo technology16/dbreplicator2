@@ -45,7 +45,7 @@ import ru.taximaxim.dbreplicator2.utils.Utils;
  */
 @Entity
 @Table(name = "tables")
-public class TableModel implements Cloneable, Serializable {
+public class TableModel implements Serializable {
     
     private static final long serialVersionUID = 2L;
     

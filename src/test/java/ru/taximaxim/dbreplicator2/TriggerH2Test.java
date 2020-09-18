@@ -23,21 +23,19 @@
 
 package ru.taximaxim.dbreplicator2;
 
-import java.io.IOException;
 import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ru.taximaxim.dbreplicator2.abstracts.AbstractSettingTest;
 
 public class TriggerH2Test extends AbstractSettingTest {
-    
+
     protected static final Logger LOG = Logger.getLogger(TriggerH2Test.class);
-    
+
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         setUp("init_db/importRep2.sql", "init_db/importSource.sql", "init_db/importSourceData.sql");
@@ -47,32 +45,21 @@ public class TriggerH2Test extends AbstractSettingTest {
     public static void tearDownAfterClass() throws Exception {
         close();
     }
-    
+
     /**
      * Проверка тригерров
      * @throws SQLException
-     * @throws ClassNotFoundException
-     * @throws IOException
-     * @throws InterruptedException 
+     * @throws InterruptedException
      */
     @Test
-    public void testTrigger() throws SQLException, InterruptedException {     
-        int countT_TABLE = Helper.InfoCount(conn, "t_table");
-        if(countT_TABLE==0) {
-            LOG.error("Таблице t_table не должна пустой: count = " + countT_TABLE);
-        }
-        Assert.assertNotEquals(countT_TABLE, 0);
-        
-        int countrep2_superlog = Helper.InfoCount(conn, "rep2_superlog");
-        if(countrep2_superlog==0) {
-            LOG.error("Таблица rep2_superlog не должна пустой: count = " + countrep2_superlog);
-        }
-        Assert.assertNotEquals(countrep2_superlog, 0);
-        
+    public void testTrigger() throws SQLException, InterruptedException {
+        Helper.assertNotEmptyTable(conn, "t_table");
+        Helper.assertNotEmptyTable(conn, "rep2_superlog");
+
         LOG.info("<====== t_table ======>");
         Helper.InfoSelect(conn, "t_table");
         LOG.info(">====== t_table ======<");
-        
+
         LOG.info("<====== rep2_superlog ======>");
         Helper.InfoSelect(conn, "rep2_superlog");
         LOG.info("======= rep2_superlog =======");

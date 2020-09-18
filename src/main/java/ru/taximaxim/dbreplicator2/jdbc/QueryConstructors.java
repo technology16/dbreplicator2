@@ -29,7 +29,7 @@ package ru.taximaxim.dbreplicator2.jdbc;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -142,7 +142,7 @@ public final class QueryConstructors {
      */
     public static String listToString(Collection<?> list, String delimiter,
             String postfix) {
-        return listToString(listAddPostfix(list, new HashMap<String, String>(), postfix),
+        return listToString(listAddPostfix(list, Collections.emptyMap(), postfix),
                 delimiter);
     }
 
@@ -190,7 +190,7 @@ public final class QueryConstructors {
      * @return список вопросов для передачи экранированых параметров
      */
     public static Collection<String> questionMarks(Collection<?> colsList) {
-        return questionMarks(colsList, new HashMap<String, String>());
+        return questionMarks(colsList, Collections.emptyMap());
     }
 
     /**
@@ -227,7 +227,7 @@ public final class QueryConstructors {
      */
     public static String constructInsertQuery(String tableName,
             Collection<String> colsList) {
-        return constructInsertQuery(tableName, colsList, new HashMap<String, String>());
+        return constructInsertQuery(tableName, colsList, Collections.emptyMap());
     }
 
     /**
@@ -268,7 +268,7 @@ public final class QueryConstructors {
     public static String constructInsertSelectQuery(String tableName,
             Collection<String> colsList) {
         return constructInsertSelectQuery(tableName, colsList,
-                new HashMap<String, String>());
+                Collections.emptyMap());
     }
 
     /**
@@ -302,7 +302,7 @@ public final class QueryConstructors {
      * @return строкf запроса на выборку данных
      */
     public static String constructSelectQuery(Collection<String> colsList) {
-        return constructSelectQuery(colsList, new HashMap<String, String>());
+        return constructSelectQuery(colsList, Collections.emptyMap());
     }
 
     /**
@@ -331,7 +331,7 @@ public final class QueryConstructors {
      */
     public static String constructSelectQuery(String tableName,
             Collection<String> colsList) {
-        return constructSelectQuery(tableName, colsList, new HashMap<String, String>());
+        return constructSelectQuery(tableName, colsList, Collections.emptyMap());
     }
 
     /**
@@ -364,7 +364,7 @@ public final class QueryConstructors {
      */
     public static String constructSelectQuery(String tableName,
             Collection<String> colsList, Collection<String> whereList, String where) {
-        return constructSelectQuery(tableName, colsList, new HashMap<String, String>(),
+        return constructSelectQuery(tableName, colsList, Collections.emptyMap(),
                 whereList, where);
     }
 
@@ -405,7 +405,7 @@ public final class QueryConstructors {
             Collection<String> colsList, Collection<String> whereList,
             Collection<String> orderByList, String where) {
 
-        return constructSelectQuery(tableName, colsList, new HashMap<String, String>(),
+        return constructSelectQuery(tableName, colsList, Collections.emptyMap(),
                 whereList, orderByList, where);
     }
 
@@ -446,7 +446,7 @@ public final class QueryConstructors {
     public static String constructUpdateQuery(String tableName,
             Collection<String> colsList, Collection<String> whereList) {
 
-        return constructUpdateQuery(tableName, colsList, new HashMap<String, String>(),
+        return constructUpdateQuery(tableName, colsList, Collections.emptyMap(),
                 whereList);
     }
 

@@ -425,7 +425,7 @@ public abstract class GeneiricManagerAlgorithm {
 
     /**
      * Получение привязки списка раннеров к именам таблиц в текущей БД
-     * 
+     *
      * @return
      */
     public Map<String, Collection<RunnerModel>> getTableObservers(
@@ -434,13 +434,7 @@ public abstract class GeneiricManagerAlgorithm {
                 String.CASE_INSENSITIVE_ORDER);
         for (RunnerModel runner : sourcePool.getRunners()) {
             for (TableModel table : runner.getTables()) {
-                final String tableName = table.getName();
-                Collection<RunnerModel> observers = tableObservers.get(tableName);
-                if (observers == null) {
-                    observers = new HashSet<>();
-                    tableObservers.put(tableName, observers);
-                }
-                observers.add(runner);
+                tableObservers.computeIfAbsent(table.getName(), e -> new HashSet<>()).add(runner);
             }
         }
         return tableObservers;

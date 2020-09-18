@@ -24,7 +24,6 @@
 package ru.taximaxim.dbreplicator2;
 
 import junit.framework.TestCase;
-
 import ru.taximaxim.dbreplicator2.jdbc.JdbcMetadata;
 
 /**
@@ -39,22 +38,21 @@ public class JdbcMetadataTest extends TestCase {
      * Тест получения имени таблицы из строки с полным именем таблицы
      */
     public void testGetTableName() {
-        assertTrue("Ошибка при получении имени таблицы T_TABLE из T_TABLE", 
-                "T_TABLE".equals(JdbcMetadata.getTableName("T_TABLE")));
+        assertEquals("Ошибка при получении имени таблицы T_TABLE из T_TABLE",
+                "T_TABLE", JdbcMetadata.getTableName("T_TABLE"));
 
-        assertTrue("Ошибка при получении имени таблицы T_TABLE из schema.T_TABLE", 
-                "T_TABLE".equals(JdbcMetadata.getTableName("schema.T_TABLE")));
+        assertEquals("Ошибка при получении имени таблицы T_TABLE из schema.T_TABLE",
+                "T_TABLE", JdbcMetadata.getTableName("schema.T_TABLE"));
     }
 
     /**
      * Тест получения схемы таблицы из строки с полным именем таблицы
      */
     public void testGetSchemaName() {
-        assertTrue("Ошибка при получении пустого имени схемы из T_TABLE", 
-                JdbcMetadata.getSchemaName("T_TABLE")==null);
+        assertNull("Ошибка при получении пустого имени схемы из T_TABLE",
+                JdbcMetadata.getSchemaName("T_TABLE"));
 
-        assertTrue("Ошибка при получении имени схемы schema из schema.T_TABLE", 
-                "schema".equals(JdbcMetadata.getSchemaName("schema.T_TABLE")));
+        assertEquals("Ошибка при получении имени схемы schema из schema.T_TABLE",
+                "schema", JdbcMetadata.getSchemaName("schema.T_TABLE"));
     }
-
 }

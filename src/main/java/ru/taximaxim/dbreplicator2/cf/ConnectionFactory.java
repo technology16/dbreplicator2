@@ -21,7 +21,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-/* 
+/*
  * Интерфейс для фабрики соединений к именованным пулам соединеий
  */
 package ru.taximaxim.dbreplicator2.cf;
@@ -30,26 +30,24 @@ import javax.sql.DataSource;
 
 /**
  * Фабрика соединений. Возвращает соединения из именованных пулов.
- * 
+ *
  * @author volodin_aa
- * 
+ *
  */
 public interface ConnectionFactory {
 
     /**
      * Получение соединения из именованного пула соединений
-     * 
+     *
      * @param poolName
      *            - имя пула соединений
      * @return
-     * @throws SQLException
-     * @throws ClassNotFoundException
      */
     DataSource get(String poolName);
 
     /**
      * Закрытие именованного пула соединений
-     * 
+     *
      * @param poolName
      *            - имя пула соединений
      * @return
@@ -58,7 +56,7 @@ public interface ConnectionFactory {
 
     /**
      * Закрытие всех пулов соединений
-     * 
+     *
      * @param poolName
      *            - имя пула соединений
      * @return

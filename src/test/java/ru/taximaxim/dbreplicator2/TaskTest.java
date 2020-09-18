@@ -23,7 +23,9 @@
 
 package ru.taximaxim.dbreplicator2;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
 
 import java.sql.SQLException;
 import java.util.Map;
@@ -36,7 +38,7 @@ import ru.taximaxim.dbreplicator2.abstracts.AbstractHikariCPTest;
 import ru.taximaxim.dbreplicator2.model.HikariCPSettingsModel;
 /**
  * Класс для тестирования пулов соединений
- * 
+ *
  * @author volodin_aa
  *
  */
@@ -52,95 +54,92 @@ public class TaskTest extends AbstractHikariCPTest  {
         close();
     }
 
-    /** 
+    /**
      * Проверка получения настроек по имени:
      *  1. Полуение несуществующих настроек
      *  2. Получение существующих
-     * 
-     * @throws ClassNotFoundException
+     *
      * @throws SQLException
      */
-    @Test 
-    public void testGetTask() throws ClassNotFoundException, SQLException {
+    @Test
+    public void testGetTask() throws SQLException {
         // Полуение несуществующих настроек
         HikariCPSettingsModel hikariCPSettings = settingStorage.getDataBaseSettingsByName("testGetDataBaseSettingsByName");
         assertNull("Ошибка при получение несуществующих настроек!", hikariCPSettings);
-        
+
         // Получение существующих
-        HikariCPSettingsModel newHikariCPSettings = new HikariCPSettingsModel("testGetDataBaseSettingsByName", 
+        HikariCPSettingsModel newHikariCPSettings = new HikariCPSettingsModel("testGetDataBaseSettingsByName",
                 "org.h2.Driver",
-                "jdbc:h2:mem://localhost/~/test", 
-                "sa", 
+                "jdbc:h2:mem://localhost/~/test",
+                "sa",
                 "");
-        
+
         settingStorage.setDataBaseSettings(newHikariCPSettings);
         hikariCPSettings = settingStorage.getDataBaseSettingsByName("testGetDataBaseSettingsByName");
         assertEquals("Ошибка при получение существующих настроек по умолчанию!", newHikariCPSettings, hikariCPSettings);
-        
+
         // Получение существующих
-        newHikariCPSettings = new HikariCPSettingsModel("testGetDataBaseSettingsByName2", 
+        newHikariCPSettings = new HikariCPSettingsModel("testGetDataBaseSettingsByName2",
                 "org.h2.Driver",
-                "jdbc:h2:mem://localhost/~/test", 
+                "jdbc:h2:mem://localhost/~/test",
                 "sa", "", 5, false, 10000, 10000, 10000);
-        
+
         settingStorage.setDataBaseSettings(newHikariCPSettings);
         hikariCPSettings = settingStorage.getDataBaseSettingsByName("testGetDataBaseSettingsByName2");
         assertEquals("Ошибка при получение существующих настроек!", newHikariCPSettings, hikariCPSettings);
-        
+
         hikariCPSettings = settingStorage.getDataBaseSettingsByName("testGetDataBaseSettingsByName");
-        assertFalse("Ошибка при получение существующих настроек!", newHikariCPSettings.equals(hikariCPSettings));
+        assertNotEquals("Ошибка при получение существующих настроек!", newHikariCPSettings, hikariCPSettings);
     }
 
-    /** 
+    /**
      * Тест получение всех настроек
-     * 
-     * @throws ClassNotFoundException
+     *
      * @throws SQLException
      */
-    @Test 
-    public void testGetTasks() throws ClassNotFoundException, SQLException {
+    @Test
+    public void testGetTasks() throws SQLException {
         // Создание настроек
-        HikariCPSettingsModel newHikariCPSettings1 = new HikariCPSettingsModel("testGetDataBaseSettings1", 
+        HikariCPSettingsModel newHikariCPSettings1 = new HikariCPSettingsModel("testGetDataBaseSettings1",
                 "org.h2.Driver",
-                "jdbc:h2:mem://localhost/~/test", 
-                "sa", 
+                "jdbc:h2:mem://localhost/~/test",
+                "sa",
                 "");
         settingStorage.setDataBaseSettings(newHikariCPSettings1);
-        
-        HikariCPSettingsModel newHikariCPSettings2 = new HikariCPSettingsModel("testGetDataBaseSettings2", 
-                "org.postgresql.Driver", 
-                "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub", 
+
+        HikariCPSettingsModel newHikariCPSettings2 = new HikariCPSettingsModel("testGetDataBaseSettings2",
+                "org.postgresql.Driver",
+                "jdbc:postgresql://127.0.0.1:5432/LoadPullPgMsPub",
                 "ags", "", 5, false, 10000, 10000, 10000);
-        
+
         settingStorage.setDataBaseSettings(newHikariCPSettings2);
-        
+
         Map<String, HikariCPSettingsModel> settingsMap = settingStorage.getDataBaseSettings();
-        assertEquals("Ошибка при получение существующих настроек по умолчанию!", 
+        assertEquals("Ошибка при получение существующих настроек по умолчанию!",
                 newHikariCPSettings1, settingsMap.get("testGetDataBaseSettings1"));
-        assertEquals("Ошибка при получение существующих настроек!", 
+        assertEquals("Ошибка при получение существующих настроек!",
                 newHikariCPSettings2, settingsMap.get("testGetDataBaseSettings2"));
 
     }
 
-    /** 
+    /**
      * Тест таймаута при привышении максимального количества открытых соединений
-     * 
-     * @throws ClassNotFoundException
+     *
      * @throws SQLException
      */
-    @Test 
-    public void testSetTask() throws ClassNotFoundException, SQLException {
+    @Test
+    public void testSetTask() throws SQLException {
         // Создание настроек
-        HikariCPSettingsModel newHikariCPSettings = new HikariCPSettingsModel("testSetDataBaseSettings", 
+        HikariCPSettingsModel newHikariCPSettings = new HikariCPSettingsModel("testSetDataBaseSettings",
                 "org.h2.Driver",
-                "jdbc:h2:mem://localhost/~/test", 
-                "sa", 
+                "jdbc:h2:mem://localhost/~/test",
+                "sa",
                 "");
-        
+
         settingStorage.setDataBaseSettings(newHikariCPSettings);
         HikariCPSettingsModel hikariCPSettings = settingStorage.getDataBaseSettingsByName("testSetDataBaseSettings");
         assertEquals("Ошибка при получение существующих настроек по умолчанию!", newHikariCPSettings, hikariCPSettings);
-        
+
         // Обновление настроек
         hikariCPSettings.setMaximumPoolSize(5);
         hikariCPSettings.setInitializationFailFast(false);
@@ -150,41 +149,38 @@ public class TaskTest extends AbstractHikariCPTest  {
         settingStorage.setDataBaseSettings(hikariCPSettings);
         HikariCPSettingsModel updatedBoneCPSettings = settingStorage.getDataBaseSettingsByName("testSetDataBaseSettings");
         assertEquals("Ошибка при получение обновленных настроек!", updatedBoneCPSettings, hikariCPSettings);
-        
+
         // Обновление идентификатора
         hikariCPSettings.setPoolId("testSetDataBaseSettings2");
         settingStorage.setDataBaseSettings(hikariCPSettings);
         updatedBoneCPSettings = settingStorage.getDataBaseSettingsByName("testSetDataBaseSettings2");
         assertEquals("Ошибка при получение настроек с новым идентификатором!", updatedBoneCPSettings, hikariCPSettings);
-        
+
         //updatedBoneCPSettings = settingStorage.getDataBaseSettingsByName("testSetDataBaseSettings");
         //assertNull("Существуют настройки со старым идентификатором!", updatedBoneCPSettings);
     }
 
-    /** 
+    /**
      * Тест таймаута при привышении максимального количества открытых соединений
-     * 
-     * @throws ClassNotFoundException
+     *
      * @throws SQLException
      */
-    @Test 
-    public void testDelTask() throws ClassNotFoundException, SQLException {
+    @Test
+    public void testDelTask() throws SQLException {
         // Создание настроек
-        HikariCPSettingsModel newHikariCPSettings = new HikariCPSettingsModel("testDelDataBaseSettings", 
+        HikariCPSettingsModel newHikariCPSettings = new HikariCPSettingsModel("testDelDataBaseSettings",
                 "org.h2.Driver",
-                "jdbc:h2:mem://localhost/~/test", 
-                "sa", 
+                "jdbc:h2:mem://localhost/~/test",
+                "sa",
                 "");
-        
+
         settingStorage.setDataBaseSettings(newHikariCPSettings);
         HikariCPSettingsModel hikariCPSettings = settingStorage.getDataBaseSettingsByName("testDelDataBaseSettings");
         assertEquals("Ошибка при получение существующих настроек по умолчанию!", newHikariCPSettings, hikariCPSettings);
-        
+
         // Удаляем настройки
         settingStorage.delDataBaseSettings(hikariCPSettings);
         hikariCPSettings = settingStorage.getDataBaseSettingsByName("testDelDataBaseSettings");
         assertNull("Существуют удаленные настройки!", hikariCPSettings);
-
     }
-    
 }

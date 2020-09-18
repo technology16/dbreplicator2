@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package ru.taximaxim.dbreplicator2;
 
@@ -21,16 +21,17 @@ import ru.taximaxim.dbreplicator2.tp.WorkerThread;
  */
 public class ReplicationTimeWatchgdogTest extends AbstractReplicationTest {
 
-protected static final Logger LOG = Logger.getLogger(ReplicationTimeWatchgdogTest.class);
-    
+    private static final Logger LOG = Logger.getLogger(ReplicationTimeWatchgdogTest.class);
+
     // Задержка между циклами репликации
     private static final int REPLICATION_DELAY = 100;
 
-    protected static Runnable errorsReplicationTimeWatchgdog = null;
-    
+    private static Runnable errorsReplicationTimeWatchgdog = null;
+
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        setUp("importRepTimeWatch.sql", "init_db/importRep2.sql", "init_db/importSource.sql", "init_db/importDest.sql");
+        setUp("importRepTimeWatch.sql", "init_db/importRep2.sql",
+                "init_db/importSource.sql", "init_db/importDest.sql");
         initRunners();
     }
 
@@ -40,35 +41,33 @@ protected static final Logger LOG = Logger.getLogger(ReplicationTimeWatchgdogTes
     }
     /**
      * Проверка внешних ключей
-     * вставка в главную таблицу  
+     * вставка в главную таблицу
      * вставка таблицу подчиненную
      * изменение главной таблицы
-     * 
+     *
      * репликация
-     * 
+     *
      * вставка таблицу подчиненную
      * изменение главной таблицы
-     * 
-     * 
+     *
      * @throws SQLException
-     * @throws ClassNotFoundException
      * @throws IOException
-     * @throws InterruptedException 
+     * @throws InterruptedException
      */
-    
     @Test
-    public void testErrorsReplicationTimeWatchgdog() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
+    public void testErrorsReplicationTimeWatchgdog()
+            throws SQLException, IOException, InterruptedException {
         //Проверка внешних ключей
         LOG.info("Проверка внешних ключей");
         Helper.executeSqlFromFile(source, "sql_query/sql_insert.sql");
         Helper.executeSqlFromFile(source, "sql_query/sql_update.sql");
-        
+
         worker.run();
         Thread.sleep(REPLICATION_DELAY);
-        
+
         errorsReplicationTimeWatchgdog.run();
     }
-    
+
     /**
      * Инициализация раннеров
      */

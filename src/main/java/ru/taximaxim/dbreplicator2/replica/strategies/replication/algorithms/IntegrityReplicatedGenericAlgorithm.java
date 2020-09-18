@@ -197,7 +197,6 @@ public class IntegrityReplicatedGenericAlgorithm extends GenericAlgorithm {
      * @param data              - данные стратегии
      * 
      * @throws SQLException
-     * @throws ClassNotFoundException 
      */
     @Override
     protected void selectLastOperations(StrategyModel data) throws SQLException {

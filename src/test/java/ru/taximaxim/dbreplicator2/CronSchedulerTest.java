@@ -23,8 +23,6 @@
 
 package ru.taximaxim.dbreplicator2;
 
-import java.util.List;
-
 import org.apache.log4j.Logger;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -36,11 +34,11 @@ import ru.taximaxim.dbreplicator2.tp.WorkerThread;
 import ru.taximaxim.dbreplicator2.utils.Core;
 
 /**
- * Тест очистки rep2_workpool_data в случае если есть записи об операциях над 
+ * Тест очистки rep2_workpool_data в случае если есть записи об операциях над
  * несуществующими записями.
- * 
- * Тест расчитан на настройки стратегии репликации  batchSize=1 и fetchSize=1 
- * 
+ *
+ * Тест расчитан на настройки стратегии репликации  batchSize=1 и fetchSize=1
+ *
  * @author volodin_aa
  *
  */
@@ -65,7 +63,7 @@ public class CronSchedulerTest extends AbstractReplicationTest {
     public static void tearDownAfterClass() throws Exception {
         close();
     }
-    
+
     /**
      * Инициализация раннеров
      */
@@ -74,7 +72,7 @@ public class CronSchedulerTest extends AbstractReplicationTest {
 
         worker = new WorkerThread(runnerService.getRunner(1));
     }
-    
+
     @Test
     public void testTaskScheduler() throws Exception {
         //Проверка внешних ключей
@@ -86,13 +84,8 @@ public class CronSchedulerTest extends AbstractReplicationTest {
         Thread.sleep(REPLICATION_DELAY);
 
         Helper.InfoSelect(source, "rep2_errors_log");
-        
-        List<MyTablesType> listSource = Helper.InfoTest(source, "t_table2");
-        List<MyTablesType> listDest   = Helper.InfoTest(dest, "t_table2");
-        Helper.AssertEquals(listSource, listDest);
 
-        listSource = Helper.InfoTest(source, "t_table3");
-        listDest   = Helper.InfoTest(dest, "t_table3");
-        Helper.AssertEquals(listSource, listDest);
+        verifyTable("t_table2");
+        verifyTable("t_table3");
     }
 }
