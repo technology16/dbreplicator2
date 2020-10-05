@@ -23,6 +23,7 @@
 
 package ru.taximaxim.dbreplicator2.tp;
 
+import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
@@ -69,7 +70,8 @@ public class WorkerThread implements Runnable {
             try {
                 processCommand();
                 errorsLog.setStatus(runner.getId(), null, null, 1);
-            } catch (InstantiationException | IllegalAccessException e) {
+            } catch (InstantiationException | IllegalAccessException
+                    | NoSuchMethodException | InvocationTargetException e) {
                 errorsLog.add(runner.getId(), null, null,
                         String.format(
                                 "Ошибка при создании объекта-стратегии раннера [id_runner = %d, %s]. [%s]",
@@ -98,16 +100,16 @@ public class WorkerThread implements Runnable {
      * Запуск рабочего потока. Вся работа по выполнению репликации должна
      * выполняться здесь.
      *
-     * @param runner
-     *            Настроенный runner.
      * @throws SQLException
      * @throws ClassNotFoundException
-     * @throws StrategyException
      * @throws IllegalAccessException
      * @throws InstantiationException
+     * @throws NoSuchMethodException
+     * @throws InvocationTargetException
      */
-    public void processCommand() throws ClassNotFoundException, SQLException,
-    InstantiationException, IllegalAccessException {
+    public void processCommand()
+            throws ClassNotFoundException, SQLException, InstantiationException,
+            IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 
         HikariCPSettingsModel sourceSettings = runner.getSource();
         if (sourceSettings != null && !sourceSettings.isEnabled()) {
@@ -141,25 +143,24 @@ public class WorkerThread implements Runnable {
     /**
      * Выполняет запрошенную стратегию.
      *
-     * @param sourceConnection
-     *            Источник
-     * @param targetConnection
-     *            Целевая БД
+     * @param connectionsFactory
+     *            Фабрика подключений
      * @param strategyModel
      *            Данные для стратегии
      *
      * @throws ClassNotFoundException
      * @throws InstantiationException
-     * @throws IllegalAccessException
-     * @throws StrategyException
      * @throws SQLException
+     * @throws NoSuchMethodException
+     * @throws InvocationTargetException
+     * @throws IllegalArgumentException
      */
-    protected void runStrategy(ConnectionFactory connectionsFactory,
-            StrategyModel strategyModel) throws SQLException, ClassNotFoundException,
-    InstantiationException, IllegalAccessException {
+    protected void runStrategy(ConnectionFactory connectionsFactory, StrategyModel strategyModel)
+            throws SQLException, ClassNotFoundException, InstantiationException,
+            IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 
         Class<?> clazz = Class.forName(strategyModel.getClassName());
-        Strategy strategy = (Strategy) clazz.newInstance();
+        Strategy strategy = (Strategy) clazz.getConstructor().newInstance();
 
         strategy.execute(connectionsFactory, strategyModel);
     }
