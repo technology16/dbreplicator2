@@ -1,6 +1,6 @@
 drop table if exists T_TABLE;
 drop table if exists T_TABLE1;
-drop table if exists T_TABLE2;
+drop table if exists T_TABLE2 CASCADE;
 drop table if exists T_TABLE3;
 drop table if exists T_TABLE4;
 drop table if exists T_TABLE5;

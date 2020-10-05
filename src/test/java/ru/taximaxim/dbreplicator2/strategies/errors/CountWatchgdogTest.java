@@ -31,6 +31,9 @@ import ru.taximaxim.dbreplicator2.tp.WorkerThread;
 @RunWith(MockitoJUnitRunner.class)
 public class CountWatchgdogTest extends AbstractReplicationTest {
 
+
+    private static final SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
     @Mock
     private AppenderSkeleton appender;
 
@@ -225,10 +228,8 @@ public class CountWatchgdogTest extends AbstractReplicationTest {
     public void testDefaultActiveErrors() throws SQLException {
         clearErrorsLog();
 
-        // Задаем в явном виде текущее время. Используем .0 что бы избежать
-        // проблем с округлением
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.0");
-        String now = formatter.format(new Timestamp(new Date().getTime()));
+        // Задаем в явном виде текущее время.
+        String now = FORMATTER.format(new Timestamp(new Date().getTime()));
 
         // Добавляем исправленные ошибки
         clearErrorsLog();
@@ -286,10 +287,9 @@ public class CountWatchgdogTest extends AbstractReplicationTest {
      */
     @Test
     public void testFixedErrors() throws SQLException {
-        // Задаем в явном виде текущее время. Используем .0 что бы избежать
-        // проблем с округлением
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.0");
-        String now = formatter.format(new Timestamp(new Date().getTime()));
+
+        // Задаем в явном виде текущее время.
+        String now = FORMATTER.format(new Timestamp(new Date().getTime()));
 
         // Добавляем исправленные ошибки
         clearErrorsLog();
@@ -317,10 +317,8 @@ public class CountWatchgdogTest extends AbstractReplicationTest {
     public void testPartEmailActiveErrors() throws SQLException {
         clearErrorsLog();
 
-        // Задаем в явном виде текущее время. Используем .0 что бы избежать
-        // проблем с округлением
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.0");
-        String now = formatter.format(new Timestamp(new Date().getTime()));
+        // Задаем в явном виде текущее время.
+        String now = FORMATTER.format(new Timestamp(new Date().getTime()));
 
         clearErrorsLog();
         insertActiveErrors(1, "table", now, 1L, 9L);
@@ -359,20 +357,16 @@ public class CountWatchgdogTest extends AbstractReplicationTest {
      */
     @Test
     public void testWhereActiveErrors() throws InterruptedException, SQLException {
-        // Задаем в явном виде текущее время. Используем .0 что бы избежать
-        // проблем с округлением
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.0");
-
         clearErrorsLog();
 
         // Добавляем ошибки старше 10 секунд
-        String now10 = formatter.format(new Timestamp(System.currentTimeMillis() - 10000));
+        String now10 = FORMATTER.format(new Timestamp(System.currentTimeMillis() - 10000));
         insertActiveError(1, "table", now10, 1L);
         insertActiveTableError(2, "table", now10, 2L);
         insertActiveRunnerError(3, now10, 3L);
 
         // Добавляем ошибки старше 3 секунд
-        String now3 = formatter.format(new Timestamp(System.currentTimeMillis() - 3000));
+        String now3 = FORMATTER.format(new Timestamp(System.currentTimeMillis() - 3000));
         insertActiveError(1, "table", now3, 4L);
         insertActiveTableError(2, "table", now3, 5L);
         insertActiveRunnerError(3, now3, 6L);
